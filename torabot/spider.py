@@ -3,6 +3,7 @@ from urllib.parse import urlencode, urljoin
 # import pprint as pp
 import re
 from logbook import Logger
+from collections import OrderedDict
 
 
 log = Logger(__name__)
@@ -11,12 +12,12 @@ log = Logger(__name__)
 def fetch(query, start):
     base = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
     r = requests.get(
-        base + '?' + urlencode({
-            'item_kind': '0401',
-            'bl_fg': '0',
-            'search': query.encode('Shift_JIS'),
-            'ps': start + 1,
-        }),
+        base + '?' + urlencode(OrderedDict([
+            ('item_kind', '0401'),
+            ('bl_fg', '0'),
+            ('search', query.encode('Shift_JIS')),
+            ('ps', start + 1),
+        ])),
         headers={
             'Referer': base,
             'Cookie': 'afg=0',

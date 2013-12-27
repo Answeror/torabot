@@ -3,6 +3,7 @@ import sys
 
 
 CURRENT_PATH = os.path.dirname(__file__)
+FROZEN_PATH = os.path.join(CURRENT_PATH, 'frozenreqs.pkl')
 
 sys.path.insert(
     0,
@@ -14,6 +15,7 @@ from torabot.spider import fetch_and_parse_all
 from httmock import HTTMock
 import requests
 import pickle
+import json
 from functools import wraps
 
 
@@ -55,22 +57,26 @@ def freeze(url, req):
     return resp
 
 
-def append(req, resp):
-    path = os.path.join(CURRENT_PATH, 'frozenreqs.pkl')
-    if not os.path.exists(path):
+def load():
+    if not os.path.exists(FROZEN_PATH):
         d = {}
     else:
-        with open(path, 'rb') as f:
+        with open(FROZEN_PATH, 'rb') as f:
             d = pickle.loads(f.read())
+    return d
+
+
+def append(req, resp):
+    d = load()
     d[reqmd5(req)] = (freezereq(req), freezeresp(resp))
-    with open(path, 'wb') as f:
+    with open(FROZEN_PATH, 'wb') as f:
         f.write(pickle.dumps(d))
 
 
 def reqmd5(req):
     from hashlib import md5
     m = md5()
-    m.update(pickle.dumps(freezereq(req)))
+    m.update(json.dumps(freezereq(req), sort_keys=True).encode('utf-8'))
     return m.hexdigest()
 
 
