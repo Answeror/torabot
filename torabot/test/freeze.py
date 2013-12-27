@@ -11,9 +11,19 @@ sys.path.insert(
 
 
 from torabot.spider import fetch_and_parse_all
-from httmock import HTTMock, urlmatch
+from httmock import HTTMock
 import requests
 import pickle
+from functools import wraps
+
+
+def all_requests(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        if getattr(inner, 'disable', False):
+            return
+        return func(*args, **kwargs)
+    return inner
 
 
 def freezereq(req):
@@ -31,13 +41,14 @@ def freezeresp(resp):
     }
 
 
-@urlmatch(scheme='http')
+@all_requests
 def freeze(url, req):
     def real(req):
-        from copy import copy
-        req = copy(req)
-        req.url = req.url.replace('http://', 'https://')
-        return requests.Session().send(req)
+        freeze.disable = True
+        try:
+            return requests.Session().send(req)
+        finally:
+            freeze.disable = False
 
     resp = real(req)
     append(req, resp)
