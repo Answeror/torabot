@@ -1,6 +1,5 @@
 import requests
 from urllib.parse import urlencode, urljoin
-# import pprint as pp
 import re
 from logbook import Logger
 from collections import OrderedDict
@@ -64,13 +63,8 @@ def parse_arts(soup):
 
 def fetch_and_parse_all(query):
     d = parse(fetch(query, 0))
-    arts = d['arts'][:]
+    yield from d['arts']
     while d['end'] < d['total']:
         log.info('fetch start from {}', d['end'])
         d = parse(fetch(query, d['end']))
-        arts.extend(d['arts'])
-    return arts
-
-
-# pp.pprint(fetch_and_parse_all('嘘つき屋'))
-# pp.pprint(fetch_and_parse_all('足'))
+        yield from d['arts']

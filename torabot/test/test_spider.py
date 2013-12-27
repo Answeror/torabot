@@ -14,7 +14,8 @@ def mock(url, req):
 
 def test_fetch_and_parse_all():
     with HTTMock(mock):
-        arts = fetch_and_parse_all('大嘘')
+        arts = list(fetch_and_parse_all('大嘘'))
+
     assert_equal(arts, [
         {
             'author': 'GEN',
