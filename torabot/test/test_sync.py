@@ -1,11 +1,13 @@
 from .g import g
 from .mixin import ModelMixin
 from ..model import Session, Art
-from .. import state
 from nose.tools import assert_equal
+from .mock import mockrequests
+from httmock import HTTMock
+from ..sync import sync
 
 
-class TestModel(ModelMixin):
+class TestSync(ModelMixin):
 
     def setup(self):
         self.transaction = g.connection.begin()
@@ -15,12 +17,6 @@ class TestModel(ModelMixin):
 
     def test_add_art(self):
         s = Session()
-        s.add(Art(
-            title='foo',
-            author='bar',
-            comp='foobar',
-            toraid='123456789012',
-            state=state.RESERVE,
-        ))
-        s.commit()
-        assert_equal(s.query(Art).count(), 1)
+        with HTTMock(mockrequests):
+            sync('大嘘', s)
+        assert_equal(s.query(Art).count(), 8)

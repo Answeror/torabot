@@ -1,19 +1,11 @@
 from nose.tools import assert_equal
-from httmock import HTTMock, all_requests
+from httmock import HTTMock
 from ..spider import fetch_and_parse_all
-from . import freeze
-
-
-@all_requests
-def mock(url, req):
-    d = freeze.load()
-    for key in d:
-        print(d[key][0])
-    return freeze.load()[freeze.reqmd5(req)][1]
+from .mock import mockrequests
 
 
 def test_fetch_and_parse_all():
-    with HTTMock(mock):
+    with HTTMock(mockrequests):
         arts = list(fetch_and_parse_all('大嘘'))
 
     assert_equal(arts, [
