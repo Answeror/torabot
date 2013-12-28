@@ -39,7 +39,7 @@ class Art(Base):
 
     @uri.setter
     def uri(self, value):
-        return toraid_from_order_uri(value)
+        self.toraid = toraid_from_order_uri(value)
 
     @property
     def reserve(self):
