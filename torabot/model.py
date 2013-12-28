@@ -1,6 +1,15 @@
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, Index
+from sqlalchemy.orm import (
+    sessionmaker,
+    relationship,
+)
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Index,
+    ForeignKey,
+)
 from .tora import order_uri_from_toraid, toraid_from_order_uri
 from . import state
 
@@ -35,3 +44,14 @@ class Art(Base):
     @property
     def reserve(self):
         return self.state == state.RESERVE
+
+
+class Change(Base):
+
+    __tablename__ = 'change'
+
+    id = Column(Integer, primary_key=True)
+    art_id = Column(Integer, ForeignKey(Art.id), index=True)
+    what = Column(Integer)
+
+    art = relationship(Art)

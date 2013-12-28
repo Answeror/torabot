@@ -1,14 +1,15 @@
 from .g import g
 from .mixin import ModelMixin
-from ..model import Session, Art
+from ..model import Session, Art, Change
 from .. import state
+from .. import what
 from nose.tools import assert_equal
 
 
 class TestModel(ModelMixin):
 
     def setup(self):
-        self.transaction = g.connection.begin()
+        self.transaction = g.connection.begin_nested()
 
     def teardown(self):
         self.transaction.rollback()
@@ -24,3 +25,18 @@ class TestModel(ModelMixin):
         ))
         s.commit()
         assert_equal(s.query(Art).count(), 1)
+
+    def test_add_change(self):
+        s = Session()
+        art = Art(
+            title='foo',
+            author='bar',
+            comp='foobar',
+            toraid='123456789012',
+            state=state.RESERVE,
+        )
+        s.add(art)
+        s.commit()
+        s.add(Change(art=art, what=what.NEW))
+        s.commit()
+        assert_equal(s.query(Change).count(), 1)

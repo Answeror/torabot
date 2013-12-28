@@ -6,7 +6,7 @@ class ModelMixin(object):
 
     @classmethod
     def setup_class(cls):
-        cls._transaction = g.connection.begin()
+        cls._transaction = g.connection.begin_nested()
         Base.metadata.create_all(g.connection)
         Session.configure(bind=g.connection)
 
