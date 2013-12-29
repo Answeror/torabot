@@ -1,7 +1,8 @@
 from nose.tools import assert_equal
 from httmock import HTTMock
-from ..spider import fetch_and_parse_all
+from ..spider import fetch_and_parse_all, fetch_ptime
 from .mock import mockrequests
+from datetime import datetime
 
 
 def test_fetch_and_parse_all():
@@ -66,3 +67,10 @@ def test_fetch_and_parse_all():
             'uri': 'http://www.toranoana.jp/mailorder/article/04/0030/08/48/040030084860.html'
         }
     ])
+
+
+def test_fetch_ptime():
+    with HTTMock(mockrequests):
+        ptime = fetch_ptime('http://www.toranoana.jp/mailorder/article/04/0030/16/24/040030162479.html')
+
+    assert_equal(ptime, datetime(year=2013, month=12, day=31))

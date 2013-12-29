@@ -3,30 +3,34 @@ from urllib.parse import urlencode, urljoin
 import re
 from logbook import Logger
 from collections import OrderedDict
+from bs4 import BeautifulSoup as BS
+from datetime import datetime
 
 
 log = Logger(__name__)
 
 
-def fetch(query, start):
+def fetch_list(query, start):
     base = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
-    r = requests.get(
+    return fetch(
         base + '?' + urlencode(OrderedDict([
             ('item_kind', '0401'),
             ('bl_fg', '0'),
             ('search', query.encode('Shift_JIS')),
             ('ps', start + 1),
         ])),
-        headers={
-            'Referer': base,
-            'Cookie': 'afg=0',
-        }
+        headers={'Referer': base}
     )
+
+
+def fetch(uri, headers={}):
+    hd = {'Cookie': 'afg=0'}
+    hd.update(headers)
+    r = requests.get(uri, headers=hd)
     return r.content
 
 
 def parse(data):
-    from bs4 import BeautifulSoup as BS
     soup = BS(data, 'html5lib')
     total, begin, end = parse_stats(soup)
     return {
@@ -62,9 +66,19 @@ def parse_arts(soup):
 
 
 def fetch_and_parse_all(query):
-    d = parse(fetch(query, 0))
+    d = parse(fetch_list(query, 0))
     yield from d['arts']
     while d['end'] < d['total']:
         log.info('fetch start from {}', d['end'])
-        d = parse(fetch(query, d['end']))
+        d = parse(fetch_list(query, d['end']))
         yield from d['arts']
+
+
+def fetch_ptime(uri):
+    soup = BS(fetch(uri))
+    for td in soup.select('td.DetailData_R'):
+        if td.string:
+            try:
+                return datetime.strptime(td.string.strip(), r'%Y/%m/%d')
+            except:
+                pass
