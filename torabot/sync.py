@@ -3,7 +3,7 @@ model used to sync tora and local database
 '''
 
 
-from .model import Art, Change
+from .model import Art, Change, Query, Result
 from .spider import fetch_and_parse_all
 from sqlalchemy.sql import exists, and_
 from . import state
@@ -38,8 +38,16 @@ def add_art(art, session):
     session.add(art)
 
 
+def has_art(art, session):
+    return bool(session.query(exists().where(Art.toraid == art.toraid)).scalar())
+
+
 def put_art(art, session):
-    session.merge(art)
+    if has_art(art, session):
+        art.id = session.query(Art).filter_by(toraid=art.toraid).one().id
+        return session.merge(art)
+    session.add(art)
+    return art
 
 
 def add_reserve_change(art, session):
@@ -57,17 +65,35 @@ def checkstate(art, session):
     )
 
 
+def has_query(query, session):
+    return bool(session.query(exists().where(Query.text == query.text)).scalar())
+
+
+def clear_query(query, session):
+    query.result.clear()
+
+
+def reset_query(query, session):
+    if has_query(query, session):
+        clear_query(query, session)
+        return
+    session.add(query)
+
+
+def add_result(query, art, rank, session):
+    query.result.append(Result(query=query, art=art, rank=rank))
+
+
 def sync(query, session):
-    session.flush()
-    for art in map(art_from_dict, fetch_and_parse_all(query)):
+    query = Query(text=query)
+    reset_query(query, session)
+    for rank, art in enumerate(map(art_from_dict, fetch_and_parse_all(query.text))):
         isreserve, isnew = checkstate(art, session)
         if isreserve:
             add_reserve_change(art, session)
-            session.flush()
         if isnew:
             add_new_change(art, session)
             add_art(art, session)
-            session.flush()
         else:
-            put_art(art, session)
-            session.flush()
+            art = put_art(art, session)
+        add_result(query, art, rank, session)

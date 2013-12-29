@@ -58,3 +58,30 @@ class Change(Base):
     ctime = Column(DateTime, default=datetime.utcnow, index=True)
 
     art = relationship(Art)
+
+
+class Query(Base):
+
+    __tablename__ = 'query'
+
+    id = Column(Integer, primary_key=True)
+    text = Column(String, index=True)
+    ctime = Column(DateTime, default=datetime.utcnow, index=True)
+
+    result = relationship('Result', order_by='Result.rank')
+
+    @property
+    def arts(self):
+        return map(lambda qa: qa.art, self.result)
+
+
+class Result(Base):
+
+    __tablename__ = 'result'
+
+    query_id = Column(Integer, ForeignKey(Query.id), primary_key=True, index=True)
+    art_id = Column(Integer, ForeignKey(Art.id), primary_key=True)
+    rank = Column(Integer, index=True)
+
+    query = relationship(Query)
+    art = relationship(Art)
