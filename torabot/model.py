@@ -9,9 +9,11 @@ from sqlalchemy import (
     String,
     Index,
     ForeignKey,
+    DateTime,
 )
 from .tora import order_uri_from_toraid, toraid_from_order_uri
 from . import state
+from datetime import datetime
 
 
 Base = declarative_base()
@@ -53,5 +55,6 @@ class Change(Base):
     id = Column(Integer, primary_key=True)
     art_id = Column(Integer, ForeignKey(Art.id), index=True)
     what = Column(Integer)
+    ctime = Column(DateTime, default=datetime.utcnow, index=True)
 
     art = relationship(Art)
