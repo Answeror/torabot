@@ -85,3 +85,13 @@ class Result(Base):
 
     query = relationship(Query)
     art = relationship(Art)
+
+
+class User(Base):
+
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    email = Column(String, unique=True)
+    openid = Column(String, unique=True, index=True)
