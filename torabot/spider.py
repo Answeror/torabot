@@ -6,6 +6,7 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup as BS
 from datetime import datetime
 from time import sleep
+from .time import tokyo_to_utc
 
 
 log = Logger(__name__)
@@ -143,13 +144,18 @@ def long_fetch_ptime(art):
     return long_work(lambda: fetch_ptime(art['uri']))
 
 
-def parse_ptime(soup):
+def parse_ptime_tokyo(soup):
     for td in soup.select('td.DetailData_R'):
         if td.string:
             try:
                 return datetime.strptime(td.string.strip(), r'%Y/%m/%d')
             except:
                 pass
+
+
+def parse_ptime(soup):
+    dt = parse_ptime_tokyo(soup)
+    return None if dt is None else tokyo_to_utc(dt)
 
 
 def fetch_ptime(uri):

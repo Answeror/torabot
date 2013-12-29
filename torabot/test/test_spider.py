@@ -3,6 +3,7 @@ from httmock import HTTMock
 from ..spider import fetch_and_parse_all, fetch_ptime, fetch_and_parse_all_future
 from .mock import mockrequests
 from datetime import datetime
+from ..time import tokyo_to_utc
 
 
 def test_fetch_and_parse_all():
@@ -73,11 +74,14 @@ def test_fetch_ptime():
     with HTTMock(mockrequests):
         ptime = fetch_ptime('http://www.toranoana.jp/mailorder/article/04/0030/16/24/040030162479.html')
 
-    assert_equal(ptime, datetime(year=2013, month=12, day=31))
+    assert_equal(ptime, tokyo_to_utc(datetime(year=2013, month=12, day=31)))
 
 
 def test_fetch_and_parse_all_future():
     with HTTMock(mockrequests):
-        arts = list(fetch_and_parse_all_future('a', now=lambda: datetime(year=2013, month=12, day=31)))
+        arts = list(fetch_and_parse_all_future(
+            'a',
+            now=lambda: tokyo_to_utc(datetime(year=2013, month=12, day=31))
+        ))
 
     assert_equal(len(arts), 94)
