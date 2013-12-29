@@ -65,7 +65,13 @@ def checkstate(art, session):
     )
 
 
-def has_query(query, session):
+def has_query(session, **kargs):
+    if 'query' in kargs:
+        query = kargs['query']
+    elif 'text' in kargs:
+        query = Query(text=kargs['text'])
+    else:
+        assert False, 'must provide query or text'
     return bool(session.query(exists().where(Query.text == query.text)).scalar())
 
 
@@ -74,7 +80,7 @@ def clear_query(query, session):
 
 
 def reset_query(query, session):
-    if has_query(query, session):
+    if has_query(query=query, session=session):
         clear_query(query, session)
         return
     session.add(query)
@@ -87,6 +93,7 @@ def add_result(query, art, rank, session):
 def sync(query, session):
     query = Query(text=query)
     reset_query(query, session)
+    arts = []
     for rank, art in enumerate(map(art_from_dict, fetch_and_parse_all(query.text))):
         isreserve, isnew = checkstate(art, session)
         if isreserve:
@@ -97,3 +104,5 @@ def sync(query, session):
         else:
             art = put_art(art, session)
         add_result(query, art, rank, session)
+        arts.append(arts)
+    return arts
