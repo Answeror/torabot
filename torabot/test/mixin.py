@@ -13,3 +13,9 @@ class ModelMixin(object):
     @classmethod
     def teardown_class(cls):
         cls._transaction.rollback()
+
+    def setup(self):
+        self.transaction = g.connection.begin_nested()
+
+    def teardown(self):
+        self.transaction.rollback()

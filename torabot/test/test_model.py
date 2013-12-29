@@ -8,12 +8,6 @@ from nose.tools import assert_equal
 
 class TestModel(ModelMixin):
 
-    def setup(self):
-        self.transaction = g.connection.begin_nested()
-
-    def teardown(self):
-        self.transaction.rollback()
-
     def test_add_art(self):
         s = Session()
         s.add(Art(

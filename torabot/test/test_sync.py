@@ -10,12 +10,6 @@ from .. import what
 
 class TestSync(ModelMixin):
 
-    def setup(self):
-        self.transaction = g.connection.begin()
-
-    def teardown(self):
-        self.transaction.rollback()
-
     def test_add_art(self):
         s = Session()
         with HTTMock(mockrequests):
