@@ -4,7 +4,7 @@ model used to sync tora and local database
 
 
 from .model import Art, Change, Query, Result
-from .spider import fetch_and_parse_all
+from .spider import list_all_future
 from sqlalchemy.sql import exists, and_
 from . import state
 from . import what
@@ -14,7 +14,7 @@ from logbook import Logger
 log = Logger(__name__)
 
 
-def art_from_dict(d):
+def dict_to_art(d):
     art = Art(
         title=d['title'],
         author=d['author'],
@@ -99,7 +99,7 @@ def sync(query, session):
     query = Query(text=query)
     reset_query(query, session)
     arts = []
-    for rank, art in enumerate(map(art_from_dict, fetch_and_parse_all(query.text))):
+    for rank, art in enumerate(map(dict_to_art, list_all_future(query.text))):
         isreserve, isnew = checkstate(art, session)
         if isreserve:
             add_reserve_change(art, session)
@@ -109,6 +109,6 @@ def sync(query, session):
         else:
             art = put_art(art, session)
         add_result(query, art, rank, session)
-        arts.append(arts)
+        arts.append(art)
     log.debug('sync done, got {} arts', len(arts))
     return arts

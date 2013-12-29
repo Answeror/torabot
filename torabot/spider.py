@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup as BS
 from datetime import datetime
 from time import sleep
 from .time import tokyo_to_utc
+import pytz
 
 
 log = Logger(__name__)
@@ -120,7 +121,11 @@ def remove_old(arts, now):
     return True
 
 
-def fetch_and_parse_all_future(query, now=datetime.now):
+def list_all_future(query):
+    return fetch_and_parse_all_future(query)
+
+
+def fetch_and_parse_all_future(query, now=lambda: datetime.now(pytz.utc)):
     _now = now()
     frozennow = lambda: _now
     arts = []
