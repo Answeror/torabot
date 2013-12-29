@@ -5,9 +5,16 @@ from logbook import Logger
 from collections import OrderedDict
 from bs4 import BeautifulSoup as BS
 from datetime import datetime
+from time import sleep
 
 
 log = Logger(__name__)
+
+
+class Busy(object): pass
+
+
+busy = Busy()
 
 
 def fetch_list(query, start):
@@ -30,8 +37,7 @@ def fetch(uri, headers={}):
     return r.content
 
 
-def parse(data):
-    soup = BS(data, 'html5lib')
+def parse_soup(soup):
     total, begin, end = parse_stats(soup)
     return {
         'total': total,
@@ -65,20 +71,89 @@ def parse_arts(soup):
     }, trs[2:-1:2]))
 
 
+def parse_list(data):
+    soup = BS(data, 'html5lib')
+    if check_busy(soup):
+        return busy
+    return parse_soup(soup)
+
+
+def check_busy(soup):
+    return re.search(r'大変混み合っています', soup.get_text()) is not None
+
+
+def long_work(f):
+    seconds = 1
+    while True:
+        d = f()
+        if d == busy:
+            if seconds >= 60:
+                raise Exception('too long busy wait')
+            log.debug('tora busy, sleep {} seconds', seconds)
+            sleep(seconds)
+            seconds += seconds
+        else:
+            return d
+
+
+def long_fetch_and_parse(query, start):
+    return long_work(lambda: parse_list(fetch_list(query, start)))
+
+
 def fetch_and_parse_all(query):
-    d = parse(fetch_list(query, 0))
+    d = long_fetch_and_parse(query, 0)
     yield from d['arts']
     while d['end'] < d['total']:
-        log.info('fetch start from {}', d['end'])
-        d = parse(fetch_list(query, d['end']))
+        log.debug('fetch start from {}', d['end'])
+        d = long_fetch_and_parse(query, d['end'])
         yield from d['arts']
 
 
-def fetch_ptime(uri):
-    soup = BS(fetch(uri))
+def remove_old(arts, now):
+    if long_fetch_ptime(arts[-1]) >= now():
+        return False
+
+    arts.pop()
+    while arts and long_fetch_ptime(arts[-1]) < now():
+        arts.pop()
+    return True
+
+
+def fetch_and_parse_all_future(query, now=datetime.now):
+    _now = now()
+    frozennow = lambda: _now
+    arts = []
+    limit = 20
+    for art in fetch_and_parse_all(query):
+        arts.append(art)
+        if len(arts) >= limit:
+            stop = remove_old(arts, frozennow)
+            log.debug('yield {}', len(arts))
+            yield from arts
+            arts.clear()
+            if stop:
+                break
+    if arts:
+        remove_old(arts, frozennow)
+        log.debug('yield {}', len(arts))
+        yield from arts
+
+
+def long_fetch_ptime(art):
+    return long_work(lambda: fetch_ptime(art['uri']))
+
+
+def parse_ptime(soup):
     for td in soup.select('td.DetailData_R'):
         if td.string:
             try:
                 return datetime.strptime(td.string.strip(), r'%Y/%m/%d')
             except:
                 pass
+
+
+def fetch_ptime(uri):
+    soup = BS(fetch(uri))
+    if check_busy(soup):
+        return busy
+    return parse_ptime(soup)
