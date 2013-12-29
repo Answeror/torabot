@@ -8,6 +8,10 @@ from .spider import fetch_and_parse_all
 from sqlalchemy.sql import exists, and_
 from . import state
 from . import what
+from logbook import Logger
+
+
+log = Logger(__name__)
 
 
 def art_from_dict(d):
@@ -91,6 +95,7 @@ def add_result(query, art, rank, session):
 
 
 def sync(query, session):
+    log.debug('sync start: {}', query)
     query = Query(text=query)
     reset_query(query, session)
     arts = []
@@ -105,4 +110,5 @@ def sync(query, session):
             art = put_art(art, session)
         add_result(query, art, rank, session)
         arts.append(arts)
+    log.debug('sync done, got {} arts', len(arts))
     return arts

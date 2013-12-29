@@ -5,8 +5,7 @@ CONNECTION_STRING = (
 
 if __name__ == '__main__':
     from torabot import make
-    app = make()
-    app.run(
+    app = make(
         connection_string=CONNECTION_STRING,
-        debug=True
     )
+    app.run(debug=True)

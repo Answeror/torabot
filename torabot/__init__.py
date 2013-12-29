@@ -5,14 +5,18 @@ def make(*args, **kargs):
     from . import view
     view.make(app)
 
-    from .model import Session
+    from .model import Session, Base
+
     if 'connection_string' in kargs:
         from sqlalchemy import create_engine
         engine = create_engine(kargs['connection_string'])
-        Session.configure(bind=engine)
+        bind = engine
     elif 'connection' in kargs:
-        Session.configure(bind=kargs['connection'])
+        bind = kargs['connection']
     else:
         assert False, "must provide database connection or connection string"
+
+    Base.metadata.create_all(bind)
+    Session.configure(bind=bind)
 
     return app
