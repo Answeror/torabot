@@ -5,6 +5,7 @@ from logbook import Logger
 from .spider import long_fetch_ptime
 from nose.tools import assert_is_not_none
 import requests
+from .time import utcnow
 
 
 log = Logger(__name__)
@@ -32,7 +33,9 @@ class Art(object):
 def makearts(arts, dbsession):
     netsession = requests.Session()
     for art in arts:
-        yield Art(art, dbsession=dbsession, netsession=netsession)
+        wrapped = Art(art, dbsession=dbsession, netsession=netsession)
+        if wrapped.ptime >= utcnow():
+            yield wrapped
 
 
 def query(text, session):

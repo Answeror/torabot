@@ -12,5 +12,9 @@ def utc_to_tokyo(dt):
     return dt.astimezone(pytz.timezone('Asia/Tokyo'))
 
 
-def utcnow():
+def _utcnow():
     return datetime.now(pytz.utc)
+
+
+def utcnow():
+    return _utcnow()
