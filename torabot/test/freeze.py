@@ -11,7 +11,7 @@ sys.path.insert(
 )
 
 
-from torabot.spider import fetch_and_parse_all, fetch_ptime, fetch_and_parse_all_future
+from torabot.spider import list_all, fetch_ptime
 from httmock import HTTMock
 import requests
 import pickle
@@ -84,9 +84,9 @@ def reqmd5(req):
 def main():
     from pprint import pprint
     with HTTMock(freeze):
-        #fetch_and_parse_all('大嘘')
+        list_all('大嘘')
         #fetch_ptime('http://www.toranoana.jp/mailorder/article/04/0030/16/24/040030162479.html')
-        list(fetch_and_parse_all_future('a', now=lambda: datetime(year=2013, month=12, day=31)))
+        #list(fetch_and_parse_all_future('a', now=lambda: datetime(year=2013, month=12, day=31)))
 
 
 if __name__ == '__main__':

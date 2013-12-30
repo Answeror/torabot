@@ -32,6 +32,7 @@ class Art(Base):
     state = Column(Integer, index=True)
     ptime = Column(DateTime)
     atime = Column(DateTime, default=utcnow)
+    timestamp = Column(String(32))
 
     @declared_attr
     def __table_args__(cls):

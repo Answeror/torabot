@@ -1,15 +1,19 @@
 from nose.tools import assert_equal
 from httmock import HTTMock
-from ..spider import fetch_and_parse_all, fetch_ptime, fetch_and_parse_all_future
+from ..spider import list_all, fetch_ptime
 from .mock import mockrequests
 from datetime import datetime
 from ..time import tokyo_to_utc
 from mock import patch
 
 
-def test_fetch_and_parse_all():
+def test_list_all():
     with HTTMock(mockrequests):
-        arts = list(fetch_and_parse_all('大嘘'))
+        arts = list(list_all('大嘘'))
+
+    for art in arts:
+        del art['ptime']
+        del art['timestamp']
 
     assert_equal(arts, [
         {
@@ -78,11 +82,11 @@ def test_fetch_ptime():
     assert_equal(ptime, tokyo_to_utc(datetime(year=2013, month=12, day=31)))
 
 
-def test_fetch_and_parse_all_future():
-    with patch('torabot.spider.utcnow') as now:
-        now.return_value = tokyo_to_utc(datetime(year=2013, month=12, day=31))
-        with HTTMock(mockrequests):
-            arts = list(fetch_and_parse_all_future('a'))
-        now.assert_called_with()
+#def test_fetch_and_parse_all_future():
+    #with patch('torabot.spider.utcnow') as now:
+        #now.return_value = tokyo_to_utc(datetime(year=2013, month=12, day=31))
+        #with HTTMock(mockrequests):
+            #arts = list(fetch_and_parse_all_future('a'))
+        #now.assert_called_with()
 
-    assert_equal(len(arts), 94)
+    #assert_equal(len(arts), 94)

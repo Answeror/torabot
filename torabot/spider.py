@@ -8,6 +8,9 @@ from datetime import datetime
 from time import sleep
 from .time import tokyo_to_utc, utcnow
 import pytz
+from hashlib import md5
+from functools import partial
+import concurrent.futures
 
 
 log = Logger(__name__)
@@ -65,13 +68,41 @@ def parse_arts(soup):
     base = 'http://www.toranoana.jp/'
     trs = soup.select('table.FixFrame tr')
     assert len(trs) == 0 or len(trs) > 3, "wrong list length: %d" % len(trs)
-    return list(map(lambda tr: {
+    return fill_detail(list(map(lambda tr: {
         'title': tr.select('td.c1 a')[0].string,
         'author': tr.select('td.c2 a')[0].string,
         'comp': tr.select('td.c3 a')[0].string,
         'uri': urljoin(base, tr.select('td.c1 a')[0]['href']),
-        'reserve': '予' in tr.select('td.c7')[0].get_text()
-    }, trs[2:-1:2]))
+        'reserve': '予' in tr.select('td.c7')[0].get_text(),
+    }, trs[2:-1:2])))
+
+
+def fill_detail(arts):
+    get = lambda art: longrun(partial(safe, parse_detail, art['uri']))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
+        for art, d in zip(arts, ex.map(get, arts)):
+            art.update(d)
+    return arts
+
+
+def parse_detail(soup):
+    return {
+        'ptime': parse_ptime(soup),
+        'timestamp': maketimestamp(soup),
+    }
+
+
+def safe(f, uri, session=Session()):
+    soup = BS(fetch(uri, session=session))
+    if check_busy(soup):
+        return busy
+    return f(soup)
+
+
+def maketimestamp(soup):
+    tags = soup.select('table[summary="Details"]')
+    assert tags
+    return md5(tags[0].get_text().encode('utf-8')).hexdigest()
 
 
 def parse_list(data):
@@ -85,7 +116,7 @@ def check_busy(soup):
     return re.search(r'大変混み合っています', soup.get_text()) is not None
 
 
-def long_work(f):
+def longrun(f):
     seconds = 1
     while True:
         d = f()
@@ -100,7 +131,7 @@ def long_work(f):
 
 
 def long_fetch_and_parse(query, start, session=Session()):
-    return long_work(lambda: parse_list(fetch_list(query, start)))
+    return longrun(lambda: parse_list(fetch_list(query, start)))
 
 
 def fetch_and_parse_all(query, session=Session()):
@@ -112,40 +143,12 @@ def fetch_and_parse_all(query, session=Session()):
         yield from d['arts']
 
 
-def remove_old(arts, session=Session()):
-    if long_fetch_ptime(arts[-1]['uri'], session=session) >= utcnow():
-        return False
-
-    arts.pop()
-    while arts and long_fetch_ptime(arts[-1]['uri'], session=session) < utcnow():
-        arts.pop()
-    return True
-
-
-def list_all_future(query, session=Session()):
-    return fetch_and_parse_all_future(query, session=session)
-
-
-def fetch_and_parse_all_future(query, session=Session()):
-    arts = []
-    limit = 20
-    for art in fetch_and_parse_all(query, session=session):
-        arts.append(art)
-        if len(arts) >= limit:
-            stop = remove_old(arts, session=session)
-            log.debug('yield {}', len(arts))
-            yield from arts
-            arts.clear()
-            if stop:
-                break
-    if arts:
-        remove_old(arts, session=session)
-        log.debug('yield {}', len(arts))
-        yield from arts
+def list_all(query, session=Session()):
+    return fetch_and_parse_all(query, session=session)
 
 
 def long_fetch_ptime(uri, session=Session()):
-    return long_work(lambda: fetch_ptime(uri, session=session))
+    return longrun(lambda: fetch_ptime(uri, session=session))
 
 
 def parse_ptime_tokyo(soup):

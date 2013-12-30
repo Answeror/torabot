@@ -4,7 +4,7 @@ model used to sync tora and local database
 
 
 from .model import Art, Change, Query, Result
-from .spider import list_all_future
+from .spider import list_all
 from sqlalchemy.sql import exists, and_
 from . import state
 from . import what
@@ -42,6 +42,13 @@ def isreserve(art, session):
     ))).scalar())
 
 
+def ischanged(art, session):
+    return bool(session.query(exists().where(and_(
+        Art.toraid == art.toraid,
+        Art.timestamp == art.timestamp
+    ))).scalar())
+
+
 def add_art(art, session):
     session.add(art)
 
@@ -70,6 +77,7 @@ def checkstate(art, session):
     return (
         isreserve(art, session),
         isnew(art, session),
+        ischanged(art, session),
     )
 
 
@@ -103,15 +111,18 @@ def sync(query, session):
     query = Query(text=query)
     reset_query(query, session)
     arts = []
-    for rank, art in enumerate(map(dict_to_art, list_all_future(query.text))):
-        isreserve, isnew = checkstate(art, session)
+    for rank, art in enumerate(map(dict_to_art, list_all(query.text))):
+        isreserve, isnew, ischanged = checkstate(art, session)
         if isreserve:
             add_reserve_change(art, session)
         if isnew:
             add_new_change(art, session)
             add_art(art, session)
-        else:
+        elif ischanged:
             art = put_art(art, session)
+        else:
+            log.debug('{} unchange', art.toraid)
+            break
         add_result(query, art, rank, session)
         arts.append(art)
     log.debug('sync done, got {} arts', len(arts))

@@ -32,9 +32,3 @@ class TestQuery(ModelMixin):
             with HTTMock(mockrequests):
                 for art in query('大嘘', s):
                     assert_is_not_none(art.ptime)
-
-    def test_query_less(self):
-        s = Session()
-        with gotopast(year=2014):
-            with HTTMock(mockrequests):
-                assert_equal(len(query('大嘘', s)), 0)
