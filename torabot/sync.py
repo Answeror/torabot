@@ -107,7 +107,14 @@ def add_result(query, art, rank, session):
 
 def get_update(query, limit, session):
     def gen():
-        for _, art in zip(range(limit), map(dict_to_art, list_all(query))):
+        for turn, art in zip(
+            range(limit + 1),
+            map(dict_to_art, list_all(query))
+        ):
+            if turn == limit:
+                log.info('sync limit({}) reached for query {}', limit, query)
+                break
+
             isreserve, isnew = checkstate(art, session)
             if isreserve:
                 add_reserve_change(art, session)
@@ -121,6 +128,7 @@ def get_update(query, limit, session):
                     log.debug('{} unchange', art.toraid)
                     break
             yield art
+
     return list(gen())
 
 
