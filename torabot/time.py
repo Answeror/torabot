@@ -1,4 +1,5 @@
 import pytz
+from datetime import datetime
 
 
 def tokyo_to_utc(dt):
@@ -9,3 +10,7 @@ def tokyo_to_utc(dt):
 
 def utc_to_tokyo(dt):
     return dt.astimezone(pytz.timezone('Asia/Tokyo'))
+
+
+def utcnow():
+    return datetime.now(pytz.utc)

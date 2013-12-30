@@ -6,7 +6,7 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup as BS
 from datetime import datetime
 from time import sleep
-from .time import tokyo_to_utc
+from .time import tokyo_to_utc, utcnow
 import pytz
 
 
@@ -112,12 +112,12 @@ def fetch_and_parse_all(query, session=Session()):
         yield from d['arts']
 
 
-def remove_old(arts, now, session=Session()):
-    if long_fetch_ptime(arts[-1], session=session) >= now():
+def remove_old(arts, session=Session()):
+    if long_fetch_ptime(arts[-1], session=session) >= utcnow():
         return False
 
     arts.pop()
-    while arts and long_fetch_ptime(arts[-1], session=session) < now():
+    while arts and long_fetch_ptime(arts[-1], session=session) < utcnow():
         arts.pop()
     return True
 
@@ -126,22 +126,20 @@ def list_all_future(query, session=Session()):
     return fetch_and_parse_all_future(query, session=session)
 
 
-def fetch_and_parse_all_future(query, now=lambda: datetime.now(pytz.utc), session=Session()):
-    _now = now()
-    frozennow = lambda: _now
+def fetch_and_parse_all_future(query, session=Session()):
     arts = []
     limit = 20
     for art in fetch_and_parse_all(query, session=session):
         arts.append(art)
         if len(arts) >= limit:
-            stop = remove_old(arts, frozennow, session=session)
+            stop = remove_old(arts, session=session)
             log.debug('yield {}', len(arts))
             yield from arts
             arts.clear()
             if stop:
                 break
     if arts:
-        remove_old(arts, frozennow, session=session)
+        remove_old(arts, session=session)
         log.debug('yield {}', len(arts))
         yield from arts
 

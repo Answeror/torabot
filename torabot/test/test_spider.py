@@ -4,6 +4,7 @@ from ..spider import fetch_and_parse_all, fetch_ptime, fetch_and_parse_all_futur
 from .mock import mockrequests
 from datetime import datetime
 from ..time import tokyo_to_utc
+from mock import patch
 
 
 def test_fetch_and_parse_all():
@@ -78,10 +79,10 @@ def test_fetch_ptime():
 
 
 def test_fetch_and_parse_all_future():
-    with HTTMock(mockrequests):
-        arts = list(fetch_and_parse_all_future(
-            'a',
-            now=lambda: tokyo_to_utc(datetime(year=2013, month=12, day=31))
-        ))
+    with patch('torabot.spider.utcnow') as now:
+        now.return_value = tokyo_to_utc(datetime(year=2013, month=12, day=31))
+        with HTTMock(mockrequests):
+            arts = list(fetch_and_parse_all_future('a'))
+        now.assert_called_with()
 
     assert_equal(len(arts), 94)
