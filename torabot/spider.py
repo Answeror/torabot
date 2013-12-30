@@ -160,8 +160,5 @@ def parse_ptime(soup):
     return None if dt is None else tokyo_to_utc(dt)
 
 
-def fetch_ptime(uri, session=Session()):
-    soup = BS(fetch(uri, session=session))
-    if check_busy(soup):
-        return busy
-    return parse_ptime(soup)
+def ptime(uri, session=Session()):
+    return longrun(partial(safe, partial(fetch, uri), parse_ptime, session))

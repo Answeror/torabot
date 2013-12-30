@@ -1,6 +1,6 @@
 from nose.tools import assert_equal
 from httmock import HTTMock
-from ..spider import list_all, fetch_ptime
+from ..spider import list_all, ptime
 from .mock import mockrequests
 from datetime import datetime
 from ..time import tokyo_to_utc
@@ -75,18 +75,9 @@ def test_list_all():
     ])
 
 
-def test_fetch_ptime():
+def test_ptime():
     with HTTMock(mockrequests):
-        ptime = fetch_ptime('http://www.toranoana.jp/mailorder/article/04/0030/16/24/040030162479.html')
-
-    assert_equal(ptime, tokyo_to_utc(datetime(year=2013, month=12, day=31)))
-
-
-#def test_fetch_and_parse_all_future():
-    #with patch('torabot.spider.utcnow') as now:
-        #now.return_value = tokyo_to_utc(datetime(year=2013, month=12, day=31))
-        #with HTTMock(mockrequests):
-            #arts = list(fetch_and_parse_all_future('a'))
-        #now.assert_called_with()
-
-    #assert_equal(len(arts), 94)
+        assert_equal(
+            ptime('http://www.toranoana.jp/mailorder/article/04/0030/16/24/040030162479.html'),
+            tokyo_to_utc(datetime(year=2013, month=12, day=31))
+        )
