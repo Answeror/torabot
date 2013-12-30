@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-<table class=table>
+<table class='table table-condensed table-striped'>
     <thead>
         <tr>
-            <td>名称</td>
-            <td>作者</td>
-            <td>生产商</td>
-            <td>状态</td>
+            <td class=col-sm-5>名称</td>
+            <td class=col-sm-2>作者</td>
+            <td class=col-sm-2>生产商</td>
+            <td class=col-sm-2>发售日</td>
+            <td class=col-sm-1>状态</td>
         </tr>
     </thead>
     <tbody>
@@ -15,6 +16,7 @@
         <td><a href="{{ art.uri }}">{{ art.title }}</a></td>
         <td>{{ art.author }}</td>
         <td>{{ art.comp }}</td>
+        <td>{{ art.ptime.strftime('%Y-%m-%d') }}</td>
         <td>{{ '预售' if art.reserve else '' }}</td>
     </tr>
     {% endfor %}
