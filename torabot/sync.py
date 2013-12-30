@@ -105,9 +105,9 @@ def add_result(query, art, rank, session):
     query.result.append(Result(query=query, art=art, rank=rank))
 
 
-def get_update(query, session):
+def get_update(query, limit, session):
     def gen():
-        for art in map(dict_to_art, list_all(query)):
+        for _, art in zip(range(limit), map(dict_to_art, list_all(query))):
             isreserve, isnew = checkstate(art, session)
             if isreserve:
                 add_reserve_change(art, session)
@@ -152,11 +152,11 @@ def refresh(session):
     session.expire_all()
 
 
-def sync(query, session):
+def sync(query, session, limit=1024):
     log.debug('sync start: {}', query)
 
     query = put_query(query, session)
-    arts = get_update(query.text, session)
+    arts = get_update(query.text, limit, session)
 
     # refresh new art id
     refresh(session)

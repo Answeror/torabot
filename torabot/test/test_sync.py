@@ -12,7 +12,6 @@ class TestSync(ModelMixin):
     def sync(self, session):
         with HTTMock(mockrequests):
             sync('大嘘', session)
-        session.commit()
 
     def test_sync(self):
         s = Session()
@@ -32,3 +31,13 @@ class TestSync(ModelMixin):
         assert_equal(s.query(Change).filter(Change.what == what.RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
         assert_equal(len(list(s.query(Query).one().arts)), 8)
+
+    def test_sync_limit(self):
+        s = Session()
+        with HTTMock(mockrequests):
+            sync('大嘘', limit=4, session=s)
+        assert_equal(s.query(Art).count(), 4)
+        assert_equal(s.query(Change).filter(Change.what == what.NEW).count(), 4)
+        assert_equal(s.query(Change).filter(Change.what == what.RESERVE).count(), 2)
+        assert_equal(s.query(Query).count(), 1)
+        assert_equal(len(list(s.query(Query).one().arts)), 4)
