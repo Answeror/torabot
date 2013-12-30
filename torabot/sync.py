@@ -52,7 +52,10 @@ def add_art(art, session):
 
 
 def has_art(art, session):
-    return bool(session.query(exists().where(Art.toraid == art.toraid)).scalar())
+    return bool(session.query(
+        exists()
+        .where(Art.toraid == art.toraid)
+    ).scalar())
 
 
 def update_art(art, session):
@@ -82,13 +85,19 @@ def has_query(session, **kargs):
         query = Query(text=kargs['text'])
     else:
         assert False, 'must provide query or text'
-    return bool(session.query(exists().where(Query.text == query.text)).scalar())
+    return bool(session.query(
+        exists()
+        .where(Query.text == query.text)
+    ).scalar())
 
 
-def put_new_query(query, session):
-    if has_query(query=query, session=session):
-        return session.query(Query).filter_by(text=query.text).one()
+def put_query(text, session):
+    if has_query(text=text, session=session):
+        return session.query(Query).filter_by(text=text).one()
+    query = Query(text=text)
     session.add(query)
+    session.flush()
+    session.refresh(query, ['id'])
     return query
 
 
@@ -96,58 +105,66 @@ def add_result(query, art, rank, session):
     query.result.append(Result(query=query, art=art, rank=rank))
 
 
-def sync(query, session):
-    log.debug('sync start: {}', query)
-
-    if has_query(text=query, session=session):
-        query = session.query(Query).filter_by(text=query).one()
-    else:
-        query = Query(text=query)
-        session.add(query)
-        session.flush()
-        session.refresh(query, ['id'])
-
-    arts = []
-    for art in map(dict_to_art, list_all(query.text)):
-        isreserve, isnew = checkstate(art, session)
-        if isreserve:
-            add_reserve_change(art, session)
-        if isnew:
-            add_new_change(art, session)
-            session.add(art)
-        else:
-            if ischanged(art, session):
-                art = update_art(art, session)
+def get_update(query, session):
+    def gen():
+        for art in map(dict_to_art, list_all(query)):
+            isreserve, isnew = checkstate(art, session)
+            if isreserve:
+                add_reserve_change(art, session)
+            if isnew:
+                add_new_change(art, session)
+                session.add(art)
             else:
-                log.debug('{} unchange', art.toraid)
-                break
-        arts.append(art)
+                if ischanged(art, session):
+                    art = update_art(art, session)
+                else:
+                    log.debug('{} unchange', art.toraid)
+                    break
+            yield art
+    return list(gen())
 
-    session.flush()
-    session.expire_all()
 
-    art_ids = [art.id for art in arts]
+def update_query(query_id, art_ids, session):
+    buf = art_ids[:]
     for id in (
         session.query(Result.art_id)
-        .filter(Result.query_id == query.id)
+        .filter(Result.query_id == query_id)
         .all()
     ):
-        if id not in (art.id for art in arts):
-            art_ids.append(id)
+        if id not in art_ids:
+            buf.append(id)
 
     session.execute(
         Result.__table__
         .delete()
-        .where(Result.query_id == query.id)
+        .where(Result.query_id == query_id)
     )
     session.execute(
         Result.__table__
         .insert()
-        .values(query_id=query.id),
-        [{'art_id': id, 'rank': i} for i, id in enumerate(art_ids)]
+        .values(query_id=query_id),
+        [{'art_id': id, 'rank': i} for i, id in enumerate(buf)]
     )
+
+
+def refresh(session):
     session.flush()
     session.expire_all()
 
-    log.debug('sync done, got {} arts', len(arts))
+
+def sync(query, session):
+    log.debug('sync start: {}', query)
+
+    query = put_query(query, session)
+    arts = get_update(query.text, session)
+
+    # refresh new art id
+    refresh(session)
+
+    update_query(query.id, [art.id for art in arts], session)
+
+    # refresh query arts
+    refresh(session)
+
+    log.debug('sync done, update {}/{} arts', len(arts), len(query.arts))
     return query.arts

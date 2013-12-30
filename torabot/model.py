@@ -75,7 +75,7 @@ class Query(Base):
 
     @property
     def arts(self):
-        return map(lambda qa: qa.art, self.result)
+        return [qa.art for qa in self.result]
 
 
 class Result(Base):
