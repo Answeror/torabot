@@ -26,9 +26,9 @@ def query(text, session):
     if not has_query(text=text, session=session):
         return list(makearts(sync(text, session=session)))
     log.debug('already synced, pull from database')
-    return list(makearts(
+    return list(makearts((
         session.query(Query)
         .filter_by(text=text)
         .options(joinedload(Query.result))
         .one()
-    ).arts)
+    ).arts))
