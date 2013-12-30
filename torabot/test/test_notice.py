@@ -5,7 +5,7 @@ from httmock import HTTMock
 from ..sync import sync
 from ..notice import pop_change
 from .. import what
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_is_none
 from mock import patch
 from ..time import tokyo_to_utc
 from datetime import datetime
@@ -35,6 +35,6 @@ class TestNotice(ModelMixin):
                 reserve_count += 1
             else:
                 assert False
-        assert pop_change(s) is None
+        assert_is_none(pop_change(s))
         assert_equal(new_count, 8)
         assert_equal(reserve_count, 2)

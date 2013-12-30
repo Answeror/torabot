@@ -1,4 +1,5 @@
 from .g import g
+import logbook
 
 
 CONNECTION_STRING = (
@@ -8,6 +9,9 @@ CONNECTION_STRING = (
 
 
 def setup_module():
+    g.log_handler = logbook.TestHandler()
+    g.log_handler.push_thread()
+
     # Connect to the database and create the schema within a transaction
     from sqlalchemy import create_engine
     g.engine = create_engine(CONNECTION_STRING)
@@ -22,3 +26,5 @@ def teardown_module():
     g.transaction.rollback()
     g.connection.close()
     g.engine.dispose()
+
+    g.log_handler.pop_thread()
