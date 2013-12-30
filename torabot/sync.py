@@ -15,11 +15,15 @@ log = Logger(__name__)
 
 
 def dict_to_art(d):
+    kargs = {}
+    if 'ptime' in d:
+        kargs['ptime'] = d['ptime']
     art = Art(
         title=d['title'],
         author=d['author'],
         comp=d['comp'],
         state=state.RESERVE if d['reserve'] else state.OTHER,
+        **kargs
     )
     art.uri = d['uri']
     return art

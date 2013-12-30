@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 from .tora import order_uri_from_toraid, toraid_from_order_uri
 from . import state
-from datetime import datetime
+from .time import utcnow
 
 
 Base = declarative_base()
@@ -30,6 +30,8 @@ class Art(Base):
     comp = Column(String)
     toraid = Column(String(12), unique=True, index=True)
     state = Column(Integer, index=True)
+    ptime = Column(DateTime)
+    atime = Column(DateTime, default=utcnow)
 
     @declared_attr
     def __table_args__(cls):
@@ -55,7 +57,7 @@ class Change(Base):
     id = Column(Integer, primary_key=True)
     art_id = Column(Integer, ForeignKey(Art.id), index=True)
     what = Column(Integer)
-    ctime = Column(DateTime, default=datetime.utcnow, index=True)
+    ctime = Column(DateTime, default=utcnow, index=True)
 
     art = relationship(Art)
 
@@ -66,7 +68,7 @@ class Query(Base):
 
     id = Column(Integer, primary_key=True)
     text = Column(String, index=True)
-    ctime = Column(DateTime, default=datetime.utcnow, index=True)
+    ctime = Column(DateTime, default=utcnow, index=True)
 
     result = relationship('Result', order_by='Result.rank')
 

@@ -113,11 +113,11 @@ def fetch_and_parse_all(query, session=Session()):
 
 
 def remove_old(arts, session=Session()):
-    if long_fetch_ptime(arts[-1], session=session) >= utcnow():
+    if long_fetch_ptime(arts[-1]['uri'], session=session) >= utcnow():
         return False
 
     arts.pop()
-    while arts and long_fetch_ptime(arts[-1], session=session) < utcnow():
+    while arts and long_fetch_ptime(arts[-1]['uri'], session=session) < utcnow():
         arts.pop()
     return True
 
@@ -144,8 +144,8 @@ def fetch_and_parse_all_future(query, session=Session()):
         yield from arts
 
 
-def long_fetch_ptime(art, session=Session()):
-    return long_work(lambda: fetch_ptime(art['uri'], session=session))
+def long_fetch_ptime(uri, session=Session()):
+    return long_work(lambda: fetch_ptime(uri, session=session))
 
 
 def parse_ptime_tokyo(soup):
