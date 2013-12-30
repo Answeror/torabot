@@ -1,4 +1,4 @@
-import requests
+from requests import Session
 from urllib.parse import urlencode, urljoin
 import re
 from logbook import Logger
@@ -19,7 +19,7 @@ class Busy(object): pass
 busy = Busy()
 
 
-def fetch_list(query, start):
+def fetch_list(query, start, session=Session()):
     base = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
     return fetch(
         base + '?' + urlencode(OrderedDict([
@@ -28,14 +28,15 @@ def fetch_list(query, start):
             ('search', query.encode('Shift_JIS')),
             ('ps', start + 1),
         ])),
-        headers={'Referer': base}
+        headers={'Referer': base},
+        session=session,
     )
 
 
-def fetch(uri, headers={}):
+def fetch(uri, headers={}, session=Session()):
     hd = {'Cookie': 'afg=0'}
     hd.update(headers)
-    r = requests.get(uri, headers=hd)
+    r = session.get(uri, headers=hd)
     return r.content
 
 
@@ -98,12 +99,12 @@ def long_work(f):
             return d
 
 
-def long_fetch_and_parse(query, start):
+def long_fetch_and_parse(query, start, session=Session()):
     return long_work(lambda: parse_list(fetch_list(query, start)))
 
 
-def fetch_and_parse_all(query):
-    d = long_fetch_and_parse(query, 0)
+def fetch_and_parse_all(query, session=Session()):
+    d = long_fetch_and_parse(query, 0, session=session)
     yield from d['arts']
     while d['end'] < d['total']:
         log.debug('fetch start from {}', d['end'])
@@ -111,42 +112,42 @@ def fetch_and_parse_all(query):
         yield from d['arts']
 
 
-def remove_old(arts, now):
-    if long_fetch_ptime(arts[-1]) >= now():
+def remove_old(arts, now, session=Session()):
+    if long_fetch_ptime(arts[-1], session=session) >= now():
         return False
 
     arts.pop()
-    while arts and long_fetch_ptime(arts[-1]) < now():
+    while arts and long_fetch_ptime(arts[-1], session=session) < now():
         arts.pop()
     return True
 
 
-def list_all_future(query):
-    return fetch_and_parse_all_future(query)
+def list_all_future(query, session=Session()):
+    return fetch_and_parse_all_future(query, session=session)
 
 
-def fetch_and_parse_all_future(query, now=lambda: datetime.now(pytz.utc)):
+def fetch_and_parse_all_future(query, now=lambda: datetime.now(pytz.utc), session=Session()):
     _now = now()
     frozennow = lambda: _now
     arts = []
     limit = 20
-    for art in fetch_and_parse_all(query):
+    for art in fetch_and_parse_all(query, session=session):
         arts.append(art)
         if len(arts) >= limit:
-            stop = remove_old(arts, frozennow)
+            stop = remove_old(arts, frozennow, session=session)
             log.debug('yield {}', len(arts))
             yield from arts
             arts.clear()
             if stop:
                 break
     if arts:
-        remove_old(arts, frozennow)
+        remove_old(arts, frozennow, session=session)
         log.debug('yield {}', len(arts))
         yield from arts
 
 
-def long_fetch_ptime(art):
-    return long_work(lambda: fetch_ptime(art['uri']))
+def long_fetch_ptime(art, session=Session()):
+    return long_work(lambda: fetch_ptime(art['uri'], session=session))
 
 
 def parse_ptime_tokyo(soup):
@@ -163,8 +164,8 @@ def parse_ptime(soup):
     return None if dt is None else tokyo_to_utc(dt)
 
 
-def fetch_ptime(uri):
-    soup = BS(fetch(uri))
+def fetch_ptime(uri, session=Session()):
+    soup = BS(fetch(uri, session=session))
     if check_busy(soup):
         return busy
     return parse_ptime(soup)
