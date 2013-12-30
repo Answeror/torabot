@@ -43,13 +43,13 @@ def fetch(uri, headers={}, session=Session()):
     return r.content
 
 
-def parse_soup(soup):
+def parse_list(soup, session):
     total, begin, end = parse_stats(soup)
     return {
         'total': total,
         'begin': begin,
         'end': end,
-        'arts': parse_arts(soup)
+        'arts': parse_arts(soup, session)
     }
 
 
@@ -64,7 +64,7 @@ def parse_stats(soup):
     return total, begin, end
 
 
-def parse_arts(soup):
+def parse_arts(soup, session):
     base = 'http://www.toranoana.jp/'
     trs = soup.select('table.FixFrame tr')
     assert len(trs) == 0 or len(trs) > 3, "wrong list length: %d" % len(trs)
@@ -74,11 +74,16 @@ def parse_arts(soup):
         'comp': tr.select('td.c3 a')[0].string,
         'uri': urljoin(base, tr.select('td.c1 a')[0]['href']),
         'reserve': '予' in tr.select('td.c7')[0].get_text(),
-    }, trs[2:-1:2])))
+    }, trs[2:-1:2])), session)
 
 
-def fill_detail(arts):
-    get = lambda art: longrun(partial(safe, parse_detail, art['uri']))
+def fill_detail(arts, session):
+    get = lambda art: longrun(partial(
+        safe,
+        partial(fetch, art['uri']),
+        parse_detail,
+        session,
+    ))
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
         for art, d in zip(arts, ex.map(get, arts)):
             art.update(d)
@@ -92,24 +97,17 @@ def parse_detail(soup):
     }
 
 
-def safe(f, uri, session=Session()):
-    soup = BS(fetch(uri, session=session))
+def safe(fetch, parse, session=Session()):
+    soup = BS(fetch(session=session))
     if check_busy(soup):
         return busy
-    return f(soup)
+    return parse(soup)
 
 
 def maketimestamp(soup):
     tags = soup.select('table[summary="Details"]')
     assert tags
     return md5(tags[0].get_text().encode('utf-8')).hexdigest()
-
-
-def parse_list(data):
-    soup = BS(data, 'html5lib')
-    if check_busy(soup):
-        return busy
-    return parse_soup(soup)
 
 
 def check_busy(soup):
@@ -130,25 +128,22 @@ def longrun(f):
             return d
 
 
-def long_fetch_and_parse(query, start, session=Session()):
-    return longrun(lambda: parse_list(fetch_list(query, start)))
-
-
-def fetch_and_parse_all(query, session=Session()):
-    d = long_fetch_and_parse(query, 0, session=session)
-    yield from d['arts']
-    while d['end'] < d['total']:
-        log.debug('fetch start from {}', d['end'])
-        d = long_fetch_and_parse(query, d['end'])
-        yield from d['arts']
+def list_one_safe(query, start, session):
+    return longrun(partial(
+        safe,
+        partial(fetch_list, query, start),
+        partial(parse_list, session=session),
+        session,
+    ))
 
 
 def list_all(query, session=Session()):
-    return fetch_and_parse_all(query, session=session)
-
-
-def long_fetch_ptime(uri, session=Session()):
-    return longrun(lambda: fetch_ptime(uri, session=session))
+    d = list_one_safe(query, 0, session)
+    yield from d['arts']
+    while d['end'] < d['total']:
+        log.debug('fetch start from {}', d['end'])
+        d = list_one_safe(query, d['end'], session)
+        yield from d['arts']
 
 
 def parse_ptime_tokyo(soup):

@@ -12,7 +12,7 @@ class TestSync(ModelMixin):
     def sync(self, session):
         with HTTMock(mockrequests):
             sync('大嘘', session)
-        session.flush()
+        session.commit()
 
     def test_sync(self):
         s = Session()

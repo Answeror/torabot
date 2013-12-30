@@ -15,15 +15,13 @@ log = Logger(__name__)
 
 
 def dict_to_art(d):
-    kargs = {}
-    if 'ptime' in d:
-        kargs['ptime'] = d['ptime']
     art = Art(
         title=d['title'],
         author=d['author'],
         comp=d['comp'],
         state=state.RESERVE if d['reserve'] else state.OTHER,
-        **kargs
+        ptime=d['ptime'],
+        timestamp=d['timestamp'],
     )
     art.uri = d['uri']
     return art
@@ -43,7 +41,7 @@ def isreserve(art, session):
 
 
 def ischanged(art, session):
-    return bool(session.query(exists().where(and_(
+    return not bool(session.query(exists().where(and_(
         Art.toraid == art.toraid,
         Art.timestamp == art.timestamp
     ))).scalar())
@@ -57,12 +55,9 @@ def has_art(art, session):
     return bool(session.query(exists().where(Art.toraid == art.toraid)).scalar())
 
 
-def put_art(art, session):
-    if has_art(art, session):
-        art.id = session.query(Art).filter_by(toraid=art.toraid).one().id
-        return session.merge(art)
-    session.add(art)
-    return art
+def update_art(art, session):
+    art.id = session.query(Art).filter_by(toraid=art.toraid).one().id
+    return session.merge(art)
 
 
 def add_reserve_change(art, session):
@@ -77,7 +72,6 @@ def checkstate(art, session):
     return (
         isreserve(art, session),
         isnew(art, session),
-        ischanged(art, session),
     )
 
 
@@ -91,15 +85,11 @@ def has_query(session, **kargs):
     return bool(session.query(exists().where(Query.text == query.text)).scalar())
 
 
-def clear_query(query, session):
-    query.result.clear()
-
-
-def reset_query(query, session):
+def put_new_query(query, session):
     if has_query(query=query, session=session):
-        clear_query(query, session)
-        return
+        return session.query(Query).filter_by(text=query.text).one()
     session.add(query)
+    return query
 
 
 def add_result(query, art, rank, session):
@@ -108,22 +98,56 @@ def add_result(query, art, rank, session):
 
 def sync(query, session):
     log.debug('sync start: {}', query)
-    query = Query(text=query)
-    reset_query(query, session)
+
+    if has_query(text=query, session=session):
+        query = session.query(Query).filter_by(text=query).one()
+    else:
+        query = Query(text=query)
+        session.add(query)
+        session.flush()
+        session.refresh(query, ['id'])
+
     arts = []
-    for rank, art in enumerate(map(dict_to_art, list_all(query.text))):
-        isreserve, isnew, ischanged = checkstate(art, session)
+    for art in map(dict_to_art, list_all(query.text)):
+        isreserve, isnew = checkstate(art, session)
         if isreserve:
             add_reserve_change(art, session)
         if isnew:
             add_new_change(art, session)
-            add_art(art, session)
-        elif ischanged:
-            art = put_art(art, session)
+            session.add(art)
         else:
-            log.debug('{} unchange', art.toraid)
-            break
-        add_result(query, art, rank, session)
+            if ischanged(art, session):
+                art = update_art(art, session)
+            else:
+                log.debug('{} unchange', art.toraid)
+                break
         arts.append(art)
+
+    session.flush()
+    session.expire_all()
+
+    art_ids = [art.id for art in arts]
+    for id in (
+        session.query(Result.art_id)
+        .filter(Result.query_id == query.id)
+        .all()
+    ):
+        if id not in (art.id for art in arts):
+            art_ids.append(id)
+
+    session.execute(
+        Result.__table__
+        .delete()
+        .where(Result.query_id == query.id)
+    )
+    session.execute(
+        Result.__table__
+        .insert()
+        .values(query_id=query.id),
+        [{'art_id': id, 'rank': i} for i, id in enumerate(art_ids)]
+    )
+    session.flush()
+    session.expire_all()
+
     log.debug('sync done, got {} arts', len(arts))
-    return arts
+    return query.arts

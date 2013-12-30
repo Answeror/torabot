@@ -68,7 +68,7 @@ class Query(Base):
     __tablename__ = 'query'
 
     id = Column(Integer, primary_key=True)
-    text = Column(String, index=True)
+    text = Column(String, unique=True, index=True)
     ctime = Column(DateTime, default=utcnow, index=True)
 
     result = relationship('Result', order_by='Result.rank')
