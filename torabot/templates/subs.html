@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+<table class='table table-condensed table-striped'>
+    <thead>
+        <tr>
+            <td class=col-sm-2>create time</td>
+            <td class=col-sm-9>query</td>
+            <td class=col-sm-1></td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for sub in subs %}
+    <tr>
+        <td>{{ sub.ctime.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td><a href='{{ url_for("search", q=sub.query.text) }}'>{{ sub.query.text }}</a></td>
+        <td>
+            <form action='{{ url_for("unsubscribe") }}' method=post>
+                <input type=hidden name=user_id value='{{ sub.user_id }}'>
+                <input type=hidden name=query_id value='{{ sub.query_id }}'>
+                <button type=submit class='btn btn-xs btn-default'>unsubscribe</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

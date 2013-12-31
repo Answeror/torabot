@@ -14,10 +14,23 @@ from sqlalchemy import (
 from .tora import order_uri_from_toraid, toraid_from_order_uri
 from . import state
 from .time import utcnow
+from contextlib import contextmanager
 
 
 Base = declarative_base()
 Session = sessionmaker()
+
+
+@contextmanager
+def makesession(commit=False, **kargs):
+    session = Session(**kargs)
+    try:
+        yield session
+        if commit:
+            session.commit()
+    except:
+        session.rollback()
+        raise
 
 
 class Art(Base):
@@ -107,3 +120,5 @@ class Subscription(Base):
     query_id = Column(Integer, ForeignKey(Query.id), primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey(User.id), primary_key=True, index=True)
     ctime = Column(DateTime, default=utcnow)
+
+    query = relationship(Query)

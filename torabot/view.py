@@ -4,19 +4,44 @@ from flask import (
     render_template,
 )
 from .query import query
-from .model import Session
+from .model import Session, makesession, Subscription
 from .kanji import translate
 from logbook import Logger
 from .sub import sub, unsub, has_sub
+from . import auth
 
 
 log = Logger(__name__)
+
+
+def get_query_info():
+    d = {}
+    if 'query_id' in request.values:
+        d['query_id'] = request.values['query_id']
+    elif 'query_text' in request.values:
+        d['query_text'] = request.values['query_text']
+    else:
+        raise Exception('neither query_id nor query_text provided')
+    return d
 
 
 def make(app):
     @app.route('/', methods=['GET'])
     def index():
         return render_template('layout.html')
+
+    @app.route('/subs', methods=['GET'])
+    @auth.require_session
+    def subscriptions(user_id):
+        with makesession() as session:
+            return render_template(
+                'subs.html',
+                subs=(
+                    session.query(Subscription)
+                    .filter_by(user_id=user_id)
+                    .all()
+                )
+            )
 
     @app.route('/search', methods=['GET'])
     def search():
@@ -48,13 +73,13 @@ def make(app):
             raise
 
     @app.route('/sub', methods=['POST'])
-    def subsribe():
+    def subscribe():
         session = Session()
         try:
             sub(
-                user_id=request.values['userid'],
-                query_text=request.values['query'],
+                user_id=request.values['user_id'],
                 session=session,
+                **get_query_info()
             )
             session.commit()
             session.close()
@@ -73,13 +98,13 @@ def make(app):
             )
 
     @app.route('/unsub', methods=['POST'])
-    def unsubsribe():
+    def unsubscribe():
         session = Session()
         try:
             unsub(
-                user_id=request.values['userid'],
-                query_text=request.values['query'],
+                user_id=request.values['user_id'],
                 session=session,
+                **get_query_info()
             )
             session.commit()
             session.close()

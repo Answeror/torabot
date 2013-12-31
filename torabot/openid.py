@@ -94,7 +94,7 @@ def make(app):
             next_url=oid.get_next_url()
         )
 
-    @app.route('/logout')
+    @app.route('/logout', methods=['POST'])
     def logout():
         session.pop('openid', None)
         session.pop('userid', None)

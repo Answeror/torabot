@@ -1,4 +1,4 @@
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<div class="navbar navbar-masthead navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
         <div class=row>
             <div class=col-sm-12>
@@ -12,13 +12,18 @@
                     <a class="navbar-brand" href='/'>torabot</a>
                 </div>
                 <div class="collapse navbar-collapse">
-                    <!--<ul class="nav navbar-nav">-->
+                    <ul class="nav navbar-nav">
+                        {% if 'userid' in session %}
+                        <li><a href='{{ url_for("subscriptions") }}'>subscriptions</a></li>
+                        {% endif %}
                         <!--<li class="active"><a href='/'>home</a></li>-->
                         <!--<li><a href="#about">about</a></li>-->
                         <!--<li><a href="#contact">contact</a></li>-->
-                    <!--</ul>-->
+                    </ul>
                     <div class='navbar-form navbar-right'>
+                        {% block search_box_left %}{% endblock %}
                         <form class="navbar-left" action='/search' role="search">
+                            <div class="form-group"></div>
                             <div class="form-group">
                                 <input type="text" class="form-control" name='q'>
                             </div>
@@ -30,7 +35,12 @@
                             <div class="form-group">
                                 <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
                             </div>
-                            <input type=submit class='btn btn-success' value="sign in">
+                            <input type=submit class='btn btn-success' value="login">
+                        </form>
+                        {% else %}
+                        <form class="navbar-left" action='/logout' method=post>
+                            <div class="form-group"></div>
+                            <input type=submit class='btn btn-success' value="logout">
                         </form>
                         {% endif %}
                     </div>
