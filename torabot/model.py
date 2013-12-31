@@ -98,3 +98,12 @@ class User(Base):
     name = Column(String, unique=True)
     email = Column(String, unique=True)
     openid = Column(String, unique=True, index=True)
+
+
+class Subscription(Base):
+
+    __tablename__ = 'subscription'
+
+    query_id = Column(Integer, ForeignKey(Query.id), primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey(User.id), primary_key=True, index=True)
+    ctime = Column(DateTime, default=utcnow)

@@ -1,0 +1,22 @@
+{% extends "nav.html" %}
+{% block search_box_right %}
+{% if 'userid' in session %}
+{% if sub %}
+<form action='/unsub' method=post class="navbar-left" role="form">
+    <div class="form-group">
+        <input type=hidden name=userid value='{{ session["userid"] }}'>
+        <input type=hidden name=query value='{{ query }}'>
+    </div>
+    <button type="submit" class="btn btn-danger">unsubscribe</button>
+</form>
+{% else %}
+<form action='/sub' method=post class="navbar-left" role="form">
+    <div class="form-group">
+        <input type=hidden name=userid value='{{ session["userid"] }}'>
+        <input type=hidden name=query value='{{ query }}'>
+    </div>
+    <button type="submit" class="btn btn-primary">subsribe</button>
+</form>
+{% endif %}
+{% endif %}
+{% endblock %}
