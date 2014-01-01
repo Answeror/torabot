@@ -5,7 +5,7 @@ model used to sync tora and local database
 
 from .model import Art, Change, Query, Result
 from .spider import list_all
-from sqlalchemy.sql import exists, and_
+from sqlalchemy.sql import exists, and_, func, update, select
 from . import state
 from . import what
 from logbook import Logger
@@ -21,7 +21,7 @@ def dict_to_art(d):
         comp=d['comp'],
         state=state.RESERVE if d['reserve'] else state.OTHER,
         ptime=d['ptime'],
-        timestamp=d['timestamp'],
+        hash=d['hash'],
     )
     art.uri = d['uri']
     return art
@@ -40,10 +40,16 @@ def isreserve(art, session):
     ))).scalar())
 
 
-def ischanged(art, session):
+def query_result_changed(query_id, art, session):
+    return not bool(session.query(exists().where(and_(
+        Result.query_id == query_id,
+        Result.hash == art.hash
+    ))).scalar())
+
+def art_changed(art, session):
     return not bool(session.query(exists().where(and_(
         Art.toraid == art.toraid,
-        Art.timestamp == art.timestamp
+        Art.hash == art.hash
     ))).scalar())
 
 
@@ -93,65 +99,64 @@ def has_query(session, **kargs):
 
 def put_query(text, session):
     if has_query(text=text, session=session):
-        return session.query(Query).filter_by(text=text).one()
+        query = session.query(Query).filter_by(text=text).one()
+        query.version += 1
+        return query
     query = Query(text=text)
     session.add(query)
     session.flush()
-    session.refresh(query, ['id'])
+    session.expire(query, ['id'])
     return query
 
 
-def add_result(query, art, rank, session):
-    query.result.append(Result(query=query, art=art, rank=rank))
-
-
-def get_update(query, limit, session):
-    def gen():
-        for turn, art in zip(
-            range(limit + 1),
-            map(dict_to_art, list_all(query))
-        ):
-            if turn == limit:
-                log.info('sync limit({}) reached for query {}', limit, query)
-                break
-
-            isreserve, isnew = checkstate(art, session)
-            if isreserve:
-                add_reserve_change(art, session)
-            if isnew:
-                add_new_change(art, session)
-                session.add(art)
-            else:
-                if ischanged(art, session):
-                    art = update_art(art, session)
-                else:
-                    log.debug('{} unchange', art.toraid)
-                    break
-            yield art
-
-    return list(gen())
-
-
-def update_query(query_id, art_ids, session):
-    buf = art_ids[:]
-    for id in (
-        session.query(Result.art_id)
-        .filter(Result.query_id == query_id)
-        .all()
+def update_arts(query, limit, session):
+    for turn, art in zip(
+        range(limit + 1),
+        map(dict_to_art, list_all(query.text))
     ):
-        if id not in art_ids:
-            buf.append(id)
+        if turn == limit:
+            log.info('sync limit({}) reached for query {}', limit, query.text)
+            break
 
+        isreserve, isnew = checkstate(art, session)
+        if isreserve:
+            add_reserve_change(art, session)
+        if isnew:
+            add_new_change(art, session)
+            session.add(art)
+            session.flush()
+            session.expire(art, ['id'])
+        else:
+            if art_changed(art, session):
+                art = update_art(art, session)
+            if query_result_changed(query.id, art, session):
+                update_query_result(query, art, session)
+            else:
+                log.debug('{} unchange', art.toraid)
+                break
+        yield art
+
+
+def update_query_result(query, art, session):
     session.execute(
-        Result.__table__
-        .delete()
-        .where(Result.query_id == query_id)
-    )
-    session.execute(
-        Result.__table__
-        .insert()
-        .values(query_id=query_id),
-        [{'art_id': id, 'rank': i} for i, id in enumerate(buf)]
+        update(Result)
+        .where(and_(
+            Result.query_id == query.id,
+            Result.art_id == art.id
+        ))
+        .values(
+            version=query.version,
+            hash=art.hash,
+            rank=(
+                select([func.max(Result.rank) + 1])
+                .where(and_(
+                    Result.query_id == query.id,
+                    Result.version == query.version
+                ))
+                .correlate()
+                .as_scalar()
+            )
+        )
     )
 
 
@@ -161,18 +166,16 @@ def refresh(session):
 
 
 def sync(query, session, limit=1024):
+    return list(gensync(query, session, limit))
+
+
+def gensync(query, session, limit=1024):
     log.debug('sync start: {}', query)
 
     query = put_query(query, session)
-    arts = get_update(query.text, limit, session)
+    count = 0
+    for art in update_arts(query, limit, session):
+        yield art
+        count += 1
 
-    # refresh new art id
-    refresh(session)
-
-    update_query(query.id, [art.id for art in arts], session)
-
-    # refresh query arts
-    refresh(session)
-
-    log.debug('sync done, update {}/{} arts', len(arts), len(query.arts))
-    return query.arts
+    log.debug('sync done, update {} arts', count)

@@ -18,6 +18,7 @@ import pickle
 import json
 from functools import wraps
 from datetime import datetime
+from threading import RLock
 
 
 def all_requests(func):
@@ -62,16 +63,21 @@ def load():
     if not os.path.exists(FROZEN_PATH):
         d = {}
     else:
-        with open(FROZEN_PATH, 'rb') as f:
-            d = pickle.loads(f.read())
+        with lock:
+            with open(FROZEN_PATH, 'rb') as f:
+                d = pickle.loads(f.read())
     return d
 
 
+lock = RLock()
+
+
 def append(req, resp):
-    d = load()
-    d[reqmd5(req)] = (freezereq(req), freezeresp(resp))
-    with open(FROZEN_PATH, 'wb') as f:
-        f.write(pickle.dumps(d))
+    with lock:
+        d = load()
+        d[reqmd5(req)] = (freezereq(req), freezeresp(resp))
+        with open(FROZEN_PATH, 'wb') as f:
+            f.write(pickle.dumps(d))
 
 
 def reqmd5(req):

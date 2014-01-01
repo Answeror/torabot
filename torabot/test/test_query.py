@@ -32,3 +32,14 @@ class TestQuery(ModelMixin):
             with HTTMock(mockrequests):
                 for art in query('大嘘', s):
                     assert_is_not_none(art.ptime)
+
+    #def test_query_page(self):
+        #s = Session()
+        #with gotopast(year=2010):
+            #with HTTMock(mockrequests):
+                #a_20_30 = query('艦', page=2, room=10, session=s)
+                #a_15_30 = query('艦', page=1, room=15, session=s)
+                #assert_equal(
+                    #[art.toraid for art in a_15_30[5:10]],
+                    #[art.toraid for art in a_20_30[:5]]
+                #)

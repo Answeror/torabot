@@ -43,14 +43,20 @@ def make(app):
                 )
             )
 
-    @app.route('/search', methods=['GET'])
-    def search():
+    @app.route('/search', methods=['GET'], defaults={'page': 0})
+    @app.route('/search/<int:page>', methods=['GET'])
+    def search(page):
         oq = request.args.get('q', '')
         tq = translate(oq)
         log.debug('query: {} -> {}', oq, tq)
         session = Session()
         try:
-            arts = query(tq, session=session)
+            arts = query(
+                tq,
+                page=page,
+                room=app.config.get('TORABOT_PAGE_ROOM', 20),
+                session=session
+            )
             session.commit()
             options = {}
             if 'userid' in flask.session:

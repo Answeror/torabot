@@ -20,7 +20,6 @@ class TestSync(ModelMixin):
         assert_equal(s.query(Change).filter(Change.what == what.NEW).count(), 8)
         assert_equal(s.query(Change).filter(Change.what == what.RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
-        assert_equal(len(list(s.query(Query).one().arts)), 8)
 
     def test_sync_twice(self):
         s = Session()
@@ -30,7 +29,6 @@ class TestSync(ModelMixin):
         assert_equal(s.query(Change).filter(Change.what == what.NEW).count(), 8)
         assert_equal(s.query(Change).filter(Change.what == what.RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
-        assert_equal(len(list(s.query(Query).one().arts)), 8)
 
     def test_sync_limit(self):
         s = Session()
@@ -40,4 +38,3 @@ class TestSync(ModelMixin):
         assert_equal(s.query(Change).filter(Change.what == what.NEW).count(), 4)
         assert_equal(s.query(Change).filter(Change.what == what.RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
-        assert_equal(len(list(s.query(Query).one().arts)), 4)

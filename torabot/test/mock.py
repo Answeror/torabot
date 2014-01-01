@@ -1,17 +1,35 @@
-from httmock import all_requests
 from . import freeze
 from logbook import Logger
 import requests
 from nose.tools import assert_in
+from time import sleep
+from ..spider import check_busy
+from bs4 import BeautifulSoup as BS
 
 
 log = Logger(__name__)
 
 
+def busy(data):
+    soup = BS(data, 'html5lib')
+    return check_busy(soup)
+
+
 def real(req):
     mockrequests.disable = True
     try:
-        return requests.Session().send(req)
+        time = 1
+        while True:
+            try:
+                r = requests.Session().send(req)
+                if r.ok and not busy(r.content):
+                    return r
+                else:
+                    raise Exception('request failed')
+            except:
+                log.info('request to {} failed, sleep {} seconds', req.url, time)
+            sleep(time)
+            time += time
     finally:
         mockrequests.disable = False
 

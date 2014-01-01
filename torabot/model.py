@@ -45,7 +45,7 @@ class Art(Base):
     state = Column(Integer, index=True)
     ptime = Column(DateTime)
     atime = Column(DateTime, default=utcnow)
-    timestamp = Column(String(32))
+    hash = Column(String(32))
 
     @declared_attr
     def __table_args__(cls):
@@ -83,12 +83,13 @@ class Query(Base):
     id = Column(Integer, primary_key=True)
     text = Column(String, unique=True, index=True)
     ctime = Column(DateTime, default=utcnow, index=True)
+    version = Column(Integer, default=0)
 
-    result = relationship('Result', order_by='Result.rank')
+    #result = relationship('Result', order_by='Result.rank')
 
-    @property
-    def arts(self):
-        return [qa.art for qa in self.result]
+    #@property
+    #def arts(self):
+        #return [qa.art for qa in self.result]
 
 
 class Result(Base):
@@ -98,6 +99,8 @@ class Result(Base):
     query_id = Column(Integer, ForeignKey(Query.id), primary_key=True, index=True)
     art_id = Column(Integer, ForeignKey(Art.id), primary_key=True)
     rank = Column(Integer, index=True)
+    hash = Column(String(32))
+    version = Column(Integer, index=True, default=0)
 
     query = relationship(Query)
     art = relationship(Art)

@@ -93,18 +93,18 @@ def fill_detail(arts, session):
 def parse_detail(soup):
     return {
         'ptime': parse_ptime(soup),
-        'timestamp': maketimestamp(soup),
+        'hash': makehash(soup),
     }
 
 
 def safe(fetch, parse, session=Session()):
-    soup = BS(fetch(session=session))
+    soup = BS(fetch(session=session), 'html5lib')
     if check_busy(soup):
         return busy
     return parse(soup)
 
 
-def maketimestamp(soup):
+def makehash(soup):
     tags = soup.select('table[summary="Details"]')
     assert tags
     return md5(tags[0].get_text().encode('utf-8')).hexdigest()
