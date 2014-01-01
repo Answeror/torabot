@@ -4,7 +4,7 @@ model used to sync tora and local database
 
 
 from .model import Art, Change, Query, Result
-from .spider import list_all
+from .spider import list_all, ROOM
 from sqlalchemy.sql import exists, and_, func, update, select, insert, desc
 from . import state
 from . import what
@@ -221,12 +221,28 @@ def get_arts_from_remote(query_text, begin):
     yield from map(dict_to_art, list_all(query_text, begin=begin))
 
 
+def find_sync_begin_point(query, begin, end, session):
+    if not remote_no_change_at(query, begin, session):
+        return 0
+
+    span = ROOM // 2
+    while begin + span < end:
+        mid = (begin + end) // 2
+        if remote_no_change_at(query, mid, session):
+            begin = mid + 1
+        else:
+            end = mid
+
+    return begin
+
+
 def _gensync(query, begin, end, limit, session):
     if not remote_no_change(query, 0, begin, session):
-        log.debug('left of {} changed, sync from 0', begin)
+        next_begin = find_sync_begin_point(query, 0, begin, session)
+        log.debug('left of {} changed, sync from {}', begin, next_begin)
         yield from drop(begin, _gensync(
             query=query,
-            begin=0,
+            begin=next_begin,
             end=end,
             limit=limit,
             session=session
@@ -264,7 +280,6 @@ def _gensync(query, begin, end, limit, session):
             else:
                 log.debug('{} unchange', art.toraid)
                 break
-        log.debug('got art {}', art.toraid)
         yield art
 
 
@@ -286,6 +301,21 @@ def check_range(begin, end):
 
 def art_count_in_db(session):
     return session.query(Art).count()
+
+
+def remote_no_change_at(query, i, session):
+    art_in_db = head(get_arts_from_db(
+        query_id=query.id,
+        offset=i,
+        limit=1,
+        session=session
+    ))
+    if art_in_db is None:
+        return False
+    art_in_remote = head(get_arts_from_remote(query.text, begin=i))
+    if art_in_remote is None:
+        return False
+    return same(art_in_db, art_in_remote)
 
 
 def remote_no_change(query, begin, end, session):
@@ -327,13 +357,13 @@ def remote_no_change(query, begin, end, session):
         arts_in_remote = []
     first_in_remote = head(get_arts_from_remote(query.text, begin=begin))
     if first_in_remote is None:
-        return True
+        return False
     if arts_in_remote:
         last_in_remote = arts_in_remote[-1]
     else:
         last_in_remote = head(get_arts_from_remote(query.text, begin=end - 1))
     if last_in_remote is None:
-        return True
+        return False
     return same(first_in_db, first_in_remote) and same(last_in_db, last_in_remote)
 
 

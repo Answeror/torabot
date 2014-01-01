@@ -1,14 +1,13 @@
-from .sync import sync, has_query
+from .sync import sync, has_query, check_range
 from .model import Query, Result, Art
 from sqlalchemy.sql import select, desc
 from logbook import Logger
-from nose.tools import assert_less_equal
 
 
 log = Logger(__name__)
 
 
-def from_remote(begin, end, session, **kargs):
+def from_remote(begin, end, session, return_query=False, **kargs):
     if 'query_text' in kargs:
         text = kargs['query_text']
     elif 'query' in kargs:
@@ -27,12 +26,13 @@ def from_remote(begin, end, session, **kargs):
     else:
         assert has_query(text=text, session=session)
         query = get_query(text, session)
-    return _query(
+    arts = _query(
         query.id,
         offset=begin,
         session=session,
         **({} if end is None else {'limit': end - begin})
     )
+    return arts if not return_query else (arts, query)
 
 
 def get_query(text, session):
@@ -40,21 +40,22 @@ def get_query(text, session):
 
 
 def query(text, session, begin=0, end=None, return_detail=False):
-    log.debug('query {} in ({}, {})', text, begin, end)
+    check_range(begin, end)
 
-    if end is not None:
-        assert_less_equal(begin, end)
+    log.debug('query {} in ({}, {})', text, begin, end)
     if not has_query(text=text, session=session):
-        return from_remote(
+        arts, query = from_remote(
             query_text=text,
             begin=begin,
             end=end,
+            return_query=True,
             session=session
         )
-    query = get_query(text, session)
+    else:
+        log.debug('already synced, pull from database')
+        query = get_query(text, session)
+        arts = from_db(query, begin, end, session)
 
-    log.debug('already synced, pull from database')
-    arts = from_db(query, begin, end, session)
     return arts if not return_detail else {
         'arts': arts,
         'total': query.total
