@@ -84,6 +84,7 @@ class Query(Base):
     text = Column(String, unique=True, index=True)
     ctime = Column(DateTime, default=utcnow, index=True)
     version = Column(Integer, default=0)
+    total = Column(Integer)
 
     #result = relationship('Result', order_by='Result.rank')
 

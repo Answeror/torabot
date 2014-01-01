@@ -41,17 +41,43 @@ class TestQuery(ModelMixin):
                 for art in query('大嘘', s):
                     assert_is_not_none(art.ptime)
 
-    def test_query_page(self):
+    def test_paged_query(self):
         s = Session()
         with gotopast(year=2010):
             with HTTMock(mockrequests):
                 with wrap_list_one_safe() as mf:
-                    a_20_30 = query('艦', page=2, room=10, session=s)
+                    a_20_30 = query('艦', begin=20, end=30, session=s)
                     assert_less(mf.call_count, 3)
                 with wrap_list_one_safe() as mf:
-                    a_15_30 = query('艦', page=1, room=15, session=s)
+                    a_15_30 = query('艦', begin=15, end=30, session=s)
                     assert_less(mf.call_count, 3)
+                assert_equal(len(a_20_30), 10)
+                assert_equal(len(a_15_30), 15)
                 assert_equal(
                     [art.toraid for art in a_15_30[5:10]],
                     [art.toraid for art in a_20_30[:5]]
                 )
+
+    def test_paged_query_twice(self):
+        s = Session()
+        with gotopast(year=2010):
+            with HTTMock(mockrequests):
+                a_20_30 = query('艦', begin=20, end=30, session=s)
+                a_15_30 = query('艦', begin=15, end=30, session=s)
+                s.commit()
+                a_20_30 = query('艦', begin=20, end=30, session=s)
+                a_15_30 = query('艦', begin=15, end=30, session=s)
+                assert_equal(len(a_20_30), 10)
+                assert_equal(len(a_15_30), 15)
+                assert_equal(
+                    [art.toraid for art in a_15_30[5:10]],
+                    [art.toraid for art in a_20_30[:5]]
+                )
+
+    def test_paged_query_futher(self):
+        s = Session()
+        with gotopast(year=2010):
+            with HTTMock(mockrequests):
+                a_10_20 = query('艦', begin=10, end=20, session=s)
+                a_20_30 = query('艦', begin=20, end=30, session=s)
+                assert_equal(len(a_20_30), 10)

@@ -5,10 +5,12 @@ model used to sync tora and local database
 
 from .model import Art, Change, Query, Result
 from .spider import list_all
-from sqlalchemy.sql import exists, and_, func, update, select
+from sqlalchemy.sql import exists, and_, func, update, select, insert, desc
 from . import state
 from . import what
 from logbook import Logger
+from fn.iters import take, head, drop
+from nose.tools import assert_equal, assert_less_equal
 
 
 log = Logger(__name__)
@@ -46,15 +48,12 @@ def query_result_changed(query_id, art, session):
         Result.hash == art.hash
     ))).scalar())
 
+
 def art_changed(art, session):
     return not bool(session.query(exists().where(and_(
         Art.toraid == art.toraid,
         Art.hash == art.hash
     ))).scalar())
-
-
-def add_art(art, session):
-    session.add(art)
 
 
 def has_art(art, session):
@@ -66,7 +65,9 @@ def has_art(art, session):
 
 def update_art(art, session):
     art.id = session.query(Art).filter_by(toraid=art.toraid).one().id
-    return session.merge(art)
+    art = session.merge(art)
+    session.flush()
+    return art
 
 
 def add_reserve_change(art, session):
@@ -101,6 +102,7 @@ def put_query(text, session):
     if has_query(text=text, session=session):
         query = session.query(Query).filter_by(text=text).one()
         query.version += 1
+        session.flush()
         return query
     query = Query(text=text)
     session.add(query)
@@ -109,35 +111,43 @@ def put_query(text, session):
     return query
 
 
-def update_arts(query, limit, session):
-    for turn, art in zip(
-        range(limit + 1),
-        map(dict_to_art, list_all(query.text))
-    ):
-        if turn == limit:
-            log.info('sync limit({}) reached for query {}', limit, query.text)
-            break
-
-        isreserve, isnew = checkstate(art, session)
-        if isreserve:
-            add_reserve_change(art, session)
-        if isnew:
-            add_new_change(art, session)
-            session.add(art)
-            session.flush()
-            session.expire(art, ['id'])
-        else:
-            if art_changed(art, session):
-                art = update_art(art, session)
-            if query_result_changed(query.id, art, session):
-                update_query_result(query, art, session)
-            else:
-                log.debug('{} unchange', art.toraid)
-                break
-        yield art
+def add_art(art, query, begin, session):
+    add_new_change(art, session)
+    session.add(art)
+    session.flush()
+    session.expire(art, ['id'])
+    assert art.id is not None
+    assert query.id is not None
+    session.execute(
+        insert(Result)
+        .values(
+            query_id=query.id,
+            art_id=art.id,
+            version=query.version,
+            hash=art.hash,
+            rank=next_rank_stmt(query, begin)
+        )
+    )
 
 
-def update_query_result(query, art, session):
+def next_rank_stmt(query, begin):
+    sub = (
+        select([Result.rank])
+        .where(and_(
+            Result.query_id == query.id,
+            Result.version == query.version
+        ))
+        .correlate()
+        .union(select([begin - 1]))
+        .alias()
+    )
+    return (
+        select([func.max(sub.c.rank) + 1])
+        .as_scalar()
+    )
+
+
+def update_query_result(query, art, begin, session):
     session.execute(
         update(Result)
         .where(and_(
@@ -147,35 +157,204 @@ def update_query_result(query, art, session):
         .values(
             version=query.version,
             hash=art.hash,
-            rank=(
-                select([func.max(Result.rank) + 1])
-                .where(and_(
-                    Result.query_id == query.id,
-                    Result.version == query.version
-                ))
-                .correlate()
-                .as_scalar()
-            )
+            rank=next_rank_stmt(query, begin)
         )
     )
 
 
-def refresh(session):
+def sync(query, session, begin=0, end=None, limit=1024):
+    return list(gensync(
+        query,
+        begin=begin,
+        end=end,
+        limit=limit,
+        session=session,
+    ))
+
+
+def promote_left(query, n, session):
+    if n == 0:
+        return
+
+    results = (
+        session
+        .query(Result)
+        .filter_by(query_id=query.id)
+        .order_by(desc(Result.version), Result.rank)
+        .limit(n)
+        .all()
+    )
+    for rank, result in enumerate(results):
+        result.version = query.version
+        result.rank = rank
     session.flush()
-    session.expire_all()
 
 
-def sync(query, session, limit=1024):
-    return list(gensync(query, session, limit))
-
-
-def gensync(query, session, limit=1024):
+def gensync(query, session, begin=0, end=None, limit=1024):
     log.debug('sync start: {}', query)
-
-    query = put_query(query, session)
     count = 0
-    for art in update_arts(query, limit, session):
-        yield art
+    for art in _gensync(put_query(query, session), begin, end, limit, session):
         count += 1
-
+        yield art
     log.debug('sync done, update {} arts', count)
+
+
+def optional_limit(stmt, begin, end):
+    return stmt if end is None else stmt.limit(end - begin)
+
+
+def clear_hash(query, begin, end, session):
+    check_range(begin, end)
+    session.execute(
+        update(Result)
+        .where(Result.query_id.in_(optional_limit((
+            select([Result.query_id])
+            .where(Result.query_id == query.id)
+            .order_by(desc(Result.version), Result.rank)
+            .offset(begin)
+        ), begin, end)))
+        .values(hash=None)
+    )
+
+
+def get_arts_from_remote(query_text, begin):
+    yield from map(dict_to_art, list_all(query_text, begin=begin))
+
+
+def _gensync(query, begin, end, limit, session):
+    if not remote_no_change(query, 0, begin, session):
+        log.debug('left of {} changed, sync from 0', begin)
+        yield from drop(begin, _gensync(
+            query=query,
+            begin=0,
+            end=end,
+            limit=limit,
+            session=session
+        ))
+        return
+
+    if not remote_no_change(query, begin, end, session):
+        log.debug('[{}, {}) changed, clear result hash', begin, end)
+        clear_hash(query, begin, end, session)
+
+    promote_left(query, begin, session)
+
+    ret = list_all(query.text, begin=begin, return_total=True)
+    query.total = next(ret)
+
+    arts = map(dict_to_art, ret)
+    for turn, art in zip(
+        range(limit + 1),
+        arts if end is None else take(end - begin, arts)
+    ):
+        if turn == limit:
+            log.info('sync limit({}) reached for query {}', limit, query.text)
+            break
+
+        isreserve, isnew = checkstate(art, session)
+        if isreserve:
+            add_reserve_change(art, session)
+        if isnew:
+            add_art(art, query, begin, session)
+        else:
+            if art_changed(art, session):
+                art = update_art(art, session)
+            if query_result_changed(query.id, art, session):
+                update_query_result(query, art, begin, session)
+            else:
+                log.debug('{} unchange', art.toraid)
+                break
+        log.debug('got art {}', art.toraid)
+        yield art
+
+
+def min_rank(query, session):
+    ret = session.execute(
+        select([func.min(Result.rank)])
+        .where(and_(
+            Result.query_id == query.id,
+            Result.version == query.version
+        ))
+    ).scalar()
+    return 0 if ret is None else ret
+
+
+def check_range(begin, end):
+    if end is not None:
+        assert_less_equal(begin, end)
+
+
+def art_count_in_db(session):
+    return session.query(Art).count()
+
+
+def remote_no_change(query, begin, end, session):
+    check_range(begin, end)
+    if begin == end:
+        return True
+    first_in_db = head(get_arts_from_db(
+        query_id=query.id,
+        offset=begin,
+        limit=1,
+        session=session
+    ))
+    if first_in_db is None:
+        return False
+    if end is None:
+        end = art_count_in_db(session)
+    last_in_db = head(get_arts_from_db(
+        query_id=query.id,
+        offset=end - 1,
+        limit=1,
+        session=session
+    ))
+    if last_in_db is None:
+        if query.total >= end:
+            return False
+        arts_in_remote = list(take(
+            end - begin,
+            get_arts_from_remote(query.text, begin=begin)
+        ))
+        if begin + len(arts_in_remote) == end:
+            return False
+        last_in_db = head(get_arts_from_db(
+            query_id=query.id,
+            offset=begin + len(arts_in_remote) - 1,
+            limit=1,
+            session=session
+        ))
+    else:
+        arts_in_remote = []
+    first_in_remote = head(get_arts_from_remote(query.text, begin=begin))
+    if first_in_remote is None:
+        return True
+    if arts_in_remote:
+        last_in_remote = arts_in_remote[-1]
+    else:
+        last_in_remote = head(get_arts_from_remote(query.text, begin=end - 1))
+    if last_in_remote is None:
+        return True
+    return same(first_in_db, first_in_remote) and same(last_in_db, last_in_remote)
+
+
+def same(lhs, rhs):
+    return lhs.toraid == rhs.toraid and lhs.hash == rhs.hash
+
+
+def get_arts_from_db(query_id, session, **kargs):
+    idq = (
+        select([Result.art_id.label('id'), Result.version, Result.rank])
+        .where(Result.query_id == query_id)
+        .order_by(desc(Result.version), Result.rank)
+    )
+    if 'offset' in kargs:
+        idq = idq.offset(kargs['offset'])
+    if 'limit' in kargs:
+        idq = idq.limit(kargs['limit'])
+    idq = idq.alias()
+    return list(
+        session.query(Art)
+        .join(idq, Art.id == idq.c.id)
+        .order_by(desc(idq.c.version), idq.c.rank)
+        .all()
+    )

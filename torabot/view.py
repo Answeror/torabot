@@ -51,12 +51,17 @@ def make(app):
         log.debug('query: {} -> {}', oq, tq)
         session = Session()
         try:
-            arts = query(
+            room = app.config.get('TORABOT_PAGE_ROOM', 20)
+            ret = query(
                 tq,
-                page=page,
-                room=app.config.get('TORABOT_PAGE_ROOM', 20),
+                begin=room * page,
+                end=room * (page + 1),
+                return_detail=True,
                 session=session
             )
+            arts = ret['arts']
+            total = ret['total']
+            log.debug('query got {} arts', len(arts))
             session.commit()
             options = {}
             if 'userid' in flask.session:
@@ -64,11 +69,15 @@ def make(app):
                     user_id=int(flask.session['userid']),
                     query_text=tq,
                     session=session,
+                    total=total,
                 )
             ret = render_template(
                 'list.html',
                 arts=arts,
                 query=tq,
+                page=page,
+                total=total,
+                room=room,
                 **options
             )
             session.commit()
@@ -127,3 +136,11 @@ def make(app):
                 ok=False,
                 message='unsubscribe failed'
             )
+
+    @app.context_processor
+    def inject_locals():
+        return dict(
+            min=min,
+            max=max,
+            len=len,
+        )

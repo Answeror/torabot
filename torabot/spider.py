@@ -11,8 +11,10 @@ import pytz
 from hashlib import md5
 from functools import partial
 import concurrent.futures
+from nose.tools import assert_greater_equal
 
 
+ROOM = 20
 log = Logger(__name__)
 
 
@@ -67,7 +69,8 @@ def parse_stats(soup):
 def parse_arts(soup, session):
     base = 'http://www.toranoana.jp/'
     trs = soup.select('table.FixFrame tr')
-    assert len(trs) == 0 or len(trs) > 3, "wrong list length: %d" % len(trs)
+    if len(trs) <= 3:
+        return []
     return fill_detail(list(map(lambda tr: {
         'title': tr.select('td.c1 a')[0].string,
         'author': tr.select('td.c2 a')[0].string,
@@ -137,13 +140,25 @@ def list_one_safe(query, start, session):
     ))
 
 
-def list_all(query, session=Session()):
-    d = list_one_safe(query, 0, session)
+def list_all(query, begin=0, return_total=False, session=Session()):
+    assert_greater_equal(begin, 0)
+    d = list_one_safe(query, begin, session)
+    total = d['total']
+    if return_total:
+        yield total
     yield from d['arts']
     while d['end'] < d['total']:
         log.debug('fetch start from {}', d['end'])
         d = list_one_safe(query, d['end'], session)
+        if d['total'] != total:
+            raise Exception(
+                'total arts changed: {} -> {}'.format(d['total'], total)
+            )
         yield from d['arts']
+
+
+def total(query, session=Session()):
+    return list_one_safe(query, 0, session)['total']
 
 
 def parse_ptime_tokyo(soup):
