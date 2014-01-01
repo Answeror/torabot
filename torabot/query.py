@@ -1,4 +1,4 @@
-from .sync import sync, has_query
+from .sync import gensync, has_query
 from .model import Query, Result, Art
 from sqlalchemy.sql import select, desc
 from logbook import Logger
@@ -15,7 +15,7 @@ def query(text, session, **kargs):
     room = kargs.get('room')
 
     if not has_query(text=text, session=session):
-        gen = lambda: sync(text, session=session)
+        gen = lambda: gensync(text, session=session)
         if page is None or room is None:
             arts = list(gen())
         else:
