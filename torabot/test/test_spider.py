@@ -4,7 +4,7 @@ from ..spider import list_all, ptime
 from .mock import mockrequests
 from datetime import datetime
 from ..time import tokyo_to_utc
-from mock import patch
+from unittest.mock import patch
 
 
 def test_list_all():
