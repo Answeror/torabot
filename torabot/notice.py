@@ -125,3 +125,5 @@ def listen(channel, action, **kargs):
         **({'timeout': kargs['timeout']} if 'timeout' in kargs else {})
     ) is not None:
         action()
+        return True
+    return False

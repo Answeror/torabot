@@ -7,7 +7,7 @@
         <input type=hidden name=user_id value='{{ session["userid"] }}'>
         <input type=hidden name=query_text value='{{ query }}'>
     </div>
-    <button type="submit" class="btn btn-danger">unsubscribe</button>
+    <button type="submit" class="btn btn-danger">取消订阅</button>
 </form>
 {% else %}
 <form action='{{ url_for("subscribe") }}' method=post class="navbar-left" role="form">
@@ -15,7 +15,7 @@
         <input type=hidden name=user_id value='{{ session["userid"] }}'>
         <input type=hidden name=query_text value='{{ query }}'>
     </div>
-    <button type="submit" class="btn btn-primary">subsribe</button>
+    <button type="submit" class="btn btn-primary">订阅</button>
 </form>
 {% endif %}
 {% endif %}

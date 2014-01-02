@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+<ul class="nav nav-tabs">
+    <li><a href='{{ url_for("pending_notices") }}'>最新</a></li>
+    <li><a href='{{ url_for("all_notices") }}'>全部</a></li>
+    <li class=active><a href='{{ url_for("notice_conf") }}'>设置</a></li>
+</ul>
+{% endblock %}

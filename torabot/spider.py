@@ -119,16 +119,27 @@ def check_busy(soup):
 
 def longrun(f):
     seconds = 1
+
+    def check_too_long():
+        if seconds >= 60:
+            raise Exception('too long busy wait')
+
     while True:
-        d = f()
-        if d == busy:
-            if seconds >= 60:
-                raise Exception('too long busy wait')
-            log.debug('tora busy, sleep {} seconds', seconds)
+        try:
+            d = f()
+            if d == busy:
+                check_too_long()
+                log.debug('longrun busy, sleep {} seconds', seconds)
+                sleep(seconds)
+                seconds += seconds
+            else:
+                return d
+        except:
+            log.exception('longrun exception')
+            check_too_long()
+            log.debug('longrun exception, sleep {} seconds', seconds)
             sleep(seconds)
             seconds += seconds
-        else:
-            return d
 
 
 def list_one_safe(query, start, session):

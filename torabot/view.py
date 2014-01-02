@@ -44,18 +44,43 @@ def make(app):
                 )
             )
 
-    @app.route('/notices', methods=['GET'])
+    @app.route('/notice/all', methods=['GET'])
     @auth.require_session
-    def notices(user_id):
+    def all_notices(user_id):
         with makesession() as session:
             return render_template(
                 'notices.html',
+                tab='all',
                 notices=(
                     session.query(Notice)
                     .filter_by(user_id=user_id)
+                    .order_by(Notice.ctime.desc())
                     .all()
                 )
             )
+
+    @app.route('/notice/pending', methods=['GET'])
+    @auth.require_session
+    def pending_notices(user_id):
+        with makesession() as session:
+            return render_template(
+                'notices.html',
+                tab='pending',
+                notices=(
+                    session.query(Notice)
+                    .filter_by(
+                        user_id=user_id,
+                        state=Notice.PENDING
+                    )
+                    .order_by(Notice.ctime.desc())
+                    .all()
+                )
+            )
+
+    @app.route('/notice/conf', methods=['GET'])
+    @auth.require_session
+    def notice_conf(user_id):
+        return render_template('noticeconf.html')
 
     @app.route('/search', methods=['GET'], defaults={'page': 0})
     @app.route('/search/<int:page>', methods=['GET'])

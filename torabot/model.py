@@ -68,6 +68,9 @@ class Change(Base):
 
     __tablename__ = 'change'
 
+    NEW = 1
+    RESERVE = 2
+
     id = Column(Integer, primary_key=True)
     art_id = Column(Integer, ForeignKey(Art.id), index=True)
     what = Column(Integer)
@@ -77,7 +80,8 @@ class Change(Base):
 
     @property
     def text(self):
-        return '{} changed, what: {}'.format(self.art.toraid, self.what)
+        from . import render
+        return render.make_change_text(self)
 
 
 class Query(Base):
@@ -156,3 +160,13 @@ class Notice(Base):
             'mtime',
             'state',
         ),)
+
+    @property
+    def state_string(self):
+        from . import render
+        return render.make_notice_state_string(self)
+
+    @property
+    def text_web(self):
+        from . import render
+        return render.make_notice_text_web(self)

@@ -3,8 +3,8 @@
 <table class='table table-condensed table-striped'>
     <thead>
         <tr>
-            <td class=col-sm-2>create time</td>
-            <td class=col-sm-9>query</td>
+            <td class=col-sm-2>订阅时间</td>
+            <td class=col-sm-9>查询内容</td>
             <td class=col-sm-1></td>
         </tr>
     </thead>
@@ -17,7 +17,7 @@
             <form action='{{ url_for("unsubscribe") }}' method=post>
                 <input type=hidden name=user_id value='{{ sub.user_id }}'>
                 <input type=hidden name=query_id value='{{ sub.query_id }}'>
-                <button type=submit class='btn btn-xs btn-default'>unsubscribe</button>
+                <button type=submit class='btn btn-xs btn-default'>取消订阅</button>
             </form>
         </td>
     </tr>
