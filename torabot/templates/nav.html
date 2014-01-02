@@ -15,6 +15,7 @@
                     <ul class="nav navbar-nav">
                         {% if 'userid' in session %}
                         <li><a href='{{ url_for("subscriptions") }}'>subscriptions</a></li>
+                        <li><a href='{{ url_for("notices") }}'>notice</a></li>
                         {% endif %}
                         <!--<li class="active"><a href='/'>home</a></li>-->
                         <!--<li><a href="#about">about</a></li>-->

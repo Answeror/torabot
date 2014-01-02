@@ -2,8 +2,8 @@ from .mixin import ModelMixin
 from ..model import Session, User, Query
 from .mock import mockrequests
 from httmock import HTTMock
-from ..sync import sync
-from ..notice import pop_change
+from ..sync import sync, gensync
+from ..notice import pop_change, pop_changes
 from .. import what
 from ..sub import sub
 from nose.tools import assert_equal, assert_is_none
@@ -13,7 +13,7 @@ class TestNotice(ModelMixin):
 
     def sync(self, session):
         with HTTMock(mockrequests):
-            sync('大嘘', session)
+            sync('大嘘', session=session)
         session.commit()
 
     def test_pop_change(self):
@@ -39,8 +39,9 @@ class TestNotice(ModelMixin):
         s.add(self.user)
         s.flush()
         s.expire(self.user, ['id'])
-        s.add(Query(text='大嘘'))
-        s.commit()
+        if s.query(Query).filter_by(text='大嘘').first() is None:
+            s.add(Query(text='大嘘'))
+            s.commit()
         sub(user_id=self.user.id, query_text='大嘘', session=s)
         s.commit()
 
@@ -48,6 +49,21 @@ class TestNotice(ModelMixin):
         s = Session()
         self.prepare(s)
         self.sync(s)
-        for i in range(10):
-            pop_change(s)
+        pop_changes(s)
         assert_equal(len(self.user.notices), 10)
+
+    def test_notice_less(self):
+        s = Session()
+        with HTTMock(mockrequests):
+            list(gensync('大嘘', begin=0, end=4, session=s))
+        s.commit()
+        self.prepare(s)
+        pop_changes(s)
+        s.commit()
+        assert_equal(len(self.user.notices), 0)
+        with HTTMock(mockrequests):
+            list(gensync('大嘘', begin=4, session=s))
+        s.commit()
+        pop_changes(s)
+        s.commit()
+        assert_equal(len(self.user.notices), 4)

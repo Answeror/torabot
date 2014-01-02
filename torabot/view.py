@@ -4,11 +4,12 @@ from flask import (
     render_template,
 )
 from .query import query
-from .model import Session, makesession, Subscription
+from .model import Session, makesession, Subscription, Notice
 from .kanji import translate
 from logbook import Logger
 from .sub import sub, unsub, has_sub
 from . import auth
+from .notice import pop_change
 
 
 log = Logger(__name__)
@@ -38,6 +39,19 @@ def make(app):
                 'subs.html',
                 subs=(
                     session.query(Subscription)
+                    .filter_by(user_id=user_id)
+                    .all()
+                )
+            )
+
+    @app.route('/notices', methods=['GET'])
+    @auth.require_session
+    def notices(user_id):
+        with makesession() as session:
+            return render_template(
+                'notices.html',
+                notices=(
+                    session.query(Notice)
                     .filter_by(user_id=user_id)
                     .all()
                 )
@@ -136,6 +150,14 @@ def make(app):
                 ok=False,
                 message='unsubscribe failed'
             )
+
+    @app.route('/pop')
+    def pop():
+        with makesession(commit=True) as session:
+            while True:
+                if pop_change(session=session) is None:
+                    break
+        return ''
 
     @app.context_processor
     def inject_locals():

@@ -20,6 +20,12 @@ def pop_change(session):
     return change
 
 
+def pop_changes(session):
+    while True:
+        if pop_change(session) is None:
+            break
+
+
 def notify(change, session):
     related_query_id_q = (
         select([Result.query_id.label('id')])
@@ -33,6 +39,7 @@ def notify(change, session):
             related_query_id_q,
             Subscription.query_id == related_query_id_q.c.id
         ))
+        .where(Subscription.ctime <= change.ctime)
         .group_by(Subscription.user_id)
         .alias()
     )
