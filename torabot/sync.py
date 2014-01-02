@@ -6,11 +6,13 @@ model used to sync tora and local database
 from .model import Art, Change, Query, Result
 from .spider import list_all, ROOM
 from sqlalchemy.sql import exists, and_, func, update, select, insert, desc
+from sqlalchemy import event
 from . import state
 from . import what
 from logbook import Logger
 from fn.iters import take, head, drop
 from nose.tools import assert_equal, assert_less_equal
+from .redis import redis
 
 
 log = Logger(__name__)
@@ -70,12 +72,18 @@ def update_art(art, session):
     return art
 
 
+def broadcast_change(*args, **kargs):
+    redis.rpush('change', None)
+
+
 def add_reserve_change(art, session):
     session.add(Change(art=art, what=what.RESERVE))
+    event.listen(session, 'after_commit', broadcast_change)
 
 
 def add_new_change(art, session):
     session.add(Change(art=art, what=what.NEW))
+    event.listen(session, 'after_commit', broadcast_change)
 
 
 def checkstate(art, session):

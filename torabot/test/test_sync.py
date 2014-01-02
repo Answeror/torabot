@@ -1,10 +1,11 @@
 from .mixin import ModelMixin
 from ..model import Session, Art, Change, Query
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_is_not_none
 from .mock import mockrequests
 from httmock import HTTMock
 from ..sync import sync, min_rank
 from ..what import NEW, RESERVE
+from ..redis import redis
 
 
 class TestSync(ModelMixin):
@@ -12,6 +13,12 @@ class TestSync(ModelMixin):
     def sync(self, session):
         with HTTMock(mockrequests):
             sync('大嘘', session)
+
+    def test_sync_broadcast(self):
+        s = Session()
+        self.sync(s)
+        s.commit()
+        assert_is_not_none(redis.lpop('change'))
 
     def test_sync(self):
         s = Session()
