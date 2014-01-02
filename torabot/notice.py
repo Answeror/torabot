@@ -1,8 +1,46 @@
-from sqlalchemy.sql import func, select, insert, join, bindparam
+from sqlalchemy.sql import func, select, insert, join, bindparam, and_
 from .model import Change, Notice, Result, Subscription
 from .time import utcnow
 from sqlalchemy import event
 from .redis import redis
+from logbook import Logger
+
+
+log = Logger(__name__)
+
+
+def pop_notices(eat, session):
+    mtime = utcnow()
+    while True:
+        if pop_notice(eat, mtime=mtime, session=session) is None:
+            break
+
+
+def pop_notice(eat, session, mtime=utcnow()):
+    notice = (
+        session.query(Notice)
+        .filter(and_(
+            Notice.state == Notice.PENDING,
+            Notice.mtime < mtime
+        ))
+        .order_by(Notice.ctime.desc())
+        .first()
+    )
+    if notice:
+        session.begin_nested()
+        try:
+            if eat(notice, session):
+                notice.state = Notice.EATEN
+                session.commit()
+            else:
+                raise Exception('failed')
+        except:
+            log.exception('eat notice failed')
+            session.rollback()
+            pass
+        finally:
+            notice.mtime = mtime
+    return notice
 
 
 def pop_change(session):
@@ -51,17 +89,28 @@ def notify(change, session):
         # http://docs.sqlalchemy.org/en/latest/core/dml.html#sqlalchemy.sql.expression.Insert.from_select
         insert(Notice, inline=True)
         .from_select(
-            [Notice.text, Notice.user_id, Notice.ctime],
+            [
+                Notice.text,
+                Notice.user_id,
+                Notice.ctime,
+                Notice.mtime,
+                Notice.state
+            ],
             select([
                 bindparam('b_text'),
                 related_user_id_q.c.id,
-                bindparam('b_ctime')
+                bindparam('b_ctime'),
+                bindparam('b_mtime'),
+                bindparam('b_state'),
             ])
         )
     )
+    now = utcnow()
     session.execute(insert_q, {
         'b_text': change.text,
-        'b_ctime': utcnow()
+        'b_ctime': now,
+        'b_mtime': now,
+        'b_state': Notice.PENDING,
     })
     event.listen(session, 'after_commit', after_notice_commit)
 

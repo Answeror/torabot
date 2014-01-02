@@ -136,9 +136,23 @@ class Notice(Base):
 
     __tablename__ = 'notice'
 
+    PENDING = 0
+    EATEN = 1
+
     id = Column(Integer, primary_key=True)
     text = Column(String)
     user_id = Column(Integer, ForeignKey(User.id), index=True)
-    ctime = Column(DateTime, default=utcnow, index=True)
+    ctime = Column(DateTime, default=utcnow)
+    mtime = Column(DateTime, default=utcnow)
+    state = Column(Integer, default=PENDING)
 
     user = relationship(User, backref='notices')
+
+    @declared_attr
+    def __table_args__(cls):
+        return (Index(
+            '%s_idx_ctime_mtime_state' % cls.__tablename__,
+            'ctime',
+            'mtime',
+            'state',
+        ),)
