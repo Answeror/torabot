@@ -3,7 +3,7 @@ from ..model import Session, User, Query
 from .mock import mockrequests
 from httmock import HTTMock
 from ..sync import sync, gensync
-from ..notice import pop_change, pop_changes
+from ..notice import pop_change, pop_changes, listen
 from .. import what
 from ..sub import sub
 from nose.tools import assert_equal, assert_is_none, assert_is_not_none
@@ -84,3 +84,11 @@ class TestNotice(ModelMixin):
         pop_changes(s)
         s.commit()
         assert_equal(len(self.user.notices), 4)
+
+    def test_listen(self):
+        s = Session()
+        self.prepare(s)
+        self.sync(s)
+        s.commit()
+        listen('change', lambda: pop_changes(s))
+        assert_equal(len(self.user.notices), 10)

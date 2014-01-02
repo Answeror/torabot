@@ -68,3 +68,11 @@ def notify(change, session):
 
 def after_notice_commit(session):
     redis.rpush('notice', None)
+
+
+def listen(channel, action, **kargs):
+    if redis.blpop(
+        channel,
+        **({'timeout': kargs['timeout']} if 'timeout' in kargs else {})
+    ) is not None:
+        action()
