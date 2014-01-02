@@ -30,6 +30,10 @@ class Redis(object):
             pass
 
     @wrap
+    def lpop(self, key, *args, **kargs):
+        return self.redis.lpop(_(key), *args, **kargs)
+
+    @wrap
     def blpop(self, key, *args, **kargs):
         return self.redis.blpop(_(key), *args, **kargs)
 

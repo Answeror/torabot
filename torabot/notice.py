@@ -1,6 +1,8 @@
 from sqlalchemy.sql import func, select, insert, join, bindparam
 from .model import Change, Notice, Result, Subscription
 from .time import utcnow
+from sqlalchemy import event
+from .redis import redis
 
 
 def pop_change(session):
@@ -61,3 +63,8 @@ def notify(change, session):
         'b_text': change.text,
         'b_ctime': utcnow()
     })
+    event.listen(session, 'after_commit', after_notice_commit)
+
+
+def after_notice_commit(session):
+    redis.rpush('notice', None)

@@ -6,10 +6,19 @@ from ..sync import sync, gensync
 from ..notice import pop_change, pop_changes
 from .. import what
 from ..sub import sub
-from nose.tools import assert_equal, assert_is_none
+from nose.tools import assert_equal, assert_is_none, assert_is_not_none
+from ..redis import redis
 
 
 class TestNotice(ModelMixin):
+
+    def setup(self):
+        ModelMixin.setup(self)
+        redis.delete('notice')
+
+    def teardown(self):
+        redis.delete('notice')
+        ModelMixin.teardown(self)
 
     def sync(self, session):
         with HTTMock(mockrequests):
@@ -51,6 +60,14 @@ class TestNotice(ModelMixin):
         self.sync(s)
         pop_changes(s)
         assert_equal(len(self.user.notices), 10)
+
+    def test_notice_redis(self):
+        s = Session()
+        self.prepare(s)
+        self.sync(s)
+        pop_changes(s)
+        s.commit()
+        assert_is_not_none(redis.lpop('notice'))
 
     def test_notice_less(self):
         s = Session()
