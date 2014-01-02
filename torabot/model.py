@@ -75,6 +75,10 @@ class Change(Base):
 
     art = relationship(Art)
 
+    @property
+    def text(self):
+        return '{} changed, what: {}'.format(self.art.toraid, self.what)
+
 
 class Query(Base):
 
@@ -126,3 +130,15 @@ class Subscription(Base):
     ctime = Column(DateTime, default=utcnow)
 
     query = relationship(Query)
+
+
+class Notice(Base):
+
+    __tablename__ = 'notice'
+
+    id = Column(Integer, primary_key=True)
+    text = Column(String)
+    user_id = Column(Integer, ForeignKey(User.id), index=True)
+    ctime = Column(DateTime, default=utcnow, index=True)
+
+    user = relationship(User, backref='notices')
