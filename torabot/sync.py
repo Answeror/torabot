@@ -11,8 +11,10 @@ from . import state
 from . import what
 from logbook import Logger
 from fn.iters import take, head, drop
-from nose.tools import assert_equal, assert_less_equal
+from nose.tools import assert_less_equal
 from .redis import redis
+from .time import utcnow
+from . import memo
 
 
 log = Logger(__name__)
@@ -66,7 +68,10 @@ def has_art(art, session):
 
 
 def update_art(art, session):
-    art.id = session.query(Art).filter_by(toraid=art.toraid).one().id
+    old = session.query(Art).filter_by(toraid=art.toraid).one()
+    if art.reserve and not old.reserve:
+        add_reserve_change(old, session)
+    art.id = old.id
     art = session.merge(art)
     session.flush()
     return art
@@ -82,15 +87,8 @@ def add_reserve_change(art, session):
 
 
 def add_new_change(art, session):
-    session.add(Change(art=art, what=what.NEW))
+    session.add(Change(art=art, what=what.NEW, ctime=art.atime))
     event.listen(session, 'after_commit', broadcast_change)
-
-
-def checkstate(art, session):
-    return (
-        isreserve(art, session),
-        isnew(art, session),
-    )
 
 
 def has_query(session, **kargs):
@@ -108,10 +106,7 @@ def has_query(session, **kargs):
 
 def put_query(text, session):
     if has_query(text=text, session=session):
-        query = session.query(Query).filter_by(text=text).one()
-        query.version += 1
-        session.flush()
-        return query
+        return session.query(Query).filter_by(text=text).one()
     query = Query(text=text)
     session.add(query)
     session.flush()
@@ -119,7 +114,8 @@ def put_query(text, session):
     return query
 
 
-def add_art(art, query, begin, session):
+def add_art(art, query, begin, now, session):
+    art.atime = now()
     add_new_change(art, session)
     session.add(art)
     session.flush()
@@ -171,7 +167,7 @@ def update_query_result(query, art, begin, session):
 
 
 def sync(query, session, begin=0, end=None, limit=1024):
-    return list(gensync(
+    return list(gen(
         query,
         begin=begin,
         end=end,
@@ -198,12 +194,18 @@ def promote_left(query, n, session):
     session.flush()
 
 
-def gensync(query, session, begin=0, end=None, limit=1024):
+def gen(query, session, begin=0, end=None, limit=1024):
     log.debug('sync start: {}', query)
     count = 0
-    for art in _gensync(put_query(query, session), begin, end, limit, session):
-        count += 1
+    for art in _gen(
+        put_query(query, session),
+        begin,
+        end,
+        limit,
+        session
+    ):
         yield art
+    count += 1
     log.debug('sync done, update {} arts', count)
 
 
@@ -244,11 +246,11 @@ def find_sync_begin_point(query, begin, end, session):
     return begin
 
 
-def _gensync(query, begin, end, limit, session):
+def _gen(query, begin, end, limit, session):
     if not remote_no_change(query, 0, begin, session):
         next_begin = find_sync_begin_point(query, 0, begin, session)
         log.debug('left of {} changed, sync from {}', begin, next_begin)
-        yield from drop(begin, _gensync(
+        yield from drop(begin, _gen(
             query=query,
             begin=next_begin,
             end=end,
@@ -257,9 +259,25 @@ def _gensync(query, begin, end, limit, session):
         ))
         return
 
+    if begin > 0:
+        session.flush()
+        now = memo.value(
+            session.query(Art.atime)
+            .join(Result)
+            .filter(and_(
+                Result.version == query.version,
+                Result.rank == 0
+            ))
+            .one()
+        )
+    else:
+        now = memo.unary(utcnow)
+
     if not remote_no_change(query, begin, end, session):
         log.debug('[{}, {}) changed, clear result hash', begin, end)
         clear_hash(query, begin, end, session)
+        query.version += 1
+        session.flush()
 
     promote_left(query, begin, session)
 
@@ -275,11 +293,8 @@ def _gensync(query, begin, end, limit, session):
             log.info('sync limit({}) reached for query {}', limit, query.text)
             break
 
-        isreserve, isnew = checkstate(art, session)
-        if isreserve:
-            add_reserve_change(art, session)
-        if isnew:
-            add_art(art, query, begin, session)
+        if isnew(art, session):
+            add_art(art, query, begin, now, session)
         else:
             if art_changed(art, session):
                 art = update_art(art, session)

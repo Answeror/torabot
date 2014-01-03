@@ -37,6 +37,9 @@ class Art(Base):
 
     __tablename__ = 'art'
 
+    OTHER = 0
+    RESERVE = 1
+
     id = Column(Integer, primary_key=True)
     title = Column(String)
     author = Column(String)
@@ -132,6 +135,7 @@ class Subscription(Base):
     query_id = Column(Integer, ForeignKey(Query.id), primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey(User.id), primary_key=True, index=True)
     ctime = Column(DateTime, default=utcnow)
+    version = Column(Integer, index=True, default=0)
 
     query = relationship(Query)
 

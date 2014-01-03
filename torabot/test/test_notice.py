@@ -1,8 +1,8 @@
 from .mixin import ModelMixin
-from ..model import Session, User, Query
+from ..model import Session, User, Query, Result, Art
 from .mock import mockrequests
 from httmock import HTTMock
-from ..sync import sync, gensync
+from ..sync import sync
 from ..notice import pop_change, pop_changes, listen, pop_notices, Notice
 from .. import what
 from ..sub import sub
@@ -29,19 +29,15 @@ class TestNotice(ModelMixin):
         s = Session()
         self.sync(s)
         new_count = 0
-        reserve_count = 0
-        for i in range(10):
+        for i in range(8):
             change = pop_change(s)
             assert change is not None
             if change.what == what.NEW:
                 new_count += 1
-            elif change.what == what.RESERVE:
-                reserve_count += 1
             else:
                 assert False
         assert_is_none(pop_change(s))
         assert_equal(new_count, 8)
-        assert_equal(reserve_count, 2)
 
     def prepare(self, s):
         self.user = User(name='foo', email='bar', openid='http://foobar.com')
@@ -59,7 +55,29 @@ class TestNotice(ModelMixin):
         self.prepare(s)
         self.sync(s)
         pop_changes(s)
-        assert_equal(len(self.user.notices), 10)
+        assert_equal(len(self.user.notices), 8)
+
+    def test_notice_reserve(self):
+        s = Session()
+        self.prepare(s)
+        self.sync(s)
+        pop_changes(s)
+        s.commit()
+        assert_equal(len(self.user.notices), 8)
+        first_art = (
+            s.query(Result)
+            .join(Query)
+            .filter(Query.text == '大嘘')
+            .filter(Result.rank == 0)
+            .one()
+        ).art
+        first_art.state = Art.OTHER
+        first_art.hash = ''
+        s.commit()
+        self.sync(s)
+        pop_changes(s)
+        s.commit()
+        assert_equal(len(self.user.notices), 9)
 
     def test_notice_redis(self):
         s = Session()
@@ -69,29 +87,13 @@ class TestNotice(ModelMixin):
         s.commit()
         assert_is_not_none(redis.lpop('notice'))
 
-    def test_notice_less(self):
-        s = Session()
-        with HTTMock(mockrequests):
-            list(gensync('大嘘', begin=0, end=4, session=s))
-        s.commit()
-        self.prepare(s)
-        pop_changes(s)
-        s.commit()
-        assert_equal(len(self.user.notices), 0)
-        with HTTMock(mockrequests):
-            list(gensync('大嘘', begin=4, session=s))
-        s.commit()
-        pop_changes(s)
-        s.commit()
-        assert_equal(len(self.user.notices), 4)
-
     def test_listen(self):
         s = Session()
         self.prepare(s)
         self.sync(s)
         s.commit()
         listen('change', lambda: pop_changes(s))
-        assert_equal(len(self.user.notices), 10)
+        assert_equal(len(self.user.notices), 8)
 
     def test_pop_notices(self):
         s = Session()
@@ -111,7 +113,7 @@ class TestNotice(ModelMixin):
             s.query(Notice)
             .filter_by(state=Notice.PENDING)
             .count()
-        ), 3)
+        ), 1)
         assert_equal((
             s.query(Notice)
             .filter_by(state=Notice.EATEN)

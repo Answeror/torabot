@@ -4,7 +4,7 @@ from nose.tools import assert_equal, assert_is_not_none
 from .mock import mockrequests
 from httmock import HTTMock
 from ..sync import sync, min_rank
-from ..what import NEW, RESERVE
+from ..what import NEW
 from ..redis import redis
 
 
@@ -25,7 +25,6 @@ class TestSync(ModelMixin):
         self.sync(s)
         assert_equal(s.query(Art).count(), 8)
         assert_equal(s.query(Change).filter(Change.what == NEW).count(), 8)
-        assert_equal(s.query(Change).filter(Change.what == RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
 
     def test_sync_twice(self):
@@ -34,7 +33,6 @@ class TestSync(ModelMixin):
         self.sync(s)
         assert_equal(s.query(Art).count(), 8)
         assert_equal(s.query(Change).filter(Change.what == NEW).count(), 8)
-        assert_equal(s.query(Change).filter(Change.what == RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
 
     def test_sync_limit(self):
@@ -43,7 +41,6 @@ class TestSync(ModelMixin):
             sync('大嘘', limit=4, session=s)
         assert_equal(s.query(Art).count(), 4)
         assert_equal(s.query(Change).filter(Change.what == NEW).count(), 4)
-        assert_equal(s.query(Change).filter(Change.what == RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
 
     def test_sync_begin_always_start_from_head(self):
@@ -54,7 +51,6 @@ class TestSync(ModelMixin):
         assert_equal(min_rank(q, s), 0)
         assert_equal(s.query(Art).count(), 8)
         assert_equal(s.query(Change).filter(Change.what == NEW).count(), 8)
-        assert_equal(s.query(Change).filter(Change.what == RESERVE).count(), 2)
         assert_equal(s.query(Query).count(), 1)
 
     def test_min_rank_none(self):
