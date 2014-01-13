@@ -11,7 +11,7 @@ from . import state
 from . import what
 from logbook import Logger
 from fn.iters import take, head, drop
-from nose.tools import assert_less_equal
+from nose.tools import assert_less_equal, assert_greater
 from .redis import redis
 from .time import utcnow
 from . import memo
@@ -246,6 +246,56 @@ def find_sync_begin_point(query, begin, end, session):
     return begin
 
 
+def synced_count(query, local_begin, local_total, remote_begin, remote_total, remote_hash, session):
+    n = min(local_total - local_begin, remote_total - remote_begin)
+    return _synced_count(query, local_begin, remote_begin, n, remote_hash, session)
+
+
+def _synced_count(query, local_begin, remote_begin, n, remote_hash, session):
+    assert_greater(n, 0)
+    # TODO: performance issue
+    assert synced(query, local_begin, remote_begin, remote_hash, session)
+    if n == 1:
+        return 1
+    if synced(query, local_begin + n - 1, remote_begin + n - 1, remote_hash, session):
+        return n
+    return _synced_count_bisect(query, local_begin, remote_begin, n, remote_hash, session)
+
+
+def _synced_count_bisect(query, local_begin, remote_begin, n, remote_hash, session):
+    assert_greater(n, 1)
+    begin = 1
+    end = n
+    while begin < end:
+        mid = (begin + end) // 2
+        if synced(query, local_begin + mid, remote_begin + mid, remote_hash, session):
+            begin = mid + 1
+        else:
+            end = mid
+    return begin
+
+
+def synced(query, local, remote, remote_hash, session):
+    return same_not_none(
+        local_hash(query, local, session),
+        remote_hash(query, remote)
+    )
+
+
+def same_not_none(lhs, rhs):
+    return lhs is not None and rhs is not None and lhs == rhs
+
+
+def local_hash(query, n, session):
+    art = head(get_arts_from_db(
+        query_id=query.id,
+        offset=n,
+        limit=1,
+        session=session
+    ))
+    return None if art is None else art.hash
+
+
 def _gen(query, begin, end, limit, session):
     if not remote_no_change(query, 0, begin, session):
         next_begin = find_sync_begin_point(query, 0, begin, session)
@@ -262,37 +312,32 @@ def _gen(query, begin, end, limit, session):
     if begin > 0:
         session.flush()
         now = memo.value(
-            session.query(Art.atime)
+            session.query(func.min(Art.atime))
             .join(Result)
             .filter(and_(
                 Result.version == query.version,
-                Result.rank == 0
+                Result.rank < begin
             ))
-            .one()
+            .scalar()
         )
     else:
         now = memo.unary(utcnow)
 
-    if not remote_no_change(query, begin, end, session):
-        log.debug('[{}, {}) changed, clear result hash', begin, end)
-        clear_hash(query, begin, end, session)
-        query.version += 1
-        session.flush()
+    query.total, arts = remote_arts(query.text, begin=begin)
+    arts = map(lambda t: (t[0] + begin, t[1]), enumerate(arts))
+    arts = take(end - begin, arts)
+    turn = 0
+    while True:
+        try:
+            rank, art = next(arts)
+        except StopIteration:
+            break
 
-    promote_left(query, begin, session)
-
-    ret = list_all(query.text, begin=begin, return_total=True)
-    query.total = next(ret)
-
-    arts = map(dict_to_art, ret)
-    for turn, art in zip(
-        range(limit + 1),
-        arts if end is None else take(end - begin, arts)
-    ):
         if turn == limit:
             log.info('sync limit({}) reached for query {}', limit, query.text)
             break
 
+        ret = [art]
         if isnew(art, session):
             add_art(art, query, begin, now, session)
         else:
@@ -301,9 +346,25 @@ def _gen(query, begin, end, limit, session):
             if query_result_changed(query.id, art, session):
                 update_query_result(query, art, begin, session)
             else:
-                log.debug('{} unchange', art.toraid)
-                break
-        yield art
+                ret = synced_arts(
+                    query=query,
+                    art=art,
+                    begin=rank,
+                    session=session
+                )
+                log.debug('[{}, {}) unchange', begin, begin + len(ret))
+        yield from ret
+        turn += 1
+
+
+def synced_arts(query, art, begin, session):
+    pass
+
+
+def remote_arts(query_text, begin):
+    ret = list_all(query_text, begin=begin, return_total=True)
+    total = next(ret)
+    return total, map(dict_to_art, ret)
 
 
 def min_rank(query, session):
