@@ -4,7 +4,7 @@ model used to sync tora and local database
 
 
 from .model import Art, Change, Query, Result
-from .spider import list_all, ROOM
+from .spider import list_all, ROOM, lazy
 from sqlalchemy.sql import exists, and_, func, update, select, insert, desc
 from sqlalchemy import event
 from . import state
@@ -323,8 +323,9 @@ def _gen(query, begin, end, limit, session):
     else:
         now = memo.unary(utcnow)
 
-    query.total, arts = remote_arts(query.text, begin=begin)
-    arts = map(lambda t: (t[0] + begin, t[1]), enumerate(arts))
+    arts = lazy(query.text)
+    query.total = len(arts)
+    rest = arts[begin:]
     arts = take(end - begin, arts)
     turn = 0
     while True:
@@ -352,13 +353,10 @@ def _gen(query, begin, end, limit, session):
                     begin=rank,
                     session=session
                 )
+
                 log.debug('[{}, {}) unchange', begin, begin + len(ret))
         yield from ret
         turn += 1
-
-
-def synced_arts(query, art, begin, session):
-    pass
 
 
 def remote_arts(query_text, begin):
