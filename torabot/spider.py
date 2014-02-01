@@ -6,19 +6,20 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup as BS
 from datetime import datetime
 from time import sleep
-from .time import tokyo_to_utc, utcnow
-import pytz
+from .time import tokyo_to_utc
 from hashlib import md5
 from functools import partial
 import concurrent.futures
 from nose.tools import assert_greater_equal
+from fn.iters import take, drop, head
 
 
 ROOM = 20
 log = Logger(__name__)
 
 
-class Busy(object): pass
+class Busy(object):
+    pass
 
 
 busy = Busy()
@@ -74,7 +75,7 @@ def parse_arts(soup, session):
     return fill_detail(list(map(lambda tr: {
         'title': tr.select('td.c1 a')[0].string,
         'author': tr.select('td.c2 a')[0].string,
-        'comp': tr.select('td.c3 a')[0].string,
+        'company': tr.select('td.c3 a')[0].string,
         'uri': urljoin(base, tr.select('td.c1 a')[0]['href']),
         'reserve': '予' in tr.select('td.c7')[0].get_text(),
     }, trs[2:-1:2])), session)
@@ -151,7 +152,7 @@ def list_one_safe(query, start, session):
     ))
 
 
-def list_all(query, begin=0, return_total=False, session=Session()):
+def gen_arts(query, begin=0, return_total=False, session=Session()):
     assert_greater_equal(begin, 0)
     d = list_one_safe(query, begin, session)
     total = d['total']
@@ -188,3 +189,20 @@ def parse_ptime(soup):
 
 def ptime(uri, session=Session()):
     return longrun(partial(safe, partial(fetch, uri), parse_ptime, session))
+
+
+class Spider(object):
+
+    def __init__(self):
+        self.session = Session()
+
+    def art_n(self, query, n):
+        return head(drop(n, self.gen_arts_from_head(query, n + 1)))
+
+    def gen_arts_from_head(self, query, n):
+        yield from take(n, gen_arts(
+            query,
+            begin=0,
+            return_total=False,
+            session=self.session,
+        ))

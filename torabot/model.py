@@ -12,7 +12,6 @@ from sqlalchemy import (
     DateTime,
 )
 from .tora import order_uri_from_toraid, toraid_from_order_uri
-from . import state
 from .time import utcnow
 from contextlib import contextmanager
 
@@ -43,7 +42,7 @@ class Art(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     author = Column(String)
-    comp = Column(String)
+    company = Column(String)
     toraid = Column(String(12), unique=True, index=True)
     state = Column(Integer, index=True)
     ptime = Column(DateTime)
@@ -64,7 +63,7 @@ class Art(Base):
 
     @property
     def reserve(self):
-        return self.state == state.RESERVE
+        return self.state == Art.RESERVE
 
 
 class Change(Base):
@@ -111,8 +110,6 @@ class Result(Base):
     query_id = Column(Integer, ForeignKey(Query.id), primary_key=True, index=True)
     art_id = Column(Integer, ForeignKey(Art.id), primary_key=True)
     rank = Column(Integer, index=True)
-    hash = Column(String(32))
-    version = Column(Integer, index=True, default=0)
 
     query = relationship(Query)
     art = relationship(Art)

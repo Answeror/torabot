@@ -11,13 +11,13 @@ sys.path.insert(
 )
 
 
-from torabot.spider import list_all, ptime
+from torabot.spider import gen_arts
 from httmock import HTTMock
 import requests
 import pickle
 import json
 from functools import wraps
-from datetime import datetime
+#from datetime import datetime
 from threading import RLock
 
 
@@ -88,9 +88,9 @@ def reqmd5(req):
 
 
 def main():
-    from pprint import pprint
+    #from pprint import pprint
     with HTTMock(freeze):
-        list_all('大嘘')
+        gen_arts('大嘘')
         #ptime('http://www.toranoana.jp/mailorder/article/04/0030/16/24/040030162479.html')
         #list(fetch_and_parse_all_future('a', now=lambda: datetime(year=2013, month=12, day=31)))
 

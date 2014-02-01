@@ -1,2 +1,0 @@
-NEW = 1
-RESERVE = 2

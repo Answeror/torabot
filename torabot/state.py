@@ -1,2 +1,0 @@
-OTHER = 0
-RESERVE = 1
