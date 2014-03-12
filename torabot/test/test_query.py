@@ -1,83 +1,52 @@
-from .mixin import ModelMixin
+from nose.tools import assert_equal
 from ..model import Session
-from nose.tools import assert_equal, assert_is_not_none, assert_less
-from .mock import mockrequests
-from httmock import HTTMock
 from ..query import query
-from unittest.mock import patch, Mock
-from ..time import tokyo_to_utc
-from datetime import datetime
-from contextlib import contextmanager
-from .. import spider
-
-
-@contextmanager
-def gotopast(year):
-    with patch('torabot.time._utcnow') as now:
-        now.return_value = tokyo_to_utc(datetime(year=year, month=1, day=1))
-        yield now
-        now.assert_called_with()
-
-
-def wrap_list_one_safe():
-    return patch(
-        'torabot.spider.list_one_safe',
-        Mock(wraps=spider.list_one_safe)
-    )
+from .mixin import ModelMixin
+from .spider import UsotukiyaSpider as Spider
 
 
 class TestQuery(ModelMixin):
 
-    def test_query(self):
-        s = Session()
-        with gotopast(year=2010):
-            with HTTMock(mockrequests):
-                assert_equal(len(query('大嘘', s)), 8)
+    def setup(self):
+        ModelMixin.setup(self)
+        self.spider = Spider()
+        self.session = Session()
 
-    def test_ptime(self):
-        s = Session()
-        with gotopast(year=2010):
-            with HTTMock(mockrequests):
-                for art in query('大嘘', s):
-                    assert_is_not_none(art.ptime)
+    def teardown(self):
+        self.session.close()
+        ModelMixin.teardown(self)
+
+    def query(self, *args, **kargs):
+        kargs.update(spider=self.spider, session=self.session)
+        return query(*args, **kargs)
+
+    def test_query(self):
+        assert_equal(len(self.query('大嘘')), 8)
 
     def test_paged_query(self):
-        s = Session()
-        with gotopast(year=2010):
-            with HTTMock(mockrequests):
-                with wrap_list_one_safe() as mf:
-                    a_20_30 = query('艦', begin=20, end=30, session=s)
-                    assert_less(mf.call_count, 3)
-                with wrap_list_one_safe() as mf:
-                    a_15_30 = query('艦', begin=15, end=30, session=s)
-                    assert_less(mf.call_count, 3)
-                assert_equal(len(a_20_30), 10)
-                assert_equal(len(a_15_30), 15)
-                assert_equal(
-                    [art.toraid for art in a_15_30[5:10]],
-                    [art.toraid for art in a_20_30[:5]]
-                )
+        a_2_7 = self.query('大嘘', begin=2, end=7)
+        a_5_7 = self.query('大嘘', begin=5, end=7)
+        assert_equal(len(a_2_7), 5)
+        assert_equal(len(a_5_7), 2)
+        assert_equal(
+            [art.toraid for art in a_2_7[3:4]],
+            [art.toraid for art in a_5_7[:1]]
+        )
 
     def test_paged_query_twice(self):
-        s = Session()
-        with gotopast(year=2010):
-            with HTTMock(mockrequests):
-                a_20_30 = query('艦', begin=20, end=30, session=s)
-                a_15_30 = query('艦', begin=15, end=30, session=s)
-                s.commit()
-                a_20_30 = query('艦', begin=20, end=30, session=s)
-                a_15_30 = query('艦', begin=15, end=30, session=s)
-                assert_equal(len(a_20_30), 10)
-                assert_equal(len(a_15_30), 15)
-                assert_equal(
-                    [art.toraid for art in a_15_30[5:10]],
-                    [art.toraid for art in a_20_30[:5]]
-                )
+        a_2_7 = self.query('大嘘', begin=2, end=7)
+        a_5_7 = self.query('大嘘', begin=5, end=7)
+        self.session.commit()
+        a_2_7 = self.query('大嘘', begin=2, end=7)
+        a_5_7 = self.query('大嘘', begin=5, end=7)
+        assert_equal(len(a_2_7), 5)
+        assert_equal(len(a_5_7), 2)
+        assert_equal(
+            [art.toraid for art in a_2_7[3:4]],
+            [art.toraid for art in a_5_7[:1]]
+        )
 
     def test_paged_query_futher(self):
-        s = Session()
-        with gotopast(year=2010):
-            with HTTMock(mockrequests):
-                a_10_20 = query('艦', begin=10, end=20, session=s)
-                a_20_30 = query('艦', begin=20, end=30, session=s)
-                assert_equal(len(a_20_30), 10)
+        self.query('大嘘', begin=2, end=5)
+        a_5_7 = self.query('大嘘', begin=5, end=7)
+        assert_equal(len(a_5_7), 2)

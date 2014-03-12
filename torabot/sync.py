@@ -147,15 +147,17 @@ def art_n_from_db(query_id, n, session):
     ))
 
 
-def arts_from_db(query_id, offset, limit, session):
+def arts_from_db(query_id, session, offset=None, limit=None):
     idq = (
         select([Result.art_id.label('id'), Result.rank])
         .where(Result.query_id == query_id)
         .order_by(Result.rank)
-        .offset(offset)
-        .limit(limit)
-        .alias()
     )
+    if offset is not None:
+        idq = idq.offset(offset)
+    if limit is not None:
+        idq = idq.limit(limit)
+    idq = idq.alias()
     return (
         session.query(Art)
         .join(idq, Art.id == idq.c.id)
@@ -186,10 +188,9 @@ def art_from_db_bi_toraid(toraid, session):
 
 def pull_from_head(query, n, spider, session):
     clear_query_result(query, session)
-    for rank, art in enumerate(map(
-        dict_to_art,
-        spider.gen_arts_from_head(query.text, n)
-    )):
+    ds = spider.gen_arts_from_head(query.text, n, return_total=True)
+    query.total = next(ds)
+    for rank, art in enumerate(map(dict_to_art, ds)):
         if art_new(art, session):
             add_art(art, query, rank, session)
             session.flush()

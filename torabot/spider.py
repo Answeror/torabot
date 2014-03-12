@@ -6,12 +6,13 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup as BS
 from datetime import datetime
 from time import sleep
-from .time import tokyo_to_utc
 from hashlib import md5
 from functools import partial
 import concurrent.futures
 from nose.tools import assert_greater_equal
 from fn.iters import take, drop, head
+from .time import tokyo_to_utc
+from .memo import memo, gemo
 
 
 ROOM = 20
@@ -199,10 +200,28 @@ class Spider(object):
     def art_n(self, query, n):
         return head(drop(n, self.gen_arts_from_head(query, n + 1)))
 
-    def gen_arts_from_head(self, query, n):
+    def gen_arts_from_head(self, query, n, return_total=False):
         yield from take(n, gen_arts(
             query,
             begin=0,
-            return_total=False,
+            return_total=return_total,
             session=self.session,
         ))
+
+
+class FrozenSpider(object):
+
+    def __init__(self, base=Spider()):
+        self.base = base
+        self._art_n = memo(base.art_n)
+        self._gen_arts_from_head = gemo(base.gen_arts_from_head)
+
+    def art_n(self, query, n):
+        return self._art_n(query, n)
+
+    def gen_arts_from_head(self, query, n, return_total=None):
+        yield from self._gen_arts_from_head(
+            query,
+            n,
+            **({} if return_total is None else {'return_total': return_total})
+        )
