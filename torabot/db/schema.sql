@@ -4,10 +4,10 @@ create type art_status as enum ('other', 'reserve');
 -- table
 create table art (
     id serial primary key,
-    title text,
+    title text not null,
     author text,
     company text,
-    uri text,
+    uri text unique not null,
     status art_status,
     hash char(32),
     ptime timestamp
