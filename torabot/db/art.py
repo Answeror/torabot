@@ -17,16 +17,16 @@ def add_art(
     return ret[0]
 
 
-def put_art(conn, id, **kargs):
-    keys = [key for key in kargs]
-    params = dict(**kargs)
-    params['id'] = id
+def put_art(conn, params, **conditions):
+    keys = [key for key in params]
+    d = dict(**conditions)
+    d.update(params)
     conn.execute(''.join([
         'update art set %s ' % ', '.join('%s = %%(%s)s' % (key, key) for key in keys),
         'where id = %(id)s'
-    ]), params)
+    ]), d)
     conn.execute(''.join([
         'insert into art (%s) ' % ', '.join(keys),
         'select %s ' % ', '.join('%%(%s)s' % key for key in keys),
         'where not exists (select 1 from art where id = %(id)s)'
-    ]), params)
+    ]), d)

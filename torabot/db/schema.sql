@@ -9,7 +9,8 @@ create table art (
     company text,
     uri text,
     status art_status,
-    hash char(32)
+    hash char(32),
+    ptime timestamp
 );
 
 create table query (

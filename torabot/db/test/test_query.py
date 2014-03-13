@@ -73,7 +73,7 @@ def test_broadcast_update():
         query_id = fake_add_queries(g.connection)[0]
         watch(g.connection, user_id=user_id, query_id=query_id)
         art_id = fake_add_arts(g.connection)[0]
-        put_art(g.connection, id=art_id, status='reserve')
+        put_art(g.connection, id=art_id, params=dict(status='reserve'))
         set_results(g.connection, query_id=query_id, art_ids=[art_id])
         assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 2)
         trans.rollback()
