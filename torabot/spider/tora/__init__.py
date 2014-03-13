@@ -11,8 +11,9 @@ from functools import partial
 import concurrent.futures
 from nose.tools import assert_greater_equal
 from fn.iters import take, drop, head
-from ..ut.time import tokyo_to_utc
-from ..ut.memo import memo, gemo
+from ...ut.time import tokyo_to_utc
+from ...ut.memo import memo, gemo
+from ...ut.bunch import Bunch
 
 
 ROOM = 20
@@ -48,16 +49,16 @@ def fetch(uri, headers={}, session=Session()):
 
 
 def parse_list(soup, session):
-    total, begin, end = parse_stats(soup)
-    return {
-        'total': total,
-        'begin': begin,
-        'end': end,
-        'arts': parse_arts(soup, session)
-    }
+    total, begin, end = parse_status(soup)
+    return Bunch(
+        total=total,
+        begin=begin,
+        end=end,
+        arts=parse_arts(soup, session)
+    )
 
 
-def parse_stats(soup):
+def parse_status(soup):
     m = re.search(r'（ (\d+) 件 のうち (\d+) 〜 (\d+) 件表示）', soup.get_text())
     if not m:
         total, begin, end = 0, 0, 0
@@ -73,13 +74,13 @@ def parse_arts(soup, session):
     trs = soup.select('table.FixFrame tr')
     if len(trs) <= 3:
         return []
-    return fill_detail(list(map(lambda tr: {
-        'title': tr.select('td.c1 a')[0].string,
-        'author': tr.select('td.c2 a')[0].string,
-        'company': tr.select('td.c3 a')[0].string,
-        'uri': urljoin(base, tr.select('td.c1 a')[0]['href']),
-        'reserve': '予' in tr.select('td.c7')[0].get_text(),
-    }, trs[2:-1:2])), session)
+    return fill_detail(list(map(lambda tr: Bunch(
+        title=tr.select('td.c1 a')[0].string,
+        author=tr.select('td.c2 a')[0].string,
+        company=tr.select('td.c3 a')[0].string,
+        uri=urljoin(base, tr.select('td.c1 a')[0]['href']),
+        status='reserve' if '予' in tr.select('td.c7')[0].get_text() else 'other'
+    ), trs[2:-1:2])), session)
 
 
 def fill_detail(arts, session):
@@ -96,10 +97,10 @@ def fill_detail(arts, session):
 
 
 def parse_detail(soup):
-    return {
-        'ptime': parse_ptime(soup),
-        'hash': makehash(soup),
-    }
+    return Bunch(
+        ptime=parse_ptime(soup),
+        hash=makehash(soup),
+    )
 
 
 def safe(fetch, parse, session=Session()):
