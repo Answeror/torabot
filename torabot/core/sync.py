@@ -81,4 +81,4 @@ def pull_from_head(query, n, spider, conn):
 
 
 def same_art(lhs, rhs):
-    return lhs.toraid == rhs.toraid and lhs.hash == rhs.hash
+    return lhs.uri == rhs.uri and lhs.hash == rhs.hash

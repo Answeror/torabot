@@ -89,3 +89,10 @@ def set_total(conn, id, total):
 
 def query_count(conn):
     return conn.execute('select count(*) from query').fetchone()[0]
+
+
+def has_query_bi_text(conn, text):
+    return conn.execute(
+        'select 1 from query where text = %s',
+        (text,)
+    ).fetchone() is not None
