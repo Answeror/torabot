@@ -27,17 +27,17 @@ def fake_add_users(conn):
 def fake_add_arts(conn):
     return [add_art(
         conn,
-        title=toraid,
-        author=toraid,
-        company=toraid,
-        toraid=toraid,
+        title=name,
+        author=name,
+        company=name,
+        uri='http://tora.aip.io/%s' % name,
         status='other',
-        hash=md5(toraid.encode('ascii')).hexdigest(),
-    ) for toraid in ['0' * 12, '1' * 12]]
+        hash=md5(name.encode('ascii')).hexdigest(),
+    ) for name in ['0' * 12, '1' * 12]]
 
 
 def fake_add_queries(conn):
-    return [add_query(conn, text=toraid) for toraid in [
+    return [add_query(conn, text=name) for name in [
         '0' * 12,
         '1' * 12
     ]]

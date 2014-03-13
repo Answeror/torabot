@@ -15,7 +15,7 @@ def fake_add_art(conn):
         title='foo',
         author='bar',
         company='foobar',
-        toraid='012345678901',
+        uri='http://tora.aip.io/foo',
         status='other',
         hash=md5(b'foo').hexdigest(),
     )

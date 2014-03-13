@@ -7,7 +7,7 @@ create table art (
     title text,
     author text,
     company text,
-    toraid char(12) unique,
+    uri text,
     status art_status,
     hash char(32)
 );
