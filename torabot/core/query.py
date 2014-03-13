@@ -49,8 +49,10 @@ def check_range(begin, end):
         assert_less_equal(begin, end)
 
 
-def query(text, spider, conn, begin=0, end=None, return_detail=False):
+def query(text, spider, session, begin=0, end=None, return_detail=False):
     check_range(begin, end)
+
+    conn = session.connection()
 
     log.debug('query {} in ({}, {})', text, begin, end)
     if not has_query_bi_text(conn, text):
@@ -62,15 +64,13 @@ def query(text, spider, conn, begin=0, end=None, return_detail=False):
             spider=spider,
             conn=conn
         )
+        query.arts = arts
     else:
         log.debug('{} already synced, pull from database')
         query = get_query_bi_text(conn, text)
-        arts = from_db_and_remote(query, begin, end, spider, conn)
+        query.arts = from_db_and_remote(query, begin, end, spider, conn)
 
-    return arts if not return_detail else {
-        'arts': arts,
-        'total': query.total
-    }
+    return query.arts if not return_detail else query
 
 
 def not_enough(begin, end, arts):

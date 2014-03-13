@@ -6,9 +6,13 @@ def add_user(
     email,
     openid,
 ):
-    ret = conn.execute((
+    return conn.execute((
         'insert into "user" (name, email, openid)'
         'values (%s, %s, %s) '
         'returning *'
-    ), (name, email, openid)).fetchone()
-    return ret[0]
+    ), (name, email, openid)).fetchone()[0]
+
+
+def get_user_id_bi_openid(conn, openid):
+    ret = conn.execute('select id from "user" where openid = %s', (openid,)).fetchone()
+    return None if ret is None else ret[0]
