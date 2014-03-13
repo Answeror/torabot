@@ -15,7 +15,8 @@ create table art (
 
 create table query (
     id serial primary key,
-    text text unique
+    text text unique,
+    total int default 0
 );
 
 create table result (
