@@ -6,6 +6,8 @@ from .user import (
     add_user,
     get_user_id_bi_openid,
     get_user_email_bi_id,
+    get_user_bi_id,
+    set_email,
 )
 from .watch import (
     watching,
@@ -51,4 +53,6 @@ __all__ = [
     get_user_email_bi_id.__name__,
     get_pending_notices.__name__,
     mark_notice_sent.__name__,
+    get_user_bi_id.__name__,
+    set_email.__name__,
 ]

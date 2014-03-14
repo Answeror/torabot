@@ -1,3 +1,6 @@
+from ..ut.bunch import Bunch
+
+
 def add_user(conn, name, email, openid):
     return conn.execute((
         'insert into "user" (name, email, openid)'
@@ -14,3 +17,15 @@ def get_user_id_bi_openid(conn, openid):
 def get_user_email_bi_id(conn, id):
     ret = conn.execute('select email from "user" where id = %s', (id,)).fetchone()
     return None if ret is None else ret[0]
+
+
+def get_user_bi_id(conn, id):
+    ret = conn.execute('select * from "user" where id = %s', (id,)).fetchone()
+    return None if ret is None else Bunch(**ret)
+
+
+def set_email(conn, id, email):
+    conn.execute(
+        'update "user" set email = %s where id = %s',
+        (email, id)
+    )

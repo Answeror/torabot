@@ -1,3 +1,4 @@
+from nose.tools import assert_equal
 from flask import (
     request,
     render_template,
@@ -11,6 +12,8 @@ from ..db import (
     unwatch as _unwatch,
     watching as _watching,
     get_sorted_watch_details_bi_user_id,
+    get_user_bi_id,
+    set_email,
 )
 from ..core.notice import (
     get_notices_bi_user_id,
@@ -36,7 +39,11 @@ def watching(user_id):
     with makesession() as session:
         return render_template(
             'watching.html',
-            watches=get_sorted_watch_details_bi_user_id(session.connection(), user_id)
+            user=get_user_bi_id(session.connection(), user_id),
+            watches=get_sorted_watch_details_bi_user_id(
+                session.connection(),
+                user_id
+            )
         )
 
 
@@ -62,10 +69,40 @@ def pending_notices(user_id):
         )
 
 
-@bp.route('/notice/config', methods=['GET'])
+@bp.route('/notice/config', methods=['GET', 'POST'])
 @auth.require_session
 def notice_conf(user_id):
-    return render_template('noticeconf.html')
+    if request.method == 'GET':
+        with makesession() as session:
+            return render_template(
+                'noticeconf.html',
+                user=get_user_bi_id(session.connection(), user_id)
+            )
+
+    assert_equal(request.method, 'POST')
+    try:
+        with makesession(commit=True) as session:
+            set_email(
+                session.connection(),
+                id=user_id,
+                email=request.values['email'],
+            )
+        return render_template(
+            'message.html',
+            ok=True,
+            message='更新成功'
+        )
+    except:
+        log.exception(
+            'user {} change email to {} failed',
+            user_id,
+            request.values['email']
+        )
+        return render_template(
+            'message.html',
+            ok=True,
+            message='更新失败'
+        )
 
 
 @bp.route('/search', methods=['GET'], defaults={'page': 0})

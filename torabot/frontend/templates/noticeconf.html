@@ -5,4 +5,17 @@
     <li><a href='{{ url_for(".all_notices") }}'>全部</a></li>
     <li class=active><a href='{{ url_for(".notice_conf") }}'>设置</a></li>
 </ul>
+<form method=post class="form-horizontal vspace-top-middle" role="form">
+    <div class="form-group">
+        <label for="email" class="col-sm-2 control-label">email</label>
+        <div class="col-sm-4">
+            <input id=email name=email type=email class=form-control placeholder=email value='{{ user.email }}'>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-success">更新</button>
+        </div>
+    </div>
+</form>
 {% endblock %}
