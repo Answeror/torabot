@@ -2,6 +2,7 @@
 *.pyc
 .python-version
 /celerybeat-schedule
+/toraconf.py
 
 /build/
 /dist/

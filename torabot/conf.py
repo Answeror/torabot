@@ -19,8 +19,12 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULE = {
+    'sync': {
+        'task': 'torabot.celery.sync_all',
+        'schedule': crontab(minute='*/5'),  # sync every 5 minutes
+    },
     'notice': {
         'task': 'torabot.celery.notice_all',
-        'schedule': crontab(minute='*'),  # notice every 5 minutes
+        'schedule': crontab(minute='*/5'),  # notice every 5 minutes
     }
 }
