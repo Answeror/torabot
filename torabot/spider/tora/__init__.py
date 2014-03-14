@@ -94,7 +94,7 @@ def fill_detail(arts, session):
         parse_detail,
         session,
     ))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=ROOM) as ex:
         for art, d in zip(arts, ex.map(get, arts)):
             art.update(d)
     return arts
