@@ -21,12 +21,15 @@ log = Logger(__name__)
 
 
 def strict(query, n, spider, conn):
-    return list(lazy(
+    log.info('start sync %s %d' % (query, n))
+    ret = list(lazy(
         query,
         n,
         spider,
         conn=conn,
     ))
+    log.info('done sync %s %d' % (query, n))
+    return ret
 
 
 def synced_from_head(query, n, spider, conn):

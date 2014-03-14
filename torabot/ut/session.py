@@ -3,10 +3,21 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def makesession(config, commit=False, **kargs):
-    from sqlalchemy import create_engine
-    engine = create_engine(config['TORABOT_CONNECTION_STRING'])
-    Session = sessionmaker(bind=engine)
+def makesession(commit=False, **kargs):
+    if 'engine' in kargs:
+        bind = kargs['engine']
+        del kargs['engine']
+    elif 'connection' in kargs:
+        bind = kargs['connection']
+        del kargs['connection']
+    elif 'config' in kargs:
+        from sqlalchemy import create_engine
+        bind = create_engine(kargs['config']['TORABOT_CONNECTION_STRING'])
+        del kargs['config']
+    else:
+        assert False, 'must provide engine, connection or config'
+
+    Session = sessionmaker(bind=bind)
     session = Session(**kargs)
     try:
         yield session
