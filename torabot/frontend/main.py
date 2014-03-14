@@ -84,23 +84,18 @@ def search(page):
             conn=session.connection(),
             spider=FrozenSpider()
         )
-        arts = q.arts
-        total = q.total
-        log.debug('query got {} arts', len(arts))
         session.commit()
         options = {}
         if 'userid' in flask_session:
-            options['sub'] = _watching(
+            options['watching'] = _watching(
                 session.connection(),
                 user_id=int(flask_session['userid']),
                 query_id=q.id,
             )
         return render_template(
             'list.html',
-            arts=arts,
             query=q,
             page=page,
-            total=total,
             room=room,
             **options
         )

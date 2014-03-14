@@ -1,6 +1,7 @@
 *.swp
 *.pyc
 .python-version
+/celerybeat-schedule
 
 /build/
 /dist/

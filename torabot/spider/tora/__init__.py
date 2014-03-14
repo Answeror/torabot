@@ -16,6 +16,7 @@ from ...ut.memo import memo, gemo
 from ...ut.bunch import Bunch
 
 
+QUERY_URL = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
 ROOM = 20
 log = Logger(__name__)
 
@@ -27,16 +28,19 @@ class Busy(object):
 busy = Busy()
 
 
+def make_query_uri(query, start):
+    return QUERY_URL + '?' + urlencode(OrderedDict([
+        ('item_kind', '0401'),
+        ('bl_fg', '0'),
+        ('search', query.encode('Shift_JIS')),
+        ('ps', start + 1),
+    ]))
+
+
 def fetch_list(query, start, session=Session()):
-    base = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
     return fetch(
-        base + '?' + urlencode(OrderedDict([
-            ('item_kind', '0401'),
-            ('bl_fg', '0'),
-            ('search', query.encode('Shift_JIS')),
-            ('ps', start + 1),
-        ])),
-        headers={'Referer': base},
+        make_query_uri(query, start),
+        headers={'Referer': QUERY_URL},
         session=session,
     )
 

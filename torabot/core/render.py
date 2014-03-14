@@ -1,4 +1,5 @@
 from ..ut.bunch import Bunch
+from ..spider.tora import make_query_uri
 
 
 def render_notice_status(notice):
@@ -40,3 +41,10 @@ def render_notice(notice):
     notice.email_body = render_notice_email_body(notice)
     notice.html = render_notice_html(notice)
     return notice
+
+
+def render_query(query):
+    return Bunch(
+        uri=make_query_uri(query.text, 0),
+        **query
+    )

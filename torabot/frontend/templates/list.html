@@ -14,7 +14,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for art in arts %}
+    {% for art in query.arts %}
     <tr>
         <td><a href="{{ art.uri }}">{{ art.title }}</a></td>
         <td>{{ art.author }}</td>
@@ -25,22 +25,7 @@
     {% endfor %}
     </tbody>
 </table>
-<hr>
-<ul class="pagination">
-    {% if page > 0 %}
-    <li><a href='{{ url_for(".search", q=query.text, page=page - 1) }}'>&laquo;</a></li>
-    {% else %}
-    <li class=disabled><span>&laquo;</span></li>
-    {% endif %}
-    {% set begin = max(0, page - 2) %}
-    {% set end = min(begin + 5, (total + room - 1) // room) %}
-    {% for i in range(begin, end) %}
-    <li{% if i == page %} class=active{% endif %}><a href='{{ url_for(".search", q=query.text, page=i) }}'>{{ i + 1 }}</a></li>
-    {% endfor %}
-    {% if page + 1 < end %}
-    <li><a href='{{ url_for(".search", q=query.text, page=page + 1) }}'>&raquo;</a></li>
-    {% else %}
-    <li class=disabled><span>&raquo;</span></li>
-    {% endif %}
-</ul>
+{% if query.total != len(query.arts) %}
+<p>以上是{{ query.total }}个搜索结果中的{{ len(query.arts) }}个, 完整列表参见<a href='{{ query.uri }}'>这里</a>.</p>
+{% endif %}
 {% endblock %}

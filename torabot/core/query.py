@@ -7,6 +7,7 @@ from ..db import (
 )
 from .sync import strict
 from .const import SYNC_LIMIT
+from .render import render_query
 
 
 log = Logger(__name__)
@@ -73,7 +74,7 @@ def query(text, spider, conn, begin=0, end=None, return_detail=False):
             **({} if end is None else {'limit': end - begin})
         )
 
-    return query.arts if not return_detail else query
+    return query.arts if not return_detail else render_query(query)
 
 
 def not_enough(begin, end, arts):
