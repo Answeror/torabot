@@ -1,9 +1,10 @@
 import os
+from sqlalchemy.sql import text
 from . import const
 
 
 def create_all(conn):
-    conn.execute(load_text('schema.sql'))
+    conn.execute(text(load_text('schema.sql')))
 
 
 def load_text(name):

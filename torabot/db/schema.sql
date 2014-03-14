@@ -34,7 +34,8 @@ create table "user" (
     name text unique not null,
     email text unique not null,
     openid text unique not null,
-    ctime timestamp default now()
+    ctime timestamp default now(),
+    maxwatch int not null default 42
 );
 
 create table watch (
@@ -60,6 +61,25 @@ create table notice (
 );
 
 -- trigger
+create function check_maxwatch() returns trigger as $$
+    declare
+        maxwatch int;
+        watch_count int;
+    begin
+        select "user".maxwatch into strict maxwatch from "user" where id = NEW.user_id;
+        select count(*) into strict watch_count from watch where user_id = NEW.user_id;
+        if (watch_count >= maxwatch) then
+            raise exception '% watch count reach limit %', NEW.user_id, maxwatch;
+        end if;
+        return NEW;
+    end;
+$$ language plpgsql;
+
+create trigger check_maxwatch
+    before insert on watch
+    for each row
+    execute procedure check_maxwatch();
+
 create function insert_snapshot() returns trigger as $$
     begin
         insert into change (art_id, new_status) values (NEW.id, NEW.status);
