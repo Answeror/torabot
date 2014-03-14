@@ -26,7 +26,7 @@ def gunicorn():
     with cd('/www/torabot/repo'):
         run('git pull')
         with prefix('pyenv virtualenvwrapper'):
-            with prefix('workon aip'):
+            with prefix('workon torabot'):
                 run('pip install -r dependencies.txt')
                 runbg('celery worker -A torabot -f data/celery.log')
                 runbg('celery beat -A torabot')
