@@ -11,6 +11,8 @@ from ..db import (
     unwatch as _unwatch,
     watching as _watching,
     get_sorted_watch_details_bi_user_id,
+)
+from ..core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
 )
@@ -18,7 +20,6 @@ from ..core.kanji import translate
 from ..spider.tora import FrozenSpider
 from . import auth, bp
 from ..ut.session import makeappsession as makesession
-from . import render
 
 
 log = Logger(__name__)
@@ -163,5 +164,4 @@ def inject_locals():
         min=min,
         max=max,
         len=len,
-        render=render,
     )

@@ -3,8 +3,9 @@ from .art import (
     get_art_bi_uri,
 )
 from .user import (
-    get_user_id_bi_openid,
     add_user,
+    get_user_id_bi_openid,
+    get_user_email_bi_id,
 )
 from .watch import (
     watching,
@@ -24,6 +25,8 @@ from .query import (
 from .notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
+    get_pending_notices,
+    mark_notice_sent,
 )
 
 
@@ -45,4 +48,7 @@ __all__ = [
     get_sorted_queries.__name__,
     get_notices_bi_user_id.__name__,
     get_pending_notices_bi_user_id.__name__,
+    get_user_email_bi_id.__name__,
+    get_pending_notices.__name__,
+    mark_notice_sent.__name__,
 ]

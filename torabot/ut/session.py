@@ -33,5 +33,6 @@ def makesession(commit=False, **kargs):
 @contextmanager
 def makeappsession(commit=False, **kargs):
     from flask import current_app
-    with makesession(current_app.config, commit=commit, **kargs) as session:
+    kargs['config'] = current_app.config
+    with makesession(commit=commit, **kargs) as session:
         yield session
