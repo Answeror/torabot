@@ -20,10 +20,7 @@ def make(*args, **kargs):
     from . import frontend
     frontend.make(app)
 
-    #from .db.schema import create_all
-    #from .core.session import makesession
-    #with app.test_request_context():
-        #with makesession(commit=True) as session:
-            #create_all(session.connection())
+    from . import api
+    api.make(app)
 
     return app

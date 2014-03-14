@@ -6,34 +6,22 @@ from flask import (
 )
 from logbook import Logger
 from ..core.query import query
-from ..core.watch import (
-    watch,
-    unwatch,
-    watching,
-    get_watches_bi_user_id
-)
-from ..core.notice import (
+from ..db import (
+    watch as _watch,
+    unwatch as _unwatch,
+    watching as _watching,
+    get_sorted_watch_details_bi_user_id,
     get_notices_bi_user_id,
-    get_pending_notices_bi_user_id
+    get_pending_notices_bi_user_id,
 )
 from ..core.kanji import translate
-from ..core.session import makesession
 from ..spider.tora import FrozenSpider
 from . import auth, bp
+from ..ut.session import makeappsession as makesession
+from . import render
 
 
 log = Logger(__name__)
-
-
-def get_query_info():
-    d = {}
-    if 'query_id' in request.values:
-        d['query_id'] = request.values['query_id']
-    #elif 'query_text' in request.values:
-        #d['query_text'] = request.values['query_text']
-    else:
-        raise Exception('neither query_id nor query_text provided')
-    return d
 
 
 @bp.route('/', methods=['GET'])
@@ -41,13 +29,13 @@ def index():
     return render_template('layout.html')
 
 
-@bp.route('/subs', methods=['GET'])
+@bp.route('/watching', methods=['GET'])
 @auth.require_session
-def subscriptions(user_id):
+def watching(user_id):
     with makesession() as session:
         return render_template(
-            'subs.html',
-            subs=get_watches_bi_user_id(session, user_id)
+            'watching.html',
+            watches=get_sorted_watch_details_bi_user_id(session.connection(), user_id)
         )
 
 
@@ -58,7 +46,7 @@ def all_notices(user_id):
         return render_template(
             'notices.html',
             tab='all',
-            notices=get_notices_bi_user_id(session, user_id)
+            notices=get_notices_bi_user_id(session.connection(), user_id)
         )
 
 
@@ -69,11 +57,11 @@ def pending_notices(user_id):
         return render_template(
             'notices.html',
             tab='pending',
-            notices=get_pending_notices_bi_user_id(session, user_id)
+            notices=get_pending_notices_bi_user_id(session.connection(), user_id)
         )
 
 
-@bp.route('/notice/conf', methods=['GET'])
+@bp.route('/notice/config', methods=['GET'])
 @auth.require_session
 def notice_conf(user_id):
     return render_template('noticeconf.html')
@@ -85,89 +73,87 @@ def search(page):
     oq = request.args.get('q', '')
     tq = translate(oq)
     log.debug('query: {} -> {}', oq, tq)
-    with makesession() as session:
+    with makesession(commit=True) as session:
         room = current_app.config.get('TORABOT_PAGE_ROOM', 20)
-        ret = query(
+        q = query(
             tq,
             begin=room * page,
             end=room * (page + 1),
             return_detail=True,
-            session=session,
+            conn=session.connection(),
             spider=FrozenSpider()
         )
-        arts = ret.arts
-        total = ret.total
+        arts = q.arts
+        total = q.total
         log.debug('query got {} arts', len(arts))
         session.commit()
         options = {}
         if 'userid' in flask_session:
-            options['sub'] = watching(
+            options['sub'] = _watching(
+                session.connection(),
                 user_id=int(flask_session['userid']),
-                query_id=ret.id,
-                session=session,
+                query_id=q.id,
             )
-        ret = render_template(
+        return render_template(
             'list.html',
             arts=arts,
-            query=tq,
+            query=q,
             page=page,
             total=total,
             room=room,
             **options
         )
-        session.commit()
-        return ret
 
 
-@bp.route('/sub', methods=['POST'])
-def subscribe():
+@bp.route('/watch', methods=['POST'])
+def watch():
     with makesession() as session:
         try:
-            watch(
+            _watch(
+                session.connection(),
                 user_id=request.values['user_id'],
-                session=session,
-                **get_query_info()
+                query_id=request.values['query_id'],
             )
             session.commit()
             session.close()
             return render_template(
                 'message.html',
                 ok=True,
-                message='subscribe done'
+                message='订阅成功'
             )
         except:
-            log.exception('sub failed')
+            log.exception('watch failed')
             session.rollback()
             return render_template(
                 'message.html',
                 ok=False,
-                message='subscribe failed'
+                message='订阅失败'
             )
 
 
-@bp.route('/unsub', methods=['POST'])
-def unsubscribe():
+@bp.route('/unwatch', methods=['POST'])
+def unwatch():
     with makesession() as session:
         try:
-            unwatch(
+            _unwatch(
+                session.connection(),
                 user_id=request.values['user_id'],
-                session=session,
-                **get_query_info()
+                query_id=request.values['query_id'],
             )
             session.commit()
             session.close()
             return render_template(
                 'message.html',
                 ok=True,
-                message='unsubscribe done'
+                message='取消订阅成功'
             )
         except:
-            log.exception('sub failed')
+            log.exception('unwatch failed')
             session.rollback()
             return render_template(
                 'message.html',
                 ok=False,
-                message='unsubscribe failed'
+                message='取消订阅失败'
             )
 
 
@@ -177,4 +163,5 @@ def inject_locals():
         min=min,
         max=max,
         len=len,
+        render=render,
     )

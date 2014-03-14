@@ -1,5 +1,6 @@
 -- type
 create type art_status as enum ('other', 'reserve');
+create type notice_status as enum ('pending', 'sent');
 
 -- table
 create table art (
@@ -16,7 +17,8 @@ create table art (
 create table query (
     id serial primary key,
     text text unique,
-    total int default 0
+    total int default 0,
+    ctime timestamp default now()
 );
 
 create table result (
@@ -53,7 +55,8 @@ create table notice (
     id serial primary key,
     user_id int references "user"(id),
     change_id int references change(id),
-    ctime timestamp default now()
+    ctime timestamp default now(),
+    status notice_status default 'pending'
 );
 
 -- trigger

@@ -1,6 +1,6 @@
 from logbook import Logger
 from nose.tools import assert_less_equal
-from ..db.query import (
+from ..db import (
     get_query_bi_text,
     has_query_bi_text,
     get_arts_bi_query_id,
@@ -49,10 +49,8 @@ def check_range(begin, end):
         assert_less_equal(begin, end)
 
 
-def query(text, spider, session, begin=0, end=None, return_detail=False):
+def query(text, spider, conn, begin=0, end=None, return_detail=False):
     check_range(begin, end)
-
-    conn = session.connection()
 
     log.debug('query {} in ({}, {})', text, begin, end)
     if not has_query_bi_text(conn, text):
@@ -66,9 +64,14 @@ def query(text, spider, session, begin=0, end=None, return_detail=False):
         )
         query.arts = arts
     else:
-        log.debug('{} already synced, pull from database')
+        log.debug('{} already synced, pull from database', text)
         query = get_query_bi_text(conn, text)
-        query.arts = from_db_and_remote(query, begin, end, spider, conn)
+        query.arts = get_arts_bi_query_id(
+            conn,
+            query_id=query.id,
+            offset=begin,
+            **({} if end is None else {'limit': end - begin})
+        )
 
     return query.arts if not return_detail else query
 
@@ -78,22 +81,4 @@ def not_enough(begin, end, arts):
 
 
 def has_more(begin, query, arts):
-    return begin + len(arts) < query.total
-
-
-def from_db_and_remote(query, begin, end, spider, conn):
-    arts = get_arts_bi_query_id(
-        conn,
-        query_id=query.id,
-        offset=begin,
-        **({} if end is None else {'limit': end - begin})
-    )
-    if not_enough(begin, end, arts) and has_more(begin, query, arts):
-        return from_remote(
-            query=query,
-            begin=begin,
-            end=end,
-            spider=spider,
-            conn=conn,
-        )
-    return arts
+    return len(arts) < min(SYNC_LIMIT, query.total - begin)

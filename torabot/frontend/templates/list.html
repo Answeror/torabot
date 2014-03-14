@@ -28,17 +28,17 @@
 <hr>
 <ul class="pagination">
     {% if page > 0 %}
-    <li><a href='{{ url_for(".search", q=query, page=page - 1) }}'>&laquo;</a></li>
+    <li><a href='{{ url_for(".search", q=query.text, page=page - 1) }}'>&laquo;</a></li>
     {% else %}
     <li class=disabled><span>&laquo;</span></li>
     {% endif %}
     {% set begin = max(0, page - 2) %}
     {% set end = min(begin + 5, (total + room - 1) // room) %}
     {% for i in range(begin, end) %}
-    <li{% if i == page %} class=active{% endif %}><a href='{{ url_for(".search", q=query, page=i) }}'>{{ i + 1 }}</a></li>
+    <li{% if i == page %} class=active{% endif %}><a href='{{ url_for(".search", q=query.text, page=i) }}'>{{ i + 1 }}</a></li>
     {% endfor %}
     {% if page + 1 < end %}
-    <li><a href='{{ url_for(".search", q=query, page=page + 1) }}'>&raquo;</a></li>
+    <li><a href='{{ url_for(".search", q=query.text, page=page + 1) }}'>&raquo;</a></li>
     {% else %}
     <li class=disabled><span>&raquo;</span></li>
     {% endif %}

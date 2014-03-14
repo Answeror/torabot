@@ -6,13 +6,14 @@ model used to sync tora and local database
 from logbook import Logger
 from fn.iters import head
 from ..ut.bunch import Bunch
-from ..db.art import put_art, get_art_bi_uri
-from ..db.query import (
+from ..db import (
     set_results,
     set_total,
     put_query,
     get_query_bi_text,
     get_arts_bi_query_id,
+    put_art,
+    get_art_bi_uri,
 )
 
 

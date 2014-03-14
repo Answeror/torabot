@@ -1,7 +1,7 @@
 from hashlib import md5
 from nose.tools import assert_equal, assert_is_not_none
 from . import g
-from ..notice import get_notice_bi_user_id
+from ..notice import get_notices_bi_user_id
 from ..user import add_user
 from ..watch import watch
 from ..art import add_art, put_art
@@ -50,7 +50,7 @@ def test_broadcast_one():
         watch(g.connection, user_id=user_id, query_id=query_id)
         art_id = fake_add_arts(g.connection)[0]
         set_results(g.connection, query_id=query_id, art_ids=[art_id])
-        assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 1)
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
         trans.rollback()
 
 
@@ -61,9 +61,9 @@ def test_broadcast_twice():
         art_ids = fake_add_arts(g.connection)
         set_results(g.connection, query_id=query_id, art_ids=[art_ids[0]])
         watch(g.connection, user_id=user_id, query_id=query_id)
-        assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 0)
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 0)
         add_results(g.connection, query_id=query_id, ranks=[(art_ids[1], 1)])
-        assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 1)
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
         trans.rollback()
 
 
@@ -75,7 +75,7 @@ def test_broadcast_update():
         art_id = fake_add_arts(g.connection)[0]
         put_art(g.connection, id=art_id, params=dict(status='reserve'))
         set_results(g.connection, query_id=query_id, art_ids=[art_id])
-        assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 2)
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 2)
         trans.rollback()
 
 
@@ -88,7 +88,7 @@ def test_broadcast_dup():
         art_id = fake_add_arts(g.connection)[0]
         for query_id in query_ids:
             set_results(g.connection, query_id=query_id, art_ids=[art_id])
-        assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 1)
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
         trans.rollback()
 
 
@@ -101,7 +101,7 @@ def test_broadcast_two_users():
         art_id = fake_add_arts(g.connection)[0]
         set_results(g.connection, query_id=query_id, art_ids=[art_id])
         for user_id in user_ids:
-            assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 1)
+            assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
         trans.rollback()
 
 
@@ -114,7 +114,7 @@ def test_broadcast_two_arts_two_users():
         art_ids = fake_add_arts(g.connection)
         set_results(g.connection, query_id=query_id, art_ids=art_ids)
         for user_id in user_ids:
-            assert_equal(len(get_notice_bi_user_id(g.connection, user_id)), 2)
+            assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 2)
         trans.rollback()
 
 

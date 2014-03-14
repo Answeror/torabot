@@ -18,8 +18,8 @@
     {% for notice in notices %}
     <tr>
         <td>{{ notice.ctime.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-        <td>{{ notice.state_string }}</td>
-        <td>{{ notice.text_web | safe }}</a></td>
+        <td>{{ render.render_notice_status(notice) }}</td>
+        <td>{{ render.render_notice_text(notice) | safe }}</a></td>
     </tr>
     {% endfor %}
     </tbody>

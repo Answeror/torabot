@@ -8,8 +8,8 @@ from flask import (
     url_for,
     abort
 )
-from ..core.user import get_user_id_bi_openid, add_user
-from ..core.session import makesession
+from ..db import get_user_id_bi_openid, add_user
+from ..ut.session import makeappsession as makesession
 from . import bp
 
 
@@ -18,7 +18,7 @@ oid = OpenID()
 
 def get_userid(openid):
     with makesession() as session:
-        return get_user_id_bi_openid(openid, session=session)
+        return get_user_id_bi_openid(session.connection(), openid)
 
 
 @bp.before_request
@@ -75,10 +75,10 @@ def prof():
             flash('Profile successfully created')
             with makesession(commit=True) as session:
                 add_user(
+                    session.connection(),
                     name=name,
                     email=email,
                     openid=flask_session['openid'],
-                    session=session
                 )
             return redirect(oid.get_next_url())
     return render_template(

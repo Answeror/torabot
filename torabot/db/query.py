@@ -96,3 +96,8 @@ def has_query_bi_text(conn, text):
         'select 1 from query where text = %s',
         (text,)
     ).fetchone() is not None
+
+
+def get_sorted_queries(conn):
+    result = conn.execute('select * from query order by ctime')
+    return [Bunch(**row) for row in result.fetchall()]
