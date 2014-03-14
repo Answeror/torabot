@@ -30,4 +30,4 @@ def gunicorn():
                 run('pip install -r dependencies.txt')
                 runbg('celery worker -A torabot -f data/celery.log')
                 runbg('celery beat -A torabot')
-                runbg('gunicorn -pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')
+                runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')
