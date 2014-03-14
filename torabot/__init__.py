@@ -8,9 +8,12 @@ def makeapp(*args, **kargs):
         ) if name in kargs}
     )
 
-    # default config
-    from . import conf
-    app.config.from_object(conf)
+    try:
+        import toraconf
+        app.config.from_object(toraconf)
+    except:
+        from . import conf
+        app.config_from_object(conf)
 
     if 'config' in kargs:
         app.config.update(kargs['config'])
