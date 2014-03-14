@@ -3,7 +3,7 @@ create type art_status as enum ('other', 'reserve');
 create type notice_status as enum ('pending', 'sent');
 
 -- table
-create table art (
+create table if not exists art (
     id serial primary key,
     title text not null,
     author text,
@@ -14,14 +14,19 @@ create table art (
     ptime timestamp
 );
 
-create table query (
+create index idx_art_uri on art (uri);
+
+create table if not exists query (
     id serial primary key,
     text text unique,
     total int default 0,
     ctime timestamp default now()
 );
 
-create table result (
+create index idx_query_text on query (text);
+create index idx_query_ctime on query (ctime);
+
+create table if not exists result (
     query_id int references query(id),
     art_id int references art(id),
     rank int not null,
@@ -29,7 +34,7 @@ create table result (
     unique (query_id, rank)
 );
 
-create table "user" (
+create table if not exists "user" (
     id serial primary key,
     name text unique not null,
     email text unique not null,
@@ -38,13 +43,17 @@ create table "user" (
     maxwatch int not null default 42
 );
 
-create table watch (
+create index idx_user_openid on "user" (openid);
+
+create table if not exists watch (
     user_id int references "user"(id),
     query_id int references query(id),
     ctime timestamp default now()
 );
 
-create table change (
+create index idx_watch_ctime on watch (ctime);
+
+create table if not exists change (
     id serial primary key,
     art_id int references art(id),
     old_status art_status,
@@ -52,7 +61,9 @@ create table change (
     ctime timestamp default now()
 );
 
-create table notice (
+create index idx_change_art_id on change (art_id);
+
+create table if not exists notice (
     id serial primary key,
     user_id int references "user"(id),
     change_id int references change(id),
@@ -60,8 +71,10 @@ create table notice (
     status notice_status default 'pending'
 );
 
+create index idx_notice_mix on notice (user_id, status, change_id, ctime);
+
 -- trigger
-create function check_maxwatch() returns trigger as $$
+create or replace function check_maxwatch() returns trigger as $$
     declare
         maxwatch int;
         watch_count int;
@@ -75,37 +88,40 @@ create function check_maxwatch() returns trigger as $$
     end;
 $$ language plpgsql;
 
+drop trigger if exists check_maxwatch on watch;
 create trigger check_maxwatch
     before insert on watch
     for each row
     execute procedure check_maxwatch();
 
-create function insert_snapshot() returns trigger as $$
+create or replace function insert_snapshot() returns trigger as $$
     begin
         insert into change (art_id, new_status) values (NEW.id, NEW.status);
         return NEW;
     end;
 $$ language plpgsql;
 
+drop trigger if exists insert_snapshot on art;
 create trigger insert_snapshot
     after insert on art
     for each row
     execute procedure insert_snapshot();
 
-create function update_snapshot() returns trigger as $$
+create or replace function update_snapshot() returns trigger as $$
     begin
         insert into change (art_id, old_status, new_status) values (NEW.id, OLD.status, NEW.status);
         return NEW;
     end;
 $$ language plpgsql;
 
+drop trigger if exists update_snapshot on art;
 create trigger update_snapshot
     after update on art
     for each row
     when (OLD.status is distinct from NEW.status and NEW.status != 'other')
     execute procedure update_snapshot();
 
-create function broadcast() returns trigger as $$
+create or replace function broadcast() returns trigger as $$
     begin
         insert into notice (user_id, change_id)
             select watch.user_id as user_id, related.id as change_id
@@ -123,6 +139,7 @@ create function broadcast() returns trigger as $$
     end;
 $$ language plpgsql;
 
+drop trigger if exists insert_broadcast on result;
 create trigger insert_broadcast
     after insert on result
     for each row
