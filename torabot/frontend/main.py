@@ -108,7 +108,7 @@ def search(page):
     oq = request.args.get('q', '')
     tq = translate(oq)
     log.debug('query: {} -> {}', oq, tq)
-    room = current_app.config.get('TORABOT_PAGE_ROOM', 20)
+    room = current_app.config['TORABOT_PAGE_ROOM']
     with appccontext(commit=True) as conn:
         q = query(
             tq,

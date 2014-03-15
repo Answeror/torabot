@@ -87,15 +87,18 @@ def parse_arts(soup, session):
     ), trs[2:-1:2])), session)
 
 
-def fill_detail(arts, session):
-    get = lambda art: longrun(partial(
+def get(session, uri):
+    return longrun(partial(
         safe,
-        partial(fetch, art['uri']),
+        partial(fetch, uri),
         parse_detail,
         session,
     ))
+
+
+def fill_detail(arts, session):
     with concurrent.futures.ThreadPoolExecutor(max_workers=ROOM) as ex:
-        for art, d in zip(arts, ex.map(get, arts)):
+        for art, d in zip(arts, ex.map(partial(get, session), [art['uri'] for art in arts])):
             art.update(d)
     return arts
 

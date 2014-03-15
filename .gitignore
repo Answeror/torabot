@@ -9,3 +9,7 @@
 /*.egg-info/
 /data/
 /temp/
+
+/prof
+/prof.py
+/show.py
