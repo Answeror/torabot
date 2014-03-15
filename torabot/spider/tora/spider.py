@@ -1,7 +1,7 @@
 import time
-from fn.iters import head, drop
-from ...ut.memo import gemo
-from .core import first_n_arts_safe
+from fn.iters import head, drop, take
+from ...ut.memo import memo
+from .core import first_n_arts_safe, ROOM
 
 
 class MemorySafeSpider(object):
@@ -39,14 +39,22 @@ class FrozenSpider(object):
         if base is None:
             base = MemorySafeSpider()
         self.base = base
-        self._gen_arts_from_head = gemo(base.gen_arts_from_head)
+        self._gen_arts_from_head = memo(lambda *args, **kargs: list(base.gen_arts_from_head(*args, **kargs)))
 
     def art_n(self, query, n):
-        return head(drop(n, self.gen_arts_from_head(query, n + 1)))
-
-    def gen_arts_from_head(self, query, n, return_total=None):
-        yield from self._gen_arts_from_head(
+        return head(drop(n + 1, self.gen_arts_from_head(
             query,
-            n,
-            **({} if return_total is None else {'return_total': return_total})
-        )
+            max(ROOM, n + 1),
+            True,
+        )))
+
+    def gen_arts_from_head(self, query, n, return_total=False):
+        arts = take(n, list(self._gen_arts_from_head(
+            query,
+            max(ROOM, n),
+            True,
+        )))
+        if return_total:
+            yield from arts
+        else:
+            yield from drop(1, arts)
