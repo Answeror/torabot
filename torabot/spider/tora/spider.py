@@ -1,3 +1,4 @@
+import time
 from fn.iters import head, drop
 from ...ut.memo import gemo
 from .core import first_n_arts_safe
@@ -10,12 +11,26 @@ class MemorySafeSpider(object):
 
     def gen_arts_from_head(self, query, n, return_total=False):
         from ...ut.rq import q
-        yield from q.enqueue(
+        job = q.enqueue(
             first_n_arts_safe,
             query,
             n,
             return_total,
         )
+        count = 0
+        ok = True
+        while job.result is None:
+            time.sleep(0.1)
+            count += 1
+            if count == 1000:
+                ok = False
+                break
+        if ok:
+            yield from job.result
+        else:
+            if return_total:
+                yield 0
+            yield from []
 
 
 class FrozenSpider(object):
