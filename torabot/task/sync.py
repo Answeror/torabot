@@ -16,6 +16,7 @@ def sync_all(conf):
         for query in queries:
             ex.submit(
                 _sync_one,
+                conf['TORABOT_PAGE_ROOM'],
                 query.text,
                 engine,
             )
