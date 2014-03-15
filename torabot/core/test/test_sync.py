@@ -4,17 +4,15 @@ from ...db.art import art_count
 from ...db.query import query_count
 from .spider import UsotukiyaSpider as Spider
 from . import g
-from sqlalchemy.orm import sessionmaker
 
 
-def sync(makesession):
-    strict('大嘘', 32, spider=Spider(), makesession=makesession)
+def sync(conn):
+    strict('大嘘', 32, spider=Spider(), conn=conn)
 
 
 def test_sync():
     with g.connection.begin_nested() as trans:
-        makesession = sessionmaker(bind=g.connection)
-        sync(makesession)
+        sync(g.connection)
         assert_equal(art_count(g.connection), 8)
         assert_equal(query_count(g.connection), 1)
         trans.rollback()

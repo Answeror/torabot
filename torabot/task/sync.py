@@ -1,4 +1,5 @@
-from ..ut.session import makesession
+from concurrent.futures import ThreadPoolExecutor as Ex
+from ..ut.connection import ccontext
 from ..core.sync import strict
 from ..core.const import SYNC_LIMIT
 from ..spider.tora import FrozenSpider
@@ -7,13 +8,18 @@ from .engine import make as make_engine
 
 
 def sync_all(conf):
-    from .. import celery
-
     engine = make_engine(conf)
 
-    with makesession(engine=engine) as session:
-        for query in get_sorted_queries(session.connection()):
-            celery.sync_one.delay(query.text)
+    with ccontext(engine=engine) as conn:
+        queries = get_sorted_queries(conn)
+
+    with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
+        for query in queries:
+            ex.submit(
+                _sync_one,
+                query.text,
+                engine,
+            )
 
 
 def sync_one(query, conf):
@@ -22,11 +28,10 @@ def sync_one(query, conf):
 
 
 def _sync_one(query, engine):
-    from sqlalchemy.orm import sessionmaker
-    spider = FrozenSpider()
-    strict(
-        query,
-        SYNC_LIMIT,
-        spider=spider,
-        makesession=sessionmaker(bind=engine)
-    )
+    with ccontext(commit=True, engine=engine) as conn:
+        strict(
+            query,
+            SYNC_LIMIT,
+            spider=FrozenSpider(),
+            conn=conn,
+        )

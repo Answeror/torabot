@@ -22,7 +22,7 @@ from ..core.notice import (
 from ..core.kanji import translate
 from ..spider.tora import FrozenSpider
 from . import auth, bp
-from ..ut.session import makeappsession as makesession, appsessionmaker
+from ..ut.connection import appccontext
 
 
 log = Logger(__name__)
@@ -36,36 +36,33 @@ def index():
 @bp.route('/watching', methods=['GET'])
 @auth.require_session
 def watching(user_id):
-    with makesession() as session:
+    with appccontext() as conn:
         return render_template(
             'watching.html',
-            user=get_user_bi_id(session.connection(), user_id),
-            watches=get_sorted_watch_details_bi_user_id(
-                session.connection(),
-                user_id
-            )
+            user=get_user_bi_id(conn, user_id),
+            watches=get_sorted_watch_details_bi_user_id(conn, user_id)
         )
 
 
 @bp.route('/notice/all', methods=['GET'])
 @auth.require_session
 def all_notices(user_id):
-    with makesession() as session:
+    with appccontext() as conn:
         return render_template(
             'notices.html',
             tab='all',
-            notices=get_notices_bi_user_id(session.connection(), user_id)
+            notices=get_notices_bi_user_id(conn, user_id)
         )
 
 
 @bp.route('/notice/pending', methods=['GET'])
 @auth.require_session
 def pending_notices(user_id):
-    with makesession() as session:
+    with appccontext() as conn:
         return render_template(
             'notices.html',
             tab='pending',
-            notices=get_pending_notices_bi_user_id(session.connection(), user_id)
+            notices=get_pending_notices_bi_user_id(conn, user_id)
         )
 
 
@@ -73,17 +70,17 @@ def pending_notices(user_id):
 @auth.require_session
 def notice_conf(user_id):
     if request.method == 'GET':
-        with makesession() as session:
+        with appccontext() as conn:
             return render_template(
                 'noticeconf.html',
-                user=get_user_bi_id(session.connection(), user_id)
+                user=get_user_bi_id(conn, user_id)
             )
 
     assert_equal(request.method, 'POST')
     try:
-        with makesession(commit=True) as session:
+        with appccontext(commit=True) as conn:
             set_email(
-                session.connection(),
+                conn,
                 id=user_id,
                 email=request.values['email'],
             )
@@ -112,19 +109,19 @@ def search(page):
     tq = translate(oq)
     log.debug('query: {} -> {}', oq, tq)
     room = current_app.config.get('TORABOT_PAGE_ROOM', 20)
-    q = query(
-        tq,
-        begin=room * page,
-        end=room * (page + 1),
-        return_detail=True,
-        makesession=appsessionmaker(),
-        spider=FrozenSpider()
-    )
-    with makesession(commit=True) as session:
+    with appccontext(commit=True) as conn:
+        q = query(
+            tq,
+            begin=room * page,
+            end=room * (page + 1),
+            return_detail=True,
+            conn=conn,
+            spider=FrozenSpider()
+        )
         options = {}
         if 'userid' in flask_session:
             options['watching'] = _watching(
-                session.connection(),
+                conn,
                 user_id=int(flask_session['userid']),
                 query_id=q.id,
             )
@@ -139,54 +136,48 @@ def search(page):
 
 @bp.route('/watch', methods=['POST'])
 def watch():
-    with makesession() as session:
-        try:
+    try:
+        with appccontext(commit=True) as conn:
             _watch(
-                session.connection(),
+                conn,
                 user_id=request.values['user_id'],
                 query_id=request.values['query_id'],
             )
-            session.commit()
-            session.close()
-            return render_template(
-                'message.html',
-                ok=True,
-                message='订阅成功'
-            )
-        except:
-            log.exception('watch failed')
-            session.rollback()
-            return render_template(
-                'message.html',
-                ok=False,
-                message='订阅失败'
-            )
+        return render_template(
+            'message.html',
+            ok=True,
+            message='订阅成功'
+        )
+    except:
+        log.exception('watch failed')
+        return render_template(
+            'message.html',
+            ok=False,
+            message='订阅失败'
+        )
 
 
 @bp.route('/unwatch', methods=['POST'])
 def unwatch():
-    with makesession() as session:
-        try:
+    try:
+        with appccontext(commit=True) as conn:
             _unwatch(
-                session.connection(),
+                conn,
                 user_id=request.values['user_id'],
                 query_id=request.values['query_id'],
             )
-            session.commit()
-            session.close()
             return render_template(
                 'message.html',
                 ok=True,
-                message='取消订阅成功'
+                message='退订成功'
             )
-        except:
-            log.exception('unwatch failed')
-            session.rollback()
-            return render_template(
-                'message.html',
-                ok=False,
-                message='取消订阅失败'
-            )
+    except:
+        log.exception('unwatch failed')
+        return render_template(
+            'message.html',
+            ok=False,
+            message='退订失败'
+        )
 
 
 @bp.context_processor

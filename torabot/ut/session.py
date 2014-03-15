@@ -1,5 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
+from .engine import appengine
 
 
 @contextmanager
@@ -47,6 +48,4 @@ def makeappsession(commit=False, **kargs):
 
 
 def appsessionmaker():
-    from flask import current_app
-    bind = create_engine(current_app.config['TORABOT_CONNECTION_STRING'])
-    return sessionmaker(bind=bind)
+    return sessionmaker(bind=appengine())

@@ -16,8 +16,8 @@ def runbg(cmd, sockname="dtach"):
 
 
 def kill(name):
-    #run("ps auxww | grep %s | grep -v \"grep\" | awk '{print $2}' | xargs kill >& /dev/null" % name)
-    run('killall %s' % name)
+    run("ps auxww | grep %s | grep -v \"grep\" | awk '{print $2}' | xargs kill -9 >& /dev/null" % name)
+    #run('killall %s' % name)
 
 
 def gunicorn():
@@ -30,5 +30,5 @@ def gunicorn():
             with prefix('workon torabot'):
                 run('pip install -r dependencies.txt')
                 runbg('celery worker -A torabot -f data/celery.log')
-                runbg('celery beat -A torabot')
+                runbg('celery beat -A torabot --autoscale=4,1')
                 runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')
