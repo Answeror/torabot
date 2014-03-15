@@ -16,7 +16,8 @@ def runbg(cmd, sockname="dtach"):
 
 
 def kill(name):
-    run("ps auxww | grep %s | grep -v \"grep\" | awk '{print $2}' | xargs kill >& /dev/null" % name)
+    #run("ps auxww | grep %s | grep -v \"grep\" | awk '{print $2}' | xargs kill >& /dev/null" % name)
+    run('killall %s' % name)
 
 
 def gunicorn():
