@@ -22,6 +22,11 @@ def sync_one(query, conf):
 
 
 def _sync_one(query, engine):
+    from sqlalchemy.orm import sessionmaker
     spider = FrozenSpider()
-    with makesession(engine=engine, commit=True) as session:
-        strict(query, SYNC_LIMIT, spider, session.connection())
+    strict(
+        query,
+        SYNC_LIMIT,
+        spider=spider,
+        makesession=sessionmaker(bind=engine)
+    )

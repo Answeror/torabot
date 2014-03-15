@@ -1,5 +1,6 @@
 from logbook import Logger
 from nose.tools import assert_less_equal
+from ..ut.session import sessionguard
 from ..db import (
     get_query_bi_text,
     has_query_bi_text,
@@ -27,21 +28,22 @@ def get_query_from_kargs(conn, kargs):
     return get_query_bi_text(conn, get_query_text_from_kargs(kargs))
 
 
-def from_remote(begin, end, conn, spider, return_query=False, **kargs):
+def from_remote(begin, end, makesession, spider, return_query=False, **kargs):
     text = get_query_text_from_kargs(kargs)
     strict(
         text,
         n=SYNC_LIMIT if end is None else end,
         spider=spider,
-        conn=conn,
+        makesession=makesession,
     )
-    query = get_query_from_kargs(conn, kargs)
-    arts = get_arts_bi_query_id(
-        conn,
-        query_id=query.id,
-        offset=begin,
-        **({} if end is None else {'limit': end - begin})
-    )
+    with sessionguard(make=makesession) as session:
+        query = get_query_from_kargs(session.connection(), kargs)
+        arts = get_arts_bi_query_id(
+            session.connection(),
+            query_id=query.id,
+            offset=begin,
+            **({} if end is None else {'limit': end - begin})
+        )
     return arts if not return_query else (arts, query)
 
 
@@ -50,29 +52,34 @@ def check_range(begin, end):
         assert_less_equal(begin, end)
 
 
-def query(text, spider, conn, begin=0, end=None, return_detail=False):
+def query(text, spider, makesession, begin=0, end=None, return_detail=False):
     check_range(begin, end)
 
     log.debug('query {} in ({}, {})', text, begin, end)
-    if not has_query_bi_text(conn, text):
+
+    with sessionguard(make=makesession) as session:
+        has = has_query_bi_text(session.connection(), text)
+
+    if not has:
         arts, query = from_remote(
             query_text=text,
             begin=begin,
             end=end,
             return_query=True,
             spider=spider,
-            conn=conn
+            makesession=makesession,
         )
         query.arts = arts
     else:
         log.debug('{} already synced, pull from database', text)
-        query = get_query_bi_text(conn, text)
-        query.arts = get_arts_bi_query_id(
-            conn,
-            query_id=query.id,
-            offset=begin,
-            **({} if end is None else {'limit': end - begin})
-        )
+        with sessionguard(make=makesession) as session:
+            query = get_query_bi_text(session.connection(), text)
+            query.arts = get_arts_bi_query_id(
+                session.connection(),
+                query_id=query.id,
+                offset=begin,
+                **({} if end is None else {'limit': end - begin})
+            )
 
     return query.arts if not return_detail else render_query(query)
 

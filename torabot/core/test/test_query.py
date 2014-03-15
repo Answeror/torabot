@@ -2,6 +2,7 @@ from nose.tools import assert_equal
 from ..query import query
 from . import g
 from .spider import UsotukiyaSpider as Spider
+from sqlalchemy.orm import sessionmaker
 
 
 class TestQuery(object):
@@ -14,7 +15,10 @@ class TestQuery(object):
         self.trans.rollback()
 
     def query(self, *args, **kargs):
-        kargs.update(spider=self.spider, conn=g.connection)
+        kargs.update(
+            spider=self.spider,
+            makesession=sessionmaker(bind=g.connection)
+        )
         return query(*args, **kargs)
 
     def test_query(self):

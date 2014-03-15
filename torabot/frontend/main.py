@@ -22,7 +22,7 @@ from ..core.notice import (
 from ..core.kanji import translate
 from ..spider.tora import FrozenSpider
 from . import auth, bp
-from ..ut.session import makeappsession as makesession
+from ..ut.session import makeappsession as makesession, appsessionmaker
 
 
 log = Logger(__name__)
@@ -111,17 +111,16 @@ def search(page):
     oq = request.args.get('q', '')
     tq = translate(oq)
     log.debug('query: {} -> {}', oq, tq)
+    room = current_app.config.get('TORABOT_PAGE_ROOM', 20)
+    q = query(
+        tq,
+        begin=room * page,
+        end=room * (page + 1),
+        return_detail=True,
+        makesession=appsessionmaker(),
+        spider=FrozenSpider()
+    )
     with makesession(commit=True) as session:
-        room = current_app.config.get('TORABOT_PAGE_ROOM', 20)
-        q = query(
-            tq,
-            begin=room * page,
-            end=room * (page + 1),
-            return_detail=True,
-            conn=session.connection(),
-            spider=FrozenSpider()
-        )
-        session.commit()
         options = {}
         if 'userid' in flask_session:
             options['watching'] = _watching(
@@ -129,13 +128,13 @@ def search(page):
                 user_id=int(flask_session['userid']),
                 query_id=q.id,
             )
-        return render_template(
-            'list.html',
-            query=q,
-            page=page,
-            room=room,
-            **options
-        )
+    return render_template(
+        'list.html',
+        query=q,
+        page=page,
+        room=room,
+        **options
+    )
 
 
 @bp.route('/watch', methods=['POST'])
