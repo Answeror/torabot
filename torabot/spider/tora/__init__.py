@@ -1,4 +1,4 @@
-from requests import Session
+import requests
 from urllib.parse import urlencode, urljoin
 import re
 from logbook import Logger
@@ -37,7 +37,7 @@ def make_query_uri(query, start):
     ]))
 
 
-def fetch_list(query, start, session=Session()):
+def fetch_list(query, start, session):
     return fetch(
         make_query_uri(query, start),
         headers={'Referer': QUERY_URL},
@@ -45,7 +45,7 @@ def fetch_list(query, start, session=Session()):
     )
 
 
-def fetch(uri, headers={}, session=Session()):
+def fetch(uri, session, headers={}):
     hd = {'Cookie': 'afg=0'}
     hd.update(headers)
     r = session.get(uri, headers=hd)
@@ -107,7 +107,7 @@ def parse_detail(soup):
     )
 
 
-def safe(fetch, parse, session=Session()):
+def safe(fetch, parse, session):
     soup = BS(fetch(session=session), 'html5lib')
     if check_busy(soup):
         return busy
@@ -158,7 +158,7 @@ def list_one_safe(query, start, session):
     ))
 
 
-def gen_arts(query, begin=0, return_total=False, session=Session()):
+def gen_arts(query, begin=0, return_total=False, session=requests.Session()):
     assert_greater_equal(begin, 0)
     d = list_one_safe(query, begin, session)
     total = d['total']
@@ -175,7 +175,7 @@ def gen_arts(query, begin=0, return_total=False, session=Session()):
         yield from d['arts']
 
 
-def total(query, session=Session()):
+def total(query, session):
     return list_one_safe(query, 0, session)['total']
 
 
@@ -193,14 +193,22 @@ def parse_ptime(soup):
     return None if dt is None else tokyo_to_utc(dt)
 
 
-def ptime(uri, session=Session()):
+def ptime(uri, session):
     return longrun(partial(safe, partial(fetch, uri), parse_ptime, session))
 
 
 class Spider(object):
 
-    def __init__(self):
-        self.session = Session()
+    def __init__(self, pool_size=ROOM + 1):
+        self.session = requests.Session()
+        # http://stackoverflow.com/a/18845952/238472
+        self.session.mount(
+            'http://',
+            requests.adapters.HTTPAdapter(
+                pool_connections=pool_size,
+                pool_maxsize=pool_size
+            )
+        )
 
     def art_n(self, query, n):
         return head(drop(n, self.gen_arts_from_head(query, n + 1)))
