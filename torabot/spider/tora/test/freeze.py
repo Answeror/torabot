@@ -11,7 +11,7 @@ FROZEN_PATH = os.path.join(CURRENT_PATH, 'frozenreqs.pkl')
 #)
 
 
-from .. import gen_arts
+from ..core import gen_arts
 from httmock import HTTMock
 import requests
 import pickle

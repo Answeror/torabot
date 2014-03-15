@@ -3,7 +3,7 @@ from nose.tools import assert_equal
 from httmock import HTTMock
 from .mock import mockrequests
 from .const import USOTUKIYA
-from .. import gen_arts
+from ..core import gen_arts
 
 
 def test_gen_arts():

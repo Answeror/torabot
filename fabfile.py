@@ -31,4 +31,6 @@ def gunicorn():
                 run('pip install -r dependencies.txt')
                 runbg('celery worker -A torabot -f data/celery.log --autoscale=2,1')
                 runbg('celery beat -A torabot')
+                for i in range(4):
+                    runbg('rqworker')
                 runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')

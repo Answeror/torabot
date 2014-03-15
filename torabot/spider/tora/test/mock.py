@@ -4,7 +4,7 @@ from nose.tools import assert_in
 from time import sleep
 from bs4 import BeautifulSoup as BS
 from . import freeze
-from .. import check_busy
+from ..core import check_busy
 
 
 log = Logger(__name__)
