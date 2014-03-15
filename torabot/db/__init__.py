@@ -1,6 +1,7 @@
 from .art import (
     put_art,
     get_art_bi_uri,
+    get_art_hash_bi_uri,
 )
 from .user import (
     add_user,
@@ -55,4 +56,5 @@ __all__ = [
     mark_notice_sent.__name__,
     get_user_bi_id.__name__,
     set_email.__name__,
+    get_art_hash_bi_uri.__name__,
 ]

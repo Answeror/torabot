@@ -14,6 +14,7 @@ from ..db import (
     get_arts_bi_query_id,
     put_art,
     get_art_bi_uri,
+    get_art_hash_bi_uri,
 )
 
 
@@ -78,7 +79,8 @@ def pull_from_head(query, n, spider, conn):
     arts = []
     for rank, art in enumerate(ds):
         art = Bunch(**art)
-        put_art(conn, uri=art.uri, params=art)
+        if art.hash != get_art_hash_bi_uri(conn, art.uri):
+            put_art(conn, uri=art.uri, params=art)
         arts.append(get_art_bi_uri(conn, art.uri))
     set_results(conn, query_id=query.id, art_ids=[art.id for art in arts])
     return arts

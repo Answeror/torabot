@@ -44,3 +44,11 @@ def get_art_bi_uri(conn, uri):
         'where uri = %s'
     ), (uri,)).fetchone()
     return None if ret is None else Bunch(**ret)
+
+
+def get_art_hash_bi_uri(conn, uri):
+    ret = conn.execute((
+        'select hash from art '
+        'where uri = %s'
+    ), (uri,)).fetchone()
+    return None if ret is None else ret[0]
