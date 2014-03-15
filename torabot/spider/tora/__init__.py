@@ -111,7 +111,7 @@ def parse_detail(soup):
 
 
 def safe(fetch, parse, session):
-    soup = BS(fetch(session=session), 'html5lib')
+    soup = BS(fetch(session=session), 'lxml')
     if check_busy(soup):
         return busy
     return parse(soup)
