@@ -52,18 +52,18 @@ def fetch(uri, session, headers={}):
     return r.content
 
 
-def parse_list(soup, session):
-    total, begin, end = parse_status(soup)
+def parse_list(soup, text, session):
+    total, begin, end = parse_status(soup, text)
     return Bunch(
         total=total,
         begin=begin,
         end=end,
-        arts=parse_arts(soup, session)
+        arts=parse_arts(soup, text, session)
     )
 
 
-def parse_status(soup):
-    m = re.search(r'（ (\d+) 件 のうち (\d+) 〜 (\d+) 件表示）', soup.get_text())
+def parse_status(soup, text):
+    m = re.search(r'（ (\d+) 件 のうち (\d+) 〜 (\d+) 件表示）', text)
     if not m:
         total, begin, end = 0, 0, 0
     else:
@@ -73,7 +73,7 @@ def parse_status(soup):
     return total, begin, end
 
 
-def parse_arts(soup, session):
+def parse_arts(soup, text, session):
     base = 'http://www.toranoana.jp/'
     trs = soup.select('table.FixFrame tr')
     if len(trs) <= 3:
@@ -103,28 +103,29 @@ def fill_detail(arts, session):
     return arts
 
 
-def parse_detail(soup):
+def parse_detail(soup, text):
     return Bunch(
-        ptime=parse_ptime(soup),
-        hash=makehash(soup),
+        ptime=parse_ptime(soup, text),
+        hash=makehash(soup, text),
     )
 
 
 def safe(fetch, parse, session):
-    soup = BS(fetch(session=session), 'lxml')
-    if check_busy(soup):
+    text = fetch(session=session).decode('Shift_JIS')
+    soup = BS(text, 'lxml')
+    if check_busy(soup, text):
         return busy
-    return parse(soup)
+    return parse(soup, text)
 
 
-def makehash(soup):
+def makehash(soup, text):
     tags = soup.select('table[summary="Details"]')
     assert tags
     return md5(tags[0].get_text().encode('utf-8')).hexdigest()
 
 
-def check_busy(soup):
-    return re.search(r'大変混み合っています', soup.get_text()) is not None
+def check_busy(soup, text):
+    return '大変混み合っています' in text
 
 
 def longrun(f):
@@ -181,11 +182,7 @@ def gen_arts(query, begin=0, return_total=False, session=None):
         yield from d['arts']
 
 
-def total(query, session):
-    return list_one_safe(query, 0, session)['total']
-
-
-def parse_ptime_tokyo(soup):
+def parse_ptime_tokyo(soup, text):
     for td in soup.select('td.DetailData_R'):
         if td.string:
             try:
@@ -194,13 +191,9 @@ def parse_ptime_tokyo(soup):
                 pass
 
 
-def parse_ptime(soup):
-    dt = parse_ptime_tokyo(soup)
+def parse_ptime(soup, text):
+    dt = parse_ptime_tokyo(soup, text)
     return None if dt is None else tokyo_to_utc(dt)
-
-
-def ptime(uri, session):
-    return longrun(partial(safe, partial(fetch, uri), parse_ptime, session))
 
 
 class Spider(object):
