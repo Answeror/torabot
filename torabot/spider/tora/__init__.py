@@ -161,7 +161,10 @@ def list_one_safe(query, start, session):
     ))
 
 
-def gen_arts(query, begin=0, return_total=False, session=requests.Session()):
+def gen_arts(query, begin=0, return_total=False, session=None):
+    if session is None:
+        session = requests.Session()
+
     assert_greater_equal(begin, 0)
     d = list_one_safe(query, begin, session)
     total = d['total']
@@ -227,7 +230,9 @@ class Spider(object):
 
 class FrozenSpider(object):
 
-    def __init__(self, base=Spider()):
+    def __init__(self, base=None):
+        if base is None:
+            base = Spider()
         self.base = base
         self._art_n = memo(base.art_n)
         self._gen_arts_from_head = gemo(base.gen_arts_from_head)
