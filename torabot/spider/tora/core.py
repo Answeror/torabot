@@ -110,9 +110,10 @@ def parse_detail(soup, text):
 
 
 def safe(fetch, parse, session):
-    text = fetch(session=session).decode('Shift_JIS')
+    raw = fetch(session=session)
+    text = raw.decode('Shift_JIS')
     # 100M memory comsume...
-    soup = BS(text, 'lxml')
+    soup = BS(raw, 'lxml')
     if check_busy(soup, text):
         return busy
     return parse(soup, text)
