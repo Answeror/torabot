@@ -62,7 +62,7 @@ def parse_list(soup, text, session):
 
 
 def parse_status(soup, text):
-    m = re.search(r'（ (\d+) 件 のうち (\d+) 〜 (\d+) 件表示）', text)
+    m = re.search(r'（ (\d+) 件 のうち (\d+) 〜 (\d+) 件表示）', soup.get_text())
     if not m:
         total, begin, end = 0, 0, 0
     else:
