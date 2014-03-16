@@ -22,12 +22,15 @@ def add_result(conn, query_id, art_id, rank):
 
 def add_results(conn, query_id, ranks):
     ranks = list(ranks)
-    result = conn.execute(''.join([
-        'insert into result (query_id, art_id, rank) values ',
-        ', '.join('(%s, %s, %s)' for i in range(len(ranks))),
-        ' returning *',
-    ]), list(chain(*[(query_id, art_id, rank) for art_id, rank in ranks])))
-    return [row[0] for row in result.fetchall()]
+    if ranks:
+        result = conn.execute(''.join([
+            'insert into result (query_id, art_id, rank) values ',
+            ', '.join('(%s, %s, %s)' for i in range(len(ranks))),
+            ' returning *',
+        ]), list(chain(*[(query_id, art_id, rank) for art_id, rank in ranks])))
+        return [row[0] for row in result.fetchall()]
+    else:
+        return []
 
 
 def del_results(conn, query_id):

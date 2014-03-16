@@ -23,6 +23,7 @@ def kill(name):
 def gunicorn():
     with settings(warn_only=True):
         kill('celery')
+        kill('rqworker')
         kill('gunicorn')
     with cd('/www/torabot/repo'):
         run('git pull')
