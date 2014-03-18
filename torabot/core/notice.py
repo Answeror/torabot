@@ -7,21 +7,28 @@ from ..db import (
 )
 from .email import send_notice as send
 from ..core.mod import mod
+from ..ut.bunch import Bunch
 
 
 log = Logger(__name__)
 
 
-def format(notice):
-    return mod(notice.kind).views.web.format_notice(notice)
+def views(notice):
+    return mod(notice.kind).views
+
+
+def web_transform(notice):
+    notice = Bunch(**notice)
+    notice.body = views(notice).web.format_notice_body(notice)
+    notice.status = views(notice).web.format_notice_status(notice)
+    return notice
 
 
 def send_notice(notice, conf, conn):
-    notice = format(notice)
     email = get_user_email_bi_id(conn, notice.user_id)
     log.info('send notice {} to {}', notice.id, email)
     try:
-        send(conf, email, notice.email_body)
+        send(conf, email, views(notice).email.format_notice_body(notice))
     except:
         log.exception('send notice {} to {} failed', notice.id, email)
         return
@@ -30,8 +37,8 @@ def send_notice(notice, conf, conn):
 
 
 def get_notices_bi_user_id(conn, user_id):
-    return list(map(format, _get_notices_bi_user_id(conn, user_id)))
+    return list(map(web_transform, _get_notices_bi_user_id(conn, user_id)))
 
 
 def get_pending_notices_bi_user_id(conn, user_id):
-    return list(map(format, _get_pending_notices_bi_user_id(conn, user_id)))
+    return list(map(web_transform, _get_pending_notices_bi_user_id(conn, user_id)))

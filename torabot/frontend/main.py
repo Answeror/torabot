@@ -1,6 +1,7 @@
 from nose.tools import assert_equal
 from flask import (
     request,
+    current_app,
     render_template,
     session as flask_session
 )
@@ -106,10 +107,15 @@ def notice_conf(user_id):
 def search(page):
     query_text = translate(request.args.get('q', ''))
     with appccontext(commit=True) as conn:
-        q = query(kind='tora', text=query_text, conn=conn)
+        q = query(
+            conn=conn,
+            kind='tora',
+            text=query_text,
+            timeout=current_app.config['TORABOT_SPY_TIMEOUT']
+        )
         options = dict(
             query=q,
-            content=mod(q.kind).views.web.format_query_result(q)
+            content=mod(q.kind).views.web.format_query_result(q.result)
         )
         if 'userid' in flask_session:
             options['watching'] = _watching(

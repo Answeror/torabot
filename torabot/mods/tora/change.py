@@ -2,7 +2,7 @@ from ...ut.bunch import Bunch
 
 
 def changes(old, new):
-    oldmap = {art.uri for art in getattr(old, 'arts', [])}
+    oldmap = {art.uri: art for art in getattr(old, 'arts', [])}
     for art in new.arts:
         if art.uri not in oldmap:
             yield Bunch(kind='new', art=art)
