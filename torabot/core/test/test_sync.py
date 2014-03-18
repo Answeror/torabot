@@ -14,6 +14,6 @@ def mod(kind):
 @patch('torabot.core.sync.mod', mod)
 def test_sync():
     with g.connection.begin_nested() as trans:
-        sync(g.connection, 'tora', '大嘘')
+        sync(g.connection, 'tora', '大嘘', 0)
         assert_equal(query_count(g.connection), 1)
         trans.rollback()

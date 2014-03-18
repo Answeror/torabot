@@ -1,8 +1,11 @@
 import os
 import json
+from logbook import Logger
 
 
 CURRENT_PATH = os.path.dirname(__file__)
+
+log = Logger(__name__)
 
 
 def kanji():
@@ -13,4 +16,6 @@ def kanji():
 
 
 def translate(s):
-    return ''.join(kanji()[c][0] if c in kanji() else c for c in s)
+    t = ''.join(kanji()[c][0] if c in kanji() else c for c in s)
+    log.debug('translate: {} -> {}', s, t)
+    return t

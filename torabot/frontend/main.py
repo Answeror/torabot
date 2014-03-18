@@ -104,12 +104,13 @@ def notice_conf(user_id):
 @bp.route('/search', methods=['GET'], defaults={'page': 0})
 @bp.route('/search/<int:page>', methods=['GET'])
 def search(page):
-    oq = request.args.get('q', '')
-    tq = translate(oq)
-    log.debug('query: {} -> {}', oq, tq)
+    query_text = translate(request.args.get('q', ''))
     with appccontext(commit=True) as conn:
-        q = query(kind='tora', text=tq, conn=conn)
-        options = dict(content=mod(q.kind).views.web.format_query_result(q))
+        q = query(kind='tora', text=query_text, conn=conn)
+        options = dict(
+            query=q,
+            content=mod(q.kind).views.web.format_query_result(q)
+        )
         if 'userid' in flask_session:
             options['watching'] = _watching(
                 conn,

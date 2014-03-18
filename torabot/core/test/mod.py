@@ -5,7 +5,7 @@ from ...mods import tora
 
 class Mod(object):
 
-    def spy(self, query):
+    def spy(self, query, timeout):
         assert_equal(query, '大嘘')
         return bunchr({
             'arts': [

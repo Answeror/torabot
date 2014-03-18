@@ -6,9 +6,9 @@ from ..db import (
 from .mod import mod
 
 
-def sync(conn, kind, text):
+def sync(conn, kind, text, timeout):
     query = get_or_add_query_bi_kind_and_text(conn, kind, text)
-    result = mod(kind).spy(text)
+    result = mod(kind).spy(text, timeout)
     add_one_query_changes(
         conn,
         query.id,

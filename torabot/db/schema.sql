@@ -11,7 +11,7 @@ create table if not exists query (
     unique (kind, text)
 );
 
-create index idx_query_text on query (text);
+create index idx_query_kind_text on query (kind, text);
 create index idx_query_ctime on query (ctime);
 
 create table if not exists "user" (
