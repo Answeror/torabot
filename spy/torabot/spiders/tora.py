@@ -29,6 +29,7 @@ class Tora(Spider):
         return Request(
             self.uri,
             cookies={'afg': '0'},
+            headers={'Referer': QUERY_URL},
             callback=self.parse
         )
 
