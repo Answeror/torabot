@@ -1,4 +1,5 @@
-from ..ut.bunch import Bunch
+from sqlalchemy.sql import text as sql
+from ..ut.bunch import bunchr
 
 
 def watch(conn, user_id, query_id):
@@ -24,11 +25,16 @@ def watching(conn, user_id, query_id):
     ), (user_id, query_id)).fetchone() is not None
 
 
-def get_sorted_watch_details_bi_user_id(conn, user_id):
-    result = conn.execute((
-        'select user_id, query_id, watch.ctime, query.text as query_text '
-        'from watch inner join query on watch.query_id = query.id '
-        'where user_id = %s '
-        'order by watch.ctime desc'
-    ), (user_id,))
-    return [Bunch(**row) for row in result.fetchall()]
+def get_watches_bi_user_id(conn, user_id):
+    result = conn.execute(sql('''
+        select
+            user_id,
+            query_id,
+            watch.ctime,
+            query.kind as query_kind,
+            query.text as query_text
+        from watch inner join query on watch.query_id = query.id
+        where user_id = :user_id
+        order by watch.ctime desc
+    '''), user_id=user_id)
+    return [bunchr(**row) for row in result.fetchall()]

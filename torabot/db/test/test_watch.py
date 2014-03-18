@@ -18,6 +18,7 @@ def test_maxwatch():
         for i in range(43):
             query_ids.append(add_query(
                 g.connection,
+                kind='foo',
                 text=str(i)
             ))
 

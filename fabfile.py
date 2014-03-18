@@ -25,13 +25,21 @@ def gunicorn():
         kill('celery')
         kill('rqworker')
         kill('gunicorn')
+        kill('scrapd')
     with cd('/www/torabot/repo'):
         run('git pull')
-        with prefix('pyenv virtualenvwrapper'):
-            with prefix('workon torabot'):
-                run('pip install -r dependencies.txt')
-                runbg('celery worker -A torabot -f data/celery.log --autoscale=2,1')
-                runbg('celery beat -A torabot')
-                for i in range(4):
-                    runbg('rqworker')
-                runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')
+        with prefix('pyenv shell 2.7.6'):
+            with prefix('pyenv virtualenvwrapper'):
+                with prefix('workon www27'):
+                    run('pip install -r dependencies-27.txt')
+                    with cd('spy'):
+                        runbg('scrapyd')
+                        run('sleep 3')
+                        run('scrapyd-deploy')
+        with prefix('pyenv shell 3.3.4'):
+            with prefix('pyenv virtualenvwrapper'):
+                with prefix('workon torabot'):
+                    run('pip install -r dependencies.txt')
+                    runbg('celery worker -A torabot -f data/celery.log --autoscale=2,1')
+                    runbg('celery beat -A torabot')
+                    runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')

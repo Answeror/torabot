@@ -1,8 +1,8 @@
 from nose.tools import assert_equal
 from flask import (
     request,
-    render_template,
     current_app,
+    render_template,
     session as flask_session
 )
 from logbook import Logger
@@ -11,7 +11,6 @@ from ..db import (
     watch as _watch,
     unwatch as _unwatch,
     watching as _watching,
-    get_sorted_watch_details_bi_user_id,
     get_user_bi_id,
     set_email,
 )
@@ -19,10 +18,11 @@ from ..core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
 )
+from ..core.watch import get_watches_bi_user_id
 from ..core.kanji import translate
-from ..spider.tora import FrozenSpider
 from . import auth, bp
 from ..ut.connection import appccontext
+from ..core.mod import mod
 
 
 log = Logger(__name__)
@@ -40,7 +40,7 @@ def watching(user_id):
         return render_template(
             'watching.html',
             user=get_user_bi_id(conn, user_id),
-            watches=get_sorted_watch_details_bi_user_id(conn, user_id)
+            watches=get_watches_bi_user_id(conn, user_id)
         )
 
 
@@ -105,33 +105,25 @@ def notice_conf(user_id):
 @bp.route('/search', methods=['GET'], defaults={'page': 0})
 @bp.route('/search/<int:page>', methods=['GET'])
 def search(page):
-    oq = request.args.get('q', '')
-    tq = translate(oq)
-    log.debug('query: {} -> {}', oq, tq)
-    room = current_app.config['TORABOT_PAGE_ROOM']
+    query_text = translate(request.args.get('q', ''))
     with appccontext(commit=True) as conn:
         q = query(
-            tq,
-            begin=room * page,
-            end=room * (page + 1),
-            return_detail=True,
             conn=conn,
-            spider=FrozenSpider()
+            kind='tora',
+            text=query_text,
+            timeout=current_app.config['TORABOT_SPY_TIMEOUT']
         )
-        options = {}
+        options = dict(
+            query=q,
+            content=mod(q.kind).views.web.format_query_result(q.result)
+        )
         if 'userid' in flask_session:
             options['watching'] = _watching(
                 conn,
                 user_id=int(flask_session['userid']),
                 query_id=q.id,
             )
-    return render_template(
-        'list.html',
-        query=q,
-        page=page,
-        room=room,
-        **options
-    )
+    return render_template('list.html', **options)
 
 
 @bp.route('/watch', methods=['POST'])

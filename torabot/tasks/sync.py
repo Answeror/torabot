@@ -1,11 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor as Ex
 from ..ut.connection import ccontext
-from ..core.sync import strict
-from ..spider.tora import FrozenSpider
+from ..ut.guard import exguard, timeguard
+from ..core.sync import sync
 from ..db import get_sorted_queries
 from .engine import make as make_engine
 
 
+@timeguard
 def sync_all(conf):
     engine = make_engine(conf)
 
@@ -15,23 +16,24 @@ def sync_all(conf):
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
         for query in queries:
             ex.submit(
-                _sync_one,
-                conf['TORABOT_PAGE_ROOM'],
+                exguard(_sync_one),
+                query.kind,
                 query.text,
                 engine,
+                conf['TORABOT_SPY_TIMEOUT'],
             )
 
 
-def sync_one(query, conf):
+def sync_one(query_kind, query_text, conf):
     engine = make_engine(conf)
-    _sync_one(conf['TORABOT_PAGE_ROOM'], query, engine)
+    _sync_one(query_kind, query_text, engine, conf['TORABOT_SPY_TIMEOUT'])
 
 
-def _sync_one(n, query, engine):
+def _sync_one(query_kind, query_text, engine, timeout):
     with ccontext(commit=True, engine=engine) as conn:
-        strict(
-            query,
-            n,
-            spider=FrozenSpider(),
+        sync(
             conn=conn,
+            kind=query_kind,
+            text=query_text,
+            timeout=timeout,
         )
