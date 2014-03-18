@@ -17,11 +17,11 @@ from ..core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
 )
-from ..core.watch import get_sorted_watch_details_bi_user_id
+from ..core.watch import get_watches_bi_user_id
 from ..core.kanji import translate
 from . import auth, bp
 from ..ut.connection import appccontext
-from .mod import mod
+from ..core.mod import mod
 
 
 log = Logger(__name__)
@@ -39,7 +39,7 @@ def watching(user_id):
         return render_template(
             'watching.html',
             user=get_user_bi_id(conn, user_id),
-            watches=get_sorted_watch_details_bi_user_id(conn, user_id)
+            watches=get_watches_bi_user_id(conn, user_id)
         )
 
 
@@ -108,8 +108,8 @@ def search(page):
     tq = translate(oq)
     log.debug('query: {} -> {}', oq, tq)
     with appccontext(commit=True) as conn:
-        q = query(text=tq, conn=conn)
-        options = dict(content=mod(q.kind).views.web.format_result(q.result))
+        q = query(kind='tora', text=tq, conn=conn)
+        options = dict(content=mod(q.kind).views.web.format_query_result(q))
         if 'userid' in flask_session:
             options['watching'] = _watching(
                 conn,

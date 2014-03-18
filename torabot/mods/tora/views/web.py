@@ -6,7 +6,7 @@ from .ut import format_change_kind
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
-def format_result(query):
+def format_query_result(query):
     return render_template_string(template(), query=query)
 
 

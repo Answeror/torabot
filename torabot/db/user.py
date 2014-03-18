@@ -1,4 +1,4 @@
-from ..ut.bunch import Bunch
+from ..ut.bunch import bunchr
 
 
 def add_user(conn, name, email, openid):
@@ -21,7 +21,7 @@ def get_user_email_bi_id(conn, id):
 
 def get_user_bi_id(conn, id):
     ret = conn.execute('select * from "user" where id = %s', (id,)).fetchone()
-    return None if ret is None else Bunch(**ret)
+    return None if ret is None else bunchr(**ret)
 
 
 def set_email(conn, id, email):

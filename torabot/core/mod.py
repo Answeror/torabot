@@ -21,3 +21,6 @@ class Mod(object):
 
     def spy(self, query):
         return spy(self.name, query)
+
+    def __getattr__(self, name):
+        return getattr(self.mod, name)

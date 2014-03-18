@@ -1,5 +1,5 @@
 from sqlalchemy.sql import text as sql
-from ..ut.bunch import Bunch
+from ..ut.bunch import bunchr
 
 
 def watch(conn, user_id, query_id):
@@ -37,4 +37,4 @@ def get_watches_bi_user_id(conn, user_id):
         where user_id = :user_id
         order by watch.ctime desc
     '''), user_id=user_id)
-    return [Bunch(**row) for row in result.fetchall()]
+    return [bunchr(**row) for row in result.fetchall()]

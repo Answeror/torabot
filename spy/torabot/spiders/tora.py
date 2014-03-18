@@ -29,7 +29,7 @@ class Tora(Spider):
                 yield Art(
                     title=tr.xpath('td[@class="c1"]/a/text()').extract()[0],
                     author=tr.xpath('td[@class="c2"]/a/text()').extract()[0],
-                    company=tr.xpath('td[@class="c2"]/a/text()').extract()[0],
+                    company=tr.xpath('td[@class="c3"]/a/text()').extract()[0],
                     uri=urljoin(BASE_URL, tr.xpath('td[@class="c1"]/a/@href').extract()[0]),
                     status='reserve' if u'予' in tr.xpath('td[@class="c7"]/text()').extract() else 'other',
                 )

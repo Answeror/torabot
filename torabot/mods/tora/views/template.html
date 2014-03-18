@@ -1,0 +1,20 @@
+<table class='table table-condensed table-striped'>
+    <thead>
+        <tr>
+            <td class=col-sm-7>名称</td>
+            <td class=col-sm-2>作者</td>
+            <td class=col-sm-2>社团</td>
+            <td class=col-sm-1>状态</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for art in query.result.arts %}
+    <tr>
+        <td><a href="{{ art.uri }}">{{ art.title }}</a></td>
+        <td>{{ art.author }}</td>
+        <td>{{ art.company }}</td>
+        <td>{{ '预售' if art.status == 'reserve' else '' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>

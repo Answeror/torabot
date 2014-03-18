@@ -6,14 +6,18 @@ from ..db import (
     get_pending_notices_bi_user_id as _get_pending_notices_bi_user_id
 )
 from .email import send_notice as send
-from .render import render_notice
+from ..core.mod import mod
 
 
 log = Logger(__name__)
 
 
+def format(notice):
+    return mod(notice.kind).views.web.format_notice(notice)
+
+
 def send_notice(notice, conf, conn):
-    notice = render_notice(notice)
+    notice = format(notice)
     email = get_user_email_bi_id(conn, notice.user_id)
     log.info('send notice {} to {}', notice.id, email)
     try:
@@ -26,8 +30,8 @@ def send_notice(notice, conf, conn):
 
 
 def get_notices_bi_user_id(conn, user_id):
-    return list(map(render_notice, _get_notices_bi_user_id(conn, user_id)))
+    return list(map(format, _get_notices_bi_user_id(conn, user_id)))
 
 
 def get_pending_notices_bi_user_id(conn, user_id):
-    return list(map(render_notice, _get_pending_notices_bi_user_id(conn, user_id)))
+    return list(map(format, _get_pending_notices_bi_user_id(conn, user_id)))

@@ -1,6 +1,6 @@
 from sqlalchemy.sql import text as sql
 from psycopg2.extras import Json
-from ..ut.bunch import Bunch
+from ..ut.bunch import bunchr
 
 
 def add_query(conn, kind, text, result={}):
@@ -17,7 +17,7 @@ def get_or_add_query_bi_kind_and_text(conn, kind, text):
         sql('select * from get_or_add_query_bi_kind_and_text(:kind, :text)'),
         kind=kind, text=text
     )
-    return Bunch(**result.fetchone())
+    return bunchr(**result.fetchone())
 
 
 def set_query_result(conn, query_id, result):
@@ -34,7 +34,7 @@ def get_query_bi_kind_and_text(conn, kind, text):
         kind=kind,
         text=text
     ).fetchone()
-    return None if ret is None else Bunch(**ret)
+    return None if ret is None else bunchr(**ret)
 
 
 def query_count(conn):
@@ -51,4 +51,4 @@ def has_query_bi_kind_and_text(conn, kind, text):
 
 def get_sorted_queries(conn):
     result = conn.execute(sql('select * from query order by ctime'))
-    return [Bunch(**row) for row in result.fetchall()]
+    return [bunchr(**row) for row in result.fetchall()]

@@ -2,6 +2,7 @@ import subprocess as sp
 from logbook import Logger
 from redis import Redis
 import json
+from ..ut.bunch import bunchr
 
 
 log = Logger(__name__)
@@ -20,4 +21,4 @@ def spy(kind, query):
     except:
         log.exception('spy %s for %s failed' % (kind, query))
         return {}
-    return json.loads(redis.blpop('torabot:spy:%s:items' % kind))
+    return bunchr(json.loads(redis.blpop('torabot:spy:%s:items' % kind)[1].decode('ascii')))
