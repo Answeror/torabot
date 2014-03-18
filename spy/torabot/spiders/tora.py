@@ -16,9 +16,10 @@ class Tora(Spider):
 
     name = 'tora'
 
-    def __init__(self, query, *args, **kargs):
+    def __init__(self, query, id, *args, **kargs):
         Spider.__init__(self, *args, **kargs)
         self.start_urls = [makeuri(encode(query))]
+        self.id = id
 
     def parse(self, response):
         sel = Selector(response)
