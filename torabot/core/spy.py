@@ -13,11 +13,9 @@ def spy(kind, query):
         sp.check_call([
             'curl',
             'http://localhost:6800/schedule.json',
-            '-d',
-            'project=torabot',
-            '-d',
-            'spider=%s' % kind,
-            'query=%s' % query
+            '-d', 'project=torabot',
+            '-d', 'spider=%s' % kind,
+            '-d', 'query=%s' % query,
         ])
     except:
         log.exception('spy %s for %s failed' % (kind, query))

@@ -34,7 +34,7 @@ class Tora(Spider):
                     status='reserve' if u'予' in tr.xpath('td[@class="c7"]/text()').extract() else 'other',
                 )
 
-        return Result(arts=gen())
+        return Result(arts=list(gen()))
 
 
 def encode(query):

@@ -14,3 +14,12 @@
 /prof.py
 /show.py
 /tmp/
+
+/spy/dbs/
+/spy/eggs/
+/spy/build/
+/spy/items/
+/spy/logs/
+/spy/project.egg-info/
+/spy/setup.py
+/spy/twistd.pid
