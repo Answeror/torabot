@@ -15,6 +15,13 @@ class Art(Item):
     status = Field()
 
 
+class Page(Item):
+
+    uri = Field()
+    total = Field()
+    arts = Field()
+
+
 class Result(Item):
 
-    arts = Field()
+    ok = Field()

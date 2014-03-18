@@ -5,11 +5,13 @@ from urlparse import urljoin
 from urllib import urlencode
 from scrapy.spider import Spider
 from scrapy.selector import Selector
-from ..items import Art, Result
+from scrapy.http import Request
+from ..items import Art, Page, Result
 
 
 BASE_URL = 'http://www.toranoana.jp/'
 QUERY_URL = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
+MAX_TRIES = 10
 
 
 class Tora(Spider):
@@ -18,14 +20,23 @@ class Tora(Spider):
 
     def __init__(self, query, id, *args, **kargs):
         Spider.__init__(self, *args, **kargs)
-        self.start_urls = [makeuri(encode(query))]
+        self.uri = makeuri(encode(query))
         self.id = id
+        self.tries = 0
+
+    @property
+    def request(self):
+        return Request(
+            self.uri,
+            cookies={'afg': '0'},
+            callback=self.parse
+        )
+
+    def start_requests(self):
+        return [self.request]
 
     def parse(self, response):
-        sel = Selector(response)
-        trs = list(sel.xpath('//table[@class="FixFrame"]//tr'))
-
-        def gen():
+        def gen(trs):
             for tr in trs[2:-1:2]:
                 yield Art(
                     title=tr.xpath('td[@class="c1"]/a/text()').extract()[0],
@@ -35,10 +46,20 @@ class Tora(Spider):
                     status='reserve' if u'予' in tr.xpath('td[@class="c7"]/text()').extract() else 'other',
                 )
 
-        return Result(
-            uri=self.start_urls[0],
-            arts=list(gen())
-        )
+        self.tries += 1
+        sel = Selector(response)
+
+        try:
+            trs = list(sel.xpath('//table[@class="FixFrame"]//tr'))
+            return Page(
+                uri=self.uri,
+                total=int(sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/span[2]/text()').re('\d+')[0]),
+                arts=list(gen(trs))
+            )
+        except:
+            if self.tries >= MAX_TRIES:
+                return Result(ok=False)
+            return self.request
 
 
 def encode(query):
