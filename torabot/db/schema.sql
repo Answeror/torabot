@@ -1,38 +1,18 @@
 -- type
-create type art_status as enum ('other', 'reserve');
 create type notice_status as enum ('pending', 'sent');
 
 -- table
-create table if not exists art (
-    id serial primary key,
-    title text not null,
-    author text,
-    company text,
-    uri text unique not null,
-    status art_status,
-    hash char(32),
-    ptime timestamp
-);
-
-create index idx_art_uri on art (uri);
-
 create table if not exists query (
     id serial primary key,
-    text text unique,
-    total int default 0,
-    ctime timestamp default now()
+    kind text not null,
+    text text not null,
+    result json not null default '{}',
+    ctime timestamp default now(),
+    unique (kind, text)
 );
 
 create index idx_query_text on query (text);
 create index idx_query_ctime on query (ctime);
-
-create table if not exists result (
-    query_id int references query(id),
-    art_id int references art(id),
-    rank int not null,
-    primary key (query_id, art_id),
-    unique (query_id, rank)
-);
 
 create table if not exists "user" (
     id serial primary key,
@@ -55,13 +35,10 @@ create index idx_watch_ctime on watch (ctime);
 
 create table if not exists change (
     id serial primary key,
-    art_id int references art(id),
-    old_status art_status,
-    new_status art_status,
+    query_id int references query(id),
+    data json not null default '{}',
     ctime timestamp default now()
 );
-
-create index idx_change_art_id on change (art_id);
 
 create table if not exists notice (
     id serial primary key,
@@ -72,6 +49,22 @@ create table if not exists notice (
 );
 
 create index idx_notice_mix on notice (user_id, status, change_id, ctime);
+
+-- function
+
+create or replace function get_or_add_query_bi_kind_and_text(kind text, text text)
+    returns setof query
+as $$
+    begin
+        insert into query (kind, text)
+        select $1, $2
+        where not exists (
+            select 1 from query as q
+            where q.kind = $1 and q.text = $2
+        );
+        return query select * from query as q where q.kind = $1 and q.text = $2;
+    end
+$$ language plpgsql;
 
 -- trigger
 create or replace function check_maxwatch() returns trigger as $$
@@ -94,53 +87,18 @@ create trigger check_maxwatch
     for each row
     execute procedure check_maxwatch();
 
-create or replace function insert_snapshot() returns trigger as $$
-    begin
-        insert into change (art_id, new_status) values (NEW.id, NEW.status);
-        return NEW;
-    end;
-$$ language plpgsql;
-
-drop trigger if exists insert_snapshot on art;
-create trigger insert_snapshot
-    after insert on art
-    for each row
-    execute procedure insert_snapshot();
-
-create or replace function update_snapshot() returns trigger as $$
-    begin
-        insert into change (art_id, old_status, new_status) values (NEW.id, OLD.status, NEW.status);
-        return NEW;
-    end;
-$$ language plpgsql;
-
-drop trigger if exists update_snapshot on art;
-create trigger update_snapshot
-    after update on art
-    for each row
-    when (OLD.status is distinct from NEW.status and NEW.status != 'other')
-    execute procedure update_snapshot();
-
 create or replace function broadcast() returns trigger as $$
     begin
         insert into notice (user_id, change_id)
-            select watch.user_id as user_id, related.id as change_id
-            from watch, (
-                select id, ctime
-                from change
-                where change.art_id = NEW.art_id and not exists (
-                    select *
-                    from notice
-                    where notice.change_id = change.id and notice.ctime >= change.ctime
-                )
-            ) as related
-            where watch.query_id = NEW.query_id and watch.ctime <= related.ctime;
+            select watch.user_id as user_id, NEW.id as change_id
+            from watch
+            where watch.query_id = NEW.query_id and watch.ctime <= NEW.ctime;
         return NEW;
     end;
 $$ language plpgsql;
 
-drop trigger if exists insert_broadcast on result;
+drop trigger if exists insert_broadcast on change;
 create trigger insert_broadcast
-    after insert on result
+    after insert on change
     for each row
     execute procedure broadcast();

@@ -1,8 +1,3 @@
-from .art import (
-    put_art,
-    get_art_bi_uri,
-    get_art_hash_bi_uri,
-)
 from .user import (
     add_user,
     get_user_id_bi_openid,
@@ -14,16 +9,15 @@ from .watch import (
     watching,
     watch,
     unwatch,
-    get_sorted_watch_details_bi_user_id,
+    get_watches_bi_user_id,
 )
 from .query import (
-    get_query_bi_text,
-    has_query_bi_text,
-    get_arts_bi_query_id,
-    set_results,
-    set_total,
-    put_query,
+    get_or_add_query_bi_kind_and_text,
+    get_query_bi_kind_and_text,
+    has_query_bi_kind_and_text,
     get_sorted_queries,
+    query_count,
+    set_query_result,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -31,23 +25,18 @@ from .notice import (
     get_pending_notices,
     mark_notice_sent,
 )
+from .change import add_one_query_changes
 
 
 __all__ = [
-    put_art.__name__,
-    get_art_bi_uri.__name__,
     get_user_id_bi_openid.__name__,
     add_user.__name__,
     watching.__name__,
     watch.__name__,
     unwatch.__name__,
-    get_sorted_watch_details_bi_user_id.__name__,
-    get_query_bi_text.__name__,
-    has_query_bi_text.__name__,
-    get_arts_bi_query_id.__name__,
-    set_results.__name__,
-    set_total.__name__,
-    put_query.__name__,
+    get_watches_bi_user_id.__name__,
+    get_query_bi_kind_and_text.__name__,
+    has_query_bi_kind_and_text.__name__,
     get_sorted_queries.__name__,
     get_notices_bi_user_id.__name__,
     get_pending_notices_bi_user_id.__name__,
@@ -56,5 +45,8 @@ __all__ = [
     mark_notice_sent.__name__,
     get_user_bi_id.__name__,
     set_email.__name__,
-    get_art_hash_bi_uri.__name__,
+    query_count.__name__,
+    add_one_query_changes.__name__,
+    set_query_result.__name__,
+    get_or_add_query_bi_kind_and_text.__name__,
 ]
