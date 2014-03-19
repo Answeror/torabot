@@ -1,3 +1,17 @@
+import openid.oidutil
+
+
+# patch for lxml
+# ValueError: Unicode strings with encoding declaration are not supported.
+# Please use bytes input or XML fragments without declaration.
+openid.oidutil.elementtree_modules = [
+    'xml.etree.cElementTree',
+    'xml.etree.ElementTree',
+    'cElementTree',
+    'elementtree.ElementTree',
+]
+
+
 from flask.ext.openid import OpenID
 from flask import (
     session as flask_session,

@@ -4,9 +4,9 @@
 /celerybeat-schedule
 /toraconf.py
 
-/build/
+build/
 /dist/
-/*.egg-info/
+*.egg-info/
 /data/
 /temp/
 
@@ -15,12 +15,9 @@
 /show.py
 /tmp/
 
-/spy/dbs/
-/spy/eggs/
-/spy/build/
-/spy/items/
-/spy/logs/
-/spy/project.egg-info/
-/spy/setup.py
-/spy/twistd.pid
-/spy/.scrapy/
+/dbs/
+/eggs/
+/items/
+/logs/
+/twistd.pid
+/.scrapy/

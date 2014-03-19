@@ -1,3 +1,4 @@
+# coding: utf-8
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -5,6 +6,7 @@
 
 from scrapy_redis.pipelines import RedisPipeline
 from scrapy import log
+from hashlib import md5
 from .items import Result
 
 
@@ -12,7 +14,10 @@ class Output(RedisPipeline):
 
     def item_key(self, item, spider):
         """Returns redis key based on given spider"""
-        return "torabot:spy:%s:%s:items" % (spider.name, spider.id)
+        return "torabot:spy:%s:%s:items" % (
+            spider.name,
+            md5(item['query'].encode('utf-8')).hexdigest()
+        )
 
     def process_item(self, item, spider):
         try:

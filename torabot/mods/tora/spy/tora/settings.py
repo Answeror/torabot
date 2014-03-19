@@ -12,13 +12,13 @@ SPIDER_MODULES = ['tora.spiders']
 NEWSPIDER_MODULE = 'tora.spiders'
 
 ITEM_PIPELINES = {
-    'torabot.pipelines.Output': 42,
+    'torabot.spy.pipelines.Output': 42,
 }
 
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': None,
-    'torabot.middlewares.RotateUserAgentMiddleware': 400,
+    'torabot.spy.middlewares.RotateUserAgentMiddleware': 400,
     'tora.middlewares.Retry': 500,
 }
 

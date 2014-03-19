@@ -17,6 +17,7 @@ class Art(Item):
 
 class Page(Item):
 
+    query = Field()
     uri = Field()
     total = Field()
     arts = Field()

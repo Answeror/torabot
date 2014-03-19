@@ -7,55 +7,53 @@
 from collections import OrderedDict
 from urlparse import urljoin
 from urllib import urlencode
-from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import Request
 from scrapy import log
-from hashlib import md5
+from torabot.spy.items import Result
+from torabot.spy.spiders.redis import RedisSpider
 from ..items import Art, Page
-from torabot.items import Result
 
 
 BASE_URL = 'http://www.toranoana.jp/'
 QUERY_URL = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
 
 
-class Tora(Spider):
+class Tora(RedisSpider):
 
     name = 'tora'
 
-    def __init__(self, query, *args, **kargs):
-        Spider.__init__(self, *args, **kargs)
-        self.query = decode(query)
+    def __init__(self, life=60, *args, **kargs):
+        RedisSpider.__init__(self, *args, **kargs)
+        self.life = float(life)
 
-    @property
-    def id(self):
-        return md5(self.query.encode('utf-8')).hexdigest()
-
-    @property
-    def uri(self):
-        return makeuri(self.query)
-
-    @property
-    def request(self):
+    def make_request_from_query(self, query):
+        uri = makeuri(query)
         return Request(
-            self.uri,
+            uri,
             cookies={'afg': '0'},
             headers={'Referer': QUERY_URL},
-            callback=self.parse
+            callback=self.parse,
+            meta=dict(
+                query=query,
+                uri=uri,
+            ),
+            dont_filter=True,
         )
 
-    def start_requests(self):
-        try:
-            return [self.request]
-        except:
-            log.msg('start requests failed', level=log.ERROR)
-            return []
-
     def parse(self, response):
+        query = response.meta['query']
+        uri = response.meta['uri']
+        log.msg(u'got response of query %s' % query, level=log.INFO)
+
         if empty(response.body_as_unicode()):
             log.msg('empty result', level=log.INFO)
-            return Page(uri=self.uri, total=0, arts=[])
+            return Page(
+                query=query,
+                uri=uri,
+                total=0,
+                arts=[]
+            )
 
         def gen(trs):
             for tr in trs[2:-1:2]:
@@ -70,10 +68,15 @@ class Tora(Spider):
         sel = Selector(response)
         try:
             trs = list(sel.xpath('//table[@class="FixFrame"]//tr'))
-            return Page(uri=self.uri, total=total(sel), arts=list(gen(trs)))
+            return Page(
+                query=query,
+                uri=uri,
+                total=total(sel),
+                arts=list(gen(trs))
+            )
         except:
             log.msg('parse failed', level=log.ERROR)
-            return Result(ok=False)
+            return Result(ok=False, query=query)
 
 
 def total(sel):
@@ -82,10 +85,6 @@ def total(sel):
 
 def empty(content):
     return u'該当する商品が見つかりませんでした。' in content
-
-
-def decode(query):
-    return query.decode('utf-8') if isinstance(query, str) else query
 
 
 def makeuri(query, start=0):
