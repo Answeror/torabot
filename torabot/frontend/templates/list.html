@@ -3,5 +3,7 @@
 {% include "listnav.html" %}
 {% endblock %}
 {% block content %}
+<p>本查询最近一次更新时间为: {{ momentjs(query.mtime).fromnow() }}</p>
+<hr>
 {{ content | safe }}
 {% endblock %}

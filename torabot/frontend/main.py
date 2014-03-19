@@ -23,6 +23,7 @@ from ..core.kanji import translate
 from . import auth, bp
 from ..ut.connection import appccontext
 from ..core.mod import mod
+from .momentjs import momentjs
 
 
 log = Logger(__name__)
@@ -178,4 +179,5 @@ def inject_locals():
         min=min,
         max=max,
         len=len,
+        momentjs=momentjs,
     )

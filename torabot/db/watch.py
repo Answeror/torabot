@@ -32,7 +32,8 @@ def get_watches_bi_user_id(conn, user_id):
             query_id,
             watch.ctime,
             query.kind as query_kind,
-            query.text as query_text
+            query.text as query_text,
+            query.mtime as query_mtime
         from watch inner join query on watch.query_id = query.id
         where user_id = :user_id
         order by watch.ctime desc
