@@ -21,8 +21,8 @@ ITEM_PIPELINES = {
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': None,
-    'torabot.middlewares.RotateUserAgentMiddleware': 42,
-    'torabot.middlewares.ToraRetry': 41,
+    'torabot.middlewares.RotateUserAgentMiddleware': 400,
+    'torabot.middlewares.ToraRetry': 500,
 }
 
 #To make RotateUserAgentMiddleware enable.
