@@ -13,7 +13,7 @@
     <tbody>
     {% for watch in watches %}
     <tr>
-        <td>{{ watch.ctime.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ momentjs(watch.ctime).calendar() }}</td>
         <td><a href='{{ url_for(".search", q=watch.query_text) }}'>{{ watch.query_text }}</a></td>
         <td>{{ momentjs(watch.query_mtime).fromnow() }}</td>
         <td>

@@ -8,8 +8,8 @@
 
 BOT_NAME = 'torabot'
 
-SPIDER_MODULES = ['torabot.spiders']
-NEWSPIDER_MODULE = 'torabot.spiders'
+SPIDER_MODULES = []
+#NEWSPIDER_MODULE = 'torabot.spiders'
 
 ITEM_PIPELINES = {
     'torabot.pipelines.Output': 42,
