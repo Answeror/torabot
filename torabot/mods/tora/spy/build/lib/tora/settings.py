@@ -1,4 +1,4 @@
-# Scrapy settings for torabot project
+# Scrapy settings for tora project
 #
 # For simplicity, this file contains only the most important settings by
 # default. All the other settings are documented here:
@@ -6,10 +6,10 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
-BOT_NAME = 'torabot'
+BOT_NAME = 'tora'
 
-SPIDER_MODULES = ['torabot.spiders']
-NEWSPIDER_MODULE = 'torabot.spiders'
+SPIDER_MODULES = ['tora.spiders']
+NEWSPIDER_MODULE = 'tora.spiders'
 
 ITEM_PIPELINES = {
     'torabot.pipelines.Output': 42,
@@ -17,7 +17,9 @@ ITEM_PIPELINES = {
 
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
+    'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': None,
     'torabot.middlewares.RotateUserAgentMiddleware': 400,
+    'tora.middlewares.Retry': 500,
 }
 
 #To make RotateUserAgentMiddleware enable.

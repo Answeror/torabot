@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+pushd spy > /dev/null
+scrapyd-deploy
+popd > /dev/null
+for i in `find torabot/mods/ -exec test -d {}/spy \; -print`; do
+    pushd $i/spy > /dev/null
+    scrapyd-deploy
+    popd > /dev/null
+done

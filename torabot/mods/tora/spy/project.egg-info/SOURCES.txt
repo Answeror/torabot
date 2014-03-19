@@ -1,0 +1,12 @@
+setup.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt
+tora/__init__.py
+tora/items.py
+tora/middlewares.py
+tora/pipelines.py
+tora/settings.py
+tora/spiders/__init__.py

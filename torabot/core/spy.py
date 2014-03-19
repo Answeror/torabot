@@ -11,15 +11,14 @@ redis = Redis()
 
 
 def spy(kind, query, timeout):
-    id = md5(query.encode('utf-8')).hexdigest()
     sp.check_call([
         'curl',
         'http://localhost:6800/schedule.json',
-        '-d', 'project=torabot',
+        '-d', 'project=%s' % kind,
         '-d', 'spider=%s' % kind,
         '-d', 'query=%s' % query,
-        '-d', 'id=%s' % id,
     ])
+    id = md5(query.encode('utf-8')).hexdigest()
     resp = redis.blpop('torabot:spy:%s:%s:items' % (kind, id), timeout=timeout)
     if resp:
         r = json.loads(resp[1].decode('ascii'))

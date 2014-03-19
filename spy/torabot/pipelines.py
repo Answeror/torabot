@@ -8,11 +8,6 @@ from scrapy import log
 from .items import Result
 
 
-class SpyPipeline(object):
-    def process_item(self, item, spider):
-        return item
-
-
 class Output(RedisPipeline):
 
     def item_key(self, item, spider):

@@ -6,22 +6,6 @@
 from scrapy.item import Item, Field
 
 
-class Art(Item):
-
-    title = Field()
-    author = Field()
-    company = Field()
-    uri = Field()
-    status = Field()
-
-
-class Page(Item):
-
-    uri = Field()
-    total = Field()
-    arts = Field()
-
-
 class Result(Item):
 
     ok = Field()

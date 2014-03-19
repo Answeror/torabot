@@ -1,4 +1,8 @@
 # coding: utf-8
+# This package will contain the spiders of your Scrapy project
+#
+# Please refer to the documentation for information on how to create and manage
+# your spiders.
 
 from collections import OrderedDict
 from urlparse import urljoin
@@ -8,7 +12,8 @@ from scrapy.selector import Selector
 from scrapy.http import Request
 from scrapy import log
 from hashlib import md5
-from ..items import Art, Page, Result
+from ..items import Art, Page
+from torabot.items import Result
 
 
 BASE_URL = 'http://www.toranoana.jp/'
