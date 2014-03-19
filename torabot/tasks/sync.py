@@ -21,19 +21,27 @@ def sync_all(conf):
                 query.text,
                 engine,
                 conf['TORABOT_SPY_TIMEOUT'],
+                conf['TORABOT_SPY_SLAVES'],
             )
 
 
 def sync_one(query_kind, query_text, conf):
     engine = make_engine(conf)
-    _sync_one(query_kind, query_text, engine, conf['TORABOT_SPY_TIMEOUT'])
+    _sync_one(
+        query_kind,
+        query_text,
+        engine,
+        conf['TORABOT_SPY_TIMEOUT'],
+        conf['TORABOT_SPY_SLAVES'],
+    )
 
 
-def _sync_one(query_kind, query_text, engine, timeout):
+def _sync_one(query_kind, query_text, engine, timeout, slaves):
     with ccontext(commit=True, engine=engine) as conn:
         sync(
             conn=conn,
             kind=query_kind,
             text=query_text,
             timeout=timeout,
+            slaves=slaves,
         )

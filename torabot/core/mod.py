@@ -19,8 +19,8 @@ class Mod(object):
     def kind(self):
         return self.name
 
-    def spy(self, query, timeout):
-        return spy(self.name, query, timeout)
+    def spy(self, query, timeout, **kargs):
+        return spy(self.name, query, timeout, **kargs)
 
     def __getattr__(self, name):
         return getattr(self.mod, name)

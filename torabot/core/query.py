@@ -9,7 +9,7 @@ def from_remote(conn, kind, text):
     return get_query_bi_kind_and_text(conn, kind, text)
 
 
-def query(conn, kind, text, timeout):
+def query(conn, kind, text, timeout, **kargs):
     if not has_query_bi_kind_and_text(conn, kind, text):
-        sync(conn, kind, text, timeout)
+        sync(conn, kind, text, timeout, **kargs)
     return get_query_bi_kind_and_text(conn, kind, text)

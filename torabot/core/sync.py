@@ -7,9 +7,9 @@ from ..db import (
 from .mod import mod
 
 
-def sync(conn, kind, text, timeout):
+def sync(conn, kind, text, timeout, **kargs):
     query = get_or_add_query_bi_kind_and_text(conn, kind, text)
-    result = mod(kind).spy(text, timeout)
+    result = mod(kind).spy(text, timeout, **kargs)
     if query.result == result:
         touch_query_bi_id(conn, query.id)
     else:

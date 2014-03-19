@@ -10,10 +10,10 @@ log = Logger(__name__)
 redis = Redis()
 
 
-def prepare(kind, query, timeout):
+def prepare(kind, query, timeout, **kargs):
     r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
     if r.ok and r.json()['status'] == 'ok':
-        if r.json()['running']:
+        if len(r.json()['running']) >= kargs.get('slaves', 1):
             return True
         r = requests.post(
             'http://localhost:6800/schedule.json',
@@ -28,7 +28,7 @@ def prepare(kind, query, timeout):
     return False
 
 
-def spy(kind, query, timeout):
+def spy(kind, query, timeout, **kargs):
     if not prepare(kind=kind, query=query, timeout=timeout):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
