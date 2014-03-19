@@ -1,5 +1,6 @@
 from sqlalchemy.sql import text as sql
 from psycopg2.extras import Json
+from datetime import datetime
 from ..ut.bunch import bunchr
 
 
@@ -52,3 +53,11 @@ def has_query_bi_kind_and_text(conn, kind, text):
 def get_sorted_queries(conn):
     result = conn.execute(sql('select * from query order by ctime'))
     return [bunchr(**row) for row in result.fetchall()]
+
+
+def touch_query_bi_id(conn, id):
+    conn.execute(
+        sql('update query set mtime = :mtime where id = :id'),
+        id=id,
+        mtime=datetime.utcnow()
+    )

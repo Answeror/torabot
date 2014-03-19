@@ -18,6 +18,7 @@ from .query import (
     get_sorted_queries,
     query_count,
     set_query_result,
+    touch_query_bi_id,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -49,4 +50,5 @@ __all__ = [
     add_one_query_changes.__name__,
     set_query_result.__name__,
     get_or_add_query_bi_kind_and_text.__name__,
+    touch_query_bi_id.__name__,
 ]
