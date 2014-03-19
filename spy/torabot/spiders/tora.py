@@ -64,7 +64,7 @@ class Tora(Spider):
             trs = list(sel.xpath('//table[@class="FixFrame"]//tr'))
             return Page(uri=self.uri, total=total(sel), arts=list(gen(trs)))
         except:
-            if empty(sel):
+            if empty(response):
                 log.msg('empty result', level=log.INFO)
                 return Page(uri=self.uri, total=0, arts=[])
             return Result(ok=False)
@@ -74,8 +74,8 @@ def total(sel):
     return int(sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/span[2]/text()').re('\d+')[0])
 
 
-def empty(sel):
-    return sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/center[1]/text()').re(u'該当する商品が見つかりませんでした。')
+def empty(response):
+    return u'該当する商品が見つかりませんでした。' in response.body_as_unicode()
 
 
 def decode(query):
@@ -97,4 +97,4 @@ def good(response):
         total(sel)
         return True
     except:
-        return empty(sel)
+        return empty(response)
