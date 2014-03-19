@@ -48,6 +48,10 @@ class Tora(Spider):
             return []
 
     def parse(self, response):
+        if empty(response.body_as_unicode()):
+            log.msg('empty result', level=log.INFO)
+            return Page(uri=self.uri, total=0, arts=[])
+
         def gen(trs):
             for tr in trs[2:-1:2]:
                 yield Art(
@@ -59,14 +63,11 @@ class Tora(Spider):
                 )
 
         sel = Selector(response)
-
         try:
             trs = list(sel.xpath('//table[@class="FixFrame"]//tr'))
             return Page(uri=self.uri, total=total(sel), arts=list(gen(trs)))
         except:
-            if empty(response):
-                log.msg('empty result', level=log.INFO)
-                return Page(uri=self.uri, total=0, arts=[])
+            log.msg('parse failed', level=log.ERROR)
             return Result(ok=False)
 
 
@@ -74,8 +75,8 @@ def total(sel):
     return int(sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/span[2]/text()').re('\d+')[0])
 
 
-def empty(response):
-    return u'該当する商品が見つかりませんでした。' in response.body_as_unicode()
+def empty(content):
+    return u'該当する商品が見つかりませんでした。' in content
 
 
 def decode(query):
@@ -92,9 +93,4 @@ def makeuri(query, start=0):
 
 
 def good(response):
-    sel = Selector(response)
-    try:
-        total(sel)
-        return True
-    except:
-        return empty(response)
+    return u'大変混み合っています' not in response.body_as_unicode()
