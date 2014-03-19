@@ -32,8 +32,7 @@ def gunicorn():
             with prefix('pyenv virtualenvwrapper'):
                 with prefix('workon www27'):
                     run('pip install -r dependencies-27.txt')
-                    with cd('spy'):
-                        runbg('scrapyd')
+                    runbg('scrapyd')
                     run('./deployspy')
         with prefix('pyenv shell 3.3.4'):
             with prefix('pyenv virtualenvwrapper'):
