@@ -13,7 +13,6 @@ from ..items import Art, Page, Result
 
 BASE_URL = 'http://www.toranoana.jp/'
 QUERY_URL = 'http://www.toranoana.jp/cgi-bin/R2/allsearch.cgi'
-MAX_TRIES = 10
 
 
 class Tora(Spider):
@@ -23,7 +22,6 @@ class Tora(Spider):
     def __init__(self, query, *args, **kargs):
         Spider.__init__(self, *args, **kargs)
         self.query = decode(query)
-        self.tries = 0
 
     @property
     def id(self):
@@ -60,7 +58,6 @@ class Tora(Spider):
                     status='reserve' if u'予' in tr.xpath('td[@class="c7"]/text()').extract() else 'other',
                 )
 
-        self.tries += 1
         sel = Selector(response)
 
         try:
@@ -68,10 +65,9 @@ class Tora(Spider):
             return Page(uri=self.uri, total=total(sel), arts=list(gen(trs)))
         except:
             if empty(sel):
+                log.msg('empty result', level=log.INFO)
                 return Page(uri=self.uri, total=0, arts=[])
-            if self.tries >= MAX_TRIES:
-                return Result(ok=False)
-            return self.request
+            return Result(ok=False)
 
 
 def total(sel):
@@ -79,7 +75,7 @@ def total(sel):
 
 
 def empty(sel):
-    return not sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/center[1]/text()').re(u'該当する商品が見つかりませんでした。')
+    return sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/center[1]/text()').re(u'該当する商品が見つかりませんでした。')
 
 
 def decode(query):
@@ -93,3 +89,12 @@ def makeuri(query, start=0):
         ('search', query.encode('Shift_JIS')),
         ('ps', start + 1),
     ]))
+
+
+def good(response):
+    sel = Selector(response)
+    try:
+        total(sel)
+        return True
+    except:
+        return empty(sel)

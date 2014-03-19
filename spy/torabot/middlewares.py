@@ -3,6 +3,8 @@
 
 import random
 from scrapy.contrib.downloadermiddleware.useragent import UserAgentMiddleware
+from scrapy.contrib.downloadermiddleware.retry import RetryMiddleware
+from .spiders.tora import good
 
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
@@ -56,3 +58,13 @@ class RotateUserAgentMiddleware(UserAgentMiddleware):
         ua = self._user_agent(spider)
         if ua:
             request.headers.setdefault('User-Agent', ua)
+
+
+class ToraRetry(RetryMiddleware):
+
+    def process_response(self, request, response, spider):
+        ret = RetryMiddleware.process_response(self, request, response, spider)
+        if spider.name != 'tora' or good(response):
+            return ret
+        reason = 'tora request failed'
+        return self._retry(request, reason, spider) or response
