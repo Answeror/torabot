@@ -17,3 +17,12 @@ NEWSPIDER_MODULE = 'torabot.spiders'
 ITEM_PIPELINES = {
     'torabot.pipelines.Output': 42,
 }
+
+DOWNLOADER_MIDDLEWARES = {
+    'torabot.middlewares.RotateUserAgentMiddleware': 42,
+}
+
+#To make RotateUserAgentMiddleware enable.
+USER_AGENT = ''
+DOWNLOAD_DELAY = 0.1
+AUTOTHROTTLE_ENABLED = True

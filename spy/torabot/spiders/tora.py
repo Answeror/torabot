@@ -6,6 +6,8 @@ from urllib import urlencode
 from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import Request
+from scrapy import log
+from hashlib import md5
 from ..items import Art, Page, Result
 
 
@@ -18,11 +20,18 @@ class Tora(Spider):
 
     name = 'tora'
 
-    def __init__(self, query, id, *args, **kargs):
+    def __init__(self, query, *args, **kargs):
         Spider.__init__(self, *args, **kargs)
-        self.uri = makeuri(encode(query))
-        self.id = id
+        self.query = decode(query)
         self.tries = 0
+
+    @property
+    def id(self):
+        return md5(self.query.encode('utf-8')).hexdigest()
+
+    @property
+    def uri(self):
+        return makeuri(self.query)
 
     @property
     def request(self):
@@ -34,7 +43,11 @@ class Tora(Spider):
         )
 
     def start_requests(self):
-        return [self.request]
+        try:
+            return [self.request]
+        except:
+            log.msg('start requests failed', level=log.ERROR)
+            return []
 
     def parse(self, response):
         def gen(trs):
@@ -52,18 +65,24 @@ class Tora(Spider):
 
         try:
             trs = list(sel.xpath('//table[@class="FixFrame"]//tr'))
-            return Page(
-                uri=self.uri,
-                total=int(sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/span[2]/text()').re('\d+')[0]),
-                arts=list(gen(trs))
-            )
+            return Page(uri=self.uri, total=total(sel), arts=list(gen(trs)))
         except:
+            if empty(sel):
+                return Page(uri=self.uri, total=0, arts=[])
             if self.tries >= MAX_TRIES:
                 return Result(ok=False)
             return self.request
 
 
-def encode(query):
+def total(sel):
+    return int(sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/span[2]/text()').re('\d+')[0])
+
+
+def empty(sel):
+    return not sel.xpath('//table[@class="addrtbl"]//td[@class="DTW_td_l"]/center[1]/text()').re(u'該当する商品が見つかりませんでした。')
+
+
+def decode(query):
     return query.decode('utf-8') if isinstance(query, str) else query
 
 

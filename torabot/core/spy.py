@@ -2,8 +2,8 @@ import subprocess as sp
 from logbook import Logger
 from redis import Redis
 import json
+from hashlib import md5
 from ..ut.bunch import bunchr
-from uuid import uuid4
 
 
 log = Logger(__name__)
@@ -11,7 +11,7 @@ redis = Redis()
 
 
 def spy(kind, query, timeout):
-    id = str(uuid4())
+    id = md5(query.encode('utf-8')).hexdigest()
     sp.check_call([
         'curl',
         'http://localhost:6800/schedule.json',
