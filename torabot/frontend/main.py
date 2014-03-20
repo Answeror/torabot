@@ -19,7 +19,6 @@ from ..core.notice import (
     get_pending_notices_bi_user_id,
 )
 from ..core.watch import get_watches_bi_user_id
-from ..core.kanji import translate
 from . import auth, bp
 from ..ut.connection import appccontext
 from ..core.mod import mod
@@ -106,7 +105,7 @@ def notice_conf(user_id):
 @bp.route('/search', methods=['GET'], defaults={'page': 0})
 @bp.route('/search/<int:page>', methods=['GET'])
 def search(page):
-    query_text = translate(request.args.get('q', ''))
+    query_text = request.args.get('q', '')
     with appccontext(commit=True) as conn:
         q = query(
             conn=conn,

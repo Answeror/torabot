@@ -1,15 +1,5 @@
 from celery.schedules import crontab
 
-
-TORABOT_CONNECTION_STRING = (
-    'postgresql+psycopg2://{0}:{0}@localhost/{0}'
-    .format('torabot-dev')
-)
-TORABOT_SYNC_THREADS = 32
-TORABOT_EMAIL_HEAD = 'torabot notice'
-TORABOT_SPY_TIMEOUT = 300
-TORABOT_SPY_SLAVES = 1
-
 # flask
 SECRET_KEY = 'test'
 
@@ -30,3 +20,15 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute='*/15'),  # notice every 5 minutes
     }
 }
+
+TORABOT_CONNECTION_STRING = (
+    'postgresql+psycopg2://{0}:{0}@localhost/{0}'
+    .format('torabot-dev')
+)
+TORABOT_SYNC_THREADS = 32
+TORABOT_EMAIL_HEAD = 'torabot notice'
+TORABOT_SPY_TIMEOUT = 300
+TORABOT_SPY_SLAVES = 1
+
+# mod
+TORABOT_MOD_TORA_TRANSLATE = True

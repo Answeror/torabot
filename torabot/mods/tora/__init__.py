@@ -1,3 +1,4 @@
+from ...core.kanji import translate
 from ..base import Mod
 from .change import changes
 from .views import web, email
@@ -27,3 +28,11 @@ class Tora(Mod):
 
     def format_query_result(self, view, result):
         return self.view(view).format_query_result(result)
+
+    def spy(self, query, timeout):
+        return Mod.spy(self, self.translate(query), timeout)
+
+    def translate(self, text):
+        if self.conf.get('TORABOT_MOD_TORA_TRANSLATE', True):
+            return translate(text)
+        return text
