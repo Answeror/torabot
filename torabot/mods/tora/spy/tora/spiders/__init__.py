@@ -59,9 +59,9 @@ class Tora(RedisSpider):
         try:
             table = sel.xpath('//table[@summary="Details"]')
             art = Art(
-                title=table.xpath('tr/td/table/tr[1]/td[@class="DetailData_L"]/text()').extract()[0],
-                author=table.xpath('tr/td/table/tr[3]/td[@class="DetailData_L"]/a/text()').extract(),
-                company=table.xpath('tr/td/table/tr[2]/td[@class="DetailData_L"]/a/text()').extract(),
+                title=table.xpath('.//td[@class="DetailData_L"][1]/text()').extract()[0],
+                author=table.xpath('.//td[@class="DetailData_L"]/a[contains(@href, "author")]/text()').extract(),
+                company=table.xpath('.//td[@class="DetailData_L"]/a[contains(@href, "circle")]/text()').extract(),
                 uri=uri,
                 status='reserve' if u'予' in table.xpath('.//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
             )
