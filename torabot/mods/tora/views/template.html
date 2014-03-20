@@ -11,7 +11,15 @@
     {% for art in result.arts %}
     <tr>
         <td><a href="{{ art.uri }}">{{ art.title }}</a></td>
-        <td><a href='{{ url_for('.search', q=art.author) }}'>{{ art.author }}</a></td>
+        <td>
+            {% if isinstance(art.author, str) %}
+            <a href='{{ url_for('.search', q=art.author) }}'>{{ art.author }}</a>
+            {% else %}
+            {% for a in art.author %}
+            <a href='{{ url_for('.search', q=a) }}'>{{ a }}</a>
+            {% endfor %}
+            {% endif %}
+        </td>
         <td><a href='{{ url_for('.search', q=art.company) }}'>{{ art.company }}</a></td>
         <td>{{ '预售' if art.status == 'reserve' else '' }}</td>
     </tr>

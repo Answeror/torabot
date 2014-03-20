@@ -28,20 +28,50 @@ class Tora(RedisSpider):
         self.life = float(life)
 
     def make_request_from_query(self, query):
-        uri = makeuri(query)
-        return Request(
-            uri,
-            cookies={'afg': '0'},
-            headers={'Referer': QUERY_URL},
-            callback=self.parse,
-            meta=dict(
-                query=query,
-                uri=uri,
-            ),
-            dont_filter=True,
+        if query.startswith(BASE_URL):
+            return Request(
+                query,
+                cookies={'afg': '0'},
+                headers={'Referer': QUERY_URL},
+                callback=self.parse_art,
+                meta=dict(
+                    uri=query,
+                ),
+                dont_filter=True,
+            )
+        else:
+            uri = makeuri(query)
+            return Request(
+                uri,
+                cookies={'afg': '0'},
+                headers={'Referer': QUERY_URL},
+                callback=self.parse_list,
+                meta=dict(
+                    query=query,
+                    uri=uri,
+                ),
+                dont_filter=True,
+            )
+
+    def parse_art(self, response):
+        uri = response.meta['uri']
+        sel = Selector(response)
+        table = sel.xpath('//table[@summary="Details"]')
+        art = Art(
+            title=table.xpath('.//td[@class="DetailData_L"][1]/text()').extract()[0],
+            author=table.xpath('.//td[@class="DetailData_L"][3]/a/text()').extract(),
+            company=table.xpath('.//td[@class="DetailData_L"][2]/a/text()').extract()[0],
+            uri=uri,
+            status='reserve' if u'予' in table.xpath('.//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
+        )
+        return Page(
+            query=uri,
+            uri=uri,
+            total=1,
+            arts=[art]
         )
 
-    def parse(self, response):
+    def parse_list(self, response):
         query = response.meta['query']
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % query, level=log.INFO)

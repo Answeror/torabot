@@ -20,4 +20,4 @@ build/
 /items/
 /logs/
 /twistd.pid
-/.scrapy/
+.scrapy/

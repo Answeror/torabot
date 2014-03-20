@@ -178,5 +178,7 @@ def inject_locals():
         min=min,
         max=max,
         len=len,
+        str=str,
+        isinstance=isinstance,
         momentjs=momentjs,
     )
