@@ -56,20 +56,24 @@ class Tora(RedisSpider):
     def parse_art(self, response):
         uri = response.meta['uri']
         sel = Selector(response)
-        table = sel.xpath('//table[@summary="Details"]')
-        art = Art(
-            title=table.xpath('.//td[@class="DetailData_L"][1]/text()').extract()[0],
-            author=table.xpath('.//td[@class="DetailData_L"][3]/a/text()').extract(),
-            company=table.xpath('.//td[@class="DetailData_L"][2]/a/text()').extract()[0],
-            uri=uri,
-            status='reserve' if u'予' in table.xpath('.//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
-        )
-        return Page(
-            query=uri,
-            uri=uri,
-            total=1,
-            arts=[art]
-        )
+        try:
+            table = sel.xpath('//table[@summary="Details"]')
+            art = Art(
+                title=table.xpath('.//td[@class="DetailData_L"][1]/text()').extract()[0],
+                author=table.xpath('.//td[@class="DetailData_L"][3]/a/text()').extract(),
+                company=table.xpath('.//td[@class="DetailData_L"][2]/a/text()').extract(),
+                uri=uri,
+                status='reserve' if u'予' in table.xpath('.//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
+            )
+            return Page(
+                query=uri,
+                uri=uri,
+                total=1,
+                arts=[art]
+            )
+        except:
+            log.msg('parse failed', level=log.ERROR)
+            return Result(ok=False, query=uri)
 
     def parse_list(self, response):
         query = response.meta['query']

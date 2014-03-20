@@ -20,7 +20,15 @@
             {% endfor %}
             {% endif %}
         </td>
-        <td><a href='{{ url_for('.search', q=art.company) }}'>{{ art.company }}</a></td>
+        <td>
+            {% if isinstance(art.company, str) %}
+            <a href='{{ url_for('.search', q=art.company) }}'>{{ art.company }}</a>
+            {% else %}
+            {% for a in art.company %}
+            <a href='{{ url_for('.search', q=c) }}'>{{ c }}</a>
+            {% endfor %}
+            {% endif %}
+        </td>
         <td>{{ '预售' if art.status == 'reserve' else '' }}</td>
     </tr>
     {% endfor %}
