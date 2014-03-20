@@ -52,15 +52,22 @@ class RedisMixin(object):
         if req:
             self.crawler.engine.crawl(req, spider=self)
 
+    def schedule_rest_requests(self):
+        while True:
+            req = self.next_request()
+            if not req:
+                break
+            self.crawler.engine.crawl(req, spider=self)
+
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""
-        self.schedule_next_request()
+        self.schedule_rest_requests()
         if self.life is None or (time() - self.start_time < self.life):
             raise DontCloseSpider
 
     def item_scraped(self, *args, **kwargs):
         """Avoids waiting for the spider to  idle before scheduling the next request"""
-        self.schedule_next_request()
+        self.schedule_rest_requests()
 
 
 class RedisSpider(RedisMixin, Spider):

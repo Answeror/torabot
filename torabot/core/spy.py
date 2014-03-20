@@ -4,28 +4,34 @@ import json
 from hashlib import md5
 from ..ut.bunch import bunchr
 import requests
+from redis_lock import Lock
 
 
 log = Logger(__name__)
 redis = Redis()
 
 
-def prepare(kind, query, timeout, **kargs):
+def runnings(kind):
     r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
-    if r.ok and r.json()['status'] == 'ok':
-        if len(r.json()['running']) >= kargs.get('slaves', 1):
-            return True
-        r = requests.post(
-            'http://localhost:6800/schedule.json',
-            data=dict(
-                project=kind,
-                spider=kind,
-                life=timeout,
+    if not r.ok or r.json()['status'] != 'ok':
+        return 0
+    return len(r.json()['running'])
+
+
+def prepare(kind, query, timeout, **kargs):
+    with Lock(redis, 'torabot:core:spy:prepare'):
+        while runnings(kind) < kargs.get('slaves', 1):
+            r = requests.post(
+                'http://localhost:6800/schedule.json',
+                data=dict(
+                    project=kind,
+                    spider=kind,
+                    life=timeout,
+                )
             )
-        )
-        if r.ok and r.json()['status'] == 'ok':
-            return True
-    return False
+            if not r.ok or r.json()['status'] != 'ok':
+                return False
+    return True
 
 
 def spy(kind, query, timeout, **kargs):
