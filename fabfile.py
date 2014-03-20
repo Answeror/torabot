@@ -22,9 +22,8 @@ def kill(name):
 
 def gunicorn():
     with settings(warn_only=True):
-        kill('celery')
-        kill('rqworker')
         kill('gunicorn')
+        kill('celery')
         kill('scrapyd')
     with cd('/www/torabot/repo'):
         run('git pull')
@@ -38,6 +37,7 @@ def gunicorn():
             with prefix('pyenv virtualenvwrapper'):
                 with prefix('workon torabot'):
                     run('pip install -r dependencies.txt')
+                    run('python setup.py develop')
                     runbg('celery worker -A torabot -f data/celery-worker.log --autoscale=2,1')
                     runbg('celery beat -A torabot -f data/celery-beat.log')
                     runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')

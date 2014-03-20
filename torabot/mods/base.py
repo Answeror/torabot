@@ -1,10 +1,15 @@
 import abc
+from .spy import spy
 
 
 class Mod(object, metaclass=abc.ABCMeta):
 
     def __init__(self, conf={}):
         self.conf = conf
+
+    @abc.abstractproperty
+    def name(self):
+        pass
 
     @abc.abstractmethod
     def changes(self, old, new):
@@ -25,3 +30,11 @@ class Mod(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def format_query_result(self, view, result):
         pass
+
+    def spy(self, query, timeout):
+        return spy(
+            self.name,
+            query,
+            timeout=timeout,
+            slaves=self.conf.get('TORABOT_SPY_SLAVES', 1)
+        )

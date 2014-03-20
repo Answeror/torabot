@@ -5,6 +5,8 @@ from .views import web, email
 
 class Tora(Mod):
 
+    name = 'tora'
+
     def view(self, name):
         return {
             'web': web,

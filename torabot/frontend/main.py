@@ -113,7 +113,6 @@ def search(page):
             kind='tora',
             text=query_text,
             timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
-            slaves=current_app.config['TORABOT_SPY_SLAVES'],
         )
         options = dict(
             query=q,

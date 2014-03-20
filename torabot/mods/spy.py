@@ -11,16 +11,22 @@ log = Logger(__name__)
 redis = Redis()
 
 
-def runnings(kind):
+def lives(kind):
     r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
     if not r.ok or r.json()['status'] != 'ok':
         return 0
-    return len(r.json()['running'])
+    return len(r.json()['running']) + len(r.json()['pending'])
 
 
-def prepare(kind, query, timeout, **kargs):
+def prepare(kind, query, timeout, slaves):
     with Lock(redis, 'torabot:core:spy:prepare'):
-        while runnings(kind) < kargs.get('slaves', 1):
+        while lives(kind) < slaves:
+            log.info(
+                'not enough {} slaves ({} < {}), start one',
+                kind,
+                lives(kind),
+                slaves
+            )
             r = requests.post(
                 'http://localhost:6800/schedule.json',
                 data=dict(
@@ -30,12 +36,13 @@ def prepare(kind, query, timeout, **kargs):
                 )
             )
             if not r.ok or r.json()['status'] != 'ok':
+                log.info('start {} slave failed', kind)
                 return False
     return True
 
 
-def spy(kind, query, timeout, **kargs):
-    if not prepare(kind=kind, query=query, timeout=timeout):
+def spy(kind, query, timeout, slaves):
+    if not prepare(kind, query, timeout, slaves):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))
