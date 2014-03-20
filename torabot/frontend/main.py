@@ -117,7 +117,7 @@ def search(page):
         )
         options = dict(
             query=q,
-            content=mod(q.kind).views.web.format_query_result(q.result)
+            content=mod(q.kind).format_query_result('web', q.result)
         )
         if 'userid' in flask_session:
             options['watching'] = _watching(

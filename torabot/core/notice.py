@@ -13,14 +13,10 @@ from ..ut.bunch import Bunch
 log = Logger(__name__)
 
 
-def views(notice):
-    return mod(notice.kind).views
-
-
 def web_transform(notice):
     notice = Bunch(**notice)
-    notice.body = views(notice).web.format_notice_body(notice)
-    notice.status = views(notice).web.format_notice_status(notice)
+    notice.body = mod(notice.kind).format_notice_body('web', notice)
+    notice.status = mod(notice.kind).format_notice_status('web', notice)
     return notice
 
 
@@ -28,7 +24,7 @@ def send_notice(notice, conf, conn):
     email = get_user_email_bi_id(conn, notice.user_id)
     log.info('send notice {} to {}', notice.id, email)
     try:
-        send(conf, email, views(notice).email.format_notice_body(notice))
+        send(conf, email, mod(notice.kind).format_notice_body('email', notice))
     except:
         log.exception('send notice {} to {} failed', notice.id, email)
         return
