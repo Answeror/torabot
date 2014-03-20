@@ -58,9 +58,9 @@ class Tora(RedisSpider):
         sel = Selector(response)
         try:
             art = Art(
-                title=sel.xpath('//table[@summary="Details"]//td[@class="DetailData_L"][1]/text()').extract()[0],
+                title=sel.xpath('//td[@class="td_title_bar_r1c2"]/text()').extract()[0],
                 author=sel.xpath('//td[@class="DetailData_L"]/a[contains(@href, "author")]/text()').extract(),
-                company=sel.xpath('//td[@class="DetailData_L"]/a[contains(@href, "circle")]/text()').extract(),
+                company=sel.xpath('//td[@class="CircleName"]/a[1]/text()').extract()[0],
                 uri=uri,
                 status='reserve' if u'予' in sel.xpath('//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
             )
