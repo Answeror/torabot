@@ -16,24 +16,19 @@ def sync_all(conf):
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
         for query in queries:
             ex.submit(
-                exguard(_sync_one),
-                query.kind,
-                query.text,
-                engine,
-                conf['TORABOT_SPY_TIMEOUT'],
+                exguard(sync),
+                kind=query.kind,
+                text=query.text,
+                engine=engine,
+                timeout=conf['TORABOT_SPY_TIMEOUT'],
             )
 
 
 def sync_one(query_kind, query_text, conf):
     engine = make_engine(conf)
-    _sync_one(query_kind, query_text, engine, conf['TORABOT_SPY_TIMEOUT'])
-
-
-def _sync_one(query_kind, query_text, engine, timeout):
-    with ccontext(commit=True, engine=engine) as conn:
-        sync(
-            conn=conn,
-            kind=query_kind,
-            text=query_text,
-            timeout=timeout,
-        )
+    sync(
+        kind=query_kind,
+        text=query_text,
+        engine=engine,
+        timeout=conf['TORABOT_SPY_TIMEOUT'],
+    )
