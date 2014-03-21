@@ -32,9 +32,9 @@ def send_notice(notice, conf, conn):
     mark_notice_sent(conn, notice.id)
 
 
-def get_notices_bi_user_id(conn, user_id):
-    return list(map(web_transform, _get_notices_bi_user_id(conn, user_id)))
+def get_notices_bi_user_id(conn, user_id, **kargs):
+    return list(map(web_transform, _get_notices_bi_user_id(conn, user_id, **kargs)))
 
 
-def get_pending_notices_bi_user_id(conn, user_id):
-    return list(map(web_transform, _get_pending_notices_bi_user_id(conn, user_id)))
+def get_pending_notices_bi_user_id(conn, user_id, **kargs):
+    return list(map(web_transform, _get_pending_notices_bi_user_id(conn, user_id, **kargs)))

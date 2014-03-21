@@ -11,6 +11,9 @@ class Mod(object, metaclass=abc.ABCMeta):
     def name(self):
         pass
 
+    def display_name(self):
+        return self.name
+
     @abc.abstractmethod
     def changes(self, old, new):
         pass
@@ -28,7 +31,11 @@ class Mod(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def format_query_result(self, view, result):
+    def format_query_result(self, view, query):
+        pass
+
+    @abc.abstractmethod
+    def format_advanced_search(self, view, query):
         pass
 
     def spy(self, query, timeout):

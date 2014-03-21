@@ -8,24 +8,24 @@
         </tr>
     </thead>
     <tbody>
-    {% for art in result.arts %}
+    {% for art in query.result.arts %}
     <tr>
         <td><a href="{{ art.uri }}">{{ art.title }}</a></td>
         <td>
             {% if isinstance(art.author, str) %}
-            <a href='{{ url_for('.search', q=art.author) }}'>{{ art.author }}</a>
+            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=art.author) }}'>{{ art.author }}</a>
             {% else %}
             {% for a in art.author %}
-            <a href='{{ url_for('.search', q=a) }}'>{{ a }}</a>
+            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=a) }}'>{{ a }}</a>
             {% endfor %}
             {% endif %}
         </td>
         <td>
             {% if isinstance(art.company, str) %}
-            <a href='{{ url_for('.search', q=art.company) }}'>{{ art.company }}</a>
+            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=art.company) }}'>{{ art.company }}</a>
             {% else %}
             {% for a in art.company %}
-            <a href='{{ url_for('.search', q=c) }}'>{{ c }}</a>
+            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=c) }}'>{{ c }}</a>
             {% endfor %}
             {% endif %}
         </td>
@@ -34,4 +34,4 @@
     {% endfor %}
     </tbody>
 </table>
-<p>以上是{{ result.total }}个搜索结果中的{{ len(result.arts) }}个, 完整列表参见<a href='{{ result.uri }}'>这里</a>.</p>
+<p>以上是{{ query.result.total }}个搜索结果中的{{ len(query.result.arts) }}个, 完整列表参见<a href='{{ query.result.uri }}'>这里</a>.</p>

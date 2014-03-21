@@ -23,6 +23,8 @@ from .query import (
 from .notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
+    get_notice_count_bi_user_id,
+    get_pending_notice_count_bi_user_id,
     get_pending_notices,
     mark_notice_sent,
 )
@@ -51,4 +53,6 @@ __all__ = [
     set_query_result.__name__,
     get_or_add_query_bi_kind_and_text.__name__,
     touch_query_bi_id.__name__,
+    get_notice_count_bi_user_id.__name__,
+    get_pending_notice_count_bi_user_id.__name__,
 ]
