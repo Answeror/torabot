@@ -62,7 +62,7 @@ class Tora(RedisSpider):
                 author=sel.xpath('//td[@class="DetailData_L"]/a[contains(@href, "author")]/text()').extract(),
                 company=sel.xpath('//td[@class="CircleName"]/a[1]/text()').extract()[0],
                 uri=uri,
-                status='reserve' if u'予' in sel.xpath('//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
+                status=status_in_art(sel),
             )
             return Page(
                 query=uri,
@@ -110,6 +110,13 @@ class Tora(RedisSpider):
         except:
             log.msg('parse failed', level=log.ERROR)
             return Result(ok=False, query=query)
+
+
+def status_in_art(sel):
+    try:
+        return 'reserve' if u'予' in sel.xpath('//form[@action="/cgi-bin/R4/details.cgi"]/input[@type="submit"]/@value').extract()[0] else 'other',
+    except:
+        return 'other'
 
 
 def total(sel):
