@@ -1,0 +1,17 @@
+<table class='table table-condensed table-striped'>
+    <thead>
+        <tr>
+            <td class=col-sm-9>名称</td>
+            <td class=col-sm-3>作者</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for art in query.result.arts %}
+    <tr>
+        <td><a href="{{ art.uri }}">{{ art.title }}</a></td>
+        <td>{{ art.author }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<p>以上是{{ query.result.total }}个搜索结果中的{{ len(query.result.arts) }}个, 完整列表参见<a href='{{ query.result.uri }}'>这里</a>.</p>

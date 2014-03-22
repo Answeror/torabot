@@ -239,6 +239,11 @@ def about():
 
 @bp.context_processor
 def inject_locals():
+    log.info('mods: {}', len([e.obj for e in ExtensionManager(
+        'torabot.mods',
+        invoke_on_load=True,
+        invoke_args=(current_app.config,)
+    )]))
     return dict(
         min=min,
         max=max,

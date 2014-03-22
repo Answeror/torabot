@@ -2,9 +2,10 @@ from logbook import Logger
 from redis import Redis
 import json
 from hashlib import md5
-from ..ut.bunch import bunchr
 import requests
 from redis_lock import Lock
+from ..ut.bunch import bunchr
+from ..core.local import get_current_conf
 
 
 log = Logger(__name__)
@@ -18,7 +19,7 @@ def lives(kind):
     return len(r.json()['running']) + len(r.json()['pending'])
 
 
-def prepare(kind, query, timeout, slaves):
+def prepare(kind, query, timeout, slaves, options):
     with Lock(redis, 'torabot:core:spy:prepare'):
         while lives(kind) < slaves:
             log.info(
@@ -33,6 +34,7 @@ def prepare(kind, query, timeout, slaves):
                     project=kind,
                     spider=kind,
                     life=timeout,
+                    **options
                 )
             )
             if not r.ok or r.json()['status'] != 'ok':
@@ -41,8 +43,20 @@ def prepare(kind, query, timeout, slaves):
     return True
 
 
-def spy(kind, query, timeout, slaves):
-    if not prepare(kind, query, timeout, slaves):
+def merge_options(kind, options):
+    conf = get_current_conf()
+    prefix = 'TORABOT_MOD_%s_SPY_' % kind.upper()
+    keys = [key for key in conf.keys() if key.startswith(prefix)]
+    d = {key[len(prefix):].lower(): conf[key] for key in keys}
+    d.update(options)
+    return d
+
+
+def spy(kind, query, timeout, slaves, options={}):
+    options = merge_options(kind, options)
+    log.debug('spy {} for {} with options: {}', query, kind, options)
+
+    if not prepare(kind, query, timeout, slaves, options):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))

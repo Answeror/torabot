@@ -9,6 +9,7 @@ setup(
     entry_points={
         'torabot.mods': [
             'tora = torabot.mods.tora:Tora',
+            'pixiv = torabot.mods.pixiv:Pixiv',
         ]
     },
 )
