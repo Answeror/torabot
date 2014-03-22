@@ -11,6 +11,7 @@ bp = Blueprint(
 
 
 from .main import *
+from .thumbnail import *
 from .openid import *
 
 

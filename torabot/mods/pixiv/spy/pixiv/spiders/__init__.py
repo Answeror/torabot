@@ -22,9 +22,10 @@ class Pixiv(RedisSpider):
 
     name = 'pixiv'
 
-    def __init__(self, phpsessid, life=60, *args, **kargs):
+    def __init__(self, max_arts, phpsessid, life=60, *args, **kargs):
         RedisSpider.__init__(self, *args, **kargs)
         self.life = float(life)
+        self.max_arts = max_arts
         self.phpsessid = phpsessid
 
     def make_request_from_query(self, query):
@@ -62,7 +63,7 @@ class Pixiv(RedisSpider):
 
         def gen(sel):
             author = sel.xpath('//h1[@class="user"]/text()').extract()[0]
-            for a in sel.xpath('//a[@class="work"]'):
+            for a in sel.xpath('//a[@class="work"]')[:self.max_arts]:
                 yield Art(
                     title=a.xpath('h1/@title').extract()[0],
                     author=author,
