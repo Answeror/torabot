@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+python setup.py develop
+for i in `find torabot/mods/ -exec test -d {}/spy \; -print`; do
+    pushd $i/spy > /dev/null
+    scrapyd-deploy
+    popd > /dev/null
+done
