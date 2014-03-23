@@ -50,8 +50,15 @@ def has_query_bi_kind_and_text(conn, kind, text):
     ).fetchone() is not None
 
 
-def get_sorted_queries(conn):
-    result = conn.execute(sql('select * from query order by ctime'))
+def get_sorted_active_queries(conn):
+    result = conn.execute(sql('''
+        select * from query as q0
+        where exists (
+            select 1 from watch as w0
+            where w0.query_id = q0.id
+        )
+        order by q0.ctime
+    '''))
     return [bunchr(**row) for row in result.fetchall()]
 
 
@@ -61,3 +68,12 @@ def touch_query_bi_id(conn, id):
         id=id,
         mtime=datetime.utcnow()
     )
+
+
+def get_query_mtime_bi_kind_and_text(conn, kind, text):
+    ret = conn.execute(
+        sql('select mtime from query where kind = :kind and text = :text'),
+        kind=kind,
+        text=text
+    ).fetchone()
+    return None if ret is None else ret[0]

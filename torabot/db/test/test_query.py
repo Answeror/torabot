@@ -1,9 +1,9 @@
-from nose.tools import assert_equal, assert_is_not_none
+from nose.tools import assert_equal, assert_is_not_none, assert_greater
 from . import g
 from ..notice import get_notices_bi_user_id
 from ..user import add_user
 from ..watch import watch
-from ..query import add_query
+from ..query import add_query, get_sorted_active_queries
 from ..change import add_one_query_changes
 
 
@@ -72,4 +72,14 @@ def test_broadcast_two_changes_two_users():
 def test_add_query():
     with g.connection.begin_nested() as trans:
         assert_is_not_none(add_query(g.connection, kind='bar', text='foo'))
+        trans.rollback()
+
+
+def test_get_sorted_active_queries():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_ids = fake_add_queries(g.connection)
+        watch(g.connection, user_id=user_id, query_id=query_ids[0])
+        assert_greater(len(query_ids), 1)
+        assert_equal(len(get_sorted_active_queries(g.connection)), 1)
         trans.rollback()

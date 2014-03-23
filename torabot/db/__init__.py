@@ -15,10 +15,11 @@ from .query import (
     get_or_add_query_bi_kind_and_text,
     get_query_bi_kind_and_text,
     has_query_bi_kind_and_text,
-    get_sorted_queries,
+    get_sorted_active_queries,
     query_count,
     set_query_result,
     touch_query_bi_id,
+    get_query_mtime_bi_kind_and_text,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -40,7 +41,7 @@ __all__ = [
     get_watches_bi_user_id.__name__,
     get_query_bi_kind_and_text.__name__,
     has_query_bi_kind_and_text.__name__,
-    get_sorted_queries.__name__,
+    get_sorted_active_queries.__name__,
     get_notices_bi_user_id.__name__,
     get_pending_notices_bi_user_id.__name__,
     get_user_email_bi_id.__name__,
@@ -55,4 +56,5 @@ __all__ = [
     touch_query_bi_id.__name__,
     get_notice_count_bi_user_id.__name__,
     get_pending_notice_count_bi_user_id.__name__,
+    get_query_mtime_bi_kind_and_text.__name__,
 ]

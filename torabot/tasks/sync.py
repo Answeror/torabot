@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor as Ex
 from ..ut.connection import ccontext
 from ..ut.guard import exguard, timeguard
 from ..core.sync import sync
-from ..db import get_sorted_queries
+from ..db import get_sorted_active_queries
 from .engine import make as make_engine
 
 
@@ -11,7 +11,7 @@ def sync_all(conf):
     engine = make_engine(conf)
 
     with ccontext(engine=engine) as conn:
-        queries = get_sorted_queries(conn)
+        queries = get_sorted_active_queries(conn)
 
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
         for query in queries:
