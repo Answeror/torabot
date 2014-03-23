@@ -23,13 +23,18 @@ class RedisMixin(object):
     def redis_key(self):
         return 'torabot:spy:' + self.name
 
-    def next_request(self):
+    def next_requests(self):
         """Returns a request to be scheduled or none."""
         query = self.server.lpop(self.redis_key)
         if query:
             query = decode(query)
             log.msg(u'got query %s' % query, level=log.INFO)
-            return self.make_request_from_query(query)
+            yield from self.make_requests_from_query(query)
+
+    def make_requests_from_query(self, query):
+        req = self.make_request_from_query(query)
+        if req:
+            yield req
 
     def setup_redis(self):
         """Setup redis connection and idle signal.
@@ -48,16 +53,16 @@ class RedisMixin(object):
 
     def schedule_next_request(self):
         """Schedules a request if available"""
-        req = self.next_request()
-        if req:
+        for req in self.next_requests():
             self.crawler.engine.crawl(req, spider=self)
 
     def schedule_rest_requests(self):
         while True:
-            req = self.next_request()
-            if not req:
+            reqs = list(self.next_requests())
+            if not reqs:
                 break
-            self.crawler.engine.crawl(req, spider=self)
+            for req in reqs:
+                self.crawler.engine.crawl(req, spider=self)
 
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""

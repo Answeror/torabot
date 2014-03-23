@@ -16,6 +16,7 @@ from ..items import Art, Page
 
 BASE_URL = 'http://www.pixiv.net/'
 AUTHOR_URL = 'http://www.pixiv.net/member_illust.php'
+RANKING_URL = 'http://www.pixiv.net/ranking.php'
 
 
 class Pixiv(RedisSpider):
@@ -28,10 +29,32 @@ class Pixiv(RedisSpider):
         self.max_arts = int(max_arts)
         self.phpsessid = phpsessid
 
-    def make_request_from_query(self, query):
+    def make_requests_from_query(self, query):
         if query.startswith(AUTHOR_URL):
-            return self.make_author_uri_request(query)
+            yield self.make_author_uri_request(query)
+            return
+        if query.startswith(RANKING_URL):
+            yield from self.make_ranking_uri_requests(query)
+            return
         raise NotSupported('only support author uri query now')
+
+    def make_ranking_uri_requests(self, uri):
+        page_count = 10
+        pages = [None] * page_count
+        for page in range(page_count):
+            yield Request(
+                make_ranking_json_uri(uri, page),
+                callback=self.parse_ranking_uri,
+                meta=dict(
+                    uri=uri,
+                    page=page,
+                    pages=pages,
+                ),
+                dont_filter=True,
+            )
+
+    def parse_ranking_uri(self, response):
+        raise NotSupported('not implemented')
 
     def make_author_uri_request(self, uri):
         return Request(
@@ -79,3 +102,7 @@ class Pixiv(RedisSpider):
         except:
             log.msg('parse failed', level=log.ERROR)
             return Result(ok=False, query=uri)
+
+
+def make_ranking_json_uri(uri, page):
+    raise NotSupported('not implemented')
