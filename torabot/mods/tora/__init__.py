@@ -10,6 +10,7 @@ class Tora(Mod):
 
     name = 'tora'
     display_name = '虎穴'
+    has_advanced_search = True
 
     def view(self, name):
         return {
@@ -49,6 +50,9 @@ class Tora(Mod):
         if self.conf.get('TORABOT_MOD_TORA_TRANSLATE', True):
             return _translate(text)
         return text
+
+    def format_help_page(self):
+        return self.view('web').format_help_page()
 
 
 def _translate(query):

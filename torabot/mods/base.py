@@ -38,6 +38,13 @@ class Mod(object, metaclass=abc.ABCMeta):
     def format_advanced_search(self, view, query):
         pass
 
+    @property
+    def has_advanced_search(self):
+        return False
+
+    def format_help_page(self):
+        return ''
+
     def spy(self, query, timeout):
         return spy(
             self.name,

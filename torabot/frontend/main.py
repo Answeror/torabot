@@ -237,6 +237,15 @@ def about():
     return render_template('about.html')
 
 
+@bp.route('/help/<name>')
+def help(name):
+    return render_template(
+        'help.html',
+        query_kind=name,
+        content=mod(name).format_help_page()
+    )
+
+
 @bp.context_processor
 def inject_locals():
     log.info('mods: {}', len([e.obj for e in ExtensionManager(
@@ -251,6 +260,8 @@ def inject_locals():
         str=str,
         isinstance=isinstance,
         momentjs=momentjs,
+        mod=mod,
+        default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
         mods=[e.obj for e in ExtensionManager(
             'torabot.mods',
             invoke_on_load=True,

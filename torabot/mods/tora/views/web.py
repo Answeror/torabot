@@ -45,3 +45,7 @@ def format_advanced_search(kind, query):
         kind=kind,
         query=query,
     )
+
+
+def format_help_page():
+    return render_template_string(template('help.html'))
