@@ -1,27 +1,30 @@
 <form name=search class="navbar-left" role="search">
     <div class="form-group"></div>
     <div class="form-group">
-        <select class="form-control" name=torabot_query_kind>
-            {% for mod in mods %}
-            {% if query_kind == mod.name %}
-            <option value='{{ mod.name }}' selected>{{ mod.display_name }}</option>
-            {% else %}
-            <option value='{{ mod.name }}'>{{ mod.display_name }}</option>
-            {% endif %}
-            {% endfor %}
-        </select>
-    </div>
-    <div class="form-group">
-        <div class="input-group" style="width: 220px;">
+        <div class="input-group" style="width: 350px;">
+            <span class="input-group-btn">
+                <button name=help type=button class="btn btn-default" title='帮助'>?</button>
+            </span>
+            <span class="input-group-btn">
+                <select class="form-control" name=torabot_query_kind style='margin-right: -1px; width: 80px;'>
+                    {% for mod in mods %}
+                    {% if query_kind == mod.name %}
+                    <option value='{{ mod.name }}' selected>{{ mod.display_name }}</option>
+                    {% else %}
+                    <option value='{{ mod.name }}'>{{ mod.display_name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </span>
             <input type="text" class="form-control" name=torabot_query_text value='{{ query_text }}'>
             <span class="input-group-btn">
-                <button name=advanced type=button class="btn btn-default">
+                <button name=search type="submit" class="btn btn-default" title='搜索'>
+                    <span class='glyphicon glyphicon-search'></span>
+                </button>
+                <button name=advanced type=button class="btn btn-default" title='高级搜索'>
                     <span class='glyphicon glyphicon-wrench'></span>
                 </button>
             </span>
         </div>
     </div>
-    <button name=search type="submit" class="btn btn-default">
-        <span class='glyphicon glyphicon-search'></span>
-    </button>
 </form>
