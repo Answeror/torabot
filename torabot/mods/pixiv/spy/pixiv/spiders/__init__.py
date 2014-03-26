@@ -16,6 +16,7 @@ from ..items import Art, Page
 
 BASE_URL = 'http://www.pixiv.net/'
 AUTHOR_URL = 'http://www.pixiv.net/member_illust.php'
+AUTHOR_URL_TEMPLATE = AUTHOR_URL + '?id=%s'
 RANKING_URL = 'http://www.pixiv.net/ranking.php'
 
 

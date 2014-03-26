@@ -1,0 +1,10 @@
+<form class=form-horizontal role=form action='{{ url_for('.search') }}'>
+    <input name=torabot_query_kind type=hidden value='{{ kind }}'>
+    {% block content %}{% endblock %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-success">搜索</button>
+            <button type="reset" class="btn btn-default">清空</button>
+        </div>
+    </div>
+</form>

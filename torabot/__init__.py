@@ -29,4 +29,12 @@ def make(*args, **kargs):
     from . import api
     api.make(app)
 
+    from .core.mod import mods
+    import jinja2
+    with app.app_context():
+        app.jinja_loader = jinja2.ChoiceLoader([
+            app.jinja_loader,
+            jinja2.FileSystemLoader([mod.template_folder for mod in mods() if mod.template_folder])
+        ])
+
     return app

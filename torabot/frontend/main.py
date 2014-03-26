@@ -1,6 +1,5 @@
 import json
 from nose.tools import assert_equal
-from stevedore.extension import ExtensionManager
 from flask import (
     request,
     current_app,
@@ -26,7 +25,7 @@ from ..core.notice import (
 from ..core.watch import get_watches_bi_user_id
 from . import auth, bp
 from ..ut.connection import appccontext
-from ..core.mod import mod
+from ..core.mod import mod, mods
 from .momentjs import momentjs
 
 
@@ -248,11 +247,6 @@ def help(name):
 
 @bp.context_processor
 def inject_locals():
-    log.info('mods: {}', len([e.obj for e in ExtensionManager(
-        'torabot.mods',
-        invoke_on_load=True,
-        invoke_args=(current_app.config,)
-    )]))
     return dict(
         min=min,
         max=max,
@@ -262,9 +256,5 @@ def inject_locals():
         momentjs=momentjs,
         mod=mod,
         default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
-        mods=[e.obj for e in ExtensionManager(
-            'torabot.mods',
-            invoke_on_load=True,
-            invoke_args=(current_app.config,)
-        )]
+        mods=mods(),
     )

@@ -4,6 +4,9 @@ from .spy import spy
 
 class Mod(object, metaclass=abc.ABCMeta):
 
+    has_advanced_search = False
+    template_folder = ''
+
     def __init__(self, conf={}):
         self.conf = conf
 
@@ -37,10 +40,6 @@ class Mod(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def format_advanced_search(self, view, query):
         pass
-
-    @property
-    def has_advanced_search(self):
-        return False
 
     def format_help_page(self):
         return ''

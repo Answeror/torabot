@@ -1,13 +1,19 @@
+import os
 from ...ut.bunch import Bunch
 from ..base import Mod
 from ..mixins import ViewMixin, NoEmptyQueryMixin, KanjiMixin
 from .views import web, email
 
 
+ROOT = os.path.abspath(os.path.dirname(__file__))
+
+
 class Pixiv(ViewMixin, NoEmptyQueryMixin, KanjiMixin, Mod):
 
     name = 'pixiv'
     display_name = 'pixiv'
+    has_advanced_search = True
+    template_folder = os.path.join(ROOT, 'views', 'templates')
 
     def view(self, name):
         return {

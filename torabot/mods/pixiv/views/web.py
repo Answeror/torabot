@@ -1,22 +1,15 @@
 import os
-from flask import render_template_string, g
+from flask import render_template
+from logbook import Logger
 
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
+log = Logger(__name__)
+
 
 def format_query_result(query):
-    return render_template_string(template('list.html'), query=query)
-
-
-def template(filename):
-    name = 'mod_pixiv_template'
-    s = getattr(g, name, None)
-    if s is None:
-        with open(os.path.join(ROOT, filename), 'rb') as f:
-            s = f.read().decode('utf-8')
-        setattr(g, name, s)
-    return s
+    return render_template('pixiv/list.html', query=query)
 
 
 def format_notice_body(notice):
@@ -38,8 +31,8 @@ def format_query_text(text):
 
 
 def format_advanced_search(kind, query):
-    return render_template_string(
-        template('advanced_search.html'),
+    return render_template(
+        'pixiv/advanced_search.html',
         kind=kind,
         query=query,
     )
