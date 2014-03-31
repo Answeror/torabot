@@ -29,7 +29,8 @@ class RedisMixin(object):
         if query:
             query = decode(query)
             log.msg(u'got query %s' % query, level=log.INFO)
-            yield from self.make_requests_from_query(query)
+            for req in self.make_requests_from_query(query):
+                yield req
 
     def make_requests_from_query(self, query):
         req = self.make_request_from_query(query)

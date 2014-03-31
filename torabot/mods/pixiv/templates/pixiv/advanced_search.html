@@ -1,0 +1,10 @@
+<ul class="nav nav-tabs">
+    <li{% if method == 'user_uri' %} class=active{% endif %}><a href='{{ url_for(".advanced_search", kind=kind, method="user_uri") }}'>按作者链接</a></li>
+    <li{% if method == 'user_id' %} class=active{% endif %}><a href='{{ url_for(".advanced_search", kind=kind, method="user_id") }}'>按作者id</a></li>
+</ul>
+<div class=vspace-top-middle></div>
+{% if method == 'user_uri' %}
+{% include "pixiv/search_bi_uri.html" %}
+{% elif method == 'user_id' %}
+{% include "pixiv/search_bi_user_id.html" %}
+{% endif %}

@@ -118,58 +118,37 @@ def notice_conf(user_id):
         )
 
 
-@bp.route('/search/advanced', methods=['GET'])
-def advanced_search():
-    sq = get_standard_query()
+@bp.route('/search/advanced/<kind>', methods=['GET'])
+def advanced_search(kind):
     return render_template(
         'advanced_search.html',
-        query_kind=sq.kind,
-        query_text=sq.text,
-        content=mod(sq.kind).format_advanced_search('web', sq.text)
+        query_kind=kind,
+        content=mod(kind).format_advanced_search('web', **dict(request.values.items()))
     )
-
-
-def try_get_json_query_text():
-    d = dict((key, request.args[key]) for key in request.args)
-    if 'torabot_query_text' in d:
-        del d['torabot_query_text']
-    del d['torabot_query_kind']
-    if d:
-        return json.dumps(d, sort_keys=True)
-    return ''
-
-
-def try_sort_json_query_text(text):
-    try:
-        d = json.loads(text)
-    except:
-        return text
-    return json.dumps(d, sort_keys=True)
 
 
 def get_standard_query():
-    text = request.args.get('torabot_query_text', '').strip()
-    kind = request.args.get('torabot_query_kind')
-    if not text:
-        text = try_get_json_query_text()
-    else:
-        text = try_sort_json_query_text(text)
-    if text == 'json':
-        kind = json.loads(text)['kind']
-    return Bunch(
-        kind=kind,
-        text=text
-    )
+    text = request.values.get('q', '').strip()
+    try:
+        d = json.loads(text)
+    except:
+        d = dict(request.values.items())
+
+    if not d:
+        return ''
+    if 'q' in d and len(d) == 1:
+        return d['q']
+    return json.dumps(d, sort_keys=True)
 
 
-@bp.route('/search', methods=['GET'])
-def search():
-    sq = get_standard_query()
+@bp.route('/search/<kind>', methods=['GET'])
+def search(kind):
+    text = get_standard_query()
     with appccontext(commit=True) as conn:
         q = query(
             conn=conn,
-            kind=sq.kind,
-            text=sq.text,
+            kind=kind,
+            text=text,
             timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
         )
         options = dict(

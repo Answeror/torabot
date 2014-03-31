@@ -20,21 +20,16 @@ def makeapp(*args, **kargs):
     return app
 
 
+def makeparts(app):
+    from . import frontend
+    from . import api
+    from .core import mod
+
+    for part in [frontend, api, mod]:
+        part.make(app)
+
+
 def make(*args, **kargs):
     app = makeapp(*args, **kargs)
-
-    from . import frontend
-    frontend.make(app)
-
-    from . import api
-    api.make(app)
-
-    from .core.mod import mods
-    import jinja2
-    with app.app_context():
-        app.jinja_loader = jinja2.ChoiceLoader([
-            app.jinja_loader,
-            jinja2.FileSystemLoader([mod.template_folder for mod in mods() if mod.template_folder])
-        ])
-
+    makeparts(app)
     return app

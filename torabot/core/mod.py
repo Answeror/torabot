@@ -19,8 +19,17 @@ def manager():
 
 
 def mod(name):
-    return manager()[name]
+    return manager()[name].obj
 
 
 def mods():
     return [e.obj for e in manager()]
+
+
+def make(app=None):
+    if app is not None:
+        with app.app_context():
+            for m in mods():
+                bp = getattr(m, 'blueprint', None)
+                if bp is not None:
+                    app.register_blueprint(bp, url_prefix='/mod/' + m.name)

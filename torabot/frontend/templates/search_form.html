@@ -1,5 +1,4 @@
-<form class=form-horizontal role=form action='{{ url_for('.search') }}'>
-    <input name=torabot_query_kind type=hidden value='{{ kind }}'>
+<form class=form-horizontal role=form action='{{ url_for('.search', kind=kind) }}'>
     {% block content %}{% endblock %}
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">

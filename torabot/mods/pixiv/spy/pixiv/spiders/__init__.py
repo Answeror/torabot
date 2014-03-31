@@ -4,6 +4,7 @@
 # Please refer to the documentation for information on how to create and manage
 # your spiders.
 
+import json
 from urlparse import urljoin
 from scrapy import log
 from scrapy.selector import Selector
@@ -32,11 +33,22 @@ class Pixiv(RedisSpider):
 
     def make_requests_from_query(self, query):
         if query.startswith(AUTHOR_URL):
-            yield self.make_author_uri_request(query)
+            yield self.make_author_uri_request(query, query)
             return
         if query.startswith(RANKING_URL):
-            yield from self.make_ranking_uri_requests(query)
+            for req in self.make_ranking_uri_requests(query):
+                yield req
             return
+        try:
+            q = json.loads(query)
+            if 'user_id' in q:
+                yield self.make_author_uri_request(AUTHOR_URL_TEMPLATE % q['user_id'], query)
+                return
+            if 'user_uri' in q:
+                yield self.make_author_uri_request(q['user_uri'], query)
+                return
+        except:
+            pass
         raise NotSupported('only support author uri query now')
 
     def make_ranking_uri_requests(self, uri):
@@ -57,7 +69,7 @@ class Pixiv(RedisSpider):
     def parse_ranking_uri(self, response):
         raise NotSupported('not implemented')
 
-    def make_author_uri_request(self, uri):
+    def make_author_uri_request(self, uri, query):
         return Request(
             uri,
             headers={
@@ -74,11 +86,13 @@ class Pixiv(RedisSpider):
             callback=self.parse_author_uri,
             meta=dict(
                 uri=uri,
+                query=query,
             ),
             dont_filter=True,
         )
 
     def parse_author_uri(self, response):
+        query = response.meta['query']
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % uri)
 
@@ -95,14 +109,14 @@ class Pixiv(RedisSpider):
         sel = Selector(response)
         try:
             return Page(
-                query=uri,
+                query=query,
                 uri=uri,
                 total=sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0],
                 arts=list(gen(sel)),
             )
         except:
             log.msg('parse failed', level=log.ERROR)
-            return Result(ok=False, query=uri)
+            return Result(ok=False, query=query)
 
 
 def make_ranking_json_uri(uri, page):

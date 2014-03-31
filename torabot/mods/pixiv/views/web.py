@@ -1,9 +1,7 @@
-import os
 from flask import render_template
 from logbook import Logger
+from .. import name
 
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
 
 log = Logger(__name__)
 
@@ -30,9 +28,13 @@ def format_query_text(text):
     return text
 
 
-def format_advanced_search(kind, query):
+def format_advanced_search(**kargs):
     return render_template(
         'pixiv/advanced_search.html',
-        kind=kind,
-        query=query,
+        kind=name,
+        method=kargs.get('method', 'user_uri'),
     )
+
+
+def format_help_page():
+    return render_template('pixiv/help.html')

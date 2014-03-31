@@ -5,7 +5,6 @@ from .spy import spy
 class Mod(object, metaclass=abc.ABCMeta):
 
     has_advanced_search = False
-    template_folder = ''
 
     def __init__(self, conf={}):
         self.conf = conf
@@ -38,7 +37,7 @@ class Mod(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def format_advanced_search(self, view, query):
+    def format_advanced_search(self, view, **kargs):
         pass
 
     def format_help_page(self):

@@ -2,23 +2,35 @@ import json
 from ...ut.bunch import Bunch
 from ...core.kanji import translate
 from ..base import Mod
-from .change import changes
-from .views import web, email
+from flask import Blueprint
+
+
+name = 'tora'
+bp = Blueprint(
+    name,
+    __name__,
+    static_folder='static',
+    template_folder='templates',
+    static_url_path='/%s/static' % name
+)
 
 
 class Tora(Mod):
 
-    name = 'tora'
+    name = name
     display_name = '虎穴'
     has_advanced_search = True
+    blueprint = bp
 
     def view(self, name):
+        from .views import web, email
         return {
             'web': web,
             'email': email,
         }[name]
 
     def changes(self, old, new):
+        from .change import changes
         return changes(old, new)
 
     def format_notice_status(self, view, notice):
@@ -33,8 +45,8 @@ class Tora(Mod):
     def format_query_result(self, view, query):
         return self.view(view).format_query_result(query)
 
-    def format_advanced_search(self, view, query):
-        return self.view(view).format_advanced_search(self.name, query)
+    def format_advanced_search(self, view):
+        return self.view(view).format_advanced_search()
 
     def spy(self, query, timeout):
         if not query:

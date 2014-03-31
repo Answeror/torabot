@@ -13,19 +13,19 @@
         <td><a href="{{ art.uri }}" target=_blank>{{ art.title }}</a></td>
         <td>
             {% if isinstance(art.author, str) %}
-            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=art.author) }}'>{{ art.author }}</a>
+            <a href='{{ url_for('.search', kind=query.kind, q=art.author) }}'>{{ art.author }}</a>
             {% else %}
             {% for a in art.author %}
-            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=a) }}'>{{ a }}</a>
+            <a href='{{ url_for('.search', kind=query.kind, q=a) }}'>{{ a }}</a>
             {% endfor %}
             {% endif %}
         </td>
         <td>
             {% if isinstance(art.company, str) %}
-            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=art.company) }}'>{{ art.company }}</a>
+            <a href='{{ url_for('.search', kind=query.kind, q=art.company) }}'>{{ art.company }}</a>
             {% else %}
             {% for a in art.company %}
-            <a href='{{ url_for('.search', torabot_query_kind=query.kind, torabot_query_text=c) }}'>{{ c }}</a>
+            <a href='{{ url_for('.search', kind=query.kind, q=c) }}'>{{ c }}</a>
             {% endfor %}
             {% endif %}
         </td>

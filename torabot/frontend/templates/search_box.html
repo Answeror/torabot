@@ -1,4 +1,4 @@
-<form name=search class="navbar-left" role="search">
+<form name=search class=navbar-left role=search method=GET>
     <div class="form-group"></div>
     <div class="form-group">
         <div class="input-group" style="width: 320px;">
@@ -6,7 +6,7 @@
                 <button name=help type=button class="btn btn-default" title='帮助'>?</button>
             </span>
             <span class="input-group-btn">
-                <select class="form-control" name=torabot_query_kind style='margin-right: -1px; width: 80px;'>
+                <select class="form-control" name=kind style='margin-right: -1px; width: 80px;'>
                     {% for m in mods %}
                     <option
                         value='{{ m.name }}'
@@ -16,7 +16,7 @@
                     {% endfor %}
                 </select>
             </span>
-            <input type="text" class="form-control" name=torabot_query_text value='{{ query_text }}'>
+            <input type="text" class="form-control" name=q value='{{ query_text }}'>
             <span name=buttons class="input-group-btn">
                 <button name=search type="submit" class="btn btn-default" title='搜索'>
                     <span class='glyphicon glyphicon-search'></span>

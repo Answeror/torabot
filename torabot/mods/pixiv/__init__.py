@@ -1,11 +1,17 @@
-import os
+from flask import Blueprint
 from ...ut.bunch import Bunch
 from ..base import Mod
 from ..mixins import ViewMixin, NoEmptyQueryMixin, KanjiMixin
-from .views import web, email
 
 
-ROOT = os.path.abspath(os.path.dirname(__file__))
+name = 'pixiv'
+bp = Blueprint(
+    name,
+    __name__,
+    static_folder='static',
+    template_folder='templates',
+    static_url_path='/%s/static' % name
+)
 
 
 class Pixiv(ViewMixin, NoEmptyQueryMixin, KanjiMixin, Mod):
@@ -13,9 +19,10 @@ class Pixiv(ViewMixin, NoEmptyQueryMixin, KanjiMixin, Mod):
     name = 'pixiv'
     display_name = 'pixiv'
     has_advanced_search = True
-    template_folder = os.path.join(ROOT, 'views', 'templates')
+    blueprint = bp
 
     def view(self, name):
+        from .views import web, email
         return {
             'web': web,
             'email': email,

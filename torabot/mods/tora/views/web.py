@@ -1,23 +1,6 @@
-import os
-from flask import render_template_string, g
+from flask import render_template
 from .ut import format_change_kind
-
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
-
-
-def format_query_result(query):
-    return render_template_string(template('list.html'), query=query)
-
-
-def template(filename):
-    name = 'mod_tora_template'
-    s = getattr(g, name, None)
-    if s is None:
-        with open(os.path.join(ROOT, filename), 'rb') as f:
-            s = f.read().decode('utf-8')
-        setattr(g, name, s)
-    return s
+from .. import name
 
 
 def format_notice_body(notice):
@@ -39,13 +22,13 @@ def format_query_text(text):
     return text
 
 
-def format_advanced_search(kind, query):
-    return render_template_string(
-        template('advanced_search.html'),
-        kind=kind,
-        query=query,
-    )
+def format_query_result(query):
+    return render_template('tora/list.html', query=query)
+
+
+def format_advanced_search(**kargs):
+    return render_template('tora/advanced_search.html', kind=name)
 
 
 def format_help_page():
-    return render_template_string(template('help.html'))
+    return render_template('tora/help.html')

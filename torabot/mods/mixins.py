@@ -22,8 +22,14 @@ class ViewMixin(object):
     def format_query_result(self, view, query):
         return self.view(view).format_query_result(query)
 
-    def format_advanced_search(self, view, query):
-        return self.view(view).format_advanced_search(self.name, query)
+    def format_advanced_search(self, view, **kargs):
+        return self.view(view).format_advanced_search(**kargs)
+
+    def format_help_page(self):
+        f = getattr(self.view('web'), 'format_help_page', None)
+        if f is None:
+            return super(ViewMixin, self).format_help_page()
+        return f()
 
 
 class NoEmptyQueryMixin(object):
