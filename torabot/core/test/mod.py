@@ -1,6 +1,6 @@
 from nose.tools import assert_equal
 from ...ut.bunch import bunchr
-from ...mods import tora
+from ..mod import mod
 
 
 class Mod(object):
@@ -69,4 +69,4 @@ class Mod(object):
         })
 
     def changes(self, old, new):
-        return tora.changes(old, new)
+        return mod('tora').changes(old, new)

@@ -28,6 +28,9 @@ class Mod(object, metaclass=abc.ABCMeta):
     def format_notice_body(self, view, notice):
         pass
 
+    def notice_attachments(self, view, notice):
+        return []
+
     @abc.abstractmethod
     def format_query_text(self, view, text):
         pass

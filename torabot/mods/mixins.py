@@ -31,6 +31,12 @@ class ViewMixin(object):
             return super(ViewMixin, self).format_help_page()
         return f()
 
+    def notice_attachments(self, view, notice):
+        f = getattr(self.view(view), 'notice_attachments', None)
+        if f is None:
+            return super(ViewMixin, self).notice_attachments(view, notice)
+        return f(notice)
+
 
 class NoEmptyQueryMixin(object):
 
