@@ -23,5 +23,11 @@ def notice_all():
     tasks.notice_all(app.conf)
 
 
+@app.task
+def log_to_file():
+    from torabot import tasks
+    tasks.log_to_file()
+
+
 if __name__ == '__main__':
     app.start()

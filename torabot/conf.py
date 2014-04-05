@@ -1,4 +1,6 @@
 from celery.schedules import crontab
+import os
+
 
 # flask
 SECRET_KEY = 'test'
@@ -13,11 +15,15 @@ CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULE = {
     'sync': {
         'task': 'torabot.celery.sync_all',
-        'schedule': crontab(minute='*/15'),  # sync every 5 minutes
+        'schedule': crontab(minute='*/15'),  # sync every 15 minutes
     },
     'notice': {
         'task': 'torabot.celery.notice_all',
-        'schedule': crontab(minute='*/15'),  # notice every 5 minutes
+        'schedule': crontab(minute='*/5'),  # notice every 5 minutes
+    },
+    'log_to_file': {
+        'task': 'torabot.celery.log_to_file',
+        'schedule': crontab(minute='*/1'),  # log every 1 minutes
     }
 }
 
@@ -31,6 +37,8 @@ TORABOT_SPY_TIMEOUT = 300
 TORABOT_SPY_SLAVES = 1
 TORABOT_NOTICE_ROOM = 16
 TORABOT_QUERY_EXPIRE = 15 * 60
+TORABOT_BUBBLE_LOG = True
+TORABOT_DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')
 
 # mod
 TORABOT_DEFAULT_MOD = 'tora'
