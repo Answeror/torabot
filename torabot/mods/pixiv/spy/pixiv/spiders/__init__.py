@@ -5,7 +5,7 @@
 # your spiders.
 
 import json
-from urlparse import urljoin
+from urlparse import urljoin, urlparse, parse_qs
 from scrapy import log
 from scrapy.selector import Selector
 from scrapy.http import Request
@@ -16,8 +16,9 @@ from ..items import Art, Page
 
 
 BASE_URL = 'http://www.pixiv.net/'
-AUTHOR_URL = 'http://www.pixiv.net/member_illust.php'
-AUTHOR_URL_TEMPLATE = AUTHOR_URL + '?id=%s'
+USER_ILLUSTRATIONS_URL = 'http://www.pixiv.net/member_illust.php'
+USER_URL = 'http://www.pixiv.net/member.php'
+USER_ILLUSTRATIONS_URL_TEMPLATE = USER_ILLUSTRATIONS_URL + '?id=%s'
 RANKING_URL = 'http://www.pixiv.net/ranking.php'
 
 
@@ -32,8 +33,11 @@ class Pixiv(RedisSpider):
         self.phpsessid = phpsessid
 
     def make_requests_from_query(self, query):
-        if query.startswith(AUTHOR_URL):
-            yield self.make_author_uri_request(query, query)
+        if query.startswith(USER_URL):
+            yield self.make_user_uri_request(query, query)
+            return
+        if query.startswith(USER_ILLUSTRATIONS_URL):
+            yield self.make_user_illustrations_uri_request(query, query)
             return
         if query.startswith(RANKING_URL):
             for req in self.make_ranking_uri_requests(query):
@@ -42,10 +46,10 @@ class Pixiv(RedisSpider):
         try:
             q = json.loads(query)
             if 'user_id' in q:
-                yield self.make_author_uri_request(AUTHOR_URL_TEMPLATE % q['user_id'], query)
+                yield self.make_user_illustrations_uri_request(USER_ILLUSTRATIONS_URL_TEMPLATE % q['user_id'], query)
                 return
             if 'user_uri' in q:
-                yield self.make_author_uri_request(q['user_uri'], query)
+                yield self.make_user_uri_request(q['user_uri'], query)
                 return
         except:
             pass
@@ -69,7 +73,17 @@ class Pixiv(RedisSpider):
     def parse_ranking_uri(self, response):
         raise NotSupported('not implemented')
 
-    def make_author_uri_request(self, uri, query):
+    def make_user_uri_request(self, uri, query):
+        if uri.startswith(USER_ILLUSTRATIONS_URL):
+            return self.make_user_illustrations_uri_request(uri, query)
+        d = parse_qs(urlparse(uri).query)
+        assert 'id' in d
+        return self.make_user_illustrations_uri_request(
+            USER_ILLUSTRATIONS_URL_TEMPLATE % d['id'][0],
+            query
+        )
+
+    def make_user_illustrations_uri_request(self, uri, query):
         return Request(
             uri,
             headers={
