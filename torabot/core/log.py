@@ -30,12 +30,25 @@ class RedisPub(logbook.queues.RedisHandler):
 
 class RedisSub(logbook.queues.SubscriberBase):
 
+    key = 'torabot:log'
+
     def __init__(self):
         self.r = redis.Redis()
 
     def recv(self, timeout=None):
-        rv = self.r.blpop('torabot:log')
-        d = json.loads(rv[1].decode('utf-8'))
+        if timeout is None:
+            rv = self.r.blpop(self.key)
+            value = rv[1]
+        elif timeout == 0:
+            value = self.r.lpop(self.key)
+        else:
+            rv = self.r.blpop(self.key)
+            value = None if rv is None else rv[1]
+
+        if value is None:
+            return None
+
+        d = json.loads(value.decode('utf-8'))
         return logbook.LogRecord.from_dict(d)
 
 
