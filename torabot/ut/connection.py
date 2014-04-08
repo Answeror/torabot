@@ -11,7 +11,7 @@ def ccontext(commit=False, **kargs):
         del kargs['connection']
     elif 'config' in kargs:
         from sqlalchemy import create_engine
-        conn = create_engine(kargs['config']['TORABOT_CONNECTION_STRING']).conntion()
+        conn = create_engine(kargs['config']['TORABOT_CONNECTION_STRING']).connect()
         del kargs['config']
     elif 'make' in kargs:
         conn = kargs['make']()

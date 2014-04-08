@@ -1,12 +1,12 @@
 import json
-from ...core.connection import appccontext
+from ...core.connection import autoccontext
 from ...core.local import get_current_conf
 from ...core.query import query
 from . import name
 
 
 def get_bangumi():
-    with appccontext(commit=True) as conn:
+    with autoccontext(commit=True) as conn:
         q = query(
             conn=conn,
             kind=name,
