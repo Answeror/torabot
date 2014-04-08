@@ -1,7 +1,32 @@
 import abc
 import json
+from flask import Blueprint
 from ..ut.bunch import Bunch
 from ..core.kanji import translate
+
+
+def make_blueprint_mixin(import_name):
+    class BlueprintMeta(abc.ABCMeta):
+
+        @property
+        def blueprint(self):
+            bp = getattr(self, '_blueprint', None)
+            if bp is None:
+                root = import_name.split('.')[-1]
+                self._blueprint = bp = Blueprint(
+                    self.name,
+                    __name__,
+                    static_folder=root + '/static',
+                    template_folder=root + '/templates',
+                    static_url_path='/%s/static' % self.name
+                )
+            return bp
+
+    class BlueprintMixin(object, metaclass=BlueprintMeta):
+
+        blueprint = BlueprintMeta.blueprint
+
+    return BlueprintMixin
 
 
 class ViewMixin(object):
@@ -17,7 +42,10 @@ class ViewMixin(object):
         return self.view(view).format_notice_body(notice)
 
     def format_query_text(self, view, text):
-        return self.view(view).format_query_text(text)
+        f = getattr(self.view(view), 'format_query_text', None)
+        if f is None:
+            return super(ViewMixin, self).format_query_text(view, text)
+        return f(text)
 
     def format_query_result(self, view, query):
         return self.view(view).format_query_result(query)

@@ -1,15 +1,16 @@
 <form name=search class=navbar-left role=search method=GET>
     <div class="form-group"></div>
     <div class="form-group">
-        <div class="input-group" style="width: 320px;">
+        <div class="input-group" style="width: 350px;">
             <span class="input-group-btn">
                 <button name=help type=button class="btn btn-default" title='帮助'>?</button>
             </span>
             <span class="input-group-btn">
-                <select class="form-control" name=kind style='margin-right: -1px; width: 80px;'>
+                <select class="form-control" name=kind style='margin-right: -1px; width: 100px;'>
                     {% for m in mods %}
                     <option
                         value='{{ m.name }}'
+                        data-has-normal-search='{{ 1 if m.has_normal_search else 0 }}'
                         data-has-advanced-search='{{ 1 if m.has_advanced_search else 0 }}'
                         {% if query_kind == m.name %} selected{% endif %}
                     >{{ m.display_name }}</option>

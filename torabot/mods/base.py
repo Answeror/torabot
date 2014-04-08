@@ -5,6 +5,7 @@ from .spy import spy
 class Mod(object, metaclass=abc.ABCMeta):
 
     has_advanced_search = False
+    has_normal_search = True
 
     def __init__(self, conf={}):
         self.conf = conf
@@ -31,9 +32,8 @@ class Mod(object, metaclass=abc.ABCMeta):
     def notice_attachments(self, view, notice):
         return []
 
-    @abc.abstractmethod
     def format_query_text(self, view, text):
-        pass
+        return text
 
     @abc.abstractmethod
     def format_query_result(self, view, query):

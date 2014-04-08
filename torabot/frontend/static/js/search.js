@@ -17,12 +17,10 @@ $(function(){
         $(location).attr('href', '/search/advanced/' + $mods.find('option:selected').val());
     });
     var $buttons = form.find('span[name="buttons"]');
+    var $q = form.find('input[name="q"]');
     var on_change_mod = function() {
-        if ($(this).find('option:selected').data('has-advanced-search')) {
-            $buttons.append($advanced);
-        } else {
-            $advanced.remove();
-        }
+        $advanced.prop('disabled', !$(this).find('option:selected').data('has-advanced-search'));
+        $q.prop('disabled', !$(this).find('option:selected').data('has-normal-search'));
     };
     $mods.ready(on_change_mod).change(on_change_mod);
 });
