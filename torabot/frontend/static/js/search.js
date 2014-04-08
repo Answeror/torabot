@@ -5,7 +5,8 @@ $(function(){
         e.preventDefault();
         $(location).attr('href', '/help/' + $mods.find('option:selected').val());
     });
-    form.find('button[name="search"]').click(function(e) {
+    var $search = form.find('button[name="search"]');
+    $search.click(function(e) {
         e.preventDefault();
         var kind = $mods.find('option:selected').val();
         var text = form.find('input[name="q"]').val();
@@ -21,6 +22,7 @@ $(function(){
     var on_change_mod = function() {
         $advanced.prop('disabled', !$(this).find('option:selected').data('has-advanced-search'));
         $q.prop('disabled', !$(this).find('option:selected').data('has-normal-search'));
+        $search.prop('disabled', !$(this).find('option:selected').data('has-normal-search'));
     };
     $mods.ready(on_change_mod).change(on_change_mod);
 });
