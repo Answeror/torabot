@@ -13,10 +13,17 @@ from ..ut.bunch import Bunch
 log = Logger(__name__)
 
 
+def format_notice_status(notice):
+    return {
+        'pending': '未发送',
+        'sent': '已发送',
+    }[notice.status]
+
+
 def web_transform(notice):
     notice = Bunch(**notice)
     notice.body = mod(notice.kind).format_notice_body('web', notice)
-    notice.status = mod(notice.kind).format_notice_status('web', notice)
+    notice.status = format_notice_status('web', notice)
     return notice
 
 
@@ -52,7 +59,6 @@ def get_pending_notices_bi_user_id(conn, user_id, **kargs):
 
 
 if __name__ == '__main__':
-    import os
     import json
     from ..ut.bunch import bunchr
     from .. import make
