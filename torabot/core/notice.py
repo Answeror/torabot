@@ -23,7 +23,7 @@ def format_notice_status(notice):
 def web_transform(notice):
     notice = Bunch(**notice)
     notice.body = mod(notice.kind).format_notice_body('web', notice)
-    notice.status = format_notice_status('web', notice)
+    notice.status = format_notice_status(notice)
     return notice
 
 
