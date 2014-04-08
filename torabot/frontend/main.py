@@ -4,11 +4,10 @@ from flask import (
     request,
     current_app,
     render_template,
-    session as flask_session
+    session
 )
 from logbook import Logger
 from ..core.query import query
-from ..ut.bunch import Bunch
 from ..db import (
     watch as _watch,
     unwatch as _unwatch,
@@ -27,6 +26,7 @@ from . import auth, bp
 from ..ut.connection import appccontext
 from ..core.mod import mod, mods
 from .momentjs import momentjs
+from uuid import uuid4
 
 
 log = Logger(__name__)
@@ -113,7 +113,7 @@ def notice_conf(user_id):
         )
         return render_template(
             'message.html',
-            ok=True,
+            ok=False,
             message='更新失败'
         )
 
@@ -155,10 +155,10 @@ def search(kind):
             query=q,
             content=mod(q.kind).format_query_result('web', q)
         )
-        if 'userid' in flask_session:
+        if 'userid' in session:
             options['watching'] = _watching(
                 conn,
-                user_id=int(flask_session['userid']),
+                user_id=int(session['userid']),
                 query_id=q.id,
             )
     return render_template('list.html', **options)
@@ -221,6 +221,20 @@ def help(name):
         'help.html',
         query_kind=name,
         content=mod(name).format_help_page()
+    )
+
+
+@bp.errorhandler(Exception)
+def general_error_guard(e):
+    name = str(uuid4())
+    log.exception(name)
+    return render_template(
+        'message.html',
+        ok=False,
+        message='出错了. 错误编号 %s . 你可以提交该编号给 %s , 协助改进torabot.' % (
+            name,
+            current_app.config.get('TORABOT_REPORT_EMAIL', '')
+        )
     )
 
 
