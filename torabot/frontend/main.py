@@ -1,3 +1,4 @@
+from uuid import uuid4
 import json
 from nose.tools import assert_equal
 from flask import (
@@ -25,12 +26,11 @@ from ..core.notice import (
     get_pending_notices_bi_user_id,
 )
 from ..core.watch import get_watches_bi_user_id
-from . import auth, bp
-from ..ut.connection import appccontext
+from ..core.connection import appccontext
 from ..core.mod import mod, mods
-from .momentjs import momentjs
-from uuid import uuid4
 from .errors import AuthError
+from .momentjs import momentjs
+from . import auth, bp
 
 
 log = Logger(__name__)

@@ -1,0 +1,8 @@
+    <div class='col-sm-2 sp'>
+        <div class=thumbnail>
+            <a href='{{ url_for(".search", kind=kind, method="sp", title=sp.title) }}' target=_blank><img alt='{{ sp.title }}' src='{{ sp.scover }}'></a>
+            <div class=caption>
+                <strong>{{ sp.title }}</strong>
+            </div>
+        </div>
+    </div>

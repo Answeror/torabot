@@ -10,6 +10,7 @@ setup(
         'torabot.mods': [
             'tora = torabot.mods.tora:Tora',
             'pixiv = torabot.mods.pixiv:Pixiv',
+            'bilibili = torabot.mods.bilibili:Bilibili',
         ]
     },
 )

@@ -1,4 +1,3 @@
-from stevedore.driver import DriverManager
 from stevedore.extension import ExtensionManager
 from .local import get_current_conf
 from ..ut.bunch import Bunch

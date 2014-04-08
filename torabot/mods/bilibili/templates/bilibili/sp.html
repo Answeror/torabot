@@ -1,0 +1,32 @@
+{% from 'bilibili/macros.html' import format_weekday %}
+<div class=row>
+    <div class=col-sm-2>
+        <img src='{{ query.result.sp.cover }}' alt='{{ query.result.sp.title }}' class=img-thumbnail>
+    </div>
+    <div class=col-sm-4>
+        <table class=table>
+            <tbody>
+                <tr>
+                    <td class=col-sm-1>名称</td>
+                    <td class=col-sm-3>{{ query.result.sp.title }}</td>
+                </tr>
+                <tr>
+                    <td class=col-sm-1>地区</td>
+                    <td class=col-sm-3>{{ query.result.sp.area }}</td>
+                </tr>
+                <tr>
+                    <td class=col-sm-1>放映时间</td>
+                    <td class=col-sm-3>{{ format_weekday(query.result.sp.weekday) }}</td>
+                </tr>
+                <tr>
+                    <td class=col-sm-1>更新时间</td>
+                    <td class=col-sm-3>{{ query.result.sp.lastupdate_at }}</td>
+                </tr>
+                <tr>
+                    <td class=col-sm-1>最新话</td>
+                    <td class=col-sm-3>{{ query.result.sp.bgmcount }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
