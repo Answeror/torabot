@@ -26,10 +26,12 @@ def watching(conn, user_id, query_id):
 
 
 def get_watches_bi_user_id(conn, user_id):
-    result = conn.execute(sql('''
+    result = conn.execute(sql(
+        '''
         select
             user_id,
             query_id,
+            watch.name,
             watch.ctime,
             query.kind as query_kind,
             query.text as query_text,
@@ -37,5 +39,15 @@ def get_watches_bi_user_id(conn, user_id):
         from watch inner join query on watch.query_id = query.id
         where user_id = :user_id
         order by watch.ctime desc
-    '''), user_id=user_id)
+        '''
+    ), user_id=user_id)
     return [bunchr(**row) for row in result.fetchall()]
+
+
+def rename_watch(conn, user_id, query_id, name):
+    conn.execute(sql(
+        '''
+        update watch set name = :name
+        where user_id = :user_id and query_id = :query_id
+        '''
+    ), user_id=user_id, query_id=query_id, name=name)

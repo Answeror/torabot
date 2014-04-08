@@ -4,7 +4,9 @@ from flask import (
     request,
     current_app,
     render_template,
-    session
+    session,
+    redirect,
+    url_for,
 )
 from logbook import Logger
 from ..core.query import query
@@ -12,6 +14,7 @@ from ..db import (
     watch as _watch,
     unwatch as _unwatch,
     watching as _watching,
+    rename_watch as _rename_watch,
     get_user_bi_id,
     set_email,
     get_notice_count_bi_user_id,
@@ -27,6 +30,7 @@ from ..ut.connection import appccontext
 from ..core.mod import mod, mods
 from .momentjs import momentjs
 from uuid import uuid4
+from .errors import AuthError
 
 
 log = Logger(__name__)
@@ -35,6 +39,44 @@ log = Logger(__name__)
 @bp.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
+
+def message(text, ok=True):
+    return render_template('message.html', ok=ok, message=text)
+
+
+def done(text):
+    return message(text, True)
+
+
+def failed(text):
+    return message(text, False)
+
+
+def check_request_user_id(session_user_id):
+    if int(request.values['user_id']) != session_user_id:
+        raise AuthError('request user_id not equal to user_id in sessoin')
+
+
+@bp.route('/watch/rename', methods=['GET', 'POST'])
+@auth.require_session
+def rename_watch(user_id):
+    check_request_user_id(user_id)
+    if request.method == 'GET':
+        return render_template('rename_watch.html')
+    else:
+        try:
+            with appccontext(commit=True) as conn:
+                _rename_watch(
+                    conn,
+                    user_id=int(request.values['user_id']),
+                    query_id=int(request.values['query_id']),
+                    name=request.values['name'],
+                )
+            return redirect(url_for('.watching'))
+        except:
+            log.exception('watch failed')
+            return failed('重命名失败')
 
 
 @bp.route('/watch', methods=['GET'])
@@ -165,49 +207,35 @@ def search(kind):
 
 
 @bp.route('/watch/add', methods=['POST'])
-def watch():
+@auth.require_session
+def watch(user_id):
+    check_request_user_id(user_id)
     try:
+        query_id = int(request.values['query_id'])
         with appccontext(commit=True) as conn:
-            _watch(
-                conn,
-                user_id=request.values['user_id'],
-                query_id=request.values['query_id'],
-            )
-        return render_template(
-            'message.html',
-            ok=True,
-            message='订阅成功'
-        )
+            _watch(conn, user_id=user_id, query_id=query_id)
+        return redirect(url_for(
+            '.rename_watch',
+            user_id=user_id,
+            query_id=query_id
+        ))
     except:
         log.exception('watch failed')
-        return render_template(
-            'message.html',
-            ok=False,
-            message='订阅失败'
-        )
+        return failed('订阅失败')
 
 
 @bp.route('/watch/del', methods=['POST'])
-def unwatch():
+@auth.require_session
+def unwatch(user_id):
+    check_request_user_id(user_id)
     try:
+        query_id = int(request.values['query_id'])
         with appccontext(commit=True) as conn:
-            _unwatch(
-                conn,
-                user_id=request.values['user_id'],
-                query_id=request.values['query_id'],
-            )
-            return render_template(
-                'message.html',
-                ok=True,
-                message='退订成功'
-            )
+            _unwatch(conn, user_id=user_id, query_id=query_id)
+        return redirect(url_for('.watching'))
     except:
         log.exception('unwatch failed')
-        return render_template(
-            'message.html',
-            ok=False,
-            message='退订失败'
-        )
+        return failed('退订失败')
 
 
 @bp.route('/about')

@@ -10,6 +10,7 @@ from .watch import (
     watch,
     unwatch,
     get_watches_bi_user_id,
+    rename_watch,
 )
 from .query import (
     get_or_add_query_bi_kind_and_text,
@@ -57,4 +58,5 @@ __all__ = [
     get_notice_count_bi_user_id.__name__,
     get_pending_notice_count_bi_user_id.__name__,
     get_query_mtime_bi_kind_and_text.__name__,
+    rename_watch.__name__,
 ]

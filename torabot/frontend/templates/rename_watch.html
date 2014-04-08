@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class=row>
+    <form class=form-horizontal role=form method=POST action='{{ url_for('.rename_watch') }}'>
+        <input type=hidden name=user_id value='{{ request.values.user_id }}'>
+        <input type=hidden name=query_id value='{{ request.values.query_id }}'>
+        <div class="form-group">
+            <label for="name" class="col-sm-2 control-label">订阅名称</label>
+            <div class="col-sm-4">
+                <input id=name name=name type=text class=form-control placeholder='懒得命名就留空点确定' value='{{ request.values.name }}'>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-success">确定</button>
+                <a class='btn btn-default' href="{{ url_for('.watching') }}">取消</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
