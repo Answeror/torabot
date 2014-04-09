@@ -36,6 +36,7 @@ class Bilibili(
         yield from {
             'bangumi': self._bangumi_changes,
             'sp': self._sp_changes,
+            'user': self._user_changes,
         }[new.kind](old, new)
 
     def _bangumi_changes(self, old, new):
@@ -64,6 +65,12 @@ class Bilibili(
             d = dict(method='sp', title=query)
             query = json.dumps(d)
         return query, d
+
+    def _user_changes(self, old, new):
+        oldmap = {post.uri: post for post in getattr(old, 'posts', [])}
+        for post in new.posts:
+            if post.uri not in oldmap:
+                yield bunchr(kind='user_new_post', post=post)
 
 
 bp = Bilibili.blueprint

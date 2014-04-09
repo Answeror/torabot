@@ -1,7 +1,10 @@
+import json
 from flask import render_template
 from logbook import Logger
+from copy import deepcopy
 from ..query import get_bangumi
 from .. import name, bp
+from ....ut.bunch import bunchr
 
 
 log = Logger(__name__)
@@ -13,7 +16,9 @@ def bilibili_site_verification(hash):
 
 
 def format_query_result(query):
-    return render_template('bilibili/sp.html', query=query)
+    query = deepcopy(query)
+    query.result.query = bunchr(json.loads(query.result.query))
+    return render_template('bilibili/%s.html' % query.result.query.method, query=query)
 
 
 def format_notice_body(notice):
@@ -31,10 +36,15 @@ def format_bangumi_search():
     )
 
 
+def format_user_search():
+    return render_template('bilibili/search/user.html', kind=name)
+
+
 def format_advanced_search(**kargs):
     return {
-        'bangumi': format_bangumi_search,
-    }[kargs.get('method', 'bangumi')]()
+        'sp': format_bangumi_search,
+        'user': format_user_search,
+    }[kargs.get('method', 'sp')]()
 
 
 def format_help_page():

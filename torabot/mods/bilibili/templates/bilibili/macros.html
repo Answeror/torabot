@@ -1,3 +1,11 @@
 {% macro format_weekday(value) -%}
 周{{ {0: '日', 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六'}[value] }}
 {%- endmacro %}
+
+{% macro search_nav(kind, method) -%}
+<ul class="nav nav-tabs">
+    <li{% if method == 'sp' %} class=active{% endif %}><a href='{{ url_for(".advanced_search", kind=kind, method="sp") }}'>按新番专题</a></li>
+    <li{% if method == 'user' %} class=active{% endif %}><a href='{{ url_for(".advanced_search", kind=kind, method="user") }}'>按UP主</a></li>
+</ul>
+<div class=vspace-top-middle></div>
+{%- endmacro %}
