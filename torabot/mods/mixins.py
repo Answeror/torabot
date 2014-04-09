@@ -5,26 +5,32 @@ from ..ut.bunch import Bunch
 from ..core.kanji import translate
 
 
+class BlueprintField(object):
+
+    def __init__(self, import_name):
+        self.import_name = import_name
+
+    def __get__(self, obj, cls):
+        if cls is None:
+            cls = type(obj)
+        name = '_blueprint'
+        value = getattr(self, name, None)
+        if value is None:
+            value = Blueprint(
+                cls.name,
+                self.import_name,
+                static_folder='static',
+                template_folder='templates',
+                static_url_path='/%s/static' % cls.name
+            )
+            setattr(cls, name, value)
+        return value
+
+
 def make_blueprint_mixin(import_name):
-    class BlueprintMeta(abc.ABCMeta):
+    class BlueprintMixin(object):
 
-        @property
-        def blueprint(self):
-            bp = getattr(self, '_blueprint', None)
-            if bp is None:
-                root = import_name.split('.')[-1]
-                self._blueprint = bp = Blueprint(
-                    self.name,
-                    __name__,
-                    static_folder=root + '/static',
-                    template_folder=root + '/templates',
-                    static_url_path='/%s/static' % self.name
-                )
-            return bp
-
-    class BlueprintMixin(object, metaclass=BlueprintMeta):
-
-        blueprint = BlueprintMeta.blueprint
+        blueprint = BlueprintField(import_name)
 
     return BlueprintMixin
 
