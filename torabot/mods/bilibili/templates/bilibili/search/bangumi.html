@@ -1,26 +1,24 @@
 {% from 'bilibili/macros.html' import format_weekday %}
-<div id=bilibili-bangumi class=row>
-    <table class='table table-hover'>
-        <thead>
-            <tr>
-                <td class=col-sm-1>放映时间</td>
-                <td class=col-sm-8>名称</td>
-                <td class=col-sm-2>地区</td>
-                <td class=col-sm-1>最新话</td>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sp in bangumi | sort(attribute='weekday') %}
-            <tr class=bilibili-sp data-uri='{{ url_for(".search", kind=kind, method="sp", title=sp.title) }}'>
-                <td>{{ format_weekday(sp.weekday) }}</td>
-                <td>{{ sp.title }}</td>
-                <td>{{ sp.area }}</td>
-                <td>{{ sp.bgmcount }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<table class='table table-hover'>
+    <thead>
+        <tr>
+            <td class=col-sm-1>放映时间</td>
+            <td class=col-sm-8>名称</td>
+            <td class=col-sm-2>地区</td>
+            <td class=col-sm-1>最新话</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sp in bangumi | sort(attribute='weekday') %}
+        <tr class=bilibili-sp data-uri='{{ url_for(".search", kind=kind, method="sp", title=sp.title) }}'>
+            <td>{{ format_weekday(sp.weekday) }}</td>
+            <td>{{ sp.title }}</td>
+            <td>{{ sp.area }}</td>
+            <td>{{ sp.bgmcount }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 <style>
 .bilibili-sp { cursor: pointer; }
 </style>
