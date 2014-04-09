@@ -31,4 +31,4 @@ def make(app=None):
             for m in mods():
                 bp = getattr(m, 'blueprint', None)
                 if bp is not None:
-                    app.register_blueprint(bp, url_prefix='/mod/' + m.name)
+                    app.register_blueprint(bp)
