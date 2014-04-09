@@ -14,3 +14,12 @@ def get_bangumi():
             timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
         )
     return q.result.content
+
+
+def standard_query(query):
+    try:
+        d = json.loads(query)
+    except:
+        d = dict(method='sp', title=query)
+        query = json.dumps(d)
+    return query, d

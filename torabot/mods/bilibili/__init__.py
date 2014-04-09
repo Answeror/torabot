@@ -1,4 +1,3 @@
-import json
 from nose.tools import assert_equal
 from ...ut.bunch import bunchr
 from ..base import Mod
@@ -47,7 +46,8 @@ class Bilibili(
             yield bunchr(kind='update', data=new)
 
     def spy(self, query, timeout):
-        query, d = self._standard_query(query)
+        from .query import standard_query
+        query, d = standard_query(query)
         if d.get('method') == 'sp':
             return self._spy_sp(d['title'])
         return super(Bilibili, self).spy(query, timeout)
@@ -57,14 +57,6 @@ class Bilibili(
         for sp in get_bangumi():
             if sp.title == title:
                 return bunchr(kind='sp', sp=sp)
-
-    def _standard_query(self, query):
-        try:
-            d = json.loads(query)
-        except:
-            d = dict(method='sp', title=query)
-            query = json.dumps(d)
-        return query, d
 
     def _user_changes(self, old, new):
         oldmap = {post.uri: post for post in getattr(old, 'posts', [])}

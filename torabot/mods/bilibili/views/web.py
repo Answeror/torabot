@@ -2,7 +2,7 @@ import json
 from flask import render_template
 from logbook import Logger
 from copy import deepcopy
-from ..query import get_bangumi
+from ..query import get_bangumi, standard_query
 from .. import name, bp
 from ....ut.bunch import bunchr
 
@@ -17,7 +17,7 @@ def bilibili_site_verification(hash):
 
 def format_query_result(query):
     query = deepcopy(query)
-    query.result.query = bunchr(json.loads(query.result.query))
+    query.result.query = bunchr(json.loads(standard_query(query.text)[0]))
     return render_template('bilibili/%s.html' % query.result.query.method, query=query)
 
 
