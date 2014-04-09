@@ -64,3 +64,9 @@ class Bilibili(
             d = dict(method='sp', title=query)
             query = json.dumps(d)
         return query, d
+
+
+bp = Bilibili.blueprint
+
+from .views import web
+assert web

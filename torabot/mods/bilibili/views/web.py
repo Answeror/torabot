@@ -1,10 +1,15 @@
 from flask import render_template
 from logbook import Logger
 from ..query import get_bangumi
-from .. import name
+from .. import name, bp
 
 
 log = Logger(__name__)
+
+
+@bp.route('/bilibili_<hash>.html')
+def bilibili_site_verification(hash):
+    return bp.send_static_file('bilibili_%s.html' % hash)
 
 
 def format_query_result(query):
