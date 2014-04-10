@@ -1,4 +1,5 @@
 import json
+from nose.tools import assert_in
 from ...core.connection import autoccontext
 from ...core.local import get_current_conf
 from ...core.query import query
@@ -22,4 +23,5 @@ def standard_query(query):
     except:
         d = dict(method='sp', title=query)
         query = json.dumps(d)
+    assert_in('method', d)
     return query, d
