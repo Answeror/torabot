@@ -27,11 +27,8 @@ class Bilibili(
         }[name]
 
     def changes(self, old, new):
-        if not old:
-            yield bunchr(kind='new', data=new)
-            return
-
-        assert_equal(old.kind, new.kind)
+        if old:
+            assert_equal(old.kind, new.kind)
         yield from {
             'bangumi': self._bangumi_changes,
             'sp': self._sp_changes,
@@ -42,6 +39,9 @@ class Bilibili(
         return []
 
     def _sp_changes(self, old, new):
+        if not old:
+            yield bunchr(kind='sp_new', data=new)
+            return
         if new.sp.lastupdate != old.sp.lastupdate:
             yield bunchr(kind='sp_update', data=new)
 
@@ -56,7 +56,7 @@ class Bilibili(
         from .query import get_bangumi
         for sp in get_bangumi():
             if sp.title == title:
-                return bunchr(sp=sp)
+                return bunchr(kind='sp', sp=sp)
 
     def _user_changes(self, old, new):
         oldmap = {post.uri: post for post in getattr(old, 'posts', [])}

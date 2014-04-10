@@ -5,6 +5,7 @@ def format_notice_body(notice):
     return {
         'update': format_sp_notice_body,
         'sp_update': format_sp_notice_body,
+        'sp_new': format_sp_notice_body,
         'user_new_post': format_user_notice_body,
     }[notice.change.kind](notice)
 
