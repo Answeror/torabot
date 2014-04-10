@@ -18,6 +18,6 @@ def format_sp_notice_body(notice):
 
 def format_user_notice_body(notice):
     return "bilibili: 新投稿 %(title)s: %(uri)s" % dict(
-        title=notice.change.sp.title,
-        uri=notice.change.sp.uri,
+        title=notice.change.post.title,
+        uri=notice.change.post.uri,
     )

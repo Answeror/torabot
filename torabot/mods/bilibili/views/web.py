@@ -22,9 +22,24 @@ def format_query_result(query):
 
 
 def format_notice_body(notice):
-    return "bilibili: <a href='%s'>%s</a> 更新了" % (
-        notice.change.art.uri,
-        notice.change.art.title,
+    return {
+        'sp': format_sp_notice_body,
+        'user_new_post': format_user_notice_body,
+    }[notice.change.kind](notice)
+
+
+def format_user_notice_body(notice):
+    return "bilibili: 新投稿 <a href='%(uri)s'>%(title)s</a>" % dict(
+        title=notice.change.post.title,
+        uri=notice.change.post.uri,
+    )
+
+
+def format_sp_notice_body(notice):
+    return "bilibili: <a href='%(uri)s'>%(title)s</a> 更新至第%(n)d话" % dict(
+        uri=notice.change.sp.uri,
+        title=notice.change.sp.title,
+        n=notice.change.sp.bgmcount,
     )
 
 
