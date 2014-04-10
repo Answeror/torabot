@@ -23,7 +23,8 @@ def format_query_result(query):
 
 def format_notice_body(notice):
     return {
-        'sp': format_sp_notice_body,
+        'update': format_sp_notice_body,
+        'sp_update': format_sp_notice_body,
         'user_new_post': format_user_notice_body,
     }[notice.change.kind](notice)
 

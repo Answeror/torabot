@@ -43,7 +43,7 @@ class Bilibili(
 
     def _sp_changes(self, old, new):
         if new.sp.lastupdate != old.sp.lastupdate:
-            yield bunchr(kind='update', data=new)
+            yield bunchr(kind='sp_update', data=new)
 
     def spy(self, query, timeout):
         from .query import standard_query
@@ -56,7 +56,7 @@ class Bilibili(
         from .query import get_bangumi
         for sp in get_bangumi():
             if sp.title == title:
-                return bunchr(kind='sp', sp=sp)
+                return bunchr(sp=sp)
 
     def _user_changes(self, old, new):
         oldmap = {post.uri: post for post in getattr(old, 'posts', [])}
