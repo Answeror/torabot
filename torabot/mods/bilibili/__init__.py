@@ -40,10 +40,10 @@ class Bilibili(
 
     def _sp_changes(self, old, new):
         if not old:
-            yield bunchr(kind='sp_new', data=new)
+            yield bunchr(kind='sp_new', sp=new.sp)
             return
         if new.sp.lastupdate != old.sp.lastupdate:
-            yield bunchr(kind='sp_update', data=new)
+            yield bunchr(kind='sp_update', sp=new.sp)
 
     def spy(self, query, timeout):
         from .query import standard_query
