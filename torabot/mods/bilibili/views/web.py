@@ -42,7 +42,7 @@ def format_sp_notice_body(notice):
     return "bilibili: <a href='%(uri)s'>%(title)s</a> 更新至第%(n)d话" % dict(
         uri=quote('http://www.bilibili.tv/sp/' + notice.change.sp.title),
         title=notice.change.sp.title,
-        n=notice.change.sp.bgmcount,
+        n=int(notice.change.sp.bgmcount),
     )
 
 
