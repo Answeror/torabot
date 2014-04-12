@@ -5,9 +5,9 @@
     <thead>
         <tr>
             <td class=col-sm-2>订阅时间</td>
-            <td class=col-sm-7>订阅名称/查询内容(点击重命名)</td>
-            <td class=col-sm-2>更新时间</td>
-            <td class=col-sm-1></td>
+            <td class=col-sm-6>订阅名称/查询内容(点击重命名)</td>
+            <td class='col-sm-2 text-right'>更新时间</td>
+            <td class=col-sm-2></td>
         </tr>
     </thead>
     <tbody>
@@ -15,14 +15,16 @@
     <tr>
         <td>{{ momentjs(watch.ctime).calendar() }}</td>
         <td><a title='点击这里重命名该订阅' href='{{ url_for(".rename_watch", user_id=watch.user_id, query_id=watch.query_id, name=watch.name) }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
-        <td>{{ momentjs(watch.query_mtime).fromnow() }}</td>
+        <td class=text-right>{{ momentjs(watch.query_mtime).fromnow() }}</td>
         <td>
-            <a class='btn btn-xs btn-default' href='{{ url_for(".search", kind=watch.query_kind, q=watch.query_text) }}'>查看</a>
-            <form style='display:inline-block' action='{{ url_for(".unwatch") }}' method=post>
-                <input type=hidden name=user_id value='{{ watch.user_id }}'>
-                <input type=hidden name=query_id value='{{ watch.query_id }}'>
-                <button type=submit class='btn btn-xs btn-default'>退订</button>
-            </form>
+            <div class=pull-right>
+                <a class='btn btn-xs btn-default' href='{{ url_for(".search", kind=watch.query_kind, q=watch.query_text) }}'>查看</a>
+                <form style='display:inline-block' action='{{ url_for(".unwatch") }}' method=post>
+                    <input type=hidden name=user_id value='{{ watch.user_id }}'>
+                    <input type=hidden name=query_id value='{{ watch.query_id }}'>
+                    <button type=submit class='btn btn-xs btn-default'>退订</button>
+                </form>
+            </div>
         </td>
     </tr>
     {% endfor %}
