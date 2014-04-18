@@ -33,3 +33,7 @@ class Pixiv(ViewMixin, NoEmptyQueryMixin, KanjiMixin, Mod):
         for art in new.arts:
             if art.uri not in oldmap:
                 yield Bunch(kind='new', art=art)
+
+    def spy(self, query, timeout):
+        from .query import regular
+        return super(Pixiv, self).spy(regular(query), timeout)

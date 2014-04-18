@@ -6,8 +6,8 @@
 
 from scrapy_redis.pipelines import RedisPipeline
 from scrapy import log
-from hashlib import md5
 from .items import Result
+from .query import hash as hash_query
 
 
 class Output(RedisPipeline):
@@ -16,7 +16,7 @@ class Output(RedisPipeline):
         """Returns redis key based on given spider"""
         return "torabot:spy:%s:%s:items" % (
             spider.name,
-            md5(item['query'].encode('utf-8')).hexdigest()
+            hash_query(item['query'])
         )
 
     def process_item(self, item, spider):

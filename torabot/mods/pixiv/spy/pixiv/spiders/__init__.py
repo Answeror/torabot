@@ -33,27 +33,18 @@ class Pixiv(RedisSpider):
         self.phpsessid = phpsessid
 
     def make_requests_from_query(self, query):
-        if query.startswith(USER_URL):
-            yield self.make_user_uri_request(query, query)
-            return
-        if query.startswith(USER_ILLUSTRATIONS_URL):
-            yield self.make_user_illustrations_uri_request(query, query)
-            return
-        if query.startswith(RANKING_URL):
-            for req in self.make_ranking_uri_requests(query):
-                yield req
-            return
-        try:
-            q = json.loads(query)
-            if 'user_id' in q:
-                yield self.make_user_illustrations_uri_request(USER_ILLUSTRATIONS_URL_TEMPLATE % q['user_id'], query)
-                return
-            if 'user_uri' in q:
-                yield self.make_user_uri_request(q['user_uri'], query)
-                return
-        except:
-            pass
-        raise NotSupported('only support author uri query now')
+        query = json.loads(query)
+        yield {
+            'user_id': self.make_user_id_request,
+            'user_uri': self.make_user_uri_request,
+            'user_illustrations_uri': self.make_user_uri_request,
+        }[query['method']](query)
+
+    def make_user_id_request(self, query):
+        return self._make_user_illustrations_uri_request(
+            USER_ILLUSTRATIONS_URL_TEMPLATE % query['user_id'],
+            query
+        )
 
     def make_ranking_uri_requests(self, uri):
         page_count = 10
@@ -73,17 +64,18 @@ class Pixiv(RedisSpider):
     def parse_ranking_uri(self, response):
         raise NotSupported('not implemented')
 
-    def make_user_uri_request(self, uri, query):
-        if uri.startswith(USER_ILLUSTRATIONS_URL):
-            return self.make_user_illustrations_uri_request(uri, query)
-        d = parse_qs(urlparse(uri).query)
+    def make_user_uri_request(self, query):
+        d = parse_qs(urlparse(query['uri']).query)
         assert 'id' in d
-        return self.make_user_illustrations_uri_request(
+        return self._make_user_illustrations_uri_request(
             USER_ILLUSTRATIONS_URL_TEMPLATE % d['id'][0],
             query
         )
 
-    def make_user_illustrations_uri_request(self, uri, query):
+    def make_user_illustrations_uri_request(self, query):
+        return self._make_user_illustrations_uri_request(query['uri'], query)
+
+    def _make_user_illustrations_uri_request(self, uri, query):
         return Request(
             uri,
             headers={
@@ -97,7 +89,7 @@ class Pixiv(RedisSpider):
                     'PHPSESSID=%s;' % self.phpsessid,
                 ])
             },
-            callback=self.parse_author_uri,
+            callback=self.parse_user_illustrations_uri,
             meta=dict(
                 uri=uri,
                 query=query,
@@ -105,7 +97,7 @@ class Pixiv(RedisSpider):
             dont_filter=True,
         )
 
-    def parse_author_uri(self, response):
+    def parse_user_illustrations_uri(self, response):
         query = response.meta['query']
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % uri)

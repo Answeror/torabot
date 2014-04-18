@@ -1,11 +1,11 @@
 from logbook import Logger
 from redis import Redis
 import json
-from hashlib import md5
 import requests
 from redis_lock import Lock
 from ..ut.bunch import bunchr
 from ..core.local import get_current_conf
+from ..spy.query import hash as hash_query
 
 
 log = Logger(__name__)
@@ -60,8 +60,10 @@ def spy(kind, query, timeout, slaves, options={}):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))
-    id = md5(query.encode('utf-8')).hexdigest()
-    resp = redis.blpop('torabot:spy:%s:%s:items' % (kind, id), timeout=timeout)
+    resp = redis.blpop(
+        'torabot:spy:%s:%s:items' % (kind, hash_query(query)),
+        timeout=timeout
+    )
     if resp:
         r = json.loads(resp[1].decode('ascii'))
         if r.get('ok', True):
