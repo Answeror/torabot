@@ -38,3 +38,18 @@ def test_spy_contains_query():
         'http://www.pixiv.net/member_illust.php?id=511763',
     ]:
         yield check_spy_contains_query, query
+
+
+@need_scrapyd
+def test_spy_ranking_limit():
+    app = make()
+    with app.test_client():
+        d = mod(name).spy(
+            json.dumps(dict(
+                method='ranking',
+                mode='daily',
+                limit=3
+            )),
+            60
+        )
+        assert_equal(len(d.arts), 3)

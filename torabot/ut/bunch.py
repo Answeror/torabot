@@ -26,7 +26,14 @@ def bunchr(*args, **kargs):
     return d
 
 
-def set(d, **kargs):
+def bunchset(d, **kargs):
     d = bunchr(**d)
     d.update(kargs)
+    return d
+
+
+def bunchdel(d, *names):
+    d = bunchr(**d)
+    for name in names:
+        del d[name]
     return d

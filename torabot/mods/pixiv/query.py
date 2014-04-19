@@ -22,11 +22,11 @@ def loads(query):
 def parse(query):
     if isinstance(query, str):
         if query.startswith(USER_URL):
-            query = dict(method='user_uri', uri=query)
+            query = bunchr(method='user_uri', uri=query)
         elif query.startswith(USER_ILLUSTRATIONS_URL):
-            query = dict(method='user_illustrations_uri', uri=query)
+            query = bunchr(method='user_illustrations_uri', uri=query)
         elif query.startswith(RANKING_URL):
-            query = dict(method='ranking', uri=query)
+            query = bunchr(method='ranking', uri=query)
         else:
             query = loads(query)
 

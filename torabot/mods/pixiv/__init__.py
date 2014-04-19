@@ -1,4 +1,4 @@
-from ...ut.bunch import bunchr, set as bset
+from ...ut.bunch import bunchr, bunchset, bunchdel
 from ..base import Mod
 from ..mixins import (
     ViewMixin,
@@ -51,12 +51,37 @@ class Pixiv(
                 yield bunchr(kind='new', query=new.query, art=art)
 
     def spy(self, query, timeout):
+        from .query import parse
+        query = parse(query)
+        return {
+            'ranking': self.spy_ranking,
+        }.get(query.method, self.spy_default)(query, timeout)
+
+    def spy_default(self, query, timeout):
         from .query import regular
         return super(Pixiv, self).spy(regular(query), timeout)
+
+    def spy_ranking(self, query, timeout):
+        if 'limit' in query:
+            return self.spy_limited_ranking(query, timeout)
+        return self.spy_default(query, timeout)
+
+    def spy_limited_ranking(self, query, timeout):
+        from ..query import query as search
+        from .query import regular
+        limit = query.limit
+        result = search(
+            self.name,
+            regular(bunchdel(query, 'limit')),
+            timeout
+        )
+        del result.arts[limit:]
+        result.query = query
+        return result
 
 
 def parse_result(d):
     if d and 'query' in d:
         from .query import parse
-        return bset(d, query=parse(d['query']))
+        return bunchset(d, query=parse(d['query']))
     return bunchr(d)
