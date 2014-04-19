@@ -1,25 +1,25 @@
-from flask import Blueprint
-from ...ut.bunch import Bunch
+from ...ut.bunch import bunchr, set as bset
 from ..base import Mod
-from ..mixins import ViewMixin, NoEmptyQueryMixin, KanjiMixin
-
-
-name = 'pixiv'
-bp = Blueprint(
-    name,
-    __name__,
-    static_folder='static',
-    template_folder='templates',
-    static_url_path='/%s/static' % name
+from ..mixins import (
+    ViewMixin,
+    NoEmptyQueryMixin,
+    make_blueprint_mixin
 )
 
 
-class Pixiv(ViewMixin, NoEmptyQueryMixin, KanjiMixin, Mod):
+name = 'pixiv'
 
-    name = 'pixiv'
-    display_name = 'pixiv'
+
+class Pixiv(
+    ViewMixin,
+    NoEmptyQueryMixin,
+    make_blueprint_mixin(__name__),
+    Mod
+):
+
+    name = name
+    display_name = name
     has_advanced_search = True
-    blueprint = bp
 
     def view(self, name):
         from .views import web, email
@@ -29,11 +29,34 @@ class Pixiv(ViewMixin, NoEmptyQueryMixin, KanjiMixin, Mod):
         }[name]
 
     def changes(self, old, new):
+        old = parse_result(old)
+        new = parse_result(new)
+        return {
+            'user_id': self.user_arts_changes,
+            'user_uri': self.user_arts_changes,
+            'user_illustrations_uri': self.user_arts_changes,
+            'ranking': self.ranking_changes,
+        }[new.query.method](old, new)
+
+    def user_arts_changes(self, old, new):
         oldmap = {art.uri: art for art in getattr(old, 'arts', [])}
         for art in new.arts:
             if art.uri not in oldmap:
-                yield Bunch(kind='new', art=art)
+                yield bunchr(kind='new', query=new.query, art=art)
+
+    def ranking_changes(self, old, new):
+        oldmap = {art.illust_id: art for art in getattr(old, 'arts', [])}
+        for art in new.arts:
+            if art.illust_id not in oldmap:
+                yield bunchr(kind='new', query=new.query, art=art)
 
     def spy(self, query, timeout):
         from .query import regular
         return super(Pixiv, self).spy(regular(query), timeout)
+
+
+def parse_result(d):
+    if d and 'query' in d:
+        from .query import parse
+        return bset(d, query=parse(d['query']))
+    return bunchr(d)

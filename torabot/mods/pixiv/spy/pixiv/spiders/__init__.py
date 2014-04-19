@@ -5,6 +5,7 @@
 # your spiders.
 
 import json
+from itertools import chain
 from urlparse import urljoin, urlparse, parse_qs
 from scrapy import log
 from scrapy.selector import Selector
@@ -34,46 +35,62 @@ class Pixiv(RedisSpider):
 
     def make_requests_from_query(self, query):
         query = json.loads(query)
-        yield {
-            'user_id': self.make_user_id_request,
-            'user_uri': self.make_user_uri_request,
-            'user_illustrations_uri': self.make_user_uri_request,
-        }[query['method']](query)
+        for req in {
+            'user_id': self.make_user_id_requests,
+            'user_uri': self.make_user_uri_requests,
+            'user_illustrations_uri': self.make_user_illustrations_uri_requests,
+            'ranking': self.make_ranking_uri_requests,
+        }[query['method']](query):
+            yield req
 
-    def make_user_id_request(self, query):
-        return self._make_user_illustrations_uri_request(
+    def make_user_id_requests(self, query):
+        yield self._make_user_illustrations_uri_request(
             USER_ILLUSTRATIONS_URL_TEMPLATE % query['user_id'],
             query
         )
 
-    def make_ranking_uri_requests(self, uri):
+    def make_ranking_uri_requests(self, query):
         page_count = 10
         pages = [None] * page_count
         for page in range(page_count):
             yield Request(
-                make_ranking_json_uri(uri, page),
+                make_ranking_json_uri(query, page),
                 callback=self.parse_ranking_uri,
                 meta=dict(
-                    uri=uri,
                     page=page,
                     pages=pages,
+                    query=query,
                 ),
                 dont_filter=True,
             )
 
     def parse_ranking_uri(self, response):
-        raise NotSupported('not implemented')
+        query = response.meta['query']
+        try:
+            pages = response.meta['pages']
+            pages[response.meta['page']] = json.loads(response.body_as_unicode())['contents']
+            if None not in pages:
+                arts = list(chain(*pages))
+                return Page(
+                    query=query,
+                    uri=make_ranking_uri(query),
+                    total=len(arts),
+                    arts=arts,
+                )
+        except Exception as e:
+            log.msg('parse failed', level=log.ERROR)
+            return Result(ok=False, query=query, message=str(e))
 
-    def make_user_uri_request(self, query):
+    def make_user_uri_requests(self, query):
         d = parse_qs(urlparse(query['uri']).query)
         assert 'id' in d
-        return self._make_user_illustrations_uri_request(
+        yield self._make_user_illustrations_uri_request(
             USER_ILLUSTRATIONS_URL_TEMPLATE % d['id'][0],
             query
         )
 
-    def make_user_illustrations_uri_request(self, query):
-        return self._make_user_illustrations_uri_request(query['uri'], query)
+    def make_user_illustrations_uri_requests(self, query):
+        yield self._make_user_illustrations_uri_request(query['uri'], query)
 
     def _make_user_illustrations_uri_request(self, uri, query):
         return Request(
@@ -120,10 +137,17 @@ class Pixiv(RedisSpider):
                 total=sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0],
                 arts=list(gen(sel)),
             )
-        except:
+        except Exception as e:
             log.msg('parse failed', level=log.ERROR)
-            return Result(ok=False, query=query)
+            return Result(ok=False, query=query, message=str(e))
 
 
-def make_ranking_json_uri(uri, page):
-    raise NotSupported('not implemented')
+def make_ranking_json_uri(query, page):
+    return 'http://www.pixiv.net/ranking.php?format=json&mode=%(mode)s&p=%(page)d' % dict(
+        mode=query['mode'],
+        page=page + 1,
+    )
+
+
+def make_ranking_uri(query):
+    return 'http://www.pixiv.net/ranking.php?mode=%(mode)s' % query

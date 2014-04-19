@@ -24,3 +24,9 @@ def bunchr(*args, **kargs):
     if isinstance(d, list):
         return [bunchr(e) for e in d]
     return d
+
+
+def set(d, **kargs):
+    d = bunchr(**d)
+    d.update(kargs)
+    return d

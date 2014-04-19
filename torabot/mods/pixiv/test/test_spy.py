@@ -29,6 +29,11 @@ def test_spy_contains_query():
             method='user_illustrations_uri',
             uri='http://www.pixiv.net/member_illust.php?id=511763'
         )),
+        json.dumps(dict(
+            method='ranking',
+            mode='daily',
+            limit=3
+        )),
         'http://www.pixiv.net/member.php?id=511763',
         'http://www.pixiv.net/member_illust.php?id=511763',
     ]:
