@@ -15,6 +15,9 @@ class App(Flask):
         self._init_conf(kargs.get('config'))
         self._init_parts()
 
+        from .cache import cache
+        cache.init_app(self)
+
     def _init_conf(self, config):
         try:
             import toraconf

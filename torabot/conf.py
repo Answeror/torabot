@@ -4,6 +4,7 @@ import os
 
 # flask
 SECRET_KEY = 'test'
+CACHE_TYPE = 'simple'
 
 # celery
 BROKER_URL = 'redis://'
