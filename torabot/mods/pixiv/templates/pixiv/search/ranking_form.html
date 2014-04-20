@@ -3,17 +3,13 @@
 <input type=hidden name=method value=ranking>
 <div class=form-group>
     <label class='control-label col-sm-2'>周期</label>
-    <div class=col-sm-5>
+    <div class=col-sm-10>
         <div class=btn-group data-toggle=buttons>
-            <label class='btn btn-primary active'>
-                <input type=radio name=mode value=daily checked>日榜
+            {% for key in modemap %}
+            <label class='btn btn-primary{% if key == 'daily'%} active{% endif %}'>
+                <input type=radio name=mode value={{ key }}{% if key == 'daily' %} checked{% endif %}>{{ modemap[key] }}
             </label>
-            <label class='btn btn-primary'>
-                <input type=radio name=mode value=weekly>周榜
-            </label>
-            <label class='btn btn-primary'>
-                <input type=radio name=mode value=monthly>月榜
-            </label>
+            {% endfor %}
         </div>
     </div>
 </div>

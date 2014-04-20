@@ -22,7 +22,7 @@ def mod(name):
 
 
 def mods():
-    return [e.obj for e in manager()]
+    return sorted([e.obj for e in manager()], key=lambda o: o.name)
 
 
 def make(app=None):

@@ -2,7 +2,7 @@ from flask import render_template
 from logbook import Logger
 from .. import name
 from ..query import parse as parse_query
-from ..translate import translate_mode
+from ..translate import translate_mode, modemap
 
 
 log = Logger(__name__)
@@ -56,7 +56,7 @@ def format_user_uri_search():
 
 
 def format_ranking_search():
-    return render_template('pixiv/search/ranking.html', kind=name)
+    return render_template('pixiv/search/ranking.html', kind=name, modemap=modemap())
 
 
 def format_advanced_search(**kargs):

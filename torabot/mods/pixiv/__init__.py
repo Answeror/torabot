@@ -65,6 +65,9 @@ class Pixiv(
         return super(Pixiv, self).spy(regular(query), timeout)
 
     def spy_ranking(self, query, timeout):
+        from .translate import modemap
+        if query.mode not in modemap():
+            raise Exception('unknown mode: %s' % query.mode)
         if 'limit' in query:
             return self.spy_limited_ranking(query, timeout)
         return self.spy_default(query, timeout)

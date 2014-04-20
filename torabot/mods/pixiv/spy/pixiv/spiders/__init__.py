@@ -10,7 +10,6 @@ from urlparse import urljoin, urlparse, parse_qs
 from scrapy import log
 from scrapy.selector import Selector
 from scrapy.http import Request
-from scrapy.exceptions import NotSupported
 from torabot.spy.spiders.redis import RedisSpider
 from torabot.spy.items import Result
 from ..items import Art, Page
@@ -55,6 +54,17 @@ class Pixiv(RedisSpider):
         for page in range(page_count):
             yield Request(
                 make_ranking_json_uri(query, page),
+                headers={
+                    'Cookie': ' '.join([
+                        'p_ab_id=3;',
+                        'login_ever=yes;',
+                        'manga_viewer_expanded=1;',
+                        'bookmark_tag_type=count;',
+                        'bookmark_tag_order=desc;',
+                        'visit_ever=yes;',
+                        'PHPSESSID=%s;' % self.phpsessid,
+                    ])
+                },
                 callback=self.parse_ranking_uri,
                 meta=dict(
                     page=page,
@@ -68,7 +78,8 @@ class Pixiv(RedisSpider):
         query = response.meta['query']
         try:
             pages = response.meta['pages']
-            pages[response.meta['page']] = json.loads(response.body_as_unicode())['contents']
+            d = json.loads(response.body_as_unicode())
+            pages[response.meta['page']] = [] if 'error' in d else d['contents']
             if None not in pages:
                 arts = list(chain(*pages))
                 return Page(
@@ -78,7 +89,7 @@ class Pixiv(RedisSpider):
                     arts=arts,
                 )
         except Exception as e:
-            log.msg('parse failed', level=log.ERROR)
+            log.msg('parse failed, content: %s' % response.body_as_unicode(), level=log.ERROR)
             return Result(ok=False, query=query, message=str(e))
 
     def make_user_uri_requests(self, query):
