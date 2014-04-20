@@ -29,14 +29,17 @@ def parse(query):
             query = bunchr(method='ranking', uri=query)
         else:
             query = loads(query)
-
-    assert isinstance(query, dict), 'unknown query type: %s' % str(type(query))
+    else:
+        assert isinstance(query, dict), 'unknown query type: %s' % str(type(query))
+        query = bunchr(query)
 
     if 'method' not in query:
         if 'user_id' in query:
-            query['method'] = 'user_id'
+            query.method = 'user_id'
         elif 'user_uri' in query:
-            query['method'] = 'user_uri'
+            query.method = 'user_uri'
+            query.uri = query.user_uri
+            del query['user_uri']
         else:
             illegal(query)
     return query

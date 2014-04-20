@@ -42,13 +42,16 @@ class Pixiv(
         oldmap = {art.uri: art for art in getattr(old, 'arts', [])}
         for art in new.arts:
             if art.uri not in oldmap:
-                yield bunchr(kind='new', query=new.query, art=art)
+                yield bunchr(kind='user_art.new', art=art)
 
     def ranking_changes(self, old, new):
         oldmap = {art.illust_id: art for art in getattr(old, 'arts', [])}
+        arts = []
         for art in new.arts:
             if art.illust_id not in oldmap:
-                yield bunchr(kind='new', query=new.query, art=art)
+                arts.append(art)
+        if arts:
+            yield bunchr(kind='ranking', mode=new.query.mode, arts=arts)
 
     def spy(self, query, timeout):
         from .query import parse
@@ -69,7 +72,7 @@ class Pixiv(
     def spy_limited_ranking(self, query, timeout):
         from ..query import query as search
         from .query import regular
-        limit = query.limit
+        limit = int(query.limit)
         result = search(
             self.name,
             regular(bunchdel(query, 'limit')),

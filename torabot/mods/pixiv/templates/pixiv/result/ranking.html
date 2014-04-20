@@ -1,0 +1,29 @@
+<div id=pixiv-arts class=row>
+    {% for art in query.result.arts %}
+    <div class='col-sm-2 pixiv-art'>
+        <div class='thumbnail'>
+            <a href='{{ "//www.pixiv.net/member_illust.php?mode=medium&illust_id=%s" % art.illust_id }}' target=_blank><img alt='{{ art.title }}' src='{{ url_for(".thumbnail_proxy", uri=art.url, referer="http://www.pixiv.net/") }}'></a>
+            <div class=caption>
+                <strong>{{ art.title }}</strong>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<p>以上是{{ query.result.total }}个搜索结果中的{{ len(query.result.arts) }}个, 完整列表参见<a href='{{ query.result.uri }}' target=_blank>这里</a>.</p>
+<script src='//cdnjs.cloudflare.com/ajax/libs/masonry/3.1.2/masonry.pkgd.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/3.0.4/jquery.imagesloaded.min.js'></script>
+<script>
+    $(function() {
+        var $container = $('#pixiv-arts');
+        $container.masonry({
+            columnWidth: $container.find('.pixiv-art').outerWidth(),
+            itemSelector: '.pixiv-art'
+        });
+        $container.find('.pixiv-art').each(function() {
+            $(this).imagesLoaded(function() {
+                $container.masonry();
+            });
+        });
+    });
+</script>
