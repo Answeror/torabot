@@ -1,20 +1,22 @@
-from flask import Blueprint
-
-
-bp = Blueprint(
-    'ui',
-    __name__,
-    static_folder='static',
-    template_folder='templates',
-    static_url_path='/ui/static'
-)
-
-
-from .main import *
-from .thumbnail import *
-from .openid import *
-
-
 def make(app):
-    app.register_blueprint(bp)
-    oid.init_app(app)
+    from . import main
+    main.make(app)
+    from . import admin
+    admin.make(app)
+
+    from ..core.mod import mod, mods
+    from .momentjs import momentjs
+
+    @app.context_processor
+    def inject_locals():
+        return dict(
+            min=min,
+            max=max,
+            len=len,
+            str=str,
+            isinstance=isinstance,
+            momentjs=momentjs,
+            mod=mod,
+            default_mod=app.config['TORABOT_DEFAULT_MOD'],
+            mods=mods(),
+        )

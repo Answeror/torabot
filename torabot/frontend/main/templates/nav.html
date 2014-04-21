@@ -24,10 +24,10 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 {% if 'userid' in session %}
-                <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for(".watching") }}'>我的订阅</a></li>
-                <li{% if request.path.startswith('/notice') %} class=active{% endif %}><a href='{{ url_for(".pending_notices") }}'>我的通知</a></li>
+                <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for("main.watching") }}'>我的订阅</a></li>
+                <li{% if request.path.startswith('/notice') %} class=active{% endif %}><a href='{{ url_for("main.pending_notices") }}'>我的通知</a></li>
                 {% endif %}
-                <li{% if request.path.startswith('/about') %} class=active{% endif %}><a href='{{ url_for(".about") }}'>关于本站</a></li>
+                <li{% if request.path.startswith('/about') %} class=active{% endif %}><a href='{{ url_for("main.about") }}'>关于本站</a></li>
             </ul>
             <div class='navbar-form navbar-right'>
                 {% block search_box_left %}{% endblock %}

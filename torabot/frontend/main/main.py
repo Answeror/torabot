@@ -10,8 +10,8 @@ from flask import (
     url_for,
 )
 from logbook import Logger
-from ..core.query import query
-from ..db import (
+from ...core.query import query
+from ...db import (
     watch as _watch,
     unwatch as _unwatch,
     watching as _watching,
@@ -21,17 +21,15 @@ from ..db import (
     get_notice_count_bi_user_id,
     get_pending_notice_count_bi_user_id,
 )
-from ..core.notice import (
+from ...core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
 )
-from ..core.watch import get_watches_bi_user_id
-from ..core.connection import appccontext, autoccontext
-from ..core.mod import mod, mods
+from ...core.watch import get_watches_bi_user_id
+from ...core.connection import appccontext
+from ...core.mod import mod
 from .errors import AuthError
-from .momentjs import momentjs
 from . import auth, bp
-from .. import db
 
 
 log = Logger(__name__)
@@ -40,27 +38,6 @@ log = Logger(__name__)
 @bp.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
-
-
-@bp.route('/admin', methods=['GET'])
-def admin():
-    with autoccontext(commit=False) as conn:
-        queries = db.get_sorted_active_queries(conn)
-    return render_template('admin.html', queries=queries)
-
-
-@bp.route('/admin/query/<id>/<field>', methods=['GET', 'PUT'])
-def _query(id, field):
-    if request.method == 'GET':
-        with autoccontext(commit=False) as conn:
-            q = db.get_query_bi_id(id, conn)
-        text = q[field]
-        if isinstance(text, dict):
-            text = json.dumps(text)
-        return render_template('jsoneditor.html', text=text)
-    if request.method == 'PUT':
-        log.info(request.values['text'])
-        return ''
 
 
 def message(text, ok=True):
@@ -285,19 +262,4 @@ def general_error_guard(e):
             name,
             current_app.config.get('TORABOT_REPORT_EMAIL', '')
         )
-    )
-
-
-@bp.context_processor
-def inject_locals():
-    return dict(
-        min=min,
-        max=max,
-        len=len,
-        str=str,
-        isinstance=isinstance,
-        momentjs=momentjs,
-        mod=mod,
-        default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
-        mods=mods(),
     )

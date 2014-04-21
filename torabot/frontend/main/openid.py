@@ -22,8 +22,8 @@ from flask import (
     url_for,
     abort
 )
-from ..db import get_user_id_bi_openid, add_user
-from ..ut.session import makeappsession as makesession
+from ...db import get_user_id_bi_openid, add_user
+from ...ut.session import makeappsession as makesession
 from . import bp
 
 
