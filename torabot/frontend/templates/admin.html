@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<table class='query-table table table-hover'>
+    <thead>
+        <tr>
+            <td class=col-sm-1>编号</td>
+            <td class=col-sm-2>类型</td>
+            <td class=col-sm-4>内容</td>
+            <td class=col-sm-4>结果</td>
+            <td class=col-sm-1>创建时间</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for q in queries %}
+        <tr>
+            <td class=col-sm-1>{{ q.id }}</td>
+            <td class=col-sm-2>{{ q.kind }}</td>
+            <td class=col-sm-4><a href='{{ url_for("._query", id=q.id, field="text") }}'>{{ q.text }}</a></td>
+            <td class=col-sm-4><a href='{{ url_for("._query", id=q.id, field="result") }}'>{{ str(q.result) }}</a></td>
+            <td class=col-sm-1>{{ momentjs(q.ctime).fromnow() }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<style>
+.query-table { table-layout:fixed; }
+.query-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+{% endblock %}

@@ -21,6 +21,8 @@ from .query import (
     set_query_result,
     touch_query_bi_id,
     get_query_mtime_bi_kind_and_text,
+    get_queries,
+    get_query_bi_id,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -59,4 +61,6 @@ __all__ = [
     get_pending_notice_count_bi_user_id.__name__,
     get_query_mtime_bi_kind_and_text.__name__,
     rename_watch.__name__,
+    get_queries.__name__,
+    get_query_bi_id.__name__,
 ]

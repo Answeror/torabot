@@ -77,3 +77,15 @@ def get_query_mtime_bi_kind_and_text(conn, kind, text):
         text=text
     ).fetchone()
     return None if ret is None else ret[0]
+
+
+def get_queries(conn):
+    pass
+
+
+def get_query_bi_id(id, conn):
+    ret = conn.execute(
+        sql('select * from query where id = :id'),
+        id=id
+    ).fetchone()
+    return None if ret is None else bunchr(**ret)

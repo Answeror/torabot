@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block head %}
+{{ super() }}
+<link rel='stylesheet' type='text/css' href='//cdnjs.cloudflare.com/ajax/libs/jsoneditor/2.3.6/jsoneditor-min.css'>
+{% endblock %}
+{% block foot %}
+{{ super() }}
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/jsoneditor/2.3.6/jsoneditor-min.js'></script>
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js'></script>
+<script type="text/javascript" >
+$(function(){
+    var container = document.getElementById('jsoneditor');
+    var options = {
+        mode: 'code',
+        indentation: 4,
+    };
+    var editor = new jsoneditor.JSONEditor(container, options);
+    var text = {{ text | tojson | safe }};
+    try {
+        editor.set(JSON.parse(text));
+    } catch (e) {
+        editor.setText(text);
+    }
+    $('#submit-json').click(function(){
+        $.ajax({
+            type: 'PUT',
+            data: {text: editor.getText()}
+        });
+    });
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class=row>
+    <div id=jsoneditor class=col-sm-12 style='height:480px'></div>
+    <div class='col-sm-12 text-center vspace-top-small'>
+        <button id=submit-json class='btn btn-primary'>提交</botton>
+    </div>
+</div>
+{% endblock %}
