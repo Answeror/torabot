@@ -25,6 +25,16 @@ $(function(){
         $.ajax({
             type: 'PUT',
             data: {text: editor.getText()}
+        }).success(function(){
+            new PNotify({
+                text: '提交成功',
+                type: 'success',
+                icon: false,
+                nonblock: {
+                    nonblock: true,
+                    nonblock_opacity: .2
+                }
+            });
         });
     });
 });
