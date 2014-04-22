@@ -26,6 +26,18 @@
                 {% if 'userid' in session %}
                 <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for("main.watching") }}'>我的订阅</a></li>
                 <li{% if request.path.startswith('/notice') %} class=active{% endif %}><a href='{{ url_for("main.pending_notices") }}'>我的通知</a></li>
+                {% if session['userid'] in config['TORABOT_ADMIN_IDS'] %}
+                <li{% if request.path.startswith('/admin') %} class=active{% endif %}>
+                    <a href=# class=dropdown-toggle data-toggle=dropdown>网站管理 <b class=caret></b></a>
+                    <ul class=dropdown-menu>
+                        <li><a href=#>dashboard</a></li>
+                        <li role=presentation class=divider></li>
+                        <li role=presentation class=dropdown-header>数据库管理</li>
+                        <li><a href='{{ url_for("admin.queries") }}'>查询</a></li>
+                        <li><a href='{{ url_for("admin.active_queries") }}'>活跃查询</a></li>
+                    </ul>
+                </li>
+                {% endif %}
                 {% endif %}
                 <li{% if request.path.startswith('/about') %} class=active{% endif %}><a href='{{ url_for("main.about") }}'>关于本站</a></li>
             </ul>

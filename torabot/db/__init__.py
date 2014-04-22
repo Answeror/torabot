@@ -17,12 +17,15 @@ from .query import (
     get_query_bi_kind_and_text,
     has_query_bi_kind_and_text,
     get_sorted_active_queries,
-    query_count,
+    get_active_queries,
     set_query_result,
     touch_query_bi_id,
     get_query_mtime_bi_kind_and_text,
     get_queries,
     get_query_bi_id,
+    get_active_query_count,
+    get_query_count,
+    set_query_field_bi_id,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -33,6 +36,7 @@ from .notice import (
     mark_notice_sent,
 )
 from .change import add_one_query_changes
+from . import error
 
 
 __all__ = [
@@ -52,7 +56,6 @@ __all__ = [
     mark_notice_sent.__name__,
     get_user_bi_id.__name__,
     set_email.__name__,
-    query_count.__name__,
     add_one_query_changes.__name__,
     set_query_result.__name__,
     get_or_add_query_bi_kind_and_text.__name__,
@@ -63,4 +66,9 @@ __all__ = [
     rename_watch.__name__,
     get_queries.__name__,
     get_query_bi_id.__name__,
+    get_active_query_count.__name__,
+    get_query_count.__name__,
+    get_active_queries.__name__,
+    set_query_field_bi_id.__name__,
+    error.__name__,
 ]
