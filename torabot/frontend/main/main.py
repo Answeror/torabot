@@ -28,8 +28,9 @@ from ...core.notice import (
 from ...core.watch import get_watches_bi_user_id
 from ...core.connection import appccontext
 from ...core.mod import mod
-from .errors import AuthError
-from . import auth, bp
+from ..errors import AuthError
+from . import bp
+from .. import auth
 
 
 log = Logger(__name__)
@@ -248,18 +249,4 @@ def help(name):
         'help.html',
         query_kind=name,
         content=mod(name).format_help_page()
-    )
-
-
-@bp.errorhandler(Exception)
-def general_error_guard(e):
-    name = str(uuid4())
-    log.exception(name)
-    return render_template(
-        'message.html',
-        ok=False,
-        message='出错了. 错误编号 %s . 你可以提交该编号给 %s , 协助改进torabot.' % (
-            name,
-            current_app.config.get('TORABOT_REPORT_EMAIL', '')
-        )
     )

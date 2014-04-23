@@ -1,5 +1,6 @@
 from functools import wraps
-from flask import session, redirect, url_for
+from flask import session
+from .errors import AuthError
 
 
 def require_session(f):
@@ -7,7 +8,7 @@ def require_session(f):
     def inner(*args, **kargs):
         user_id = session.get('userid')
         if user_id is None:
-            return redirect(url_for('.index'))
+            raise AuthError()
         return f(*args, user_id=user_id, **kargs)
 
     return inner

@@ -1,9 +1,17 @@
 import mimeparse
 from uuid import uuid4
 from logbook import Logger
-from flask import jsonify, render_template, current_app, request
-from .momentjs import momentjs
+from flask import (
+    jsonify,
+    render_template,
+    current_app,
+    request,
+    redirect,
+    url_for,
+)
 from ..core.mod import mod, mods
+from .momentjs import momentjs
+from .errors import AuthError
 
 
 log = Logger(__name__)
@@ -16,6 +24,7 @@ def make(app):
     admin.make(app)
 
     app.context_processor(inject_locals)
+    app.errorhandler(AuthError)(auth_error_guard)
     app.errorhandler(Exception)(general_error_guard)
 
 
@@ -31,6 +40,10 @@ def inject_locals():
         default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
         mods=mods(),
     )
+
+
+def auth_error_guard(e):
+    return redirect(url_for('main.index'))
 
 
 def general_error_guard(e):
