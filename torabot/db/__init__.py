@@ -4,6 +4,8 @@ from .user import (
     get_user_email_bi_id,
     get_user_bi_id,
     set_email,
+    get_users,
+    get_user_count,
 )
 from .watch import (
     watching,
@@ -71,4 +73,6 @@ __all__ = [
     get_active_queries.__name__,
     set_query_field_bi_id.__name__,
     error.__name__,
+    get_users.__name__,
+    get_user_count.__name__,
 ]

@@ -18,26 +18,46 @@ from .auth import require_admin
 log = Logger(__name__)
 
 
+def page_room():
+    return current_app.config['TORABOT_PAGE_ROOM']
+
+
 @bp.route('/queries', defaults={'page': 0}, methods=['GET'])
 @bp.route('/queries/<int:page>', methods=['GET'])
 @require_admin
 def queries(page):
-    room = current_app.config['TORABOT_PAGE_ROOM']
     with autoccontext(commit=False) as conn:
-        queries = db.get_queries(
-            conn,
-            offset=page * room,
-            limit=room,
+        return render_template(
+            'admin/queries.html',
+            queries=db.get_queries(
+                conn,
+                offset=page * page_room(),
+                limit=page_room(),
+            ),
+            total=db.get_query_count(conn),
+            page=page,
+            room=page_room(),
+            uri=lambda page: url_for('.queries', page=page),
         )
-        total = db.get_query_count(conn)
-    return render_template(
-        'admin/queries.html',
-        queries=queries,
-        page=page,
-        room=room,
-        total=total,
-        uri=lambda page: url_for('.queries', page=page),
-    )
+
+
+@bp.route('/users', defaults={'page': 0}, methods=['GET'])
+@bp.route('/users/<int:page>', methods=['GET'])
+@require_admin
+def users(page):
+    with autoccontext(commit=False) as conn:
+        return render_template(
+            'admin/users.html',
+            users = db.get_users(
+                conn,
+                offset=page * page_room(),
+                limit=page_room(),
+            ),
+            total=db.get_user_count(conn),
+            page=page,
+            room=page_room(),
+            uri=lambda page: url_for('.users', page=page),
+        )
 
 
 @bp.route('/queries/active', defaults={'page': 0}, methods=['GET'])

@@ -1,4 +1,3 @@
-from uuid import uuid4
 import json
 from nose.tools import assert_equal
 from flask import (
