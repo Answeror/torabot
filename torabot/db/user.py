@@ -55,3 +55,11 @@ def set_user_field_bi_id(conn, id, field, value):
         id=id,
         value=value
     )
+
+
+@error_guard
+def has_user_bi_openid(conn, openid):
+    return conn.execute(
+        sql('select 1 from "user" where openid = :openid'),
+        openid=openid
+    ).fetchone() is not None

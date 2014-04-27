@@ -9,6 +9,7 @@ from flask import (
     jsonify,
 )
 from ...core.connection import autoccontext
+from ...core.version import get_version
 from ... import db
 from . import bp
 from .errors import AdminAuthError
@@ -109,6 +110,17 @@ def user(id, field):
         with autoccontext(commit=True) as conn:
             db.set_user_field_bi_id(conn, id, field, request.json['value'])
         return make_ok_response()
+
+
+@bp.route('/', methods=['GET'])
+@bp.route('/dashboard', methods=['GET'])
+def dashboard():
+    with autoccontext(commit=True) as conn:
+        return render_template('admin/dashboard.html', stats=[
+            ('版本', get_version()),
+            ('用户', db.get_user_count(conn)),
+            ('活跃查询', db.get_active_query_count(conn)),
+        ])
 
 
 def make_ok_response():
