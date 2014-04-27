@@ -1,0 +1,40 @@
+{% macro pagination(page, room, total, uri) -%}
+<ul class="pagination">
+    {% if page > 0 %}
+    <li><a href='{{ uri(page - 1) }}'>&laquo;</a></li>
+    {% else %}
+    <li class=disabled><span>&laquo;</span></li>
+    {% endif %}
+    {% set begin = max(0, page - 2) %}
+    {% set end = min(begin + 5, (total + room - 1) // room) %}
+    {% for i in range(begin, end) %}
+    <li{% if i == page %} class=active{% endif %}><a href='{{ uri(i) }}'>{{ i + 1 }}</a></li>
+    {% endfor %}
+    {% if page + 1 < end %}
+    <li><a href='{{ uri(page + 1) }}'>&raquo;</a></li>
+    {% else %}
+    <li class=disabled><span>&raquo;</span></li>
+    {% endif %}
+</ul>
+{%- endmacro %}
+
+{% macro jsoneditor_css() -%}
+<link rel='stylesheet' type='text/css' href='{{ url_for("main.static", filename="jsoneditor-2.3.6/jsoneditor-min.css") }}'>
+{%- endmacro %}
+
+{% macro jsoneditor_js() -%}
+<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/jsoneditor-min.js") }}'></script>
+<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/jsonlint/jsonlint.js") }}'></script>
+<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/ace.js") }}'></script>
+<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/mode-json.js") }}'></script>
+<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/theme-textmate.js") }}'></script>
+<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/theme-jsoneditor.js") }}'></script>
+{%- endmacro %}
+
+{% macro xeditable_css() -%}
+<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css'>
+{%- endmacro %}
+
+{% macro xeditable_js() -%}
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js'></script>
+{%- endmacro %}

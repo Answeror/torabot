@@ -2,7 +2,7 @@ from flask import request, abort
 import requests
 from logbook import Logger
 from . import bp
-from ..cache import cache
+from ...cache import cache
 
 
 log = Logger(__name__)

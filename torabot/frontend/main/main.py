@@ -1,4 +1,3 @@
-from uuid import uuid4
 import json
 from nose.tools import assert_equal
 from flask import (
@@ -10,8 +9,8 @@ from flask import (
     url_for,
 )
 from logbook import Logger
-from ..core.query import query
-from ..db import (
+from ...core.query import query
+from ...db import (
     watch as _watch,
     unwatch as _unwatch,
     watching as _watching,
@@ -21,16 +20,16 @@ from ..db import (
     get_notice_count_bi_user_id,
     get_pending_notice_count_bi_user_id,
 )
-from ..core.notice import (
+from ...core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
 )
-from ..core.watch import get_watches_bi_user_id
-from ..core.connection import appccontext
-from ..core.mod import mod, mods
-from .errors import AuthError
-from .momentjs import momentjs
-from . import auth, bp
+from ...core.watch import get_watches_bi_user_id
+from ...core.connection import appccontext
+from ...core.mod import mod
+from ..errors import AuthError
+from . import bp
+from .. import auth
 
 
 log = Logger(__name__)
@@ -249,33 +248,4 @@ def help(name):
         'help.html',
         query_kind=name,
         content=mod(name).format_help_page()
-    )
-
-
-@bp.errorhandler(Exception)
-def general_error_guard(e):
-    name = str(uuid4())
-    log.exception(name)
-    return render_template(
-        'message.html',
-        ok=False,
-        message='出错了. 错误编号 %s . 你可以提交该编号给 %s , 协助改进torabot.' % (
-            name,
-            current_app.config.get('TORABOT_REPORT_EMAIL', '')
-        )
-    )
-
-
-@bp.context_processor
-def inject_locals():
-    return dict(
-        min=min,
-        max=max,
-        len=len,
-        str=str,
-        isinstance=isinstance,
-        momentjs=momentjs,
-        mod=mod,
-        default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
-        mods=mods(),
     )

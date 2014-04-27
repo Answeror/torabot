@@ -5,6 +5,7 @@ import os
 # flask
 SECRET_KEY = 'test'
 CACHE_TYPE = 'simple'
+TRAP_BAD_REQUEST_ERRORS = True
 
 # celery
 BROKER_URL = 'redis://'
@@ -37,6 +38,7 @@ TORABOT_EMAIL_HEAD = 'torabot notice'
 TORABOT_SPY_TIMEOUT = 300
 TORABOT_SPY_SLAVES = 1
 TORABOT_NOTICE_ROOM = 16
+TORABOT_PAGE_ROOM = 16
 TORABOT_QUERY_EXPIRE = 15 * 60
 TORABOT_BUBBLE_LOG = True
 TORABOT_DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')

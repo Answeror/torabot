@@ -1,0 +1,67 @@
+{% import 'macros.html' as macros with context %}
+{% extends "layout.html" %}
+{% block head %}
+    {{ super() }}
+    {{ macros.jsoneditor_css() }}
+{% endblock %}
+{% block foot %}
+    {{ super() }}
+    {{ macros.jsoneditor_js() }}
+    <script type="text/javascript" >
+        $(function(){
+            var container = document.getElementById('jsoneditor');
+            var options = {
+                mode: 'code',
+                indentation: 4,
+            };
+            var editor = new jsoneditor.JSONEditor(container, options);
+            var value = {{ value | tojson | safe }};
+            try {
+                editor.set(JSON.parse(value));
+            } catch (e) {
+                editor.setText(value);
+            }
+            var $area = $('.json-edit-area');
+            $area.find('button[name="submit"]').click(function(){
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({value: editor.getText()})
+                }).done(function(){
+                    new PNotify({
+                        text: '提交成功',
+                        type: 'success',
+                        icon: false,
+                        nonblock: {
+                            nonblock: true,
+                            nonblock_opacity: .2
+                        }
+                    });
+                }).fail(function(xhr){
+                    new PNotify({
+                        text: JSON.parse(xhr.responseText).message.html,
+                        type: 'error',
+                        icon: false,
+                        buttons: {
+                            closer: true,
+                            sticker: false
+                        }
+                    });
+                });
+            });
+            $area.find('button[name="cancel"]').click(function(){
+                $(location).attr('href', '{{ back }}');
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+<div class='json-edit-area row'>
+    <div id=jsoneditor class=col-sm-12 style='height:480px'></div>
+    <div class='col-sm-12 text-center vspace-top-small'>
+        <button name=submit class='btn btn-success'>提交</button>
+        <button name=cancel class='btn btn-default'>返回</button>
+    </div>
+</div>
+{% endblock %}

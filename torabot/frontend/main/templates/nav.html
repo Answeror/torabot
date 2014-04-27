@@ -23,17 +23,30 @@
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                {% if 'userid' in session %}
-                <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for(".watching") }}'>我的订阅</a></li>
-                <li{% if request.path.startswith('/notice') %} class=active{% endif %}><a href='{{ url_for(".pending_notices") }}'>我的通知</a></li>
+                {% if is_user %}
+                <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for("main.watching") }}'>我的订阅</a></li>
+                <li{% if request.path.startswith('/notice') %} class=active{% endif %}><a href='{{ url_for("main.pending_notices") }}'>我的通知</a></li>
+                {% if is_admin %}
+                <li{% if request.path.startswith('/admin') %} class=active{% endif %}>
+                    <a href=# class=dropdown-toggle data-toggle=dropdown>网站管理 <b class=caret></b></a>
+                    <ul class=dropdown-menu>
+                        <li><a href='{{ url_for("admin.dashboard") }}'>dashboard</a></li>
+                        <li role=presentation class=divider></li>
+                        <li role=presentation class=dropdown-header>数据库管理</li>
+                        <li><a href='{{ url_for("admin.users") }}'>用户</a></li>
+                        <li><a href='{{ url_for("admin.queries") }}'>查询</a></li>
+                        <li><a href='{{ url_for("admin.active_queries") }}'>活跃查询</a></li>
+                    </ul>
+                </li>
                 {% endif %}
-                <li{% if request.path.startswith('/about') %} class=active{% endif %}><a href='{{ url_for(".about") }}'>关于本站</a></li>
+                {% endif %}
+                <li{% if request.path.startswith('/about') %} class=active{% endif %}><a href='{{ url_for("main.about") }}'>关于本站</a></li>
             </ul>
             <div class='navbar-form navbar-right'>
                 {% block search_box_left %}{% endblock %}
                 {% include "search_box.html" %}
                 {% block search_box_right %}{% endblock %}
-                {% if 'userid' not in session %}
+                {% if not is_user %}
                 <form class="navbar-left" action='/login' method=post>
                     <div class="form-group">
                         <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>

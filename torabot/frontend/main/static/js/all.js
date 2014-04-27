@@ -1,3 +1,42 @@
+$(function() {
+    $.torabot = {};
+    $.torabot.cast = function(type, value) {
+        return ({
+            text: function(x) { return x.toString(); },
+            int: parseInt
+        })[type](value);
+    };
+});
+$(function() {
+    $.fn.popup_text_edit = function() {
+        $(this).editable({
+            type: 'text',
+            mode: 'popup',
+            url: function(params) {
+                var d = $.Deferred();
+                $.ajax({
+                    url: $(this).data('uri'),
+                    type: 'post',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({value: $.torabot.cast($(this).data('kind'), params.value)})
+                }).done(d.resolve).fail(d.reject);
+                return d;
+            },
+            error: function(xhr) {
+                new PNotify({
+                    text: JSON.parse(xhr.responseText).message.html,
+                    type: 'error',
+                    icon: false,
+                    buttons: {
+                        closer: true,
+                        sticker: false
+                    }
+                });
+            }
+        });
+    }
+});
 $(function(){
     var form = $('form[name="search"]');
     var $mods = form.find('select[name="kind"]');

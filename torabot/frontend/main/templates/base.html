@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang='zh-CN'>
     <head>
+        {% block head %}
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <!--<link rel='stylesheet' href='//todc.github.io/todc-bootstrap/dist/css/bootstrap.min.css'>-->
         <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css'>
-        <!--<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap-theme.min.css'>-->
-        <link rel='stylesheet' href='{{ url_for(".static", filename="style.css") }}'>
+        <link rel='stylesheet' href='{{ url_for("main.static", filename="pnotify.custom.min.css") }}'>
+        <link rel='stylesheet' href='{{ url_for("main.static", filename="style.css") }}'>
         <title>{% block title %}torabot{% endblock %}</title>
         <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
+        {% endblock %}
     </head>
     <body style='padding-top: 70px;'>
         {% block body %}{% endblock %}
+    </body>
+    <foot>
+        {% block foot %}
         <script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
         <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js'></script>
         <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/lang/zh-cn.js'></script>
-        <script src='{{ url_for(".static", filename="js/search.js") }}'></script>
+        <script src='{{ url_for("main.static", filename="pnotify.custom.min.js") }}'></script>
+        <script src='{{ url_for("main.static", filename="js/all.js") }}'></script>
         <script>
             $('span.momentjs').each(function() {
                 $this = $(this);
@@ -35,5 +40,6 @@
             ga('create', 'UA-10313309-6', 'aip.io');
             ga('send', 'pageview');
         </script>
-    </body>
+        {% endblock %}
+    </foot>
 </html>
