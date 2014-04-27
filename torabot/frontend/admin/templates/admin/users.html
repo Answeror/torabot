@@ -1,45 +1,55 @@
-{% from 'macros.html' import pagination with context %}
+{% import 'macros.html' as macros with context %}
 {% extends "layout.html" %}
-{% block content %}
-<style>
-.user-table { table-layout:fixed; }
-.user-table td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.user-field { cursor: pointer; }
-</style>
-<table class='user-table table table-hover'>
-    <thead>
-        <tr>
-            <td class=col-sm-1>编号</td>
-            <td class=col-sm-2>昵称</td>
-            <td class=col-sm-4>email</td>
-            <td class=col-sm-4>openid</td>
-            <td class=col-sm-1>创建时间</td>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.openid }}</td>
-            <td>{{ momentjs(user.ctime).fromnow() }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<div class=text-center>
-    {{ pagination(page, room, total, uri) }}
-</div>
-<script>
-    $(function() {
-        $('.user-field').click(function() {
-            $(location).attr('href', $(this).data('uri'));
+{% block head %}
+    {{ super() }}
+    {{ macros.xeditable_css() }}
+    {{ macros.jsoneditor_css() }}
+    <style>
+        .user-table { table-layout:fixed; }
+        .user-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-field { cursor: pointer; }
+    </style>
+{% endblock %}
+{% block foot %}
+    {{ super() }}
+    {{ macros.xeditable_js() }}
+    {{ macros.jsoneditor_js() }}
+    <script>
+        $(function() {
+            $('.user-table').find('.editable-field').popup_text_edit();
         });
-    });
-</script>
+    </script>
+{% endblock %}
+{% block content %}
+    <table class='user-table table table-hover'>
+        <thead>
+            <tr>
+                <td class=col-sm-1>编号</td>
+                <td class=col-sm-2>昵称</td>
+                <td class=col-sm-3>email</td>
+                <td class=col-sm-4>openid</td>
+                <td class=col-sm-1>订阅容量</td>
+                <td class=col-sm-1>创建时间</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="name") }}'>{{ user.name }}</a></td>
+                <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="email") }}'>{{ user.email }}</a></td>
+                <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="openid") }}'>{{ user.openid }}</a></td>
+                <td><a href=# class=editable-field data-kind=int data-uri='{{ url_for(".user", id=user.id, field="maxwatch") }}'>{{ user.maxwatch }}</a></td>
+                <td>{{ momentjs(user.ctime).fromnow() }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class=text-center>
+        {{ macros.pagination(page, room, total, uri) }}
+    </div>
 {% endblock %}

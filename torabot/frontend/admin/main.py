@@ -48,7 +48,7 @@ def users(page):
     with autoccontext(commit=False) as conn:
         return render_template(
             'admin/users.html',
-            users = db.get_users(
+            users=db.get_users(
                 conn,
                 offset=page * page_room(),
                 limit=page_room(),
@@ -88,22 +88,31 @@ def query(id, field):
     if request.method == 'GET':
         with autoccontext(commit=False) as conn:
             q = db.get_query_bi_id(conn, id)
-        text = q[field]
-        if isinstance(text, dict):
-            text = json.dumps(text)
+        value = q[field]
+        if isinstance(value, dict):
+            value = json.dumps(value)
         return render_template(
             'jsoneditor.html',
-            text=text,
+            value=value,
             back=request.headers['referer'],
         )
     if request.method == 'POST':
-        try:
-            with autoccontext(commit=True) as conn:
-                db.set_query_field_bi_id(conn, id, field, request.values['text'])
-            return jsonify(dict(ok=True))
-        except db.error.InvalidArgumentError:
-            text = '无效值'
-            return jsonify(dict(ok=False, message=dict(text=text, html=text))), 400
+        with autoccontext(commit=True) as conn:
+            db.set_query_field_bi_id(conn, id, field, request.json['value'])
+        return make_ok_response()
+
+
+@bp.route('/user/<id>/<field>', methods=['POST'])
+@require_admin
+def user(id, field):
+    if request.method == 'POST':
+        with autoccontext(commit=True) as conn:
+            db.set_user_field_bi_id(conn, id, field, request.json['value'])
+        return make_ok_response()
+
+
+def make_ok_response():
+    return jsonify(dict(ok=True))
 
 
 @bp.errorhandler(AdminAuthError)

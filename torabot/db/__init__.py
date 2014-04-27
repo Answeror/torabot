@@ -6,6 +6,7 @@ from .user import (
     set_email,
     get_users,
     get_user_count,
+    set_user_field_bi_id,
 )
 from .watch import (
     watching,
@@ -75,4 +76,5 @@ __all__ = [
     error.__name__,
     get_users.__name__,
     get_user_count.__name__,
+    set_user_field_bi_id.__name__,
 ]

@@ -12,6 +12,7 @@ from flask import (
 from ..core.mod import mod, mods
 from .momentjs import momentjs
 from .errors import AuthError
+from .. import db
 
 
 log = Logger(__name__)
@@ -25,7 +26,43 @@ def make(app):
 
     app.context_processor(inject_locals)
     app.errorhandler(AuthError)(auth_error_guard)
+    app.errorhandler(db.error.InvalidArgumentError)(invalid_argument_error_guard)
+    app.errorhandler(db.error.UniqueConstraintError)(unique_constraint_error_guard)
     app.errorhandler(Exception)(general_error_guard)
+
+
+def make_response_content(formats):
+    return formats[mimeparse.best_match(formats, request.headers['accept'])]()
+
+
+def invalid_argument_error_guard(e):
+    text = '无效值'
+    return make_response_content({
+        'application/json': lambda: jsonify(dict(
+            ok=False,
+            message=dict(text=text, html=text)
+        )),
+        'text/html': lambda: render_template(
+            'message.html',
+            ok=False,
+            message=text
+        )
+    }), 400
+
+
+def unique_constraint_error_guard(e):
+    text = '重复值错误'
+    return make_response_content({
+        'application/json': lambda: jsonify(dict(
+            ok=False,
+            message=dict(text=text, html=text)
+        )),
+        'text/html': lambda: render_template(
+            'message.html',
+            ok=False,
+            message=text
+        )
+    }), 400
 
 
 def inject_locals():

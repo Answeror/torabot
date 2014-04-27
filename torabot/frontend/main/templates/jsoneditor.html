@@ -1,63 +1,60 @@
+{% import 'macros.html' as macros with context %}
 {% extends "layout.html" %}
 {% block head %}
-{{ super() }}
-<link rel='stylesheet' type='text/css' href='{{ url_for("main.static", filename="jsoneditor-2.3.6/jsoneditor-min.css") }}'>
+    {{ super() }}
+    {{ macros.jsoneditor_css() }}
 {% endblock %}
 {% block foot %}
-{{ super() }}
-<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/jsoneditor-min.js") }}'></script>
-<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/jsonlint/jsonlint.js") }}'></script>
-<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/ace.js") }}'></script>
-<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/mode-json.js") }}'></script>
-<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/theme-textmate.js") }}'></script>
-<script type='text/javascript' src='{{ url_for("main.static", filename="jsoneditor-2.3.6/lib/ace/theme-jsoneditor.js") }}'></script>
-<script type="text/javascript" >
-$(function(){
-    var container = document.getElementById('jsoneditor');
-    var options = {
-        mode: 'code',
-        indentation: 4,
-    };
-    var editor = new jsoneditor.JSONEditor(container, options);
-    var text = {{ text | tojson | safe }};
-    try {
-        editor.set(JSON.parse(text));
-    } catch (e) {
-        editor.setText(text);
-    }
-    var $area = $('.json-edit-area');
-    $area.find('button[name="submit"]').click(function(){
-        $.ajax({
-            type: 'POST',
-            dataType: 'json',
-            data: {text: editor.getText()}
-        }).done(function(){
-            new PNotify({
-                text: '提交成功',
-                type: 'success',
-                icon: false,
-                nonblock: {
-                    nonblock: true,
-                    nonblock_opacity: .2
-                }
+    {{ super() }}
+    {{ macros.jsoneditor_js() }}
+    <script type="text/javascript" >
+        $(function(){
+            var container = document.getElementById('jsoneditor');
+            var options = {
+                mode: 'code',
+                indentation: 4,
+            };
+            var editor = new jsoneditor.JSONEditor(container, options);
+            var value = {{ value | tojson | safe }};
+            try {
+                editor.set(JSON.parse(value));
+            } catch (e) {
+                editor.setText(value);
+            }
+            var $area = $('.json-edit-area');
+            $area.find('button[name="submit"]').click(function(){
+                $.ajax({
+                    type: 'post',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({value: editor.getText()})
+                }).done(function(){
+                    new PNotify({
+                        text: '提交成功',
+                        type: 'success',
+                        icon: false,
+                        nonblock: {
+                            nonblock: true,
+                            nonblock_opacity: .2
+                        }
+                    });
+                }).fail(function(xhr){
+                    new PNotify({
+                        text: JSON.parse(xhr.responseText).message.html,
+                        type: 'error',
+                        icon: false,
+                        buttons: {
+                            closer: true,
+                            sticker: false
+                        }
+                    });
+                });
             });
-        }).fail(function(xhr){
-            new PNotify({
-                text: $.parseJSON(xhr.responseText).message.html,
-                type: 'error',
-                icon: false,
-                buttons: {
-                    closer: true,
-                    sticker: false
-                }
+            $area.find('button[name="cancel"]').click(function(){
+                $(location).attr('href', '{{ back }}');
             });
         });
-    });
-    $area.find('button[name="cancel"]').click(function(){
-        $(location).attr('href', '{{ back }}');
-    });
-});
-</script>
+    </script>
 {% endblock %}
 {% block content %}
 <div class='json-edit-area row'>
