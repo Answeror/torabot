@@ -1,9 +1,10 @@
 from werkzeug.local import LocalProxy
-from flask import g, session, current_app
+from flask import g, session
 
 
 def get_current_conf():
     try:
+        from flask import current_app
         return current_app.config
     except:
         try:
@@ -36,6 +37,7 @@ def get_is_admin():
 
 
 def check_admin_openid(openid):
+    from flask import current_app
     from .user import get_user_id_bi_openid
     user_id = get_user_id_bi_openid(openid)
     return user_id in current_app.config['TORABOT_ADMIN_IDS']
