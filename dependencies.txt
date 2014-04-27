@@ -20,6 +20,7 @@ joblib==0.7.1
 kombu==3.0.12
 nose==1.3.0
 psycopg2==2.5.1
+python-mimeparse==0.1.4
 python3-openid==3.0.3
 pytz==2013.8
 redis==2.9.1
