@@ -31,8 +31,9 @@
                 <td class=col-sm-1>编号</td>
                 <td class=col-sm-2>昵称</td>
                 <td class=col-sm-3>email</td>
-                <td class=col-sm-4>openid</td>
-                <td class=col-sm-1>订阅容量</td>
+                <td class=col-sm-3>openid</td>
+                <td class=col-sm-1>订阅数</td>
+                <td class=col-sm-1>订阅上限</td>
                 <td class=col-sm-1>创建时间</td>
             </tr>
         </thead>
@@ -43,6 +44,7 @@
                 <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="name") }}'>{{ user.name }}</a></td>
                 <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="email") }}'>{{ user.email }}</a></td>
                 <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="openid") }}'>{{ user.openid }}</a></td>
+                <td>{{ user.watch_count }}</td>
                 <td><a href=# class=editable-field data-kind=int data-uri='{{ url_for(".user", id=user.id, field="maxwatch") }}'>{{ user.maxwatch }}</a></td>
                 <td>{{ momentjs(user.ctime).fromnow() }}</td>
             </tr>

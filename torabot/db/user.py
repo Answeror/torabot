@@ -43,6 +43,19 @@ def get_users(conn, offset=None, limit=None):
     return [bunchr(**row) for row in result.fetchall()]
 
 
+def get_users_detail(conn, offset=None, limit=None):
+    result = conn.execute(sql('\n'.join([
+        '''
+        select u0.*, (select count(1) from watch as w0 where w0.user_id = u0.id) watch_count
+        from "user" as u0
+        order by u0.id
+        ''',
+        '' if offset is None else 'offset :offset',
+        '' if limit is None else 'limit :limit'
+    ])), **dict(offset=offset, limit=limit))
+    return [bunchr(**row) for row in result.fetchall()]
+
+
 def get_user_count(conn):
     return conn.execute('select count(1) from "user"').fetchone()[0]
 

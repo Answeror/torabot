@@ -49,7 +49,7 @@ def users(page):
     with autoccontext(commit=False) as conn:
         return render_template(
             'admin/users.html',
-            users=db.get_users(
+            users=db.get_users_detail(
                 conn,
                 offset=page * page_room(),
                 limit=page_room(),
