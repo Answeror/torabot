@@ -38,9 +38,24 @@ def get_is_admin():
 
 def check_admin_openid(openid):
     from flask import current_app
-    from .user import get_user_id_bi_openid
-    user_id = get_user_id_bi_openid(openid)
-    return user_id in current_app.config['TORABOT_ADMIN_IDS']
+    return current_user_id._get_current_object() in current_app.config['TORABOT_ADMIN_IDS']
 
 
 is_admin = LocalProxy(get_is_admin)
+
+
+def get_current_user_id():
+    name = '_current_user_id'
+    if hasattr(g, name):
+        value = getattr(g, name)
+    else:
+        if 'openid' not in session:
+            value = None
+        else:
+            from .user import get_user_id_bi_openid
+            value = get_user_id_bi_openid(session['openid'])
+        setattr(g, name, value)
+    return value
+
+
+current_user_id = LocalProxy(get_current_user_id)

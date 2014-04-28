@@ -65,7 +65,7 @@ def unique_constraint_error_guard(e):
 
 def inject_locals():
     from ..core.mod import mod, mods
-    from ..core.local import is_user, is_admin
+    from ..core.local import is_user, is_admin, current_user_id
     from .momentjs import momentjs
     return dict(
         min=min,
@@ -79,6 +79,7 @@ def inject_locals():
         mods=mods(),
         is_user=is_user,
         is_admin=is_admin,
+        current_user_id=current_user_id,
     )
 
 
