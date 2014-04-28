@@ -114,6 +114,7 @@ def user(id, field):
 
 @bp.route('/', methods=['GET'])
 @bp.route('/dashboard', methods=['GET'])
+@require_admin
 def dashboard():
     with autoccontext(commit=True) as conn:
         return render_template('admin/dashboard.html', stats=[
