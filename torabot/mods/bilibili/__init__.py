@@ -18,7 +18,7 @@ class Bilibili(
     display_name = name
     has_advanced_search = True
     has_normal_search = False
-    description = '可以订阅新番和up主, 更新时会收到邮件通知.'
+    description = '订阅新番和up主, 更新时会收到邮件通知.'
 
     def view(self, name):
         from .views import web, email

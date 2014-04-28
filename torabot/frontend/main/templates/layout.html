@@ -1,13 +1,9 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block body %}
 {% block navbar %}
-{% include "nav.html" %}
+{% include 'nav.html' %}
 {% endblock %}
 <div class='container vspace-top-small'>
-    <div class=row>
-        <div class='col-sm-12'>
-            {% block content %}{% endblock %}
-        </div>
-    </div>
+    {% block content %}{% endblock %}
 </div>
 {% endblock %}

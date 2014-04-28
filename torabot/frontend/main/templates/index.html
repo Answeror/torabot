@@ -11,11 +11,17 @@
         {% for mod in mods %}
         <div class="item{% if loop.first %} active{% endif %}">
             <div class=container>
-                <iframe class=snapshot src='{{ url_for("main.advanced_search", kind=mod.name) }}'></iframe>
+                {% if mod.name == 'pixiv' %}
+                <iframe class=snapshot frameborder=0 src='{{ url_for("main.search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
+                {% elif mod.name == 'tora' %}
+                <iframe class=snapshot frameborder=0 src='{{ url_for("main.search", kind="tora", q="tony") }}'></iframe>
+                {% else %}
+                <iframe class=snapshot frameborder=0 src='{{ url_for("main.advanced_search", kind=mod.name) }}'></iframe>
+                {% endif %}
                 <div class=snapshot-glass></div>
                 <div class=carousel-caption>
                     <h1>{{ mod.display_name }}</h1>
-                    <p>{{ mod.description }}</p>
+                    <p class=lead>{{ mod.description }}</p>
                     {% if not is_user %}
                     <p>
                         <form action='/login' method=post>
@@ -32,7 +38,22 @@
     <a class='left carousel-control' href=#mod-carousel data-slide=prev><span class='glyphicon glyphicon-chevron-left'></span></a>
     <a class='right carousel-control' href=#mod-carousel data-slide=next><span class='glyphicon glyphicon-chevron-right'></span></a>
 </div>
-
+<div class=container>
+    <div class='row featurette'>
+        <div class=col-sm-7>
+            <h2 class=featurette-heading>更新通知</h2>
+            <p class=lead>用来做虎穴, pixiv, bilibili等站点的更新通知(邮件通知). 可以在"我的通知"的"设置"里修改邮箱. 点击导航条上的问号获取对应模块的帮助.</p>
+        </div>
+        <div class='col-sm-5 img-thumbnail'>
+            <iframe class=snapshot frameborder=0 src='{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}'></iframe>
+            <div class=snapshot-glass></div>
+        </div>
+    </div>
+    <hr class=featurette-divider>
+</div>
+{% endblock %}
+{% block foot %}
+{{ super() }}
 <style>
 /* Carousel base class */
 .carousel {
@@ -64,13 +85,37 @@
     background-color: #777;
     opacity: 0.7;
 }
+.featurette .snapshot {
+    width: 100%;
+    height: 500px;
+}
+.featurette .snapshot-glass {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    height: 500px;
+    background-color: #fff;
+    opacity: 0.2;
+}
+.featurette-divider {
+    margin: 80px 0; /* Space out the Bootstrap <hr> more */
+}
+/* Thin out the marketing headings */
+.featurette-heading {
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -1px;
+}
+@media (min-width: 768px) {
+    .featurette-heading {
+        font-size: 50px;
+    }
+}
+@media (min-width: 992px) {
+    .featurette-heading {
+        margin-top: 120px;
+    }
+}
 </style>
-
-<div class=container>
-    <div class=row>
-        <div class='col-sm-12'>
-            <p>用来做虎穴, pixiv, bilibili等站点的更新通知(邮件通知). 可以在"我的通知"的"设置"里修改邮箱. 点击导航条上的问号获取对应模块的帮助.</p>
-        </div>
-    </div>
-</div>
 {% endblock %}

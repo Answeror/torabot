@@ -160,16 +160,18 @@ def notice_conf(user_id):
         )
 
 
+@cache.memoize(timeout=600)
+def _advanced_search(kind, values):
+    return render_template(
+        'advanced_search.html',
+        query_kind=kind,
+        content=mod(kind).format_advanced_search('web', **values)
+    )
+
+
 @bp.route('/search/advanced/<kind>', methods=['GET'])
 def advanced_search(kind):
-    @cache.memoize(timeout=current_app.config['TORABOT_ADVANCED_SEARCH_CACHE_TIMEOUT'])
-    def inner(kind, **values):
-        return render_template(
-            'advanced_search.html',
-            query_kind=kind,
-            content=mod(kind).format_advanced_search('web', **values)
-        )
-    return inner(kind, **dict(request.values.items()))
+    return _advanced_search(kind, dict(request.values.items()))
 
 
 def get_standard_query():

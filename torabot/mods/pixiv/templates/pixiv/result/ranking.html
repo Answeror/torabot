@@ -1,6 +1,6 @@
 <div id=pixiv-arts class=row>
     {% for art in query.result.arts %}
-    <div class='col-sm-2 pixiv-art'>
+    <div class='col-xs-4 col-sm-2 pixiv-art'>
         <div class='thumbnail'>
             <a href='{{ "//www.pixiv.net/member_illust.php?mode=medium&illust_id=%s" % art.illust_id }}' target=_blank><img alt='{{ art.title }}' src='{{ url_for(".thumbnail_proxy", uri=art.url, referer="http://www.pixiv.net/") }}'></a>
             <div class=caption>
@@ -17,7 +17,8 @@
     $(function() {
         var $container = $('#pixiv-arts');
         $container.masonry({
-            columnWidth: $container.find('.pixiv-art').outerWidth(),
+            // http://codepen.io/ldwg/pen/eCwnK
+            columnWidth: '.pixiv-art',
             itemSelector: '.pixiv-art'
         });
         $container.find('.pixiv-art').each(function() {
