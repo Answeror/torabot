@@ -27,6 +27,7 @@ from ...core.watch import get_watches_bi_user_id
 from ...core.connection import appccontext
 from ...core.mod import mod
 from ...core.local import is_user, current_user_id
+from ...cache import cache
 from ..errors import AuthError
 from . import bp
 from .. import auth
@@ -161,11 +162,14 @@ def notice_conf(user_id):
 
 @bp.route('/search/advanced/<kind>', methods=['GET'])
 def advanced_search(kind):
-    return render_template(
-        'advanced_search.html',
-        query_kind=kind,
-        content=mod(kind).format_advanced_search('web', **dict(request.values.items()))
-    )
+    @cache.memoize(timeout=current_app.config['TORABOT_ADVANCED_SEARCH_CACHE_TIMEOUT'])
+    def inner(kind, **values):
+        return render_template(
+            'advanced_search.html',
+            query_kind=kind,
+            content=mod(kind).format_advanced_search('web', **values)
+        )
+    return inner(kind, **dict(request.values.items()))
 
 
 def get_standard_query():
