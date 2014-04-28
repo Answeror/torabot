@@ -6,6 +6,7 @@ class Mod(object, metaclass=abc.ABCMeta):
 
     has_advanced_search = False
     has_normal_search = True
+    description = ''
 
     def __init__(self, conf={}):
         self.conf = conf
