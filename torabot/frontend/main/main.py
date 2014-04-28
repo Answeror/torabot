@@ -90,10 +90,38 @@ def watching(user_id):
         )
 
 
+@bp.route('/watch/example', methods=['GET'])
+def example_watching():
+    user_id = current_app.config['TORABOT_EXAMPLE_USER_ID']
+    with appccontext() as conn:
+        return render_template(
+            'watching.html',
+            user=get_user_bi_id(conn, user_id),
+            watches=get_watches_bi_user_id(conn, user_id)
+        )
+
+
 @bp.route('/notice/all', methods=['GET'], defaults=dict(page=0))
 @bp.route('/notice/all/<int:page>', methods=['GET'])
 @auth.require_session
 def all_notices(page, user_id):
+    room = current_app.config['TORABOT_NOTICE_ROOM']
+    with appccontext() as conn:
+        return render_template(
+            'notices.html',
+            tab='all',
+            view=all_notices.__name__,
+            page=page,
+            room=room,
+            total=get_notice_count_bi_user_id(conn, user_id),
+            notices=get_notices_bi_user_id(conn, user_id, page=page, room=room)
+        )
+
+
+@bp.route('/notice/example', methods=['GET'])
+def example_all_notices():
+    page = 0
+    user_id = current_app.config['TORABOT_EXAMPLE_USER_ID']
     room = current_app.config['TORABOT_NOTICE_ROOM']
     with appccontext() as conn:
         return render_template(

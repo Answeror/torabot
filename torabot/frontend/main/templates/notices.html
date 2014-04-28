@@ -5,12 +5,12 @@
     <li{% if tab == 'all' %} class=active{% endif %}><a href='{{ url_for(".all_notices") }}'>全部</a></li>
     <li><a href='{{ url_for(".notice_conf") }}'>设置</a></li>
 </ul>
-<table class='table table-condensed table-striped vspace-top-small'>
+<table class='table table-condensed table-striped vspace-top-small notice-table'>
     <thead>
         <tr>
-            <td class=col-sm-2>时间</td>
-            <td class=col-sm-1>状态</td>
-            <td class=col-sm-9>内容</td>
+            <td class='col-xs-3 col-sm-2'>时间</td>
+            <td class='col-xs-2 col-sm-1'>状态</td>
+            <td class='col-xs-7 col-sm-9'>内容</td>
         </tr>
     </thead>
     <tbody>
@@ -40,4 +40,15 @@
     <li class=disabled><span>&raquo;</span></li>
     {% endif %}
 </ul>
+{% endblock %}
+{% block foot %}
+{{ super() }}
+<style>
+.notice-table { table-layout:fixed; }
+.notice-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 {% endblock %}

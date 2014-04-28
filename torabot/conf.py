@@ -42,6 +42,7 @@ TORABOT_PAGE_ROOM = 16
 TORABOT_QUERY_EXPIRE = 15 * 60
 TORABOT_BUBBLE_LOG = True
 TORABOT_DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')
+TORABOT_EXAMPLE_USER_ID = 1
 
 # mod
 TORABOT_DEFAULT_MOD = 'tora'

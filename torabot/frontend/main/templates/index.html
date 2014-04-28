@@ -40,16 +40,47 @@
 </div>
 <div class=container>
     <div class='row featurette'>
-        <div class=col-sm-7>
-            <h2 class=featurette-heading>更新通知</h2>
-            <p class=lead>用来做虎穴, pixiv, bilibili等站点的更新通知(邮件通知). 可以在"我的通知"的"设置"里修改邮箱. 点击导航条上的问号获取对应模块的帮助.</p>
+        <div class='col-xs-12 col-sm-7'>
+            <h2 class=featurette-heading>定义查询</h2>
+            <p class=lead>点击导航条上的<span class=text-primary>扳手按钮</span>进入高级查询, 定义查询条件. 点击<span class=text-primary>问号</span>获取对应模块的帮助.</p>
         </div>
-        <div class='col-sm-5 img-thumbnail'>
-            <iframe class=snapshot frameborder=0 src='{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}'></iframe>
-            <div class=snapshot-glass></div>
+        <div class='col-xs-12 col-sm-5'>
+            <div class=img-thumbnail>
+                <iframe height=420 class=snapshot frameborder=0 src='{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}'></iframe>
+                <div class=snapshot-glass></div>
+            </div>
         </div>
     </div>
     <hr class=featurette-divider>
+    <div class='row featurette'>
+        <div class='col-xs-12 col-sm-5'>
+            <div class=img-thumbnail>
+                <iframe height=200 class=snapshot frameborder=0 src='{{ url_for("main.example_watching") }}'></iframe>
+                <div class=snapshot-glass></div>
+            </div>
+        </div>
+        <div class='col-xs-12 col-sm-7'>
+            <h2 class=featurette-heading>订阅查询</h2>
+            <p class=lead><span class=text-warning>登录后</span>, 点击导航条上的<span class=text-primary>订阅</span>按钮订阅该查询. 在<span class=text-primary>我的查询</span>页面管理查询列表.</p>
+        </div>
+    </div>
+    <hr class=featurette-divider>
+    <div class='row featurette'>
+        <div class='col-xs-12 col-sm-7'>
+            <h2 class=featurette-heading>更新通知</h2>
+            <p class=lead>查询的更新通过邮件推送, 可以在<span class=text-primary>我的通知</span>的<span class=text-primary>设置</span>里修改邮箱. 在<span class=text-primary>我的通知</span>页面查看通知列表.</p>
+        </div>
+        <div class='col-xs-12 col-sm-5'>
+            <div class=img-thumbnail>
+                <iframe height=300 class=snapshot frameborder=0 src='{{ url_for("main.example_all_notices") }}'></iframe>
+                <div class=snapshot-glass></div>
+            </div>
+        </div>
+    </div>
+    <hr class=featurette-divider>
+    <footer>
+        <p class=pull-right><a href=#>回到顶部</a></p>
+    </footer>
 </div>
 {% endblock %}
 {% block foot %}
@@ -80,26 +111,28 @@
     position: absolute;
     top: 0;
     left: 0;
-    min-width: 100%;
-    height: 500px;
+    width: 100%;
+    height: 100%;
     background-color: #777;
     opacity: 0.7;
 }
 .featurette .snapshot {
     width: 100%;
-    height: 500px;
 }
 .featurette .snapshot-glass {
     position: absolute;
     top: 0;
     left: 0;
-    min-width: 100%;
-    height: 500px;
+    width: 100%;
+    height: 100%;
     background-color: #fff;
     opacity: 0.2;
 }
+.featurette .img-thumbnail {
+    width: 100%;
+}
 .featurette-divider {
-    margin: 80px 0; /* Space out the Bootstrap <hr> more */
+    margin: 42px 0; /* Space out the Bootstrap <hr> more */
 }
 /* Thin out the marketing headings */
 .featurette-heading {
@@ -109,12 +142,12 @@
 }
 @media (min-width: 768px) {
     .featurette-heading {
-        font-size: 50px;
+        font-size: 42px;
     }
 }
 @media (min-width: 992px) {
     .featurette-heading {
-        margin-top: 120px;
+        margin-top: 42px;
     }
 }
 </style>
