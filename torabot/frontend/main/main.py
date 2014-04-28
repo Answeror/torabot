@@ -24,9 +24,11 @@ from ...core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
 )
+from ...core.user import get_user_id_bi_openid
 from ...core.watch import get_watches_bi_user_id
 from ...core.connection import appccontext
 from ...core.mod import mod
+from ...core.local import is_user
 from ..errors import AuthError
 from . import bp
 from .. import auth
@@ -53,7 +55,7 @@ def failed(text):
 
 
 def check_request_user_id(session_user_id):
-    if int(request.values['user_id']) != session_user_id:
+    if 'openid' not in request.values or get_user_id_bi_openid(request.values['openid']) != session_user_id:
         raise AuthError('request user_id not equal to user_id in sessoin')
 
 
@@ -196,10 +198,10 @@ def search(kind):
             query=q,
             content=mod(q.kind).format_query_result('web', q)
         )
-        if 'userid' in session:
+        if is_user:
             options['watching'] = _watching(
                 conn,
-                user_id=int(session['userid']),
+                user_id=get_user_id_bi_openid(session['openid']),
                 query_id=q.id,
             )
     return render_template('list.html', **options)

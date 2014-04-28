@@ -1,10 +1,10 @@
 {% extends "nav.html" %}
 {% block search_box_left %}
-{% if 'userid' in session %}
+{% if is_user %}
 {% if watching %}
 <form action='{{ url_for(".unwatch") }}' method=post class="navbar-left" role="form">
     <div class="form-group">
-        <input type=hidden name=user_id value='{{ session["userid"] }}'>
+        <input type=hidden name=user_id value='{{ session["openid"] }}'>
         <input type=hidden name=query_id value='{{ query.id }}'>
     </div>
     <button type="submit" class="btn btn-danger">退订</button>
@@ -12,7 +12,7 @@
 {% else %}
 <form action='{{ url_for(".watch") }}' method=post class="navbar-left" role="form">
     <div class="form-group">
-        <input type=hidden name=user_id value='{{ session["userid"] }}'>
+        <input type=hidden name=user_id value='{{ session["openid"] }}'>
         <input type=hidden name=query_id value='{{ query.id }}'>
     </div>
     <button type="submit" class="btn btn-primary">订阅</button>
