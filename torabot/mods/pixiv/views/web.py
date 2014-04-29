@@ -26,16 +26,19 @@ def format_ranking_result(query):
 
 
 def format_user_notice(notice):
-    return "pixiv: <a href='%s'>%s</a> 更新了" % (
-        notice.change.art.uri,
-        notice.change.art.title,
+    return "<span class='label label-primary'>pixiv</span>%(sep)s%(username)s%(sep)s的<a href='%(uri)s'>%(title)s</a>%(sep)s更新了" % dict(
+        uri=notice.change.art.uri,
+        title=notice.change.art.title,
+        username=notice.change.art.author,
+        sep='<span class=w-d5em></span>'
     )
 
 
 def format_ranking_notice(notice):
-    return "pixiv: <a href='%(uri)s'>%(mode)s</a> 更新了" % dict(
+    return "<span class='label label-primary'>pixiv</span>%(sep)s<a href='%(uri)s'>%(mode)s</a>%(sep)s更新了" % dict(
         uri='http://www.pixiv.net/ranking.php?mode=%s' % notice.change.mode,
-        mode=translate_mode(notice.change.mode)
+        mode=translate_mode(notice.change.mode),
+        sep='<span class=w-d5em></span>'
     )
 
 

@@ -4,16 +4,18 @@ from ..translate import translate_mode
 
 
 def format_user_notice(notice):
-    return "pixiv: %(title)s 更新了: %(uri)s" % dict(
+    return "pixiv: %(username)s 的 %(title)s 更新了: %(uri)s" % dict(
         uri=notice.change.art.uri,
         title=notice.change.art.title,
+        username=notice.change.art.author,
     )
 
 
 def format_ranking_art(art):
-    return '%(title)s: %(uri)s' % dict(
+    return '%(username)s 的 %(title)s: %(uri)s' % dict(
         title=art.title,
-        uri='http://www.pixiv.net/member_illust.php?mode=medium&illust_id=%s' % art.illust_id
+        uri='http://www.pixiv.net/member_illust.php?mode=medium&illust_id=%s' % art.illust_id,
+        username=art.user_name,
     )
 
 
@@ -22,7 +24,8 @@ def format_ranking_notice(notice):
         "pixiv: %(mode)s 更新了: %(uri)s" % dict(
             uri='http://www.pixiv.net/ranking.php?mode=%s' % notice.change.mode,
             mode=translate_mode(notice.change.mode)
-        )
+        ),
+        '---',
     ] + list(map(format_ranking_art, notice.change.arts)))
 
 

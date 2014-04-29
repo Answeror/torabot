@@ -12,21 +12,40 @@
     padding-top: 7px;
 }
 
+.w-d5em {
+    width: 0.5em;
+}
+span.w-d5em {
+    display: inline-block;
+};
+
 .w-1em {
     width: 1em;
 }
+span.w-1em {
+    display: inline-block;
+};
 
 .w-2em {
     width: 2em;
 }
+span.w-2em {
+    display: inline-block;
+};
 
 .w-3em {
     width: 3em;
 }
+span.w-3em {
+    display: inline-block;
+};
 
 .w-6em {
     width: 6em;
 }
+span.w-6em {
+    display: inline-block;
+};
 
 .inline-block {
     display: inline-block;
