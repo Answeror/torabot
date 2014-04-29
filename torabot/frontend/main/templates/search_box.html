@@ -10,8 +10,9 @@
                     {% for m in mods %}
                     <option
                         value='{{ m.name }}'
-                        data-has-normal-search='{{ 1 if m.has_normal_search else 0 }}'
-                        data-has-advanced-search='{{ 1 if m.has_advanced_search else 0 }}'
+                        data-has-normal-search={{ 1 if m.has_normal_search else 0 }}
+                        data-has-advanced-search={{ 1 if m.has_advanced_search else 0 }}
+                        data-allow-empty-query={{ 1 if m.allow_empty_query else 0 }}
                         {% if query_kind == m.name %} selected{% endif %}
                     >{{ m.display_name }}</option>
                     {% endfor %}

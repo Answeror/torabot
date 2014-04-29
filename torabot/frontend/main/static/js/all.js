@@ -59,8 +59,17 @@ $(function(){
     var $search = form.find('button[name="search"]');
     $search.click(function(e) {
         e.preventDefault();
-        var kind = $mods.find('option:selected').val();
+        var $selected = $mods.find('option:selected');
+        var kind = $selected.val();
         var text = form.find('input[name="q"]').val();
+        if (!text && !$selected.data('allow-empty-query')) {
+            new PNotify({
+                text: '查询不能为空',
+                type: 'error',
+                icon: false
+            });
+            return;
+        }
         $(location).attr('href', '/search/' + kind + '?' + $.param({q: text}));
     });
     var $advanced = form.find('button[name="advanced"]');
