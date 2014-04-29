@@ -22,6 +22,7 @@ class Tora(Mod):
     has_advanced_search = True
     blueprint = bp
     description = '订阅虎穴查询, 新货上架或可预约时第一时间收到邮件通知, 用来抢本子.'
+    normal_search_prompt = '关键字或商品链接'
 
     def view(self, name):
         from .views import web, email

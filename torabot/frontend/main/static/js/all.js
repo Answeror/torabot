@@ -51,6 +51,7 @@ $(function() {
 });
 $(function(){
     var form = $('form[name="search"]');
+    var $q = form.find('input[name="q"]');
     var $mods = form.find('select[name="kind"]');
     form.find('button[name="help"]').click(function(e) {
         e.preventDefault();
@@ -61,7 +62,7 @@ $(function(){
         e.preventDefault();
         var $selected = $mods.find('option:selected');
         var kind = $selected.val();
-        var text = form.find('input[name="q"]').val();
+        var text = $q.val();
         if (!text && !$selected.data('allow-empty-query')) {
             new PNotify({
                 text: '查询不能为空',
@@ -78,11 +79,12 @@ $(function(){
         $(location).attr('href', '/search/advanced/' + $mods.find('option:selected').val());
     });
     var $buttons = form.find('span[name="buttons"]');
-    var $q = form.find('input[name="q"]');
     var on_change_mod = function() {
-        $advanced.prop('disabled', !$(this).find('option:selected').data('has-advanced-search'));
-        $q.prop('disabled', !$(this).find('option:selected').data('has-normal-search'));
-        $search.prop('disabled', !$(this).find('option:selected').data('has-normal-search'));
+        var $selected = $(this).find('option:selected');
+        $advanced.prop('disabled', !$selected.data('has-advanced-search'));
+        $q.prop('disabled', !$selected.data('has-normal-search'));
+        $search.prop('disabled', !$selected.data('has-normal-search'));
+        $q.prop('placeholder', $selected.data('normal-search-prompt'));
     };
     $mods.ready(on_change_mod).change(on_change_mod);
 });

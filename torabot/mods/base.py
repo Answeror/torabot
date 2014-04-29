@@ -6,6 +6,7 @@ class Mod(object, metaclass=abc.ABCMeta):
 
     has_advanced_search = False
     has_normal_search = True
+    normal_search_prompt = ''
     description = ''
     allow_empty_query = False
 
