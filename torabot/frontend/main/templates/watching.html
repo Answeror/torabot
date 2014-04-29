@@ -3,7 +3,6 @@
 {% block head %}
     {{ super() }}
     {{ macros.xeditable_css() }}
-    {{ macros.jsoneditor_css() }}
     <style>
         .watch-table { table-layout:fixed; }
         .watch-table td {
@@ -17,7 +16,6 @@
 {% block foot %}
     {{ super() }}
     {{ macros.xeditable_js() }}
-    {{ macros.jsoneditor_js() }}
     <script>
         $(function() {
             $('.watch-table').find('.editable-field').popup_text_edit();
@@ -29,17 +27,17 @@
 <table class='table table-condensed table-striped watch-table'>
     <thead>
         <tr>
-            <td class='col-xs-2 col-sm-2'>订阅时间</td>
+            <td class='hidden-xs col-sm-2'>订阅时间</td>
             <td class='col-xs-2 col-sm-1'>模块</td>
-            <td class='col-xs-3 col-sm-5'>订阅名称/查询内容(点击重命名)</td>
-            <td class='col-xs-2 col-sm-2 text-right'>更新时间</td>
+            <td class='col-xs-4 col-sm-5'>订阅名称/查询内容(点击重命名)</td>
+            <td class='col-xs-3 col-sm-2 text-right'>更新时间</td>
             <td class='col-xs-3 col-sm-2'></td>
         </tr>
     </thead>
     <tbody>
     {% for watch in watches %}
     <tr>
-        <td>{{ momentjs(watch.ctime).calendar() }}</td>
+        <td class=hidden-xs>{{ momentjs(watch.ctime).calendar() }}</td>
         <td><span class='label label-primary'>{{ watch.query_kind }}</span></td>
         <td><a class=editable-field data-kind=text title='重命名' href=# data-field=name data-args='{"user_id": {{ watch.user_id }}, "query_id": {{ watch.query_id }}}' data-uri='{{ url_for(".rename_watch") }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
         <td class=text-right>{{ momentjs(watch.query_mtime).fromnow() }}</td>
