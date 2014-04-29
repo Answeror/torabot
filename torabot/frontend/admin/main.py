@@ -11,6 +11,7 @@ from flask import (
 from ...core.connection import autoccontext
 from ...core.version import get_version
 from ... import db
+from ..response import make_ok_response
 from . import bp
 from .errors import AdminAuthError
 from .auth import require_admin
@@ -122,10 +123,6 @@ def dashboard():
             ('用户', db.get_user_count(conn)),
             ('活跃查询', db.get_active_query_count(conn)),
         ])
-
-
-def make_ok_response():
-    return jsonify(dict(ok=True))
 
 
 @bp.errorhandler(AdminAuthError)

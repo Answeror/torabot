@@ -1,20 +1,47 @@
+{% import 'macros.html' as macros with context %}
 {% extends "layout.html" %}
+{% block head %}
+    {{ super() }}
+    {{ macros.xeditable_css() }}
+    {{ macros.jsoneditor_css() }}
+    <style>
+        .watch-table { table-layout:fixed; }
+        .watch-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .watch-field { cursor: pointer; }
+    </style>
+{% endblock %}
+{% block foot %}
+    {{ super() }}
+    {{ macros.xeditable_js() }}
+    {{ macros.jsoneditor_js() }}
+    <script>
+        $(function() {
+            $('.watch-table').find('.editable-field').popup_text_edit();
+        });
+    </script>
+{% endblock %}
 {% block content %}
 {% if watches %}
 <table class='table table-condensed table-striped watch-table'>
     <thead>
         <tr>
-            <td class=col-sm-2>订阅时间</td>
-            <td class=col-sm-6>订阅名称/查询内容(点击重命名)</td>
-            <td class='col-sm-2 text-right'>更新时间</td>
-            <td class=col-sm-2></td>
+            <td class='col-xs-2 col-sm-2'>订阅时间</td>
+            <td class='col-xs-2 col-sm-1'>模块</td>
+            <td class='col-xs-3 col-sm-5'>订阅名称/查询内容(点击重命名)</td>
+            <td class='col-xs-2 col-sm-2 text-right'>更新时间</td>
+            <td class='col-xs-3 col-sm-2'></td>
         </tr>
     </thead>
     <tbody>
     {% for watch in watches %}
     <tr>
         <td>{{ momentjs(watch.ctime).calendar() }}</td>
-        <td><a title='点击这里重命名该订阅' href='{{ url_for(".rename_watch", user_id=watch.user_id, query_id=watch.query_id, name=watch.name) }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
+        <td><span class='label label-primary'>{{ watch.query_kind }}</span></td>
+        <td><a class=editable-field data-kind=text title='重命名' href=# data-field=name data-args='{"user_id": {{ watch.user_id }}, "query_id": {{ watch.query_id }}}' data-uri='{{ url_for(".rename_watch") }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
         <td class=text-right>{{ momentjs(watch.query_mtime).fromnow() }}</td>
         <td>
             <div class=pull-right>
@@ -22,7 +49,7 @@
                 <form style='display:inline-block' action='{{ url_for(".unwatch") }}' method=post>
                     <input type=hidden name=user_id value='{{ watch.user_id }}'>
                     <input type=hidden name=query_id value='{{ watch.query_id }}'>
-                    <button type=submit class='btn btn-xs btn-default'>退订</button>
+                    <button type=submit class='btn btn-xs btn-danger'>退订</button>
                 </form>
             </div>
         </td>
@@ -32,12 +59,4 @@
 </table>
 {% endif %}
 <p>已用订阅查询{{ len(watches) }}个, 还可订阅{{ user.maxwatch - len(watches) }}个.</p>
-<style>
-.watch-table { table-layout:fixed; }
-.watch-table td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-</style>
 {% endblock %}

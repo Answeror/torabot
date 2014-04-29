@@ -9,8 +9,9 @@ from flask import (
     redirect,
     url_for,
 )
-from .errors import AuthError
 from .. import db
+from .errors import AuthError
+from .response import make_response_content
 
 
 log = Logger(__name__)
@@ -27,10 +28,6 @@ def make(app):
     app.errorhandler(db.error.InvalidArgumentError)(invalid_argument_error_guard)
     app.errorhandler(db.error.UniqueConstraintError)(unique_constraint_error_guard)
     app.errorhandler(Exception)(general_error_guard)
-
-
-def make_response_content(formats):
-    return formats[mimeparse.best_match(formats, request.headers['accept'])]()
 
 
 def invalid_argument_error_guard(e):

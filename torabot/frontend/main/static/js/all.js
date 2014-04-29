@@ -14,12 +14,24 @@ $(function() {
             mode: 'popup',
             url: function(params) {
                 var d = $.Deferred();
+                var $this = $(this);
+                if ($this.data('args')) {
+                    var data = $this.data('args');
+                } else {
+                    var data = {};
+                }
+                if ($this.data('field')) {
+                    var field = $this.data('field');
+                } else {
+                    var field = 'value';
+                }
+                data[field] = $.torabot.cast($this.data('kind'), params.value);
                 $.ajax({
-                    url: $(this).data('uri'),
+                    url: $this.data('uri'),
                     type: 'post',
                     dataType: 'json',
                     contentType: 'application/json',
-                    data: JSON.stringify({value: $.torabot.cast($(this).data('kind'), params.value)})
+                    data: JSON.stringify(data)
                 }).done(d.resolve).fail(d.reject);
                 return d;
             },

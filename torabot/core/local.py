@@ -1,5 +1,5 @@
 from werkzeug.local import LocalProxy
-from flask import g, session
+from flask import g, session, request
 
 
 def get_current_conf():
@@ -59,3 +59,19 @@ def get_current_user_id():
 
 
 current_user_id = LocalProxy(get_current_user_id)
+
+
+def get_request_values():
+    name = '_request_values'
+    if hasattr(g, name):
+        value = getattr(g, name)
+    else:
+        if request.json:
+            value = request.json
+        else:
+            value = request.values
+        setattr(g, name, value)
+    return value
+
+
+request_values = LocalProxy(get_request_values)

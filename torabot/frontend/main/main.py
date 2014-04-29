@@ -1,6 +1,7 @@
 import json
 from nose.tools import assert_equal
 from flask import (
+    jsonify,
     request,
     current_app,
     render_template,
@@ -26,11 +27,12 @@ from ...core.notice import (
 from ...core.watch import get_watches_bi_user_id
 from ...core.connection import appccontext
 from ...core.mod import mod
-from ...core.local import is_user, current_user_id
+from ...core.local import is_user, current_user_id, request_values
 from ...cache import cache
 from ..errors import AuthError
 from . import bp
 from .. import auth
+from ..response import make_ok_response, make_response
 
 
 log = Logger(__name__)
@@ -54,7 +56,7 @@ def failed(text):
 
 
 def check_request_user_id(session_user_id):
-    if int(request.values['user_id']) != session_user_id:
+    if int(request_values['user_id']) != session_user_id:
         raise AuthError('request user_id not equal to user_id in sessoin')
 
 
@@ -64,19 +66,32 @@ def rename_watch(user_id):
     check_request_user_id(user_id)
     if request.method == 'GET':
         return render_template('rename_watch.html')
-    else:
+    if request.method == 'POST':
         try:
             with appccontext(commit=True) as conn:
                 _rename_watch(
                     conn,
-                    user_id=int(request.values['user_id']),
-                    query_id=int(request.values['query_id']),
-                    name=request.values['name'],
+                    user_id=int(request_values['user_id']),
+                    query_id=int(request_values['query_id']),
+                    name=request_values['name'],
                 )
-            return redirect(url_for('.watching'))
+            return make_response({
+                'application/json': make_ok_response,
+                'text/html': lambda: redirect(url_for('.watching'))
+            })
         except:
-            log.exception('watch failed')
-            return failed('重命名失败')
+            log.exception('rename watch failed')
+            text = '重命名失败'
+            return make_response({
+                'application/json': lambda: (
+                    jsonify(dict(
+                        ok=False,
+                        message=dict(text=text, html=text)
+                    )),
+                    400
+                ),
+                'text/html': lambda: (failed(text), 200)
+            })
 
 
 @bp.route('/watch', methods=['GET'])
