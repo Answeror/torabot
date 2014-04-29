@@ -105,14 +105,15 @@ def watching(user_id):
         )
 
 
-@bp.route('/watch/example', methods=['GET'])
+@bp.route('/example/watch', methods=['GET'])
 def example_watching():
     user_id = current_app.config['TORABOT_EXAMPLE_USER_ID']
     with appccontext() as conn:
         return render_template(
             'watching.html',
             user=get_user_bi_id(conn, user_id),
-            watches=get_watches_bi_user_id(conn, user_id)
+            watches=get_watches_bi_user_id(conn, user_id),
+            snapshot=True,
         )
 
 
@@ -133,7 +134,7 @@ def all_notices(page, user_id):
         )
 
 
-@bp.route('/notice/example', methods=['GET'])
+@bp.route('/example/notice', methods=['GET'])
 def example_all_notices():
     page = 0
     user_id = current_app.config['TORABOT_EXAMPLE_USER_ID']
@@ -146,7 +147,8 @@ def example_all_notices():
             page=page,
             room=room,
             total=get_notice_count_bi_user_id(conn, user_id),
-            notices=get_notices_bi_user_id(conn, user_id, page=page, room=room)
+            notices=get_notices_bi_user_id(conn, user_id, page=page, room=room),
+            snapshot=True,
         )
 
 
@@ -204,17 +206,23 @@ def notice_conf(user_id):
 
 
 @cache.memoize(timeout=600)
-def _advanced_search(kind, values):
+def _advanced_search(kind, values, snapshot):
     return render_template(
         'advanced_search.html',
         query_kind=kind,
-        content=mod(kind).format_advanced_search('web', **values)
+        content=mod(kind).format_advanced_search('web', **values),
+        snapshot=snapshot,
     )
 
 
 @bp.route('/search/advanced/<kind>', methods=['GET'])
 def advanced_search(kind):
-    return _advanced_search(kind, dict(request.values.items()))
+    return _advanced_search(kind, dict(request.values.items()), snapshot=False)
+
+
+@bp.route('/example/search/advanced/<kind>', methods=['GET'])
+def example_advanced_search(kind):
+    return _advanced_search(kind, dict(request.values.items()), snapshot=True)
 
 
 def get_standard_query():
@@ -233,6 +241,15 @@ def get_standard_query():
 
 @bp.route('/search/<kind>', methods=['GET'])
 def search(kind):
+    return _search(kind, snapshot=False)
+
+
+@bp.route('/example/search/<kind>', methods=['GET'])
+def example_search(kind):
+    return _search(kind, snapshot=True)
+
+
+def _search(kind, snapshot):
     text = get_standard_query()
     with appccontext(commit=True) as conn:
         q = query(
@@ -251,7 +268,7 @@ def search(kind):
                 user_id=current_user_id._get_current_object(),
                 query_id=q.id,
             )
-    return render_template('list.html', **options)
+    return render_template('list.html', snapshot=snapshot, **options)
 
 
 @bp.route('/watch/add', methods=['POST'])

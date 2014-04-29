@@ -11,7 +11,7 @@
         <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
         {% endblock %}
     </head>
-    <body style='padding-top: 50px;'>
+    <body style='padding-top: 50px;{% if snapshot %}overflow: hidden;{% endif %}'>
         {% block body %}{% endblock %}
     </body>
     <foot>

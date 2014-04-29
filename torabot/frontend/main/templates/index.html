@@ -12,11 +12,11 @@
         <div class="item{% if loop.first %} active{% endif %}">
             <div class=container>
                 {% if mod.name == 'pixiv' %}
-                <iframe class=snapshot frameborder=0 src='{{ url_for("main.search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
+                <iframe class=snapshot frameborder=0 src='{{ url_for("main.example_search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
                 {% elif mod.name == 'tora' %}
-                <iframe class=snapshot frameborder=0 src='{{ url_for("main.search", kind="tora", q="tony") }}'></iframe>
+                <iframe class=snapshot frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
                 {% else %}
-                <iframe class=snapshot frameborder=0 src='{{ url_for("main.advanced_search", kind=mod.name) }}'></iframe>
+                <iframe class=snapshot frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
                 {% endif %}
                 <div class=snapshot-glass></div>
                 <div class=carousel-caption>
@@ -46,7 +46,7 @@
         </div>
         <div class='col-xs-12 col-sm-5'>
             <div class=img-thumbnail>
-                <iframe height=420 class=snapshot frameborder=0 src='{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}'></iframe>
+                <iframe height=420 class=snapshot frameborder=0 src='{{ url_for("main.example_advanced_search", kind="pixiv", method="ranking") }}'></iframe>
                 <div class=snapshot-glass></div>
             </div>
         </div>
