@@ -229,6 +229,8 @@ def get_standard_query():
     text = request.values.get('q', '').strip()
     try:
         d = json.loads(text)
+        if not isinstance(d, dict):
+            raise Exception('query not standard')
     except:
         d = dict(request.values.items())
 
