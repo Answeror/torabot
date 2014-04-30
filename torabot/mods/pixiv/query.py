@@ -1,3 +1,4 @@
+import re
 import json
 from ...ut.bunch import bunchr
 
@@ -27,6 +28,8 @@ def parse(query):
             query = bunchr(method='user_illustrations_uri', uri=query)
         elif query.startswith(RANKING_URL):
             query = bunchr(method='ranking', uri=query)
+        elif re.match(r'^\d+$', query):
+            query = bunchr(method='user_id', user_id=query)
         else:
             query = loads(query)
     else:
