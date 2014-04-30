@@ -28,10 +28,10 @@
     <thead>
         <tr>
             <td class='hidden-xs col-sm-2'>订阅时间</td>
-            <td class='col-xs-2 col-sm-1'>模块</td>
-            <td class='col-xs-4 col-sm-5'>订阅名称/查询内容(点击重命名)</td>
-            <td class='col-xs-3 col-sm-2 text-right'>更新时间</td>
-            <td class='col-xs-3 col-sm-2'></td>
+            <td class='col-xs-3 col-sm-1'>模块</td>
+            <td class='col-xs-5 col-sm-5'>订阅名称/查询内容(点击重命名)</td>
+            <td class='hidden-xs col-sm-2 text-right'>更新时间</td>
+            <td class='col-xs-4 col-sm-2'></td>
         </tr>
     </thead>
     <tbody>
@@ -40,7 +40,7 @@
         <td class=hidden-xs>{{ momentjs(watch.ctime).calendar() }}</td>
         <td><span class='label label-primary'>{{ watch.query_kind }}</span></td>
         <td><a class=editable-field data-kind=text title='重命名' href=# data-field=name data-args='{"user_id": {{ watch.user_id }}, "query_id": {{ watch.query_id }}}' data-uri='{{ url_for(".rename_watch") }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
-        <td class=text-right>{{ momentjs(watch.query_mtime).fromnow() }}</td>
+        <td class='hidden-xs text-right'>{{ momentjs(watch.query_mtime).fromnow() }}</td>
         <td>
             <div class=pull-right>
                 <a class='btn btn-xs btn-default' href='{{ url_for(".search", kind=watch.query_kind, q=watch.query_text) }}'>查看</a>
