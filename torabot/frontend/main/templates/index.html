@@ -11,13 +11,15 @@
         {% for mod in mods %}
         <div class="item{% if loop.first %} active{% endif %}">
             <div class=container>
-                {% if mod.name == 'pixiv' %}
-                <iframe class=snapshot frameborder=0 src='{{ url_for("main.example_search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
-                {% elif mod.name == 'tora' %}
-                <iframe class=snapshot frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
-                {% else %}
-                <iframe class=snapshot frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
-                {% endif %}
+                <div class=snapshot>
+                    {% if mod.name == 'pixiv' %}
+                    <iframe frameborder=0 src='{{ url_for("main.example_search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
+                    {% elif mod.name == 'tora' %}
+                    <iframe frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
+                    {% else %}
+                    <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
+                    {% endif %}
+                </div>
                 <div class=snapshot-glass></div>
                 <div class=carousel-caption>
                     <h1>{{ mod.display_name }}</h1>
@@ -46,7 +48,9 @@
         </div>
         <div class='col-xs-12 col-sm-5'>
             <div class=img-thumbnail>
-                <iframe height=420 class=snapshot frameborder=0 src='{{ url_for("main.example_advanced_search", kind="pixiv", method="ranking") }}'></iframe>
+                <div class=snapshot style='height:420px'>
+                    <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind="pixiv", method="ranking") }}'></iframe>
+                </div>
                 <div class=snapshot-glass></div>
             </div>
         </div>
@@ -55,7 +59,9 @@
     <div class='row featurette'>
         <div class='col-xs-12 col-sm-5'>
             <div class=img-thumbnail>
-                <iframe height=200 class=snapshot frameborder=0 src='{{ url_for("main.example_watching") }}'></iframe>
+                <div class=snapshot style='height:200px'>
+                    <iframe frameborder=0 src='{{ url_for("main.example_watching") }}'></iframe>
+                </div>
                 <div class=snapshot-glass></div>
             </div>
         </div>
@@ -72,7 +78,9 @@
         </div>
         <div class='col-xs-12 col-sm-5'>
             <div class=img-thumbnail>
-                <iframe height=300 class=snapshot frameborder=0 src='{{ url_for("main.example_all_notices") }}'></iframe>
+                <div class=snapshot style='height:300px'>
+                    <iframe frameborder=0 src='{{ url_for("main.example_all_notices") }}'></iframe>
+                </div>
                 <div class=snapshot-glass></div>
             </div>
         </div>
@@ -106,6 +114,7 @@
 .carousel .snapshot {
     width: 100%;
     height: 500px;
+    overflow: hidden;
 }
 .carousel .snapshot-glass {
     position: absolute;
@@ -118,6 +127,11 @@
 }
 .featurette .snapshot {
     width: 100%;
+    overflow: hidden;
+}
+.snapshot > iframe {
+    width: 100%;
+    height: 100%;
 }
 .featurette .snapshot-glass {
     position: absolute;
