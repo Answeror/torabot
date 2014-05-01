@@ -25,15 +25,18 @@ from flask import (
 from ...db import add_user
 from ...ut.session import makeappsession as makesession
 from . import bp
+from logbook import Logger
+from ...core.local import is_user
 
 
 oid = OpenID()
+log = Logger(__name__)
 
 
 @bp.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
-    if 'openid' in flask_session:
+    if is_user:
         return redirect(oid.get_next_url())
     if request.method == 'POST':
         openid = request.form.get('openid')
@@ -47,9 +50,9 @@ def login():
 
 @oid.after_login
 def create_or_login(resp):
-    openid = flask_session['openid'] = resp.identity_url
-    if openid is not None:
+    if is_user:
         return redirect(oid.get_next_url())
+    flask_session['openid'] = resp.identity_url
     return redirect(url_for(
         '.prof',
         next=oid.get_next_url(),
@@ -60,7 +63,7 @@ def create_or_login(resp):
 
 @bp.route('/prof', methods=['GET', 'POST'])
 def prof():
-    if 'openid' not in flask_session:
+    if is_user or 'openid' not in flask_session:
         return redirect(url_for('.index'))
     if request.method == 'POST':
         name = request.form['name']
