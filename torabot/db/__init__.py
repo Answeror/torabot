@@ -15,6 +15,7 @@ from .watch import (
     watch,
     unwatch,
     get_watches_bi_user_id,
+    get_watch_count_bi_user_id,
     rename_watch,
 )
 from .query import (
@@ -81,4 +82,5 @@ __all__ = [
     set_user_field_bi_id.__name__,
     has_user_bi_openid.__name__,
     get_users_detail.__name__,
+    get_watch_count_bi_user_id.__name__,
 ]

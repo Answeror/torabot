@@ -3,28 +3,20 @@
 {% block head %}
     {{ super() }}
     {{ macros.xeditable_css() }}
-    <style>
-        .watch-table { table-layout:fixed; }
-        .watch-table td {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .watch-field { cursor: pointer; }
-    </style>
 {% endblock %}
 {% block foot %}
     {{ super() }}
     {{ macros.xeditable_js() }}
     <script>
         $(function() {
-            $('.watch-table').find('.editable-field').popup_text_edit();
+            $('#watch-table').find('.editable-field').popup_text_edit();
         });
     </script>
 {% endblock %}
 {% block content %}
+<p>已用订阅查询{{ len(watches) }}个, 还可订阅{{ user.maxwatch - len(watches) }}个.</p>
 {% if watches %}
-<table class='table table-condensed table-striped watch-table'>
+<table id=watch-table class='table table-condensed table-striped fixed-table'>
     <thead>
         <tr>
             <td class='hidden-xs col-sm-2'>订阅时间</td>
@@ -55,6 +47,8 @@
     {% endfor %}
     </tbody>
 </table>
+<div class=text-center>
+    {{ macros.pagination(page, room, total, uri) }}
+</div>
 {% endif %}
-<p>已用订阅查询{{ len(watches) }}个, 还可订阅{{ user.maxwatch - len(watches) }}个.</p>
 {% endblock %}

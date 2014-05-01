@@ -25,6 +25,13 @@ def watching(conn, user_id, query_id):
     ), (user_id, query_id)).fetchone() is not None
 
 
+def get_watch_count_bi_user_id(conn, user_id):
+    return conn.execute(
+        sql('select count(1) from watch where user_id = :user_id'),
+        user_id=user_id
+    ).fetchone()[0]
+
+
 def get_watches_bi_user_id(conn, user_id):
     result = conn.execute(sql(
         '''

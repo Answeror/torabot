@@ -9,17 +9,8 @@ from flask import (
     url_for,
 )
 from logbook import Logger
+from ... import db
 from ...core.query import query
-from ...db import (
-    watch as _watch,
-    unwatch as _unwatch,
-    watching as _watching,
-    rename_watch as _rename_watch,
-    get_user_bi_id,
-    set_email,
-    get_notice_count_bi_user_id,
-    get_pending_notice_count_bi_user_id,
-)
 from ...core.notice import (
     get_notices_bi_user_id,
     get_pending_notices_bi_user_id,
@@ -69,7 +60,7 @@ def rename_watch(user_id):
     if request.method == 'POST':
         try:
             with appccontext(commit=True) as conn:
-                _rename_watch(
+                db.rename_watch(
                     conn,
                     user_id=int(request_values['user_id']),
                     query_id=int(request_values['query_id']),
@@ -94,79 +85,88 @@ def rename_watch(user_id):
             })
 
 
-@bp.route('/watch', methods=['GET'])
-@auth.require_session
-def watching(user_id):
+def _watches(page, user_id, snapshot=False):
+    room = current_app.config['TORABOT_PAGE_ROOM']
     with appccontext() as conn:
         return render_template(
-            'watching.html',
-            user=get_user_bi_id(conn, user_id),
-            watches=get_watches_bi_user_id(conn, user_id)
-        )
-
-
-@bp.route('/example/watch', methods=['GET'])
-def example_watching():
-    user_id = current_app.config['TORABOT_EXAMPLE_USER_ID']
-    with appccontext() as conn:
-        return render_template(
-            'watching.html',
-            user=get_user_bi_id(conn, user_id),
+            'watches.html',
+            page=page,
+            room=room,
+            total=db.get_watch_count_bi_user_id(conn, user_id),
+            user=db.get_user_bi_id(conn, user_id),
             watches=get_watches_bi_user_id(conn, user_id),
-            snapshot=True,
+            uri=lambda page: url_for('.watching', page=page),
+            snapshot=snapshot,
         )
 
 
-@bp.route('/notice/all', methods=['GET'], defaults=dict(page=0))
-@bp.route('/notice/all/<int:page>', methods=['GET'])
+@bp.route('/watches', methods=['GET'], defaults=dict(page=0))
+@bp.route('/watches/<int:page>', methods=['GET'])
+@auth.require_session
+def watching(page, user_id):
+    return _watches(page, user_id)
+
+
+@bp.route('/example/watches', methods=['GET'])
+def example_watching():
+    return _watches(0, current_app.config['TORABOT_EXAMPLE_USER_ID'], True)
+
+
+def _notices(tab, view, total, notices, page, user_id, snapshot=False):
+    room = current_app.config['TORABOT_NOTICE_ROOM']
+    with appccontext() as conn:
+        return render_template(
+            'notices.html',
+            tab=tab,
+            view=view,
+            page=page,
+            room=room,
+            total=total(conn, user_id),
+            notices=notices(conn, user_id, page=page, room=room),
+            uri=lambda page: url_for("." + view, page=page),
+            snapshot=snapshot,
+        )
+
+
+@bp.route('/notices', methods=['GET'], defaults=dict(page=0))
+@bp.route('/notices/<int:page>', methods=['GET'])
 @auth.require_session
 def all_notices(page, user_id):
-    room = current_app.config['TORABOT_NOTICE_ROOM']
-    with appccontext() as conn:
-        return render_template(
-            'notices.html',
-            tab='all',
-            view=all_notices.__name__,
-            page=page,
-            room=room,
-            total=get_notice_count_bi_user_id(conn, user_id),
-            notices=get_notices_bi_user_id(conn, user_id, page=page, room=room)
-        )
+    return _notices(
+        'all',
+        all_notices.__name__,
+        db.get_notice_count_bi_user_id,
+        get_notices_bi_user_id,
+        page,
+        user_id,
+    )
 
 
-@bp.route('/example/notice', methods=['GET'])
+@bp.route('/example/notices', methods=['GET'])
 def example_all_notices():
-    page = 0
-    user_id = current_app.config['TORABOT_EXAMPLE_USER_ID']
-    room = current_app.config['TORABOT_NOTICE_ROOM']
-    with appccontext() as conn:
-        return render_template(
-            'notices.html',
-            tab='all',
-            view=all_notices.__name__,
-            page=page,
-            room=room,
-            total=get_notice_count_bi_user_id(conn, user_id),
-            notices=get_notices_bi_user_id(conn, user_id, page=page, room=room),
-            snapshot=True,
-        )
+    return _notices(
+        'all',
+        example_all_notices.__name__,
+        db.get_notice_count_bi_user_id,
+        get_notices_bi_user_id,
+        0,
+        current_app.config['TORABOT_EXAMPLE_USER_ID'],
+        True,
+    )
 
 
-@bp.route('/notice/pending', methods=['GET'], defaults=dict(page=0))
-@bp.route('/notice/pending/<int:page>', methods=['GET'])
+@bp.route('/notices/pending', methods=['GET'], defaults=dict(page=0))
+@bp.route('/notices/pending/<int:page>', methods=['GET'])
 @auth.require_session
 def pending_notices(page, user_id):
-    room = current_app.config['TORABOT_NOTICE_ROOM']
-    with appccontext() as conn:
-        return render_template(
-            'notices.html',
-            tab='pending',
-            view=pending_notices.__name__,
-            page=page,
-            room=room,
-            total=get_pending_notice_count_bi_user_id(conn, user_id),
-            notices=get_pending_notices_bi_user_id(conn, user_id, page=page, room=room)
-        )
+    return _notices(
+        'pending',
+        pending_notices.__name__,
+        db.get_pending_notice_count_bi_user_id,
+        get_pending_notices_bi_user_id,
+        page,
+        user_id
+    )
 
 
 @bp.route('/notice/config', methods=['GET', 'POST'])
@@ -176,13 +176,13 @@ def notice_conf(user_id):
         with appccontext() as conn:
             return render_template(
                 'noticeconf.html',
-                user=get_user_bi_id(conn, user_id)
+                user=db.get_user_bi_id(conn, user_id)
             )
 
     assert_equal(request.method, 'POST')
     try:
         with appccontext(commit=True) as conn:
-            set_email(
+            db.set_email(
                 conn,
                 id=user_id,
                 email=request.values['email'],
@@ -265,7 +265,7 @@ def _search(kind, snapshot):
             content=mod(q.kind).format_query_result('web', q)
         )
         if is_user:
-            options['watching'] = _watching(
+            options['watching'] = db.watching(
                 conn,
                 user_id=current_user_id._get_current_object(),
                 query_id=q.id,
@@ -280,7 +280,7 @@ def watch(user_id):
     try:
         query_id = int(request.values['query_id'])
         with appccontext(commit=True) as conn:
-            _watch(conn, user_id=user_id, query_id=query_id)
+            db.watch(conn, user_id=user_id, query_id=query_id)
         return redirect(url_for(
             '.rename_watch',
             user_id=user_id,
@@ -298,7 +298,7 @@ def unwatch(user_id):
     try:
         query_id = int(request.values['query_id'])
         with appccontext(commit=True) as conn:
-            _unwatch(conn, user_id=user_id, query_id=query_id)
+            db.unwatch(conn, user_id=user_id, query_id=query_id)
         return redirect(url_for('.watching'))
     except:
         log.exception('unwatch failed')

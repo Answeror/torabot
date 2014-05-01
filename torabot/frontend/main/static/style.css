@@ -50,3 +50,12 @@ span.w-6em {
 .inline-block {
     display: inline-block;
 }
+
+.fixed-table {
+    table-layout:fixed;
+}
+.fixed-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

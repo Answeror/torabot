@@ -1,11 +1,12 @@
-{% extends "layout.html" %}
+{% import 'macros.html' as macros with context %}
+{% extends 'layout.html' %}
 {% block content %}
-<ul class="nav nav-tabs">
+<ul class='nav nav-tabs'>
     <li{% if tab == 'pending' %} class=active{% endif %}><a href='{{ url_for(".pending_notices") }}'>最新</a></li>
     <li{% if tab == 'all' %} class=active{% endif %}><a href='{{ url_for(".all_notices") }}'>全部</a></li>
     <li><a href='{{ url_for(".notice_conf") }}'>设置</a></li>
 </ul>
-<table class='table table-condensed table-striped vspace-top-small notice-table'>
+<table class='table table-condensed table-striped vspace-top-small fixed-table'>
     <thead>
         <tr>
             <td class='col-xs-3 col-sm-2'>时间</td>
@@ -23,32 +24,7 @@
     {% endfor %}
     </tbody>
 </table>
-<ul class="pagination">
-    {% if page > 0 %}
-    <li><a href='{{ url_for("." + view, page=page - 1) }}'>&laquo;</a></li>
-    {% else %}
-    <li class=disabled><span>&laquo;</span></li>
-    {% endif %}
-    {% set begin = max(0, page - 2) %}
-    {% set end = min(begin + 5, (total + room - 1) // room) %}
-    {% for i in range(begin, end) %}
-    <li{% if i == page %} class=active{% endif %}><a href='{{ url_for("." + view, page=i) }}'>{{ i + 1 }}</a></li>
-    {% endfor %}
-    {% if page + 1 < end %}
-    <li><a href='{{ url_for("." + view, page=page + 1) }}'>&raquo;</a></li>
-    {% else %}
-    <li class=disabled><span>&raquo;</span></li>
-    {% endif %}
-</ul>
-{% endblock %}
-{% block foot %}
-{{ super() }}
-<style>
-.notice-table { table-layout:fixed; }
-.notice-table td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-</style>
+<div class=text-center>
+    {{ macros.pagination(page, room, total, uri) }}
+</div>
 {% endblock %}
