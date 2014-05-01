@@ -1,10 +1,34 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class=row>
-    <div class='col-sm-8 col-sm-offset-2'>
-        <p>刚开始写这个是因为AIP的数据库设计得太烂跑不动了, 想用来练练手. 写着写着发现爬虫意外的有趣. 只是比起解析booru站点规范的XML和JSON, 虎穴的页面看起来十分糟糕, 更别提CQ了... 某天晚上想到这个东西可以做成插件的形式, 于是推倒重来写成现在这个样子. 努力做了许多优化, 也只能保证100用户的所有查询每15分钟更新一次.</p>
-        <p>源码在<a href='https://github.com/Answeror/torabot'>github</a>.</p>
-        <p>其实我自己没用过虎穴...</p>
-    </div>
-</div>
+<ul class="timeline">
+    <li>
+        <div class="timeline-badge info"><i class="glyphicon glyphicon-pushpin"></i></div>
+        <div class="timeline-panel">
+            <h4 class="timeline-title">0.2.0</h4>
+            <div class="timeline-heading">
+                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i><span class='w w-1em'></span>2014-05-01</small></p>
+            </div>
+            <div class="timeline-body">
+                <p>注册的小伙伴依然很少... 于是在首页补充了使用说明. 表示美工真的好难... 首页的截图总么弄都觉得不好看, 而且最近页面布局经常变化, 重新截图太麻烦了. 于是弄了个iframe假冒截图, 看起来似乎可以以假乱真呢.
+            </div>
+        </div>
+    </li>
+    <li class=timeline-inverted>
+        <div class="timeline-badge info"><i class="glyphicon glyphicon-pushpin"></i></div>
+        <div class="timeline-panel">
+            <div class="timeline-heading">
+                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i><span class='w w-1em'></span>2014-03-22</small></p>
+            </div>
+            <div class="timeline-body">
+                <p>刚开始写这个是因为AIP的数据库设计得太烂跑不动了, 想用来练练手. 写着写着发现爬虫意外的有趣. 只是比起解析booru站点规范的XML和JSON, 虎穴的页面看起来十分糟糕, 更别提CQ了... 某天晚上想到这个东西可以做成插件的形式, 于是推倒重来写成现在这个样子. 努力做了许多优化, 也只能保证100用户的所有查询每15分钟更新一次.</p>
+                <p>源码在<a href='https://github.com/Answeror/torabot'>github</a>.</p>
+                <p>其实我自己没用过虎穴...</p>
+            </div>
+        </div>
+    </li>
+</ul>
+{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel=stylesheet href='{{ url_for("main.static", filename="timeline.css") }}'>
 {% endblock %}
