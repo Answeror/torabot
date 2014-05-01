@@ -3,9 +3,9 @@
 {% include 'nav.html' %}
 <div id=mod-carousel class='carousel slide' data-ride=carousel>
     <ol class=carousel-indicators>
-        <li data-target=#mod-carousel data-slide-to=0 class=active></li>
-        <li data-target=#mod-carousel data-slide-to=1></li>
-        <li data-target=#mod-carousel data-slide-to=2></li>
+        {% for mod in mods %}
+        <li data-target=#mod-carousel data-slide-to={{ loop.index0 }}{% if loop.first %} class=active{% endif %}></li>
+        {% endfor %}
     </ol>
     <div class=carousel-inner>
         {% for mod in mods %}
@@ -16,6 +16,8 @@
                     <iframe frameborder=0 src='{{ url_for("main.example_search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
                     {% elif mod.name == 'tora' %}
                     <iframe frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
+                    {% elif mod.name == 'yyets' %}
+                    <iframe frameborder=0 src='{{ url_for("main.example_search", kind="yyets", q="http://www.yyets.com/rss/feed/?area=%E7%BE%8E%E5%9B%BD") }}'></iframe>
                     {% else %}
                     <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
                     {% endif %}
