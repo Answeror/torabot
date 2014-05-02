@@ -1,3 +1,4 @@
+{% if query.result.total > 0 %}
 <div id=pixiv-arts class=row>
     {% for art in query.result.arts %}
     <div class='col-sm-2 pixiv-art'>
@@ -27,3 +28,24 @@
         });
     });
 </script>
+{% else %}
+<p>没有找到您所需要的画师, 相关画师如下:</p>
+<table class='user-table table table-hover'>
+    <thead>
+        <tr>
+            <td class=col-sm-3>昵称</td>
+            <td class=col-sm-1>作品数</td>
+            <td class=col-sm-8>签名</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in query.result.recommendations %}
+        <tr>
+            <td><a href='{{ url_for("main.search", q=r.user_uri, kind="pixiv") }}'>{{ r.title }}</a></td>
+            <td>{{ r.illustration_count }}</td>
+            <td>{{ r.caption }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}

@@ -14,6 +14,7 @@ def format_query_result(query):
         'user_uri': format_user_result,
         'user_illustrations_uri': format_user_result,
         'ranking': format_ranking_result,
+        'username': format_user_result,
     }[parse_query(query.text).method](query)
 
 
