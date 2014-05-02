@@ -21,7 +21,7 @@ class Pixiv(
     display_name = name
     has_advanced_search = True
     description = '订阅喜欢的画师和各种榜单(日榜, 月榜, R18等...), 邮件通知里包含新作的缩略图.'
-    normal_search_prompt = '画师主页或id'
+    normal_search_prompt = '画师主页/名字/id'
 
     def view(self, name):
         from .views import web, email
