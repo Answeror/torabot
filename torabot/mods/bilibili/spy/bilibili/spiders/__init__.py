@@ -31,8 +31,7 @@ class Bilibili(RedisSpider):
     name = 'bilibili'
 
     def __init__(self, life=60, *args, **kargs):
-        RedisSpider.__init__(self, *args, **kargs)
-        self.life = life
+        super(Bilibili, self).__init__(*args, life=life, **kargs)
 
     def make_requests_from_query(self, query):
         d = json.loads(query)

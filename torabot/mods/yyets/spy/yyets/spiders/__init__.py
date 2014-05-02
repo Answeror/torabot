@@ -27,8 +27,7 @@ class Yyets(RedisSpider):
     name = 'yyets'
 
     def __init__(self, life=60, *args, **kargs):
-        RedisSpider.__init__(self, *args, **kargs)
-        self.life = float(life)
+        super(Yyets, self).__init__(*args, life=life, **kargs)
 
     def make_requests_from_query(self, query):
         query = json.loads(query)

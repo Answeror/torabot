@@ -24,11 +24,8 @@ MAX_ARTS = 8
 
 class Tora(RedisSpider):
 
-    name = 'tora'
-
     def __init__(self, life=60, *args, **kargs):
-        RedisSpider.__init__(self, *args, **kargs)
-        self.life = float(life)
+        super(Tora, self).__init__(*args, life=life, **kargs)
 
     def make_list_request(self, query):
         try:

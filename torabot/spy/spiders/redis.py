@@ -79,6 +79,10 @@ class RedisMixin(object):
 class RedisSpider(RedisMixin, Spider):
     """Spider that reads urls from redis queue when idle."""
 
+    def __init__(self, life=None, *args, **kargs):
+        super(RedisSpider, self).__init__(*args, **kargs)
+        self.life = None if life is None else float(life)
+
     def set_crawler(self, crawler):
         super(RedisSpider, self).set_crawler(crawler)
         self.setup_redis()

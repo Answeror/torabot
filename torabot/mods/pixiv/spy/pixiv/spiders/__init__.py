@@ -27,8 +27,7 @@ class Pixiv(RedisSpider):
     name = 'pixiv'
 
     def __init__(self, max_arts, phpsessid, life=60, *args, **kargs):
-        RedisSpider.__init__(self, *args, **kargs)
-        self.life = float(life)
+        super(Pixiv, self).__init__(*args, life=life, **kargs)
         self.max_arts = int(max_arts)
         self.phpsessid = phpsessid
 
