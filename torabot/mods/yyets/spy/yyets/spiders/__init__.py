@@ -15,13 +15,6 @@ from torabot.spy.items import Result
 from ..items import Art, RSS
 
 
-class ArtLoader(ItemLoader):
-
-    default_item_class = Art
-    default_input_processor = Identity()
-    default_output_processor = TakeFirst()
-
-
 class Yyets(RedisSpider):
 
     name = 'yyets'
@@ -57,11 +50,15 @@ class Yyets(RedisSpider):
             return Result(ok=False, query=query)
 
 
+class ArtLoader(ItemLoader):
+
+    default_item_class = Art
+    default_input_processor = Identity()
+    default_output_processor = TakeFirst()
+
+
 def make_art(sel):
     loader = ArtLoader(selector=sel)
-    loader.add_xpath('guid', './/guid/text()')
-    loader.add_xpath('title', './/title/text()')
-    loader.add_xpath('link', './/link/text()')
-    loader.add_xpath('description', './/description/text()')
-    loader.add_xpath('pubDate', './/pubDate/text()')
+    for field in Art.__dict__['fields']:
+        loader.add_xpath(field, './/%s/text()' % field)
     return loader.load_item()
