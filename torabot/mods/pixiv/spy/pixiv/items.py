@@ -20,3 +20,24 @@ class Page(Item):
     uri = Field()
     total = Field()
     arts = Field()
+
+
+class SearchUserPage(Page):
+
+    recommendations = Field()
+
+
+class Recommendation(Item):
+
+    user_uri = Field()
+    icon_uri = Field()
+    title = Field()
+    illustration_count = Field()
+    caption = Field()
+    images = Field()
+
+
+class RecommendationImage(Item):
+
+    uri = Field()
+    thumbnail_uri = Field()

@@ -4,15 +4,17 @@
 # Please refer to the documentation for information on how to create and manage
 # your spiders.
 
+import re
 import json
 from itertools import chain
 from urlparse import urljoin, urlparse, parse_qs
+from urllib import urlencode
 from scrapy import log
 from scrapy.selector import Selector
 from scrapy.http import Request
 from torabot.spy.spiders.redis import RedisSpider
 from torabot.spy.items import Result
-from ..items import Art, Page
+from ..items import Art, Page, SearchUserPage, Recommendation, RecommendationImage
 
 
 BASE_URL = 'http://www.pixiv.net/'
@@ -20,6 +22,7 @@ USER_ILLUSTRATIONS_URL = 'http://www.pixiv.net/member_illust.php'
 USER_URL = 'http://www.pixiv.net/member.php'
 USER_ILLUSTRATIONS_URL_TEMPLATE = USER_ILLUSTRATIONS_URL + '?id=%s'
 RANKING_URL = 'http://www.pixiv.net/ranking.php'
+SEARCH_USER_URL = 'http://www.pixiv.net/search_user.php'
 
 
 class Pixiv(RedisSpider):
@@ -38,6 +41,7 @@ class Pixiv(RedisSpider):
             'user_uri': self.make_user_uri_requests,
             'user_illustrations_uri': self.make_user_illustrations_uri_requests,
             'ranking': self.make_ranking_uri_requests,
+            'username': self.make_username_requests,
         }[query['method']](query):
             yield req
 
@@ -47,23 +51,39 @@ class Pixiv(RedisSpider):
             query
         )
 
+    def _make_headers(self):
+        return {
+            'Cookie': ' '.join([
+                'p_ab_id=3;',
+                'login_ever=yes;',
+                'manga_viewer_expanded=1;',
+                'bookmark_tag_type=count;',
+                'bookmark_tag_order=desc;',
+                'visit_ever=yes;',
+                'PHPSESSID=%s;' % self.phpsessid,
+            ])
+        }
+
+    def make_username_requests(self, query):
+        yield Request(
+            SEARCH_USER_URL + '?' + urlencode({
+                's_mode': 's_usr',
+                'nick_mf': 1,
+                'nick': query['username'].encode('utf-8'),
+            }),
+            headers=self._make_headers(),
+            callback=self.parse_username,
+            meta=dict(query=query),
+            dont_filter=True,
+        )
+
     def make_ranking_uri_requests(self, query):
         page_count = 10
         pages = [None] * page_count
         for page in range(page_count):
             yield Request(
                 make_ranking_json_uri(query, page),
-                headers={
-                    'Cookie': ' '.join([
-                        'p_ab_id=3;',
-                        'login_ever=yes;',
-                        'manga_viewer_expanded=1;',
-                        'bookmark_tag_type=count;',
-                        'bookmark_tag_order=desc;',
-                        'visit_ever=yes;',
-                        'PHPSESSID=%s;' % self.phpsessid,
-                    ])
-                },
+                headers=self._make_headers(),
                 callback=self.parse_ranking_uri,
                 meta=dict(
                     page=page,
@@ -88,8 +108,7 @@ class Pixiv(RedisSpider):
                     arts=arts,
                 )
         except Exception as e:
-            log.msg('parse failed, content: %s' % response.body_as_unicode(), level=log.ERROR)
-            return Result(ok=False, query=query, message=str(e))
+            return failed(query, str(e))
 
     def make_user_uri_requests(self, query):
         d = parse_qs(urlparse(query['uri']).query)
@@ -105,17 +124,7 @@ class Pixiv(RedisSpider):
     def _make_user_illustrations_uri_request(self, uri, query):
         return Request(
             uri,
-            headers={
-                'Cookie': ' '.join([
-                    'p_ab_id=3;',
-                    'login_ever=yes;',
-                    'manga_viewer_expanded=1;',
-                    'bookmark_tag_type=count;',
-                    'bookmark_tag_order=desc;',
-                    'visit_ever=yes;',
-                    'PHPSESSID=%s;' % self.phpsessid,
-                ])
-            },
+            headers=self._make_headers(),
             callback=self.parse_user_illustrations_uri,
             meta=dict(
                 uri=uri,
@@ -144,12 +153,83 @@ class Pixiv(RedisSpider):
             return Page(
                 query=query,
                 uri=uri,
-                total=sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0],
+                total=int(sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0]),
                 arts=list(gen(sel)),
             )
         except Exception as e:
-            log.msg('parse failed', level=log.ERROR)
-            return Result(ok=False, query=query, message=str(e))
+            return failed(query, str(e))
+
+    def parse_username(self, response):
+        query = response.meta['query']
+        sel = Selector(response)
+        try:
+            items = list(sel.xpath('//li[@class="user-recommendation-item"]'))
+            if items:
+                user_id = items[0].xpath('.//a[@class="title"]/@href').extract()[0].split('=')[-1]
+                check_user_id(user_id)
+                return self._make_user_illustrations_uri_request(
+                    USER_ILLUSTRATIONS_URL_TEMPLATE % user_id,
+                    query
+                )
+            return Request(
+                SEARCH_USER_URL + '?' + urlencode({
+                    's_mode': 's_usr',
+                    'nick': query['username'].encode('utf-8'),
+                }),
+                headers=self._make_headers(),
+                callback=self.parse_username_recommendations,
+                meta=dict(query=query),
+                dont_filter=True,
+            )
+        except Exception as e:
+            return failed(query, str(e))
+
+    def parse_username_recommendations(self, response):
+        query = response.meta['query']
+        sel = Selector(response)
+        try:
+            return SearchUserPage(
+                query=query,
+                uri=response.url,
+                total=0,
+                arts=[],
+                recommendations=list(gen_recommendations(sel))
+            )
+        except Exception as e:
+            return failed(query, str(e))
+
+
+def gen_recommendations(sel):
+    for item in sel.xpath('//li[@class="user-recommendation-item"]'):
+        yield make_recommendation(item)
+
+
+def make_recommendation(item):
+    return Recommendation(
+        user_uri=urljoin(BASE_URL, item.xpath('.//a[@class="title"]/@href').extract()[0]),
+        icon_uri=item.xpath('.//a[@class="user-icon-container ui-scroll-view"]/@data-src').extract()[0],
+        title=item.xpath('.//a[@class="title"]/text()').extract()[0],
+        illustration_count=int(item.xpath('.//dl/dd/a/text()').extract()[0]),
+        caption=''.join(item.xpath('.//p[@class="caption"]/text()').extract()),
+        images=list(gen_recommendation_images(item.xpath('.//ul[@class="images"]/li'))),
+    )
+
+
+def gen_recommendation_images(images):
+    for image in images:
+        yield RecommendationImage(
+            uri=image.xpath('.//a/@href').extract()[0],
+            thumbnail_uri=image.xpath('@data-src').extract()[0],
+        )
+
+
+def check_user_id(id):
+    assert re.match(r'^\d+$', id)
+
+
+def failed(query, message):
+    log.msg('parse failed: %s' % message, level=log.ERROR)
+    return Result(ok=False, query=query, message=message)
 
 
 def make_ranking_json_uri(query, page):

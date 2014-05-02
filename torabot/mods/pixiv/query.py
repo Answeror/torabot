@@ -50,6 +50,11 @@ def patch(query):
             illegal(query)
 
 
+def parse_username(query):
+    if isinstance(query, str):
+        return bunchr(method='username', username=query)
+
+
 def parse(query):
     for f in [
         parse_dict,
@@ -58,6 +63,7 @@ def parse(query):
         parse_ranking_uri,
         parse_user_id,
         parse_json,
+        parse_username,
     ]:
         ret = f(query)
         if ret is not None:

@@ -68,5 +68,8 @@ def spy(kind, query, timeout, slaves, options={}):
         r = json.loads(resp[1].decode('ascii'))
         if r.get('ok', True):
             return bunchr(r)
+        message = r.get('message', '')
+    else:
+        message = ''
 
-    raise Exception('spy %s for %s failed' % (kind, query))
+    raise Exception('spy %s for %s failed: %s' % (kind, query, message))

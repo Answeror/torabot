@@ -38,6 +38,7 @@ class Pixiv(
             'user_uri': self.user_arts_changes,
             'user_illustrations_uri': self.user_arts_changes,
             'ranking': self.ranking_changes,
+            'username': self.user_arts_changes,
         }[new.query.method](old, new)
 
     def user_arts_changes(self, old, new):
