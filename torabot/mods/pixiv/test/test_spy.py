@@ -1,5 +1,5 @@
 import json
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_greater
 from .... import make
 from ....core.mod import mod
 from ...ut import need_scrapyd
@@ -53,3 +53,18 @@ def test_spy_ranking_limit():
             60
         )
         assert_equal(len(d.arts), 3)
+
+
+#@need_scrapyd
+#def test_spy_username():
+    #app = make()
+    #with app.app_context():
+        #d = mod(name).spy('大嘘（例大祭あ35b）')
+        #assert_equal(d.found, 1)
+        #assert_greater(len(d.arts), 0)
+        #assert_greater(d.total, 0)
+        #d = mod(name).spy('大 大嘘')
+        #assert_equal(d.found, 0)
+        #assert_equal(len(d.arts), 0)
+        #assert_equal(d.total, 0)
+        #assert_greater(len(d.recommendations), 0)
