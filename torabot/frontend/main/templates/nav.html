@@ -19,7 +19,8 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href='/'>torabot</a>
+            <a class=navbar-brand href='/'>torabot</a>
+            <span class=navbar-brand><div class=g-plusone data-size=medium data-href='http://torabot.aip.io'></div></span>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -40,7 +41,6 @@
                 </li>
                 {% endif %}
                 {% endif %}
-                <li{% if request.path.startswith('/about') %} class=active{% endif %}><a href='{{ url_for("main.about") }}'>关于本站</a></li>
             </ul>
             <div class='navbar-form navbar-right'>
                 {% block search_box_left %}{% endblock %}
