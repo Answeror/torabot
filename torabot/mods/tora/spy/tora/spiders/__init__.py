@@ -24,6 +24,8 @@ MAX_ARTS = 8
 
 class Tora(RedisSpider):
 
+    name = 'tora'
+
     def __init__(self, life=60, *args, **kargs):
         super(Tora, self).__init__(*args, life=life, **kargs)
 
