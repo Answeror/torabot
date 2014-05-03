@@ -20,7 +20,7 @@
                 <span class="icon-bar"></span>
             </button>
             <a class=navbar-brand href='/'>torabot</a>
-            <span class=navbar-brand><div class=g-plusone data-size=medium data-href='http://torabot.aip.io'></div></span>
+            {% if not snapshot %}<span class=navbar-brand><div class=g-plusone data-size=medium data-href='http://torabot.aip.io'></div></span>{% endif %}
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
