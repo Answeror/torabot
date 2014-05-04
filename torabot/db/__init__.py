@@ -9,6 +9,7 @@ from .user import (
     set_user_field_bi_id,
     has_user_bi_openid,
     get_users_detail,
+    get_user_name_bi_openid,
 )
 from .watch import (
     watching,
@@ -83,4 +84,5 @@ __all__ = [
     has_user_bi_openid.__name__,
     get_users_detail.__name__,
     get_watch_count_bi_user_id.__name__,
+    get_user_name_bi_openid.__name__,
 ]

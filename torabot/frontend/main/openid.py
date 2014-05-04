@@ -88,7 +88,7 @@ def prof():
     )
 
 
-@bp.route('/logout', methods=['POST'])
+@bp.route('/logout', methods=['GET', 'POST'])
 def logout():
     flask_session.pop('openid', None)
     flash('You were signed out')

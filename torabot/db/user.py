@@ -17,6 +17,11 @@ def get_user_id_bi_openid(conn, openid):
     return None if ret is None else ret[0]
 
 
+def get_user_name_bi_openid(conn, openid):
+    ret = conn.execute('select name from "user" where openid = %s', (openid,)).fetchone()
+    return None if ret is None else ret[0]
+
+
 def get_user_email_bi_id(conn, id):
     ret = conn.execute('select email from "user" where id = %s', (id,)).fetchone()
     return None if ret is None else ret[0]

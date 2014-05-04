@@ -61,6 +61,23 @@ def get_current_user_id():
 current_user_id = LocalProxy(get_current_user_id)
 
 
+def get_current_username():
+    name = '_current_username'
+    if hasattr(g, name):
+        value = getattr(g, name)
+    else:
+        if 'openid' not in session:
+            value = None
+        else:
+            from .user import get_user_name_bi_openid
+            value = get_user_name_bi_openid(session['openid'])
+        setattr(g, name, value)
+    return value
+
+
+current_username = LocalProxy(get_current_username)
+
+
 def get_request_values():
     name = '_request_values'
     if hasattr(g, name):

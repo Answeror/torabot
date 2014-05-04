@@ -47,16 +47,26 @@
                 {% include "search_box.html" %}
                 {% block search_box_right %}{% endblock %}
                 {% if not is_user %}
-                <form class="navbar-left" action='/login' method=post>
+                <form class="navbar-left" action='{{ url_for("main.login") }}' method=post>
                     <div class="form-group">
                         <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
                     </div>
                     <input type=submit class='btn btn-success' value="登录">
                 </form>
                 {% else %}
-                <form class="navbar-left" action='/logout' method=post>
-                    <div class="form-group"></div>
-                    <input type=submit class='btn btn-success' value="登出">
+                <form class="navbar-left" action='{{ url_for("main.logout") }}' method=post>
+                    <div class="form-group">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                {{ current_username }} <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href='{{ url_for("main.notice_conf") }}'>修改邮箱</a></li>
+                                <li class="divider"></li>
+                                <li><a href=# onclick="$(this).closest('form').submit()">登出</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </form>
                 {% endif %}
             </div>
