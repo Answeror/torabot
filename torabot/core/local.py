@@ -98,7 +98,7 @@ def get_intro():
     name = '_intro'
     value = getattr(g, name, None)
     if value is None:
-        value = bool(int(request.cookies.get('intro', '0')))
+        value = bool(int(request.cookies.get('intro', '1')))
         setattr(g, name, value)
     return value
 
