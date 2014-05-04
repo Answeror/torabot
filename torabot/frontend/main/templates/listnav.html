@@ -7,7 +7,7 @@
         <input type=hidden name=user_id value='{{ current_user_id }}'>
         <input type=hidden name=query_id value='{{ query.id }}'>
     </div>
-    <button type="submit" class="btn btn-danger">退订</button>
+    <button type="submit" class="intro-watch btn btn-danger">退订</button>
 </form>
 {% else %}
 <form action='{{ url_for(".watch") }}' method=post class="navbar-left" role="form">
@@ -15,7 +15,7 @@
         <input type=hidden name=user_id value='{{ current_user_id }}'>
         <input type=hidden name=query_id value='{{ query.id }}'>
     </div>
-    <button type="submit" class="btn btn-primary">订阅</button>
+    <button type="submit" class="intro-watch btn btn-primary">订阅</button>
 </form>
 {% endif %}
 {% else %}
