@@ -38,3 +38,15 @@
 {% macro xeditable_js() -%}
 <script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js'></script>
 {%- endmacro %}
+
+{% macro intro_js() -%}
+<script type='text/javascript' src='{{ url_for("main.static", filename="intro.min.js") }}'></script>
+{%- endmacro %}
+
+{% macro intro_css() -%}
+<link rel='stylesheet' href='{{ url_for("main.static", filename="introjs.min.css") }}'>
+{%- endmacro %}
+
+{% macro cookie_js() -%}
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js'></script>
+{%- endmacro %}

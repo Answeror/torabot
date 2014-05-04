@@ -1,5 +1,6 @@
 {% extends 'search_form.html' %}
 {% block content %}
+<div class=intro-pixiv-ranking-form>
 <input type=hidden name=method value=ranking>
 <div class=form-group>
     <label class='control-label col-sm-2'>内容</label>
@@ -31,6 +32,7 @@
     <div class=col-sm-1>
         <input type=text name=limit value=10 class=form-control>
     </div>
+</div>
 </div>
 <script>
 $(function(){

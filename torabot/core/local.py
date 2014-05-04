@@ -75,3 +75,15 @@ def get_request_values():
 
 
 request_values = LocalProxy(get_request_values)
+
+
+def get_intro():
+    name = '_intro'
+    value = getattr(g, name, None)
+    if value is None:
+        value = bool(int(request.cookies.get('intro', '0')))
+        setattr(g, name, value)
+    return value
+
+
+intro = LocalProxy(get_intro)

@@ -1,3 +1,4 @@
+{% import 'macros.html' as macros with context %}
 <!DOCTYPE html>
 <html lang='zh-CN'>
     <head>
@@ -7,31 +8,16 @@
         <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css'>
         <link rel='stylesheet' href='{{ url_for("main.static", filename="pnotify.custom.min.css") }}'>
         <link rel='stylesheet' href='{{ url_for("main.static", filename="style.css") }}'>
+        {% if intro %}{{ macros.intro_css() }}{% endif %}
         <title>{% block title %}torabot{% endblock %}</title>
         <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
         {% endblock %}
     </head>
-    <body style='padding-top: 50px;{% if snapshot %}overflow: hidden;{% endif %}'>
+    <body style='{% if snapshot %}overflow: hidden;{% endif %}'>
         {% block body %}{% endblock %}
     </body>
     <foot>
         {% block foot %}
-        <script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
-        <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js'></script>
-        <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/lang/zh-cn.js'></script>
-        <script src='{{ url_for("main.static", filename="pnotify.custom.min.js") }}'></script>
-        <script src='{{ url_for("main.static", filename="js/all.js") }}'></script>
-        <script>
-            $('span.momentjs').each(function() {
-                $this = $(this);
-                $this.text(function() {
-                    var format = $this.data('format');
-                    if (format == 'fromnow') return moment($this.text()).fromNow();
-                    if (format == 'calendar') return moment($this.text()).calendar();
-                    return moment($this.text()).format(format);
-                }());
-            });
-        </script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
                 (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -44,6 +30,172 @@
                 po.src = 'https://apis.google.com/js/platform.js';
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
             })();
+        </script>
+        {% if intro %}
+        {{ macros.intro_js() }}
+        {% endif %}
+        {{ macros.cookie_js() }}
+        <script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js'></script>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/lang/zh-cn.js'></script>
+        <script src='{{ url_for("main.static", filename="pnotify.custom.min.js") }}'></script>
+        <script src='{{ url_for("main.static", filename="js/all.js") }}'></script>
+        <script>
+            $(function(){
+                $('span.momentjs').each(function() {
+                    $this = $(this);
+                    $this.text(function() {
+                        var format = $this.data('format');
+                        if (format == 'fromnow') return moment($this.text()).fromNow();
+                        if (format == 'calendar') return moment($this.text()).calendar();
+                        return moment($this.text()).format(format);
+                    }());
+                });
+            });
+        </script>
+        <script>
+            $(function(){
+                $('body').addClass('intro');
+                $('.navbar').removeClass('navbar-fixed-top');
+                var restore = function() {
+                    $('body').removeClass('intro');
+                    $('.navbar').addClass('navbar-fixed-top');
+                };
+                var exit = function(){
+                    restore();
+                    $.cookie('intro', '0', {path: '/'});
+                    setTimeout(function(){
+                        introJs().setOptions({
+                            steps: [
+                                {
+                                    element: '#start-intro',
+                                    intro: '点击这里重新开始教程.',
+                                    position: 'top'
+                                }
+                            ],
+                            showStepNumbers: false,
+                            exitOnOverlayClick: true,
+                            scrollToElement: true,
+                            showButtons: false,
+                            showBullets: false
+                        }).start();
+                    }, 0);
+                };
+                {% if request.path in ['/', '/intro'] %}
+                introJs().setOptions({
+                    steps: [
+                        {
+                            intro: '欢迎来到torabot. Torabot是一个网络事件订阅工具, 您可以订阅感兴趣的新番, 画师等, 在目标更新时您会收到来自torabot的邮件通知. 本教程将引导您快速上手torabot.'
+                        },
+                        {
+                            element: '.intro-select-mod',
+                            intro: '从这里选择感兴趣的模块. 假设您希望使用torabot在虎穴抢本子.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.intro-query',
+                            intro: '填写查询条件. 例如您想订阅东方相关的本子信息, 就填入"东方".',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.intro-search',
+                            intro: '点击这里开始搜索.',
+                            position: 'bottom'
+                        }
+                    ],
+                    nextLabel: '下一步',
+                    prevLabel: '上一步',
+                    skipLabel: '跳过教程',
+                    doneLabel: '下一页',
+                    showStepNumbers: false,
+                    exitOnOverlayClick: true,
+                    scrollToElement: true,
+                    showButtons: true,
+                    showBullets: true
+                }).onbeforechange(function(e){
+                    var $e = $(e);
+                    if ($e.hasClass('intro-query')) {
+                        $e.prop('value', '东方');
+                    }
+                }).onexit(exit).oncomplete(function(){
+                    restore();
+                    $('.intro-search').click();
+                }).start();
+                {% elif request.path == '/search/tora' %}
+                introJs().setOptions({
+                    steps: [
+                        {
+                            element: '.intro-watch',
+                            intro: '如果您已经登录, 点击该按钮订阅该查询, 当查询结果更新时即可收到通知.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.intro-advanced-search',
+                            intro: '您可能并不满足于简单查询, 点击这里进行高级搜索. 下面我们来试试订阅pixiv日榜.',
+                            position: 'bottom'
+                        }
+                    ],
+                    nextLabel: '下一步',
+                    prevLabel: '上一步',
+                    skipLabel: '跳过教程',
+                    doneLabel: '下一页',
+                    showStepNumbers: false,
+                    exitOnOverlayClick: true,
+                    scrollToElement: true,
+                    showButtons: true,
+                    showBullets: true
+                }).onexit(exit).oncomplete(function(){
+                    restore();
+                    $(location).attr('href', '{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}');
+                }).start();
+                {% elif request.path == '/search/advanced/pixiv' %}
+                introJs().setOptions({
+                    steps: [
+                        {
+                            element: '.intro-pixiv-methods',
+                            intro: '高级搜索里通常包含多种搜索方式.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.intro-pixiv-ranking-form',
+                            intro: '指定搜索条件, 系统会自动记录下每日新上榜的作品.',
+                            position: 'bottom'
+                        }
+                    ],
+                    nextLabel: '下一步',
+                    prevLabel: '上一步',
+                    skipLabel: '跳过教程',
+                    doneLabel: '下一页',
+                    showStepNumbers: false,
+                    exitOnOverlayClick: true,
+                    scrollToElement: true,
+                    showButtons: true,
+                    showBullets: true
+                }).onexit(exit).oncomplete(function(){
+                    restore();
+                    $(location).attr('href', '{{ url_for("main.search", kind="pixiv", method="ranking", mode="daily", limit=10)|safe }}');
+                }).start();
+                {% elif request.path == '/search/pixiv' %}
+                introJs().setOptions({
+                    steps: [
+                        {
+                            element: '.intro-help',
+                            intro: '现在您已经学会了torabot的基本使用方法. 如果需要进一步了解各个模块的功能, 请在下拉菜单选择模块, 然后猛戳这里 :)',
+                            position: 'bottom'
+                        }
+                    ],
+                    nextLabel: '下一步',
+                    prevLabel: '上一步',
+                    skipLabel: '跳过教程',
+                    doneLabel: '开始使用torabot',
+                    showStepNumbers: false,
+                    exitOnOverlayClick: true,
+                    scrollToElement: true,
+                    showButtons: true,
+                    showBullets: false
+                }).onexit(exit).oncomplete(exit).start();
+                {% endif %}
+            });
         </script>
         {% endblock %}
     </foot>

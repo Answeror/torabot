@@ -7,6 +7,7 @@ from flask import (
     render_template,
     redirect,
     url_for,
+    make_response as flask_make_response
 )
 from logbook import Logger
 from ... import db
@@ -32,6 +33,13 @@ log = Logger(__name__)
 @bp.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
+
+@bp.route('/intro', methods=['GET'])
+def intro():
+    resp = flask_make_response(render_template('index.html', intro=True))
+    resp.set_cookie('intro', '1')
+    return resp
 
 
 def message(text, ok=True):

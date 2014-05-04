@@ -1,3 +1,4 @@
+{% import 'macros.html' as macros with context %}
 {% extends 'base.html' %}
 {% block body %}
 {% include 'nav.html' %}
@@ -87,15 +88,12 @@
             </div>
         </div>
     </div>
-    <hr class=featurette-divider>
-    <footer>
-        <p class=pull-left><a href='{{ url_for("main.about") }}'>关于本站</a></p>
-        <p class=pull-right><a href=#>回到顶部</a></p>
-    </footer>
+    {% include 'footer.html' %}
 </div>
 {% endblock %}
 {% block head %}
 {{ super() }}
+<link rel=stylesheet href='//cdnjs.cloudflare.com/ajax/libs/intro.js/0.5.0/introjs.min.css'>
 <style>
 .carousel {
     height: 500px;
