@@ -1,3 +1,4 @@
+{% if not snapshot %}
 {% if query_text is defined %}
 {% elif query is defined %}
 {% set query_text = query.text %}
@@ -73,3 +74,4 @@
         </div>
     </div>
 </div>
+{% endif %}

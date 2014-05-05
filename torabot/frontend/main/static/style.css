@@ -8,6 +8,7 @@ body.intro {
 }
 body.snapshot {
     overflow: hidden;
+    padding-top: 0;
 }
 
 .intro .navbar {
