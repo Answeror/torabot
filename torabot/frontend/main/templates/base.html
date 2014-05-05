@@ -31,9 +31,6 @@
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
             })();
         </script>
-        {% if intro %}
-        {{ macros.intro_js() }}
-        {% endif %}
         {{ macros.cookie_js() }}
         <script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
         <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js'></script>
@@ -53,6 +50,8 @@
                 });
             });
         </script>
+        {% if intro %}
+        {{ macros.intro_js() }}
         <script>
             $(function(){
                 $('body').addClass('intro');
@@ -197,6 +196,7 @@
                 {% endif %}
             });
         </script>
+        {% endif %}
         {% endblock %}
     </foot>
 </html>
