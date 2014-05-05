@@ -1,8 +1,13 @@
 body {
     padding-top: 50px;
+    /* from v2ex */
+    font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", STHeiti !important;
 }
 body.intro {
     padding-top: 0;
+}
+body.snapshot {
+    overflow: hidden;
 }
 
 .intro .navbar {
@@ -58,4 +63,8 @@ span.w {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.carousel-control.left, .carousel-control.right {
+    background: none; !important
 }

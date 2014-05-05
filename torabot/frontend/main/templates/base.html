@@ -13,7 +13,7 @@
         <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
         {% endblock %}
     </head>
-    <body style='{% if snapshot %}overflow: hidden;{% endif %}'>
+    <body {% if snapshot %}class=snapshot{% endif %}>
         {% block body %}{% endblock %}
     </body>
     <foot>
