@@ -22,6 +22,11 @@ def get_user_name_bi_openid(conn, openid):
     return None if ret is None else ret[0]
 
 
+def get_user_name_bi_id(conn, id):
+    ret = conn.execute(sql('select name from "user" where id = :id'), id=id).fetchone()
+    return None if ret is None else ret[0]
+
+
 def get_user_email_bi_id(conn, id):
     ret = conn.execute('select email from "user" where id = %s', (id,)).fetchone()
     return None if ret is None else ret[0]
@@ -81,3 +86,21 @@ def has_user_bi_openid(conn, openid):
         sql('select 1 from "user" where openid = :openid'),
         openid=openid
     ).fetchone() is not None
+
+
+@error_guard
+def activate_user_bi_id(conn, id):
+    conn.execute(sql('update "user" set activated = TRUE where id = :id'), id=id)
+
+
+@error_guard
+def inactivate_user_bi_id(conn, id):
+    conn.execute(sql('update "user" set activated = FALSE where id = :id'), id=id)
+
+
+@error_guard
+def user_activated_bi_id(conn, id):
+    return conn.execute(
+        sql('select activated from "user" where id = :id'),
+        id=id
+    ).fetchone()[0]

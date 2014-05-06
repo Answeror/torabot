@@ -27,6 +27,24 @@ def get_is_user():
 is_user = LocalProxy(get_is_user)
 
 
+def get_is_user_activated():
+    from .. import db
+    from .connection import autoccontext
+    name = '_is_user_activated'
+    value = getattr(g, name, None)
+    if value is None:
+        if not is_user:
+            value = False
+        else:
+            with autoccontext() as conn:
+                value = db.user_activated_bi_id(conn, current_user_id._get_current_object())
+        setattr(g, name, value)
+    return value
+
+
+is_user_activated = LocalProxy(get_is_user_activated)
+
+
 def get_is_admin():
     name = '_is_admin'
     value = getattr(g, name, None)

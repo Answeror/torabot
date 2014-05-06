@@ -45,7 +45,7 @@ TORABOT_DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..
 TORABOT_EXAMPLE_USER_ID = 1
 TORABOT_ISSUE_LIST_URI = 'https://github.com/Answeror/torabot/issues'
 TORABOT_EMAIL_HOST = 'smtp.gmail.com'
-TORABOT_EMAIL_HOST = 587
+TORABOT_EMAIL_PORT = 587
 
 # mod
 TORABOT_DEFAULT_MOD = 'tora'

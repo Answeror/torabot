@@ -27,6 +27,7 @@ from . import bp
 from .. import auth
 from ..response import make_ok_response, make_response
 from ..bulletin import get_bulletin_text, get_bulletin_type
+from .openid import send_activation_email
 
 
 log = Logger(__name__)
@@ -191,16 +192,22 @@ def notice_conf(user_id):
 
     assert_equal(request.method, 'POST')
     try:
+        email = request.values['email']
+
         with appccontext(commit=True) as conn:
             db.set_email(
                 conn,
                 id=user_id,
-                email=request.values['email'],
+                email=email,
             )
+            db.inactivate_user_bi_id(conn, user_id)
+            username = db.get_user_name_bi_id(conn, user_id)
+
+        send_activation_email(user_id, username, email, url_for("main.index"))
         return render_template(
             'message.html',
             ok=True,
-            message='更新成功'
+            message='邮箱已更改, 需要重新激活. 激活邮件已发送至 %s , 请根据邮件中的提示完成更改.' % email
         )
     except:
         log.exception(

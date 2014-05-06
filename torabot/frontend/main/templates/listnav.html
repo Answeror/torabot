@@ -1,6 +1,6 @@
 {% extends "nav.html" %}
 {% block search_box_left %}
-{% if is_user %}
+{% if is_user and is_user_activated %}
 {% if watching %}
 <form action='{{ url_for(".unwatch") }}' method=post class="navbar-left" role="form">
     <div class="form-group">
