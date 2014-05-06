@@ -3,8 +3,30 @@
 {% block navbar %}
 {% include 'nav.html' %}
 {% endblock %}
+{% block before_container %}
+{% if not snapshot and bulletin_text and bulletin_id != request.cookies['hide_bulletin_id'] %}
+<div class='bulletin alert alert-{{ bulletin_type if bulletin_type else "info" }} alert-dismissable'>
+    <input type=hidden name=id value='{{ bulletin_id }}'>
+    <button type=button class=close data-dismiss=alert aria-hidden=true>&times;</button>
+    <div class=container>
+        {{ bulletin_text|safe }}
+    </div>
+</div>
+<script>
+$(function(){
+    $('.bulletin').bind('closed.bs.alert', function(){
+        $.cookie('hide_bulletin_id', $('.bulletin *[name="id"]').prop('value'), {path: '/'});
+    })
+})
+</script>
+{% endif %}
+{% endblock %}
 <div class='container vspace-top-small'>
     {% block content %}{% endblock %}
+    {% block footer %}
+    <hr>
     {% include 'footer.html' %}
+    {% endblock %}
 </div>
+{% block after_container %}{% endblock %}
 {% endblock %}

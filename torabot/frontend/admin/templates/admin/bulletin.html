@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+{% block content %}
+<form class=bulletin-form role=form>
+    <div class=form-group>
+        <textarea name=text class=form-control rows=3>{{ text }}</textarea>
+    </div>
+    <div class='row form-group text-center'>
+        <div class='col-sm-2 col-sm-offset-4'>
+            <select name=type class=form-control>
+                {% for value in ['info', 'warning', 'error'] %}
+                <option value='{{ value }}'{% if value == type %} selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class=col-sm-2>
+            <button type=submit class='btn btn-success'>提交</button>
+            <button type=reset class='btn btn-default'>清空</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+{% block foot %}
+{{ super() }}
+<script>
+$(function(){
+    var $form = $('.bulletin-form');
+    $form.find('button[type="submit"]').click(function(e){
+        e.preventDefault();
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                text: $form.find('*[name="text"]').prop('value'),
+                type: $form.find('*[name="type"]').find('option:selected').val()
+            })
+        }).done(function(){
+            new PNotify({
+                text: '提交成功',
+                type: 'success',
+                icon: false,
+                nonblock: {
+                    nonblock: true,
+                    nonblock_opacity: .2
+                }
+            });
+        }).fail(function(xhr){
+            new PNotify({
+                text: JSON.parse(xhr.responseText).message.html,
+                type: 'error',
+                icon: false,
+                buttons: {
+                    closer: true,
+                    sticker: false
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

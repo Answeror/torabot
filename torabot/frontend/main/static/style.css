@@ -54,7 +54,7 @@ span.w {
 }
 
 .inline-block {
-    display: inline-block;
+    display: inline-block; !important
 }
 
 .fixed-table {
@@ -68,4 +68,14 @@ span.w {
 
 .carousel-control.left, .carousel-control.right {
     background: none; !important
+}
+
+.bulletin {
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+.bulletin .close {
+    position: inherit;
+    margin-right: 1em;
 }

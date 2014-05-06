@@ -1,9 +1,8 @@
-{% import 'macros.html' as macros with context %}
-{% extends 'base.html' %}
-{% block body %}
-{% include 'nav.html' %}
+{% extends 'layout.html' %}
+{% block before_container %}
+{{ super() }}
 {% include 'carousel.html' %}
-<div class=container>
+{% endblock %}
+{% block footer %}
     {% include 'footer.html' %}
-</div>
 {% endblock %}

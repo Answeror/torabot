@@ -1,3 +1,4 @@
+from hashlib import md5
 import json
 from nose.tools import assert_equal
 from flask import (
@@ -25,6 +26,7 @@ from ..errors import AuthError
 from . import bp
 from .. import auth
 from ..response import make_ok_response, make_response
+from ..bulletin import get_bulletin_text, get_bulletin_type
 
 
 log = Logger(__name__)
@@ -324,4 +326,13 @@ def help(name):
         'help.html',
         query_kind=name,
         content=mod(name).format_help_page()
+    )
+
+
+@bp.context_processor
+def inject_locals():
+    return dict(
+        bulletin_text=get_bulletin_text(),
+        bulletin_type=get_bulletin_type(),
+        bulletin_id=md5((get_bulletin_text() or '').encode('utf-8')).hexdigest()
     )
