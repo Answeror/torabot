@@ -16,7 +16,7 @@ ENCODING = 'utf-8'
 log = Logger(__name__)
 
 
-def send(sender_addr, password, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None, save=False):
+def send(sender_addr, password, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None, save=False, host='smtp.gmail.com', port=587):
     if sender_name is None:
         sender_name = sender_addr
     sender_name = Header(sender_name, ENCODING).encode()
@@ -45,16 +45,25 @@ def send(sender_addr, password, recipient_addrs, subject, text=None, attachments
     for child in format_attachments(attachments):
         msg_related.attach(child)
 
-    smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    if port is None:
+        smtp = smtplib.SMTP(host)
+    else:
+        smtp = smtplib.SMTP(host, port)
+
     smtp.ehlo()
 
     try:
         smtp.starttls()
         smtp.ehlo()
-    except smtplib.SMTPException:
-        log.exception('email login failed')
+        smtp.login(sender_addr, password)
+    except smtplib.SMTPException as e:
+        if 'SMTP AUTH extension not supported by server.' in str(e):
+            # not auth required
+            pass
+        else:
+            log.exception('email login failed')
+            raise
 
-    smtp.login(sender_addr, password)
     smtp.send_message(msg_root)
     smtp.quit()
 
@@ -122,4 +131,6 @@ if __name__ == '__main__':
             mime='application/image',
             name='例大祭11カット'
         )],
+        host=conf['TORABOT_EMAIL_HOST'],
+        port=conf['TORABOT_EMAIL_PORT'],
     )
