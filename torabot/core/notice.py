@@ -35,6 +35,8 @@ def send_notice_email(conf, target, notice):
         conf['TORABOT_EMAIL_HEAD'],
         mod(notice.kind).format_notice_body('email', notice),
         mod(notice.kind).notice_attachments('email', notice),
+        host=conf['TORABOT_EMAIL_HOST'],
+        port=conf['TORABOT_EMAIL_PORT'],
     )
 
 
