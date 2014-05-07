@@ -23,6 +23,14 @@ body.snapshot {
     margin-top: 29px;
 }
 
+.vspace-top-large {
+    margin-top: 59px; !important
+}
+
+.vspace-bottom-large {
+    margin-bottom: 59px; !important
+}
+
 .control-text {
     margin-top: 0;
     margin-bottom: 0;

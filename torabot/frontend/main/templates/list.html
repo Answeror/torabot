@@ -3,16 +3,18 @@
 {% include "listnav.html" %}
 {% endblock %}
 {% block content %}
-{% if not is_user %}
-<div class='alert alert-warning'>
-    您尚未登录, 请<a href='{{ url_for("main.index") }}'>登录</a>后订阅该查询.
-</div>
-{% elif not is_user_activated %}
-<div class='alert alert-warning'>
-    您的账户尚未激活, 点击<a href='{{ url_for("main.notice_conf") }}'>修改邮箱</a>重新发送激活邮件.
-</div>
-{% endif %}
-<p>本查询最近一次更新时间为: {{ momentjs(query.mtime).fromnow() }}</p>
-<hr>
-{{ content | safe }}
+    {% if not snapshot %}
+        {% if not is_user %}
+        <div class='alert alert-warning'>
+            您尚未登录, 请<a href='{{ url_for("main.index") }}'>登录</a>后订阅该查询.
+        </div>
+        {% elif not is_user_activated %}
+        <div class='alert alert-warning'>
+            您的账户尚未激活, 点击<a href='{{ url_for("main.notice_conf") }}'>修改邮箱</a>重新发送激活邮件.
+        </div>
+        {% endif %}
+    {% endif %}
+    <p>本查询最近一次更新时间为: {{ momentjs(query.mtime).fromnow() }}</p>
+    <hr>
+    {{ content | safe }}
 {% endblock %}
