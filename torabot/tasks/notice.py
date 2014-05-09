@@ -14,7 +14,7 @@ def notice_all(conf):
 
     for notice in notices:
         with ccontext(commit=True, engine=engine) as conn:
-            if db.user_activated_bi_id(conn, notice.user_id):
+            if db.email_activated_bi_id(conn, notice.email_id):
                 send_notice(
                     conf=conf,
                     notice=notice,

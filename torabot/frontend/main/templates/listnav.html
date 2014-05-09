@@ -1,24 +1,175 @@
-{% extends "nav.html" %}
+{% extends 'nav.html' %}
 {% block search_box_left %}
-{% if is_user and is_user_activated %}
-{% if watching %}
-<form action='{{ url_for(".unwatch") }}' method=post class="navbar-left" role="form">
-    <div class="form-group">
-        <input type=hidden name=user_id value='{{ current_user_id }}'>
-        <input type=hidden name=query_id value='{{ query.id }}'>
-    </div>
-    <button type="submit" class="intro-watch btn btn-danger">退订</button>
-</form>
-{% else %}
-<form action='{{ url_for(".watch") }}' method=post class="navbar-left" role="form">
-    <div class="form-group">
-        <input type=hidden name=user_id value='{{ current_user_id }}'>
-        <input type=hidden name=query_id value='{{ query.id }}'>
-    </div>
-    <button type="submit" class="intro-watch btn btn-primary">订阅</button>
-</form>
-{% endif %}
-{% else %}
-<button class='intro-watch navbar-left btn btn-primary' disabled>订阅</button>
-{% endif %}
+    {% set main_watching = states[0].watching %}
+    {% set color = "danger" if main_watching else "primary" %}
+    {% if is_user and is_user_activated %}
+    <form id=watch-form action='{{ url_for("main.unwatch" if main_watching else "main.watch") }}' method=post class="navbar-left" role="form">
+        <div class="form-group">
+            <input type=hidden name=user_id value='{{ current_user_id }}'>
+            <input type=hidden name=email_id value='{{ states[0].id }}'>
+            <input type=hidden name=query_id value='{{ query.id }}'>
+        </div>
+        <div class="btn-group">
+            <button type="submit" class="intro-watch btn btn-{{ color }} {{ "unwatch" if main_watching else "watch" }}">{{ "退订" if main_watching else "订阅" }}</button>
+            <button type="button" class="btn btn-{{ color }} dropdown-toggle" data-toggle="dropdown">
+                <span class="caret"></span>
+                <span class="sr-only">toggle dropdown</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                {% for state in states %}
+                {% if not loop.first %}<li class=divider></li>{% endif %}
+                <li><div class=email-switch><span name=label>{{ state.label if state.label else state.text }}</span><div class='switch-wrap pull-right'><input name=switch-{{ state.id }} data-email-id={{ state.id }} type=checkbox data-size=small class=switch{% if state.watching %} checked{% endif %}></div><div class=clearfix></div></div></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </form>
+    {% else %}
+    <button class='intro-watch navbar-left btn btn-primary' disabled>订阅</button>
+    {% endif %}
+    <script>
+    $(function(){
+        var self = {
+            $watch_form: $('#watch-form'),
+            show_name_watch_dialog: function(email_id){
+                var $d = $.Deferred();
+                var $dialog = $('#name-watch-dialog');
+                var submit = function(){
+                    $.ajax({
+                        url: '{{ url_for("main.watch") }}',
+                        type: 'post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            user_id: {{ current_user_id }},
+                            email_id: email_id,
+                            query_id: {{ query.id }},
+                            name: $dialog.find('[name="name"]').val()
+                        })
+                    }).done(function(){
+                        new PNotify({
+                            text: '订阅成功',
+                            type: 'success',
+                            icon: false,
+                        });
+                        self.switch(email_id, true, true);
+                        $dialog.modal('hide');
+                    }).done($d.resolve).fail(function(xhr){
+                        new PNotify({
+                            text: JSON.parse(xhr.responseText).message.html,
+                            type: 'error',
+                            icon: false,
+                        });
+                    }).fail($d.reject);
+                };
+                $dialog.find('[name="confirm"]').off('click').click(function(e){
+                    e.preventDefault();
+                    submit();
+                });
+                $dialog.find('form').off('submit').submit(function(e){
+                    e.preventDefault();
+                    submit();
+                });
+                $dialog.off('hidden.bs.modal').on('hidden.bs.modal', function(e){
+                    $d.reject();
+                }).modal('show');
+                return $d.promise();
+            },
+            unwatch: function(email_id){
+                var $d = $.Deferred();
+                $.ajax({
+                    url: '{{ url_for("main.unwatch") }}',
+                    type: 'post',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        user_id: {{ current_user_id }},
+                        email_id: email_id,
+                        query_id: {{ query.id }}
+                    })
+                }).done(function(){
+                    new PNotify({
+                        text: '退订成功',
+                        type: 'success',
+                        icon: false,
+                    });
+                    self.switch(email_id, false, true);
+                }).done($d.resolve).fail(function(xhr){
+                    new PNotify({
+                        text: JSON.parse(xhr.responseText).message.html,
+                        type: 'error',
+                        icon: false,
+                    });
+                }).fail($d.reject);
+                return $d.promise();
+            },
+            bind: function(){
+                self.$watch_form.find('.btn.watch').off('click').click(function(e){
+                    e.preventDefault();
+                    self.show_name_watch_dialog({{ states[0].id }}).done(self.show_unwatch_button);
+                });
+                self.$watch_form.find('.btn.unwatch').off('click').click(function(e){
+                    e.preventDefault();
+                    self.unwatch({{ states[0].id }}).done(self.show_watch_button);
+                });
+            },
+            show_watch_button: function(){
+                self.$watch_form.find('[type="submit"]')
+                    .removeClass('btn-danger')
+                    .addClass('btn-primary')
+                    .removeClass('unwatch')
+                    .addClass('watch')
+                    .text('订阅');
+                self.$watch_form.find('.dropdown-toggle')
+                    .removeClass('btn-danger')
+                    .addClass('btn-primary');
+                self.bind();
+            },
+            show_unwatch_button: function(){
+                self.$watch_form.find('[type="submit"]')
+                    .removeClass('btn-primary')
+                    .addClass('btn-danger')
+                    .removeClass('watch')
+                    .addClass('unwatch')
+                    .text('退订');
+                self.$watch_form.find('.dropdown-toggle')
+                    .removeClass('btn-primary')
+                    .addClass('btn-danger');
+                self.bind();
+            },
+            switch: function(email_id, state, skip){
+                self.$watch_form.find('.dropdown-menu [name="switch-' + email_id + '"]').bootstrapSwitch('state', state, skip);
+            },
+            init_switch: function(){
+                $('.switch').bootstrapSwitch({
+                    onSwitchChange: function(e, state){
+                        var $this = $(this);
+                        var email_id = $this.data('email-id');
+                        var $d;
+                        if (state) {
+                            $d = self.show_name_watch_dialog(email_id);
+                        } else {
+                            $d = self.unwatch(email_id);
+                        }
+                        $d.done(function(){
+                            if (email_id == {{ states[0].id }}) {
+                                if (state) {
+                                    self.show_unwatch_button();
+                                } else {
+                                    self.show_watch_button();
+                                }
+                            }
+                        }).fail(function(){
+                            $this.bootstrapSwitch('state', !state, true);
+                        });
+                    }
+                });
+            },
+            init: function(){
+                self.bind();
+                self.init_switch();
+            }
+        };
+        self.init();
+    });
+    </script>
 {% endblock %}

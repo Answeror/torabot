@@ -50,3 +50,72 @@
 {% macro cookie_js() -%}
 <script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js'></script>
 {%- endmacro %}
+
+{% macro switch_css() -%}
+<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.0/css/bootstrap3/bootstrap-switch.min.css'>
+{%- endmacro %}
+
+{% macro switch_js() -%}
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.0/js/bootstrap-switch.min.js'></script>
+<script>
+    $(function(){
+        $('.dropdown-menu .bootstrap-switch').click(function(e) {
+            e.stopPropagation();
+        });
+    });
+</script>
+{%- endmacro %}
+
+{% macro jquery_js() -%}
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+{%- endmacro %}
+
+{% macro bootstrap_css() -%}
+<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css'>
+{%- endmacro %}
+
+{% macro bootstrap_js() -%}
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
+{%- endmacro %}
+
+{% macro moment_js() -%}
+<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/lang/zh-cn.js'></script>
+<script>
+    $(function(){
+        $('.momentjs').each(function() {
+            $this = $(this);
+            $this.text(function() {
+                var format = $this.data('format');
+                if (format == 'fromnow') return moment($this.text()).fromNow();
+                if (format == 'calendar') return moment($this.text()).calendar();
+                return moment($this.text()).format(format);
+            }());
+        });
+    });
+</script>
+{%- endmacro %}
+
+{% macro pnotify_css() -%}
+<link rel='stylesheet' href='{{ url_for("main.static", filename="pnotify.custom.min.css") }}'>
+{%- endmacro %}
+
+{% macro pnotify_js() -%}
+<script src='{{ url_for("main.static", filename="pnotify.custom.min.js") }}'></script>
+{%- endmacro %}
+
+{% macro google_js() -%}
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-10313309-6', 'aip.io');
+    ga('send', 'pageview');
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/platform.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+{%- endmacro %}

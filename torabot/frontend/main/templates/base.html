@@ -5,12 +5,13 @@
         {% block head %}
         <meta charset='utf-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css'>
-        <link rel='stylesheet' href='{{ url_for("main.static", filename="pnotify.custom.min.css") }}'>
-        <link rel='stylesheet' href='{{ url_for("main.static", filename="style.css") }}'>
-        {% if intro %}{{ macros.intro_css() }}{% endif %}
         <title>{% block title %}torabot{% endblock %}</title>
-        <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
+        {{ macros.bootstrap_css() }}
+        {{ macros.switch_css() }}
+        {{ macros.pnotify_css() }}
+        {% if intro %}{{ macros.intro_css() }}{% endif %}
+        <link rel='stylesheet' href='{{ url_for("main.static", filename="style.css") }}'>
+        {{ macros.jquery_js() }}
         {% endblock %}
     </head>
     <body {% if snapshot %}class=snapshot{% endif %}>
@@ -18,38 +19,13 @@
     </body>
     <foot>
         {% block foot %}
-        <script>
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-            ga('create', 'UA-10313309-6', 'aip.io');
-            ga('send', 'pageview');
-            (function() {
-                var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-                po.src = 'https://apis.google.com/js/platform.js';
-                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-            })();
-        </script>
+        {{ macros.google_js() }}
+        {{ macros.bootstrap_js() }}
         {{ macros.cookie_js() }}
-        <script src='//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js'></script>
-        <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/moment.min.js'></script>
-        <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.5.1/lang/zh-cn.js'></script>
-        <script src='{{ url_for("main.static", filename="pnotify.custom.min.js") }}'></script>
+        {{ macros.moment_js() }}
+        {{ macros.pnotify_js() }}
+        {{ macros.switch_js() }}
         <script src='{{ url_for("main.static", filename="js/all.js") }}'></script>
-        <script>
-            $(function(){
-                $('span.momentjs').each(function() {
-                    $this = $(this);
-                    $this.text(function() {
-                        var format = $this.data('format');
-                        if (format == 'fromnow') return moment($this.text()).fromNow();
-                        if (format == 'calendar') return moment($this.text()).calendar();
-                        return moment($this.text()).format(format);
-                    }());
-                });
-            });
-        </script>
         {% if intro %}
         {{ macros.intro_js() }}
         <script>
@@ -68,7 +44,7 @@
                             steps: [
                                 {
                                     element: '#start-intro',
-                                    intro: '点击这里重新开始教程.',
+                                    intro: '点击这里重新开始教程, 点击背景结束教程.',
                                     position: 'top'
                                 }
                             ],

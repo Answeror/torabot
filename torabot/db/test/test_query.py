@@ -1,7 +1,7 @@
 from nose.tools import assert_equal, assert_is_not_none, assert_greater
 from . import g
 from ..notice import get_notices_bi_user_id
-from ..user import add_user
+from ..user import add_user, add_email_bi_user_id, activate_email_bi_id
 from ..watch import watch
 from ..query import add_query, get_sorted_active_queries
 from ..change import add_one_query_changes
@@ -30,6 +30,41 @@ def test_broadcast_one():
         watch(g.connection, user_id=user_id, query_id=query_id)
         add_one_query_changes(g.connection, query_id, [{}])
         assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
+        trans.rollback()
+
+
+def test_broadcast_non_main_email_not_activated():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        email_text = 'answeror+foo@gmail.com'
+        email_id = add_email_bi_user_id(
+            g.connection,
+            id=user_id,
+            email=email_text,
+            label=''
+        )
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id, email_id=email_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 0)
+        trans.rollback()
+
+
+def test_broadcast_non_main_email_activated():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        email_text = 'answeror+foo@gmail.com'
+        email_id = add_email_bi_user_id(
+            g.connection,
+            id=user_id,
+            email=email_text,
+            label=''
+        )
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id, email_id=email_id)
+        activate_email_bi_id(g.connection, email_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        assert_equal(get_notices_bi_user_id(g.connection, user_id)[0].email, email_text)
         trans.rollback()
 
 

@@ -87,3 +87,25 @@ span.w {
     position: inherit;
     margin-right: 1em;
 }
+
+.email-switch {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+}
+
+#watch-form .dropdown-menu {
+    width: 300px;
+}
+#watch-form .dropdown-menu span[name="label"] {
+    display: block;
+    float: left;
+    width: 170px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

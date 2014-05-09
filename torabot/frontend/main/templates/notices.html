@@ -11,7 +11,8 @@
         <tr>
             <td class='col-xs-3 col-sm-2'>时间</td>
             <td class='col-xs-2 col-sm-1'>状态</td>
-            <td class='col-xs-7 col-sm-9'>内容</td>
+            <td class='col-xs-2 col-sm-2'>订阅邮箱</td>
+            <td class='col-xs-5 col-sm-7'>内容</td>
         </tr>
     </thead>
     <tbody>
@@ -19,6 +20,7 @@
     <tr>
         <td>{{ momentjs(notice.ctime).calendar() }}</td>
         <td>{{ notice.status | safe }}</td>
+        <td>{{ notice.email }}</td>
         <td>{{ notice.body | safe }}</a></td>
     </tr>
     {% endfor %}

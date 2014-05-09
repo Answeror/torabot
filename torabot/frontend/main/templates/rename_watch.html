@@ -3,6 +3,7 @@
 <div class=row>
     <form class=form-horizontal role=form method=POST action='{{ url_for('.rename_watch') }}'>
         <input type=hidden name=user_id value='{{ request.values.user_id }}'>
+        <input type=hidden name=email_id value='{{ request.values.email_id }}'>
         <input type=hidden name=query_id value='{{ request.values.query_id }}'>
         <div class="form-group">
             <label for="name" class="col-sm-2 control-label">订阅名称</label>

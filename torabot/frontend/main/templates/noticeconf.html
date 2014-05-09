@@ -1,21 +1,49 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 {% block content %}
-<ul class="nav nav-tabs">
+<ul class='nav nav-tabs'>
     <li><a href='{{ url_for(".pending_notices") }}'>最新</a></li>
     <li><a href='{{ url_for(".all_notices") }}'>全部</a></li>
     <li class=active><a href='{{ url_for(".notice_conf") }}'>设置</a></li>
 </ul>
-<form method=post class="form-horizontal vspace-top-middle" role="form">
-    <div class="form-group">
-        <label for="email" class="col-sm-2 control-label">email</label>
-        <div class="col-sm-4">
-            <input id=email name=email type=email class=form-control placeholder=email value='{{ user.email }}'>
-        </div>
+{% for email in user.emails %}
+<form method=post class='email-form form-inline vspace-top-{{ "middle" if loop.first else "small" }}' role=form>
+    <input type=hidden name=id value={{ email.id }}>
+    <input type=hidden name=action value=update>
+    <div class=form-group>
+        <label for=label class='sr-only control-label'>标签</label>
+        <input name=label type=text class=form-control placeholder=标签 value='{{ email.label or '' }}'>
     </div>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-success">更新</button>
-        </div>
+    <div class=form-group>
+        <label for=text class='sr-only control-label'>email</label>
+        <input name=text type=email class=form-control placeholder=email value='{{ email.text }}'>
     </div>
+    <button name=update type=submit class='btn btn-success'>更新</button>
+    {% if not loop.first %}<button name=delete type=submit class='btn btn-danger'>删除</button>{% endif %}
+    {% if not email.activated %}<button name=activate type=submit class='btn btn-primary'>激活</button>{% endif %}
 </form>
+{% endfor %}
+{% if len(user.emails) < user.maxemail %}
+<form method=post class='form-inline vspace-top-small' role=form>
+    <div class=form-group>
+        <label for=label class='sr-only control-label'>标签</label>
+        <input name=label type=text class=form-control placeholder=标签>
+    </div>
+    <div class=form-group>
+        <label for=text class='sr-only control-label'>email</label>
+        <input name=text type=email class=form-control placeholder=email>
+    </div>
+    <button type=submit class='btn btn-default'>增加</button>
+</form>
+{% endif %}
+{% endblock %}
+{% block foot %}
+{{ super() }}
+<script>
+$(function(){
+    var $form = $('.email-form');
+    $form.find('button[type="submit"]').click(function(e){
+        $form.find('input[name="action"]').val($(this).prop('name'));
+    });
+});
+</script>
 {% endblock %}

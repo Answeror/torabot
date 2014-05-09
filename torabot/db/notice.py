@@ -6,24 +6,27 @@ ROOM = 2147483647
 
 
 def get_notices_bi_user_id(conn, user_id, page=0, room=ROOM):
-    result = conn.execute(sql('''
+    result = conn.execute(sql(
+        '''
         select
             n0.id,
             n0.user_id,
             n0.ctime,
             n0.status,
-            q0.kind as kind,
-            c0.data as change
+            q0.kind kind,
+            c0.data change,
+            n0.email
         from (
             select * from notice
             where user_id = :user_id
-        ) as n0
-        inner join change as c0 on n0.change_id = c0.id
-        inner join query as q0 on c0.query_id = q0.id
+        ) n0
+        inner join change c0 on n0.change_id = c0.id
+        inner join query q0 on c0.query_id = q0.id
         order by n0.ctime desc
         offset :offset
         limit :limit
-    '''), user_id=user_id, offset=page * room, limit=room)
+        '''
+    ), user_id=user_id, offset=page * room, limit=room)
     return [bunchr(**row) for row in result.fetchall()]
 
 
@@ -35,20 +38,22 @@ def get_notice_count_bi_user_id(conn, user_id):
 
 
 def get_pending_notices_bi_user_id(conn, user_id, page=0, room=ROOM):
-    result = conn.execute(sql('''
+    result = conn.execute(sql(
+        '''
         select
             n0.id,
             n0.user_id,
             n0.ctime,
             n0.status,
-            q0.kind as kind,
-            c0.data as change
+            q0.kind kind,
+            c0.data change,
+            n0.email
         from (
             select * from notice
             where user_id = :user_id and status = :status
-        ) as n0
-        inner join change as c0 on n0.change_id = c0.id
-        inner join query as q0 on c0.query_id = q0.id
+        ) n0
+        inner join change c0 on n0.change_id = c0.id
+        inner join query q0 on c0.query_id = q0.id
         order by n0.ctime desc
         offset :offset
         limit :limit
@@ -64,22 +69,25 @@ def get_pending_notice_count_bi_user_id(conn, user_id):
 
 
 def get_pending_notices(conn):
-    result = conn.execute(sql('''
+    result = conn.execute(sql(
+        '''
         select
             n0.id,
             n0.user_id,
             n0.ctime,
             n0.status,
-            q0.kind as kind,
-            c0.data as change
+            q0.kind kind,
+            c0.data change,
+            n0.email
         from (
             select * from notice
             where status = :status
-        ) as n0
-        inner join change as c0 on n0.change_id = c0.id
-        inner join query as q0 on c0.query_id = q0.id
+        ) n0
+        inner join change c0 on n0.change_id = c0.id
+        inner join query q0 on c0.query_id = q0.id
         order by n0.ctime desc
-    '''), status='pending')
+        '''
+    ), status='pending')
     return [bunchr(**row) for row in result.fetchall()]
 
 

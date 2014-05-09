@@ -10,7 +10,19 @@ class InvalidArgumentError(DBError):
     pass
 
 
+class InvalidEmailError(DBError):
+    pass
+
+
 class UniqueConstraintError(DBError):
+    pass
+
+
+class DeleteMainEmainError(DBError):
+    pass
+
+
+class EmailCountLimitError(DBError):
     pass
 
 
@@ -24,5 +36,11 @@ def error_guard(f):
         except sqlalchemy.exc.IntegrityError as e:
             if 'duplicate' in str(e):
                 raise UniqueConstraintError from e
+            raise
+        except sqlalchemy.exc.InternalError as e:
+            if 'cannot delete main email of' in str(e):
+                raise DeleteMainEmainError from e
+            if 'email count reach limit' in str(e):
+                raise EmailCountLimitError from e
             raise
     return inner

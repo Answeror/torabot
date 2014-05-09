@@ -1,8 +1,8 @@
 from hashlib import md5
+from functools import wraps
+from nose.tools import assert_in
 import json
-from nose.tools import assert_equal
 from flask import (
-    jsonify,
     request,
     current_app,
     render_template,
@@ -10,6 +10,7 @@ from flask import (
     url_for,
     make_response as flask_make_response
 )
+from flask.views import MethodView
 from logbook import Logger
 from ... import db
 from ...core.query import query
@@ -18,16 +19,20 @@ from ...core.notice import (
     get_pending_notices_bi_user_id,
 )
 from ...core.watch import get_watches_bi_user_id
-from ...core.connection import appccontext
+from ...core.connection import appccontext, autoccontext
 from ...core.mod import mod
 from ...core.local import is_user, current_user_id, request_values
+from ...core.user import (
+    update_email as core_update_email,
+    add_email as core_add_email,
+    activate_email as core_activate_email,
+)
 from ...cache import cache
 from ..errors import AuthError
 from . import bp
 from .. import auth
 from ..response import make_ok_response, make_response
 from ..bulletin import get_bulletin_text, get_bulletin_type
-from .openid import send_activation_email
 
 
 log = Logger(__name__)
@@ -45,55 +50,56 @@ def intro():
     return resp
 
 
-def message(text, ok=True):
-    return render_template('message.html', ok=ok, message=text)
+def user_id_not_match(session_user_id):
+    return int(request_values['user_id']) != session_user_id
 
 
-def done(text):
-    return message(text, True)
+def email_id_not_match(session_user_id):
+    if 'email_id' not in request_values:
+        return False
+    with autoccontext() as conn:
+        return db.get_email_bi_id(conn, request_values['email_id']).user_id != session_user_id
 
 
-def failed(text):
-    return message(text, False)
-
-
-def check_request_user_id(session_user_id):
-    if int(request_values['user_id']) != session_user_id:
+def check_request(session_user_id):
+    if user_id_not_match(session_user_id) or email_id_not_match(session_user_id):
         raise AuthError('request user_id not equal to user_id in sessoin')
 
 
-@bp.route('/watch/rename', methods=['GET', 'POST'])
-@auth.require_session
-def rename_watch(user_id):
-    check_request_user_id(user_id)
-    if request.method == 'GET':
+def request_checked(f):
+    '''check user_id and email_id in request with user_id in session'''
+    @wraps(f)
+    def inner(*args, **kargs):
+        assert_in('user_id', kargs)
+        check_request(kargs['user_id'])
+        return f(*args, **kargs)
+    return inner
+
+
+class RenameWatchView(MethodView):
+
+    decorators = [request_checked, auth.require_session]
+
+    def get(self, user_id):
         return render_template('rename_watch.html')
-    if request.method == 'POST':
-        try:
-            with appccontext(commit=True) as conn:
-                db.rename_watch(
-                    conn,
-                    user_id=int(request_values['user_id']),
-                    query_id=int(request_values['query_id']),
-                    name=request_values['name'],
-                )
-            return make_response({
-                'application/json': make_ok_response,
-                'text/html': lambda: redirect(url_for('.watching'))
-            })
-        except:
-            log.exception('rename watch failed')
-            text = '重命名失败'
-            return make_response({
-                'application/json': lambda: (
-                    jsonify(dict(
-                        ok=False,
-                        message=dict(text=text, html=text)
-                    )),
-                    400
-                ),
-                'text/html': lambda: (failed(text), 200)
-            })
+
+    def post(self, user_id):
+        with appccontext(commit=True) as conn:
+            db.rename_watch(
+                conn,
+                email_id=int(request_values['email_id']),
+                query_id=int(request_values['query_id']),
+                name=request_values['name'],
+            )
+        return make_response({
+            'application/json': make_ok_response,
+            'text/html': lambda: redirect(url_for('.watching'))
+        })
+
+
+rename_watch_view = RenameWatchView.as_view('rename_watch')
+bp.add_url_rule('/watch/rename', view_func=rename_watch_view, methods=['GET'])
+bp.add_url_rule('/watch/rename', view_func=rename_watch_view, methods=['POST'])
 
 
 def _watches(page, user_id, snapshot=False):
@@ -180,46 +186,73 @@ def pending_notices(page, user_id):
     )
 
 
-@bp.route('/notice/config', methods=['GET', 'POST'])
+@bp.route('/notice/config', methods=['GET', 'POST', 'PATCH'])
 @auth.require_session
 def notice_conf(user_id):
     if request.method == 'GET':
         with appccontext() as conn:
             return render_template(
                 'noticeconf.html',
-                user=db.get_user_bi_id(conn, user_id)
+                user=db.get_user_detail_bi_id(conn, user_id)
             )
 
-    assert_equal(request.method, 'POST')
-    try:
-        email = request.values['email']
+    if request.method == 'POST':
+        if 'id' in request.values:
+            return {
+                'update': update_email,
+                'delete': delete_email,
+                'activate': activate_email,
+            }[request.values['action']](user_id)
+        return add_email(user_id)
 
-        with appccontext(commit=True) as conn:
-            db.set_email(
-                conn,
-                id=user_id,
-                email=email,
-            )
-            db.inactivate_user_bi_id(conn, user_id)
-            username = db.get_user_name_bi_id(conn, user_id)
 
-        send_activation_email(user_id, username, email, url_for("main.index"))
+def activate_email(user_id):
+    core_activate_email(int(request.values['id']))
+    return render_template(
+        'message.html',
+        ok=True,
+        message='激活邮件已发送至 %s , 请根据邮件中的提示完成激活.' % request.values['text']
+    )
+
+
+def add_email(user_id):
+    email = request.values['text']
+    core_add_email(
+        user_id=user_id,
+        email=email,
+        label=request.values['label'],
+    )
+    return render_template(
+        'message.html',
+        ok=True,
+        message='邮箱添加. 激活邮件已发送至 %s , 请根据邮件中的提示完成添加.' % email
+    )
+
+
+def delete_email(user_id):
+    with appccontext(commit=True) as conn:
+        db.del_email_bi_id(
+            conn,
+            id=request.values['id'],
+        )
+    return redirect(url_for('.notice_conf'))
+
+
+def update_email(user_id):
+    email = request.values['text']
+    if core_update_email(
+        user_id=user_id,
+        email_id=int(request.values['id']),
+        email=email,
+        label=request.values['label'],
+    ):
         return render_template(
             'message.html',
             ok=True,
             message='邮箱已更改, 需要重新激活. 激活邮件已发送至 %s , 请根据邮件中的提示完成更改.' % email
         )
-    except:
-        log.exception(
-            'user {} change email to {} failed',
-            user_id,
-            request.values['email']
-        )
-        return render_template(
-            'message.html',
-            ok=False,
-            message='更新失败'
-        )
+
+    return redirect(url_for('.notice_conf'))
 
 
 @cache.memoize(timeout=600)
@@ -285,41 +318,55 @@ def _search(kind, snapshot):
             options['watching'] = db.watching(
                 conn,
                 user_id=current_user_id._get_current_object(),
-                query_id=q.id,
+                query_id=q.id
+            )
+            options['states'] = db.get_email_watch_states(
+                conn,
+                user_id=current_user_id._get_current_object(),
+                query_id=q.id
             )
     return render_template('list.html', snapshot=snapshot, **options)
 
 
 @bp.route('/watch/add', methods=['POST'])
 @auth.require_session
+@request_checked
 def watch(user_id):
-    check_request_user_id(user_id)
-    try:
-        query_id = int(request.values['query_id'])
-        with appccontext(commit=True) as conn:
-            db.watch(conn, user_id=user_id, query_id=query_id)
-        return redirect(url_for(
+    query_id = int(request_values['query_id'])
+    email_id = int(request_values['email_id'])
+
+    options = {}
+    if 'name' in request_values:
+        options.update(name=request_values['name'])
+
+    with appccontext(commit=True) as conn:
+        db.watch(conn, email_id=email_id, query_id=query_id, **options)
+
+    return make_response({
+        'application/json': make_ok_response,
+        'text/html': lambda: redirect(url_for(
             '.rename_watch',
             user_id=user_id,
+            email_id=email_id,
             query_id=query_id
-        ))
-    except:
-        log.exception('watch failed')
-        return failed('订阅失败')
+        )),
+    })
 
 
 @bp.route('/watch/del', methods=['POST'])
 @auth.require_session
+@request_checked
 def unwatch(user_id):
-    check_request_user_id(user_id)
-    try:
-        query_id = int(request.values['query_id'])
-        with appccontext(commit=True) as conn:
-            db.unwatch(conn, user_id=user_id, query_id=query_id)
-        return redirect(url_for('.watching'))
-    except:
-        log.exception('unwatch failed')
-        return failed('退订失败')
+    query_id = int(request_values['query_id'])
+    email_id = int(request_values['email_id'])
+
+    with appccontext(commit=True) as conn:
+        db.unwatch(conn, email_id=email_id, query_id=query_id)
+
+    return make_response({
+        'application/json': make_ok_response,
+        'text/html': lambda: redirect(url_for('.watching')),
+    })
 
 
 @bp.route('/about')

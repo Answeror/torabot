@@ -1,10 +1,5 @@
 from logbook import Logger
-from ..db import (
-    get_user_email_bi_id,
-    mark_notice_sent,
-    get_notices_bi_user_id as _get_notices_bi_user_id,
-    get_pending_notices_bi_user_id as _get_pending_notices_bi_user_id
-)
+from .. import db
 from .email import send as send_email
 from ..core.mod import mod
 from ..ut.bunch import Bunch
@@ -41,23 +36,24 @@ def send_notice_email(conf, target, notice):
 
 
 def send_notice(notice, conf, conn):
-    email = get_user_email_bi_id(conn, notice.user_id)
-    log.info('send notice {} to {}', notice.id, email)
+    assert notice.email
+    log.info('send notice {} to {}', notice.id, notice.email)
     try:
-        send_notice_email(conf, email, notice)
+        send_notice_email(conf, notice.email, notice)
     except:
-        log.exception('send notice {} to {} failed', notice.id, email)
-        return
+        log.exception('send notice {} to {} failed', notice.id, notice.email)
+        return False
 
-    mark_notice_sent(conn, notice.id)
+    db.mark_notice_sent(conn, notice.id)
+    return True
 
 
 def get_notices_bi_user_id(conn, user_id, **kargs):
-    return list(map(web_transform, _get_notices_bi_user_id(conn, user_id, **kargs)))
+    return list(map(web_transform, db.get_notices_bi_user_id(conn, user_id, **kargs)))
 
 
 def get_pending_notices_bi_user_id(conn, user_id, **kargs):
-    return list(map(web_transform, _get_pending_notices_bi_user_id(conn, user_id, **kargs)))
+    return list(map(web_transform, db.get_pending_notices_bi_user_id(conn, user_id, **kargs)))
 
 
 if __name__ == '__main__':

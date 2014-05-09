@@ -1,5 +1,5 @@
 import mimeparse
-from flask import request, jsonify
+from flask import request, json, jsonify
 
 
 def make_response_content(formats):
@@ -11,8 +11,8 @@ def make_response(formats):
 
 
 def make_ok_response_content():
-    return jsonify(dict(ok=True))
+    return json.dumps(dict(ok=True))
 
 
 def make_ok_response():
-    return make_ok_response_content(), 200
+    return jsonify(dict(ok=True))
