@@ -21,7 +21,7 @@ from ...core.notice import (
 from ...core.watch import get_watches_bi_user_id
 from ...core.connection import appccontext, autoccontext
 from ...core.mod import mod
-from ...core.local import is_user, current_user_id, request_values
+from ...core.local import is_user, current_user_id, request_values, current_user
 from ...core.user import (
     update_email as core_update_email,
     add_email as core_add_email,
@@ -40,6 +40,8 @@ log = Logger(__name__)
 
 @bp.route('/', methods=['GET'])
 def index():
+    if is_user:
+        return _watches(0, current_user.id)
     return render_template('index.html')
 
 

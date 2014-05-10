@@ -56,6 +56,7 @@
                         }).start();
                     }, 0);
                 };
+                var nextpage = '<strong class=text-success>进入下一页</strong>';
                 {% if request.path in ['/', '/intro'] %}
                 introJs().setOptions({
                     steps: [
@@ -81,7 +82,8 @@
                     nextLabel: '下一步',
                     prevLabel: '上一步',
                     skipLabel: '跳过教程',
-                    doneLabel: '下一页',
+                    doneLabel: nextpage,
+                    tooltipClass: 'intro-tooltip',
                     showStepNumbers: false,
                     exitOnOverlayClick: true,
                     scrollToElement: true,
@@ -113,7 +115,8 @@
                     nextLabel: '下一步',
                     prevLabel: '上一步',
                     skipLabel: '跳过教程',
-                    doneLabel: '下一页',
+                    doneLabel: nextpage,
+                    tooltipClass: 'intro-tooltip',
                     showStepNumbers: false,
                     exitOnOverlayClick: true,
                     scrollToElement: true,
@@ -140,7 +143,8 @@
                     nextLabel: '下一步',
                     prevLabel: '上一步',
                     skipLabel: '跳过教程',
-                    doneLabel: '下一页',
+                    doneLabel: nextpage,
+                    tooltipClass: 'intro-tooltip',
                     showStepNumbers: false,
                     exitOnOverlayClick: true,
                     scrollToElement: true,
