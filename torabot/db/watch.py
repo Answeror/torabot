@@ -72,8 +72,8 @@ def get_watch_count_bi_user_id(conn, user_id):
     ).fetchone()[0]
 
 
-def get_watches_bi_user_id(conn, user_id):
-    result = conn.execute(sql(
+def get_watches_bi_user_id(conn, user_id, offset=None, limit=None):
+    result = conn.execute(sql('\n'.join([
         '''
         select
             w0.user_id,
@@ -92,8 +92,10 @@ def get_watches_bi_user_id(conn, user_id):
             inner join email e0 on w0.email_id = e0.id
         where w0.user_id = :user_id
         order by w0.ctime desc
-        '''
-    ), user_id=user_id)
+        ''',
+        '' if offset is None else 'offset :offset',
+        '' if limit is None else 'limit :limit'
+    ])), user_id=user_id, offset=offset, limit=limit)
     return [bunchr(**row) for row in result.fetchall()]
 
 

@@ -111,7 +111,12 @@ def _watches(page, user_id, snapshot=False):
             room=room,
             total=db.get_watch_count_bi_user_id(conn, user_id),
             user=db.get_user_bi_id(conn, user_id),
-            watches=get_watches_bi_user_id(conn, user_id),
+            watches=get_watches_bi_user_id(
+                conn,
+                user_id,
+                offset=page * room,
+                limit=room
+            ),
             uri=lambda page: url_for('.watching', page=page),
             snapshot=snapshot,
         )

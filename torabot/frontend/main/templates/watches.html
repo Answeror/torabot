@@ -15,7 +15,10 @@
 {% endblock %}
 {% block content %}
     {% if watches %}
-    <p>已用订阅查询{{ len(watches) }}个, 还可订阅{{ user.maxwatch - len(watches) }}个.</p>
+    {% set rest = user.maxwatch - total %}
+    {% set threshold = config['TORABOT_REST_WATCH_HIGHLIGHT_THRESHOLD'] %}
+    {% set rest_tag = "strong" if rest < threshold else "span" %}
+    <p>已用订阅查询{{ total }}个, 还可订阅<{{ rest_tag }}{% if rest < threshold %} class=text-danger{% endif %}>{{ rest }}</{{ rest_tag }}>个.</p>
     <table id=watch-table class='table table-condensed table-striped fixed-table'>
         <thead>
             <tr>
