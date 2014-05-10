@@ -78,33 +78,43 @@ def get_users_detail(conn, offset=None, limit=None):
 
 @error_guard
 def get_user_detail_bi_id(conn, id):
-    ret = conn.execute(sql(
+    return enrich(conn, conn.execute(sql(
         '''
         select u0.*, (select count(1) from watch as w0 where w0.user_id = u0.id) watch_count
         from "user" as u0
         where u0.id = :id
         '''
-    ), id=id).fetchone()
-    return None if ret is None else bunchr(
-        emails=get_emails_bi_user_id(conn, id),
-        **ret
-    )
+    ), id=id).fetchone())
 
 
 @error_guard
-def get_user_detail_bi_email_id(conn, id):
-    ret = conn.execute(sql(
+def get_user_detail_bi_openid(conn, openid):
+    return enrich(conn, conn.execute(sql(
         '''
         select u0.*, (select count(1) from watch as w0 where w0.user_id = u0.id) watch_count
-        from "user" as u0 inner join email e0 on u0.id = e0.user_id
-        where e0.id = :id
+        from "user" as u0
+        where u0.openid = :openid
         '''
-    ), id=id).fetchone()
+    ), openid=openid).fetchone())
+
+
+def enrich(conn, ret):
     if ret is None:
         return None
     user = bunchr(**ret)
     user.emails = get_emails_bi_user_id(conn, user.id)
     return user
+
+
+@error_guard
+def get_user_detail_bi_email_id(conn, id):
+    return enrich(conn, conn.execute(sql(
+        '''
+        select u0.*, (select count(1) from watch as w0 where w0.user_id = u0.id) watch_count
+        from "user" as u0 inner join email e0 on u0.id = e0.user_id
+        where e0.id = :id
+        '''
+    ), id=id).fetchone())
 
 
 @error_guard

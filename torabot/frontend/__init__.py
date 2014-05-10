@@ -60,6 +60,7 @@ def inject_locals():
         intro,
         current_username,
         is_user_activated,
+        current_user,
     )
     from .momentjs import momentjs
     return dict(
@@ -78,6 +79,7 @@ def inject_locals():
         current_username=current_username,
         intro=intro,
         is_user_activated=is_user_activated,
+        current_user=current_user,
     )
 
 

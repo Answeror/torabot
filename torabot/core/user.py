@@ -1,12 +1,21 @@
 from logbook import Logger
 from flask import url_for, current_app, render_template
 from itsdangerous import URLSafeSerializer
-from ..core.connection import autoccontext
+from ..ut.bunch import Bunch
 from .. import db
+from .connection import autoccontext
 from .email import send as send_email
 
 
 log = Logger(__name__)
+
+
+class User(Bunch):
+
+    @property
+    def has_not_activated_email(self):
+        log.info(self.emails)
+        return bool([e for e in self.emails if not e.activated])
 
 
 def get_user_id_bi_openid(openid):
@@ -17,6 +26,12 @@ def get_user_id_bi_openid(openid):
 def get_user_name_bi_openid(openid):
     with autoccontext(commit=False) as conn:
         return db.get_user_name_bi_openid(conn, openid)
+
+
+def get_user_detail_bi_openid(openid):
+    with autoccontext(commit=False) as conn:
+        ret = db.get_user_detail_bi_openid(conn, openid)
+        return None if ret is None else User(ret)
 
 
 def check_openid(openid):

@@ -24,6 +24,7 @@ from .user import (
     get_emails_bi_user_id,
     inactivate_email_bi_id,
     get_user_detail_bi_email_id,
+    get_user_detail_bi_openid,
 )
 from .watch import (
     watching,
@@ -117,4 +118,5 @@ __all__ = [
     inactivate_email_bi_id.__name__,
     get_user_detail_bi_email_id.__name__,
     get_email_watch_states.__name__,
+    get_user_detail_bi_openid.__name__,
 ]

@@ -1,5 +1,13 @@
 from werkzeug.local import LocalProxy
 from flask import g, session, request
+from .. import db
+from .connection import autoccontext
+from .user import (
+    get_user_detail_bi_openid as core_get_user_detail_bi_openid,
+    get_user_id_bi_openid as core_get_user_id_bi_openid,
+    get_user_name_bi_openid as core_get_user_name_bi_openid,
+    check_openid,
+)
 
 
 def get_current_conf():
@@ -15,7 +23,6 @@ def get_current_conf():
 
 
 def get_is_user():
-    from .user import check_openid
     name = '_is_user'
     value = getattr(g, name, None)
     if value is None:
@@ -28,8 +35,6 @@ is_user = LocalProxy(get_is_user)
 
 
 def get_is_user_activated():
-    from .. import db
-    from .connection import autoccontext
     name = '_is_user_activated'
     value = getattr(g, name, None)
     if value is None:
@@ -62,6 +67,20 @@ def check_admin_openid(openid):
 is_admin = LocalProxy(get_is_admin)
 
 
+def get_current_user():
+    name = '_current_user'
+    value = getattr(g, name, None)
+    if value is None:
+        value = core_get_user_detail_bi_openid(session['openid'])
+        setattr(g, name, value)
+        if value:
+            g.current_user_loaded = True
+    return value
+
+
+current_user = LocalProxy(get_current_user)
+
+
 def get_current_user_id():
     name = '_current_user_id'
     if hasattr(g, name):
@@ -70,8 +89,10 @@ def get_current_user_id():
         if 'openid' not in session:
             value = None
         else:
-            from .user import get_user_id_bi_openid
-            value = get_user_id_bi_openid(session['openid'])
+            if g.get('current_user_loaded', False):
+                value = current_user.id
+            else:
+                value = core_get_user_id_bi_openid(session['openid'])
         setattr(g, name, value)
     return value
 
@@ -87,8 +108,10 @@ def get_current_username():
         if 'openid' not in session:
             value = None
         else:
-            from .user import get_user_name_bi_openid
-            value = get_user_name_bi_openid(session['openid'])
+            if g.get('current_user_loaded', False):
+                value = current_user.name
+            else:
+                value = core_get_user_name_bi_openid(session['openid'])
         setattr(g, name, value)
     return value
 
