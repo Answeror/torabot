@@ -98,7 +98,7 @@ def prof():
                     email=email,
                     openid=flask_session['openid'],
                 )
-                user = db.get_user_detail_bi_id(user_id)
+                user = db.get_user_detail_bi_id(session.connection(), user_id)
             send_activation_email(
                 email_id=user.emails[0].id,
                 email_text=email,
