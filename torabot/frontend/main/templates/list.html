@@ -6,7 +6,7 @@
     {% if not snapshot %}
         {% if not is_user %}
         <div class='alert alert-warning'>
-            您尚未登录, 请<a href='{{ url_for("main.index") }}'>登录</a>后订阅该查询.
+            您尚未登录, 请<a href=# onclick='$("#login-form").submit()'>登录</a>后订阅该查询.
         </div>
         {% elif not is_user_activated %}
         <div class='alert alert-warning'>

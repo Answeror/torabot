@@ -14,7 +14,6 @@ class User(Bunch):
 
     @property
     def has_not_activated_email(self):
-        log.info(self.emails)
         return bool([e for e in self.emails if not e.activated])
 
 

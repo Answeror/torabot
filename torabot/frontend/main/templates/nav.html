@@ -24,52 +24,43 @@
             {% if not snapshot %}<span class=navbar-brand style='width:90px;'><div class=g-plusone data-size=medium data-href='http://torabot.aip.io'></div></span>{% endif %}
         </div>
         <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav">
-                {% if is_user %}
-                <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for("main.watching") }}'>我的订阅</a></li>
-                <li{% if request.path.startswith('/notice') %} class=active{% endif %}><a href='{{ url_for("main.pending_notices") }}'>我的通知</a></li>
-                {% if is_admin %}
-                <li{% if request.path.startswith('/admin') %} class=active{% endif %}>
-                    <a href=# class=dropdown-toggle data-toggle=dropdown>网站管理 <b class=caret></b></a>
-                    <ul class=dropdown-menu>
-                        <li><a href='{{ url_for("admin.dashboard") }}'>dashboard</a></li>
-                        <li><a href='{{ url_for("admin.bulletin") }}'>公告版</a></li>
-                        <li role=presentation class=divider></li>
-                        <li role=presentation class=dropdown-header>数据库管理</li>
-                        <li><a href='{{ url_for("admin.users") }}'>用户</a></li>
-                        <li><a href='{{ url_for("admin.queries") }}'>查询</a></li>
-                        <li><a href='{{ url_for("admin.active_queries") }}'>活跃查询</a></li>
-                    </ul>
-                </li>
-                {% endif %}
-                {% endif %}
-            </ul>
-            <div class='navbar-form navbar-right'>
+            <div class=navbar-right>
                 {% block search_box_left %}{% endblock %}
-                {% include "search_box.html" %}
+                <div class='navbar-form navbar-left'>
+                    {% include "search_box.html" %}
+                </div>
                 {% block search_box_right %}{% endblock %}
                 {% if not is_user %}
-                <form class="navbar-left" action='{{ url_for("main.login") }}' method=post>
-                    <div class="form-group">
-                        <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
-                    </div>
-                    <input type=submit class='btn btn-success' value="登录">
+                <form id=login-form class=navbar-left action='{{ url_for("main.login") }}' method=post>
+                    <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
                 </form>
+                <input type=submit class='btn btn-success navbar-btn navbar-left' onclick='$("#login-form").submit()' value='登录'>
                 {% else %}
-                <form class="navbar-left" action='{{ url_for("main.logout") }}' method=post>
-                    <div class="form-group">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                {{ current_username }} <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href='{{ url_for("main.notice_conf") }}'>修改邮箱</a></li>
-                                <li class="divider"></li>
-                                <li><a href=# onclick="$(this).closest('form').submit()">登出</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </form>
+                <ul class='nav navbar-nav navbar-left'>
+                    <li>
+                        <a href=# class=dropdown-toggle data-toggle=dropdown> {{ current_username }} <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li{% if request.path.startswith('/watch') %} class=active{% endif %}><a href='{{ url_for("main.watching") }}'>我的订阅</a></li>
+                            <li{% if request.path.startswith('/notices') %} class=active{% endif %}><a href='{{ url_for("main.pending_notices") }}'>我的通知</a></li>
+                            <li{% if request.path.startswith('/notice/config') %} class=active{% endif %}><a href='{{ url_for("main.notice_conf") }}'>修改邮箱</a></li>
+
+                            {% if is_admin %}
+                            <li class="divider"></li>
+                            <li class=dropdown-header>网站管理</li>
+                            <li{% if request.path.startswith('/admin/dashboard') %} class=active{% endif %}><a href='{{ url_for("admin.dashboard") }}'>dashboard</a></li>
+                            <li{% if request.path.startswith('/admin/bulletin') %} class=active{% endif %}><a href='{{ url_for("admin.bulletin") }}'>公告版</a></li>
+                            <li class=divider></li>
+                            <li class=dropdown-header>数据库管理</li>
+                            <li{% if request.path.startswith('/admin/users') %} class=active{% endif %}><a href='{{ url_for("admin.users") }}'>用户</a></li>
+                            <li{% if request.path == '/admin/queries' %} class=active{% endif %}><a href='{{ url_for("admin.queries") }}'>查询</a></li>
+                            <li{% if request.path == '/admin/queries/active' %} class=active{% endif %}><a href='{{ url_for("admin.active_queries") }}'>活跃查询</a></li>
+                            {% endif %}
+
+                            <li class="divider"></li>
+                            <li><form id=logout-form method=post action='{{ url_for("main.logout") }}'></form><a href=# onclick='$("#logout-form").submit()'>登出</a></li>
+                        </ul>
+                    </li>
+                </ul>
                 {% endif %}
             </div>
         </div>
