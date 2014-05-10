@@ -26,6 +26,10 @@ class EmailCountLimitError(DBError):
     pass
 
 
+class DeleteEmailInUseError(DBError):
+    pass
+
+
 def error_guard(f):
     @wraps(f)
     def inner(*args, **kargs):
@@ -36,6 +40,8 @@ def error_guard(f):
         except sqlalchemy.exc.IntegrityError as e:
             if 'duplicate' in str(e):
                 raise UniqueConstraintError from e
+            if 'update or delete on table "email" violates foreign key constraint "watch_email_id_fkey" on table "watch"' in str(e):
+                raise DeleteEmailInUseError from e
             raise
         except sqlalchemy.exc.InternalError as e:
             if 'cannot delete main email of' in str(e):

@@ -1,6 +1,7 @@
 import mimeparse
 from uuid import uuid4
 from logbook import Logger
+from functools import partial
 from flask import (
     jsonify,
     render_template,
@@ -24,15 +25,19 @@ def make(app):
     admin.make(app)
 
     app.context_processor(inject_locals)
+    register_error_handlers(app)
+
+
+def register_error_handlers(app):
     app.errorhandler(AuthError)(auth_error_guard)
-    app.errorhandler(db.error.InvalidArgumentError)(invalid_argument_error_guard)
-    app.errorhandler(db.error.InvalidEmailError)(invalid_email_error_guard)
-    app.errorhandler(db.error.UniqueConstraintError)(unique_constraint_error_guard)
+    app.errorhandler(db.error.InvalidArgumentError)(partial(simple_error_guard, text='无效值.', status_code=400))
+    app.errorhandler(db.error.InvalidEmailError)(partial(simple_error_guard, text='无效邮箱.', status_code=400))
+    app.errorhandler(db.error.UniqueConstraintError)(partial(simple_error_guard, text='重复值错误.', status_code=400))
+    app.errorhandler(db.error.DeleteEmailInUseError)(partial(simple_error_guard, text='请退订相关订阅后再删除该邮箱.', status_code=400))
     app.errorhandler(Exception)(general_error_guard)
 
 
-def invalid_argument_error_guard(e):
-    text = '无效值'
+def simple_error_guard(e, text, status_code):
     return make_response_content({
         'application/json': lambda: jsonify(dict(
             ok=False,
@@ -43,37 +48,7 @@ def invalid_argument_error_guard(e):
             ok=False,
             message=text
         )
-    }), 400
-
-
-def invalid_email_error_guard(e):
-    text = '无效邮箱'
-    return make_response_content({
-        'application/json': lambda: jsonify(dict(
-            ok=False,
-            message=dict(text=text, html=text)
-        )),
-        'text/html': lambda: render_template(
-            'message.html',
-            ok=False,
-            message=text
-        )
-    }), 400
-
-
-def unique_constraint_error_guard(e):
-    text = '重复值错误'
-    return make_response_content({
-        'application/json': lambda: jsonify(dict(
-            ok=False,
-            message=dict(text=text, html=text)
-        )),
-        'text/html': lambda: render_template(
-            'message.html',
-            ok=False,
-            message=text
-        )
-    }), 400
+    }), status_code
 
 
 def inject_locals():
