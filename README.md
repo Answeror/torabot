@@ -1,6 +1,6 @@
 # Torabot
 
-[Torabot](http://torabot.aip.io)是一个二次元(已经混入了一些三次元的异端 bgm38)事件的(邮件)通知工具(框架). 目前实现了4个模块(mod):
+[Torabot](http://torabot.com)是一个二次元(已经混入了一些三次元的异端 bgm38)事件的(邮件)通知工具(框架). 目前实现了4个模块(mod):
 
 1. Pixiv榜单订阅, 画师订阅. 邮件里附带缩略图.
 2. Bilibili新番订阅.
