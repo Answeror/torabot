@@ -31,7 +31,7 @@ from . import bp
 from logbook import Logger
 from ...core.local import is_user
 from ...core.connection import autoccontext
-from ...core.user import send_activation_email, get_serializer
+from ...core.user import send_activation_email, get_serializer, check_openid
 
 
 oid = OpenID()
@@ -113,10 +113,12 @@ def next():
 @oid.after_login
 def create_or_login(resp):
     log.info('create or login, next netloc: {}', next_netloc())
-    if is_user:
-        return redirect(get_next_url())
 
     flask_session['openid'] = resp.identity_url
+
+    if check_openid(resp.identity_url):
+        return redirect(get_next_url())
+
     parts = list(urlparse(url_for(
         '.prof',
         next=oid.get_next_url(),
