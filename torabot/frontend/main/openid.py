@@ -12,6 +12,7 @@ openid.oidutil.elementtree_modules = [
 ]
 
 
+from urllib.parse import urlparse, urlunparse, ParseResult, urlencode
 from flask.ext.openid import OpenID
 from flask import (
     session as flask_session,
@@ -55,7 +56,7 @@ def activate_user(payload):
 @oid.loginhandler
 def login():
     if is_user:
-        return redirect(oid.get_next_url())
+        return redirect(get_next_url())
     if request.method == 'POST':
         openid = request.form.get('openid')
         if openid:
@@ -70,24 +71,71 @@ def login():
     abort(404)
 
 
+def netloc(uri):
+    return urlparse(uri).netloc
+
+
+def replace_netloc(uri, netloc):
+    parts = list(urlparse(uri))
+    parts[1] = netloc
+    return urlunparse(parts)
+
+
+def get_next_url():
+    uri = oid.get_next_url()
+    if next_netloc() != netloc(request.host_url):
+        query = dict(next=uri)
+        if 'openid' in flask_session:
+            query['openid'] = flask_session['openid']
+        uri = urlunparse(ParseResult(
+            scheme=urlparse(uri).scheme,
+            netloc=netloc(uri),
+            path=url_for('.next'),
+            params='',
+            query=urlencode(query),
+            fragment=''
+        ))
+    return uri
+
+
+def next_netloc():
+    return netloc(oid.get_next_url())
+
+
+@bp.route('/next')
+def next():
+    openid = request.values.get('openid', '')
+    log.info('got next with openid: {}', openid)
+    flask_session['openid'] = openid
+    return redirect(get_next_url())
+
+
 @oid.after_login
 def create_or_login(resp):
-    log.info('create or login')
+    log.info('create or login, next netloc: {}', next_netloc())
     if is_user:
-        return redirect(oid.get_next_url())
+        return redirect(get_next_url())
+
     flask_session['openid'] = resp.identity_url
-    return redirect(url_for(
+    parts = list(urlparse(url_for(
         '.prof',
         next=oid.get_next_url(),
         name=resp.fullname or resp.nickname,
-        email=resp.email
-    ))
+        email=resp.email,
+        openid=resp.identity_url,
+        _external=True
+    )))
+    parts[1] = next_netloc()
+    return redirect(urlunparse(parts))
 
 
 @bp.route('/prof', methods=['GET', 'POST'])
 def prof():
-    if is_user or 'openid' not in flask_session:
-        return redirect(url_for('.index'))
+    if is_user or 'openid' not in request.values:
+        return redirect(url_for("main.index"))
+
+    flask_session['openid'] = request.values['openid']
+
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
@@ -109,7 +157,7 @@ def prof():
                 email_id=user.emails[0].id,
                 email_text=email,
                 username=name,
-                next_uri=oid.get_next_url()
+                next_uri=get_next_url()
             )
             return render_template(
                 'message.html',
@@ -118,7 +166,7 @@ def prof():
             )
     return render_template(
         'prof.html',
-        next_url=oid.get_next_url()
+        next_url=get_next_url()
     )
 
 
@@ -126,4 +174,4 @@ def prof():
 def logout():
     flask_session.pop('openid', None)
     flash('You were signed out')
-    return redirect(oid.get_next_url())
+    return redirect(get_next_url())
