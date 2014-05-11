@@ -21,6 +21,7 @@ from flask import (
     render_template,
     url_for,
     abort,
+    current_app
 )
 from itsdangerous import BadSignature
 from ... import db
@@ -58,6 +59,10 @@ def login():
     if request.method == 'POST':
         openid = request.form.get('openid')
         if openid:
+            domain = current_app.config.get('TORABOT_DOMAIN', '')
+            if domain:
+                request.host_url = 'http://%s/' % domain
+                request.base_url = 'http://%s/login' % domain
             return oid.try_login(
                 openid,
                 ask_for=['email', 'fullname', 'nickname']
@@ -67,6 +72,7 @@ def login():
 
 @oid.after_login
 def create_or_login(resp):
+    log.info('create or login')
     if is_user:
         return redirect(oid.get_next_url())
     flask_session['openid'] = resp.identity_url

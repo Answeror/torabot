@@ -50,10 +50,10 @@ scrapyd &
 
 ```
 createdb torabot-dev
-psql torabot-dev < torabot/db/migrate/schema.0.1.0-33-gc2fbf24.sql
+psql torabot-dev < torabot/db/schema.sql
 ```
 
-其中最后一句需要换成`torabot/db/migrate`目录下具有最新版本号后缀的sql文件. 当然你也可以先导入`torabot/db/schema.sql`然后根据`torabot/db/migrate`目录下的sql文件的版本号后缀依次打上补丁.
+`torabot/db/schema.sql`已经是最新的, 不需要打`torabot/db/migrate`目录下的补丁.
 
 ## Redis
 
@@ -72,6 +72,7 @@ TORABOT_EMAIL_USERNAME = 'torabot@aip.io'
 TORABOT_EMAIL_PASSWORD = 'guess it'
 TORABOT_ADMIN_IDS = [1]
 TORABOT_MOD_PIXIV_SPY_PHPSESSID = 'get it from pixiv cookies'
+TORABOT_DOMAIN = 'torabot.aip.io'  # use localhost:5000 or keep empty here
 ```
 
 除了上述配置, 可以参考`torabot/conf.py`覆盖其中的默认配置. 其中用于发送通知的邮箱必须是google的.
