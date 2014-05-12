@@ -113,3 +113,26 @@ span.w {
 .intro-tooltip {
     min-width: 250px; !important
 }
+
+.not-important {
+    opacity: 0.2;
+    transition: opacity 0.5s ease-in;
+}
+.not-important:hover {
+    opacity: 1.0;
+}
+
+.torabot ::-moz-selection {
+    text-shadow: none;
+    background: rgba(65,131,196,0.4);
+}
+.torabot ::selection {
+    text-shadow: none;
+    background: rgba(65,131,196,0.4);
+}
+.torabot a {
+    transition: all 0.4s;
+}
+.torabot a:hover {
+    text-shadow: 0 0 4px rgba(171, 227, 255, 0.43);
+}

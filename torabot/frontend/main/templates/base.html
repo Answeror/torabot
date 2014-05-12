@@ -11,10 +11,11 @@
         {{ macros.pnotify_css() }}
         {% if intro %}{{ macros.intro_css() }}{% endif %}
         <link rel='stylesheet' href='{{ url_for("main.static", filename="style.css") }}'>
+        <link rel='stylesheet' href='{{ url_for("main.static", filename="yue.css") }}'>
         {{ macros.jquery_js() }}
         {% endblock %}
     </head>
-    <body {% if snapshot %}class=snapshot{% endif %}>
+    <body {% if snapshot %}class=snapshot{% endif %} class='yue torabot'>
         {% block body %}{% endblock %}
     </body>
     <foot>
