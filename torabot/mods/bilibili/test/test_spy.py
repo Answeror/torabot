@@ -1,4 +1,5 @@
-from nose.tools import assert_equal, assert_in
+import json
+from nose.tools import assert_equal, assert_in, assert_greater
 from .... import make
 from ....core.mod import mod
 from .. import name
@@ -43,3 +44,20 @@ def test_spy_user():
     with app.test_client():
         d = mod(name).spy('{"method": "user", "user_id": "928123"}', 60)
         assert_in('posts', d)
+
+
+@need_scrapyd
+def test_spy_username():
+    app = make()
+    with app.app_context():
+        d = mod(name).spy(json.dumps({
+            'method': 'username',
+            'username': '搬'
+        }), 60)
+        assert_greater(len(d.posts), 0)
+        d = mod(name).spy(json.dumps({
+            'method': 'username',
+            'username': '搬 搬'
+        }), 60)
+        assert_equal(len(d.posts), 0)
+        assert_greater(len(d.recommendations), 0)

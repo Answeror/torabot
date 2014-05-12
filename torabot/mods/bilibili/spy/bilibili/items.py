@@ -22,6 +22,7 @@ class User(Item):
     kind = Field()
     query = Field()
     posts = Field()
+    user_uri = Field()
 
     def __init__(self, **kargs):
         kargs.update(kind='user')
@@ -36,3 +37,27 @@ class Post(Item):
     kind = Field()
     ctime = Field()
     desc = Field()
+
+
+class SearchResult(Item):
+
+    query = Field()
+    posts = Field()
+    recommendations = Field()
+
+
+class SearchResultPost(Item):
+
+    title = Field()
+    upper = Field()
+    kind = Field()
+    date = Field()
+    intro = Field()
+    uri = Field()
+    user_uri = Field()
+
+
+class Recommendation(Item):
+
+    username = Field()
+    user_uri = Field()

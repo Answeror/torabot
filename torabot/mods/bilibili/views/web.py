@@ -19,7 +19,7 @@ def bilibili_site_verification(hash):
 def format_query_result(query):
     query = deepcopy(query)
     query.result.query = bunchr(json.loads(standard_query(query.text)[0]))
-    return render_template('bilibili/%s.html' % query.result.query.method, query=query)
+    return render_template('bilibili/result/%s.html' % query.result.query.method, query=query)
 
 
 def format_notice_body(notice):
@@ -58,10 +58,15 @@ def format_user_search():
     return render_template('bilibili/search/user.html', kind=name)
 
 
+def format_username_search():
+    return render_template('bilibili/search/username.html', kind=name)
+
+
 def format_advanced_search(**kargs):
     return {
         'sp': format_bangumi_search,
         'user': format_user_search,
+        'username': format_username_search,
     }[kargs.get('method', 'sp')]()
 
 

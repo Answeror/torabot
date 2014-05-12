@@ -84,7 +84,11 @@ $(function(){
         $advanced.prop('disabled', !$selected.data('has-advanced-search'));
         $q.prop('disabled', !$selected.data('has-normal-search'));
         $search.prop('disabled', !$selected.data('has-normal-search'));
-        $q.prop('placeholder', $selected.data('normal-search-prompt'));
+        if ($selected.data('has-normal-search')) {
+            $q.prop('placeholder', $selected.data('normal-search-prompt'));
+        } else {
+            $q.prop('placeholder', '请使用高级搜索');
+        }
     };
     $mods.ready(on_change_mod).change(on_change_mod);
 });

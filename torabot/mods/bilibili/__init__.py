@@ -29,12 +29,16 @@ class Bilibili(
 
     def changes(self, old, new):
         if old:
-            assert_equal(old.kind, new.kind)
+            assert_equal(
+                query_method_from_result(old),
+                query_method_from_result(new)
+            )
         yield from {
             'bangumi': self._bangumi_changes,
             'sp': self._sp_changes,
             'user': self._user_changes,
-        }[new.kind](old, new)
+            'username': self._user_changes,
+        }[query_method_from_result(new)](old, new)
 
     def _bangumi_changes(self, old, new):
         return []
@@ -64,6 +68,12 @@ class Bilibili(
         for post in new.posts:
             if post.uri not in oldmap:
                 yield bunchr(kind='user_new_post', post=post)
+
+
+def query_method_from_result(result):
+    if 'kind' in result:
+        return result.kind
+    return result.query.method
 
 
 bp = Bilibili.blueprint

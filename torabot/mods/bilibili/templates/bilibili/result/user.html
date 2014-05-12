@@ -1,0 +1,34 @@
+{% if len(query.result.posts) > 0 %}
+<table class=table>
+    <thead>
+        <tr>
+            <td class=col-sm-2>类型</td>
+            <td class=col-sm-8>名称</td>
+            <td class=col-sm-2>投稿时间</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for post in query.result.posts %}
+        <tr>
+            <td>{{ post.kind }}</td>
+            <td><a href='{{ post.uri }}'>{{ post.title }}</a></td>
+            <td>{{ post.ctime }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>以上是全部搜索结果中的{{ len(query.result.posts) }}个, 完整列表参见<a href='{{ query.result.user_uri }}' target=_blank>这里</a>.</p>
+{% elif len(query.result.recommendations) > 0 %}
+<p>没有找到您所需要的UP主, 相关UP主如下:</p>
+<table class='user-table table table-hover'>
+    <tbody>
+        {% for r in query.result.recommendations %}
+        <tr>
+            <td><a href='{{ url_for("main.search", method="username", kind="bilibili") }}'>{{ r.username }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>没有找到相关UP主. 你可以先去<a href='http://www.bilibili.tv/search?keyword={{ ("@author " + query.result.query.username)|urlencode }}'>这里</a>搜搜看.</p>
+{% endif %}

@@ -1,0 +1,10 @@
+{% extends "search_form.html" %}
+{% block content %}
+<input type=hidden name=method value=username>
+<div class=form-group>
+    <label class='control-label col-sm-2'>UP主昵称</label>
+    <div class=col-sm-5>
+        <input name=username type=text class=form-control placeholder='例如: 搬'>
+    </div>
+</div>
+{% endblock %}
