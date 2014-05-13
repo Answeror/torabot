@@ -6,3 +6,10 @@
 {% block footer %}
     {% include 'footer.html' %}
 {% endblock %}
+{% set qq_meta = config.get('TORABOT_QQ_META', None) %}
+{% if qq_meta %}
+{% block head %}
+    {{ super() }}
+    {{ qq_meta|safe }}
+{% endblock %}
+{% endif %}
