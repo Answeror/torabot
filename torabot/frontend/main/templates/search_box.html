@@ -1,10 +1,10 @@
 <form name=search class=navbar-left role=search method=GET>
-    <div class="input-group" style="width: 350px;">
+    <div class="input-group" style="width: 400px;">
         <span class="intro-step input-group-btn">
             <button name=help type=button class='intro-help btn btn-default' title='帮助'>?</button>
         </span>
         <span class='intro-select-mod input-group-btn'>
-            <select class="form-control" name=kind style='margin-right: -1px; width: 100px;'>
+            <select class="form-control" name=kind style='margin-right: -1px; width: 120px;'>
                 {% for m in mods %}
                 <option
                     value='{{ m.name }}'

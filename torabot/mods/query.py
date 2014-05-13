@@ -33,3 +33,15 @@ def parse_dict(query):
 
 def illegal(query):
     assert False, 'illegal query: %s' % query
+
+
+def try_parse(query, candidates):
+    for f in candidates:
+        ret = f(query)
+        if ret is not None:
+            return ret
+    assert False, 'invalid query: %s' % str(query)
+
+
+def try_regular(query, candidates):
+    return json.dumps(try_parse(query, candidates), sort_keys=True)

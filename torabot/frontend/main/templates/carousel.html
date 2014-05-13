@@ -78,6 +78,8 @@
                         <iframe frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
                         {% elif mod.name == 'yyets' %}
                         <iframe frameborder=0 src='{{ url_for("main.example_search", kind="yyets", q="http://www.yyets.com/rss/feed/?area=%E7%BE%8E%E5%9B%BD") }}'></iframe>
+                        {% elif mod.name == 'yandere' %}
+                        <iframe frameborder=0 src='{{ url_for("main.example_search", kind="yandere", q="https://yande.re/post?tags=rating%3As") }}'></iframe>
                         {% else %}
                         <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
                         {% endif %}
