@@ -15,30 +15,49 @@
         height: 500px;
         background-color: #777;
     }
-    .carousel .snapshot {
+    .carousel .snapshot-wrap {
+        position: relative;
         width: 100%;
         height: 460px;
         margin-top: 20px;
-        overflow: hidden;
         -webkit-box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
         -moz-box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
         box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
         -moz-border-radius: 10px;
         -webkit-border-radius: 10px;
         border-radius: 10px;
+        overflow: hidden;
     }
-    .carousel .snapshot-glass {
+    .carousel .snapshot {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .carousel .snapshot iframe {
+        width: 100%;
+        height: 100%;
+        border-radius: 11px;
+    }
+    .carousel .snapshot::before {
+        content: ' ';
         position: absolute;
         top: 0;
+        bottom: 50%;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #777;
-        opacity: 0.7;
+        right: 0;
+        background: -moz-linear-gradient(top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,.7) 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.3)), color-stop(100%,rgba(0,0,0,.7)));
+        background: linear-gradient(top, rgba(0,0,0,0.3) 0%,rgba(0,0,0,.7) 100%);
     }
-    .snapshot > iframe {
-        width: 100%;
-        height: 100%;
+    .carousel .snapshot::after {
+        content: ' ';
+        position: absolute;
+        top: 50%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0,0,0,.7);
     }
 </style>
 <div id=mod-carousel class='carousel slide' data-ride=carousel>
@@ -51,34 +70,35 @@
         {% for mod in mods %}
         <div class="item{% if loop.first %} active{% endif %}">
             <div class=container>
-                <div class=snapshot>
-                    {% if mod.name == 'pixiv' %}
-                    <iframe frameborder=0 src='{{ url_for("main.example_search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
-                    {% elif mod.name == 'tora' %}
-                    <iframe frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
-                    {% elif mod.name == 'yyets' %}
-                    <iframe frameborder=0 src='{{ url_for("main.example_search", kind="yyets", q="http://www.yyets.com/rss/feed/?area=%E7%BE%8E%E5%9B%BD") }}'></iframe>
-                    {% else %}
-                    <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
-                    {% endif %}
-                </div>
-                <div class=snapshot-glass></div>
-                <div class=carousel-caption>
-                    <h1>{{ mod.display_name }}</h1>
-                    <p class=lead>{{ mod.description }}</p>
-                    {% if not is_user %}
-                    <p>
-                        <form action='/login' method=post>
-                            <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
-                            <input type=submit class='btn btn-lg btn-primary' value="使用Google账户登录">
-                        </form>
-                    </p>
-                    {% endif %}
+                <div class=snapshot-wrap>
+                    <div class=snapshot>
+                        {% if mod.name == 'pixiv' %}
+                        <iframe frameborder=0 src='{{ url_for("main.example_search", kind="pixiv", method="ranking", mode="daily", limit=10) }}'></iframe>
+                        {% elif mod.name == 'tora' %}
+                        <iframe frameborder=0 src='{{ url_for("main.example_search", kind="tora", q="tony") }}'></iframe>
+                        {% elif mod.name == 'yyets' %}
+                        <iframe frameborder=0 src='{{ url_for("main.example_search", kind="yyets", q="http://www.yyets.com/rss/feed/?area=%E7%BE%8E%E5%9B%BD") }}'></iframe>
+                        {% else %}
+                        <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
+                        {% endif %}
+                    </div>
+                    <div class=carousel-caption>
+                        <h1>{{ mod.display_name }}</h1>
+                        <p class=lead>{{ mod.description }}</p>
+                        {% if not is_user %}
+                        <p>
+                            <form action='/login' method=post>
+                                <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
+                                <input type=submit class='btn btn-lg btn-primary' value="使用Google账户登录">
+                            </form>
+                        </p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
-    <a class='left carousel-control' href=#mod-carousel data-slide=prev><span class='glyphicon glyphicon-chevron-left'></span></a>
-    <a class='right carousel-control' href=#mod-carousel data-slide=next><span class='glyphicon glyphicon-chevron-right'></span></a>
+    <a class='left carousel-control' href=#mod-carousel data-slide=prev></a>
+    <a class='right carousel-control' href=#mod-carousel data-slide=next></a>
 </div>
