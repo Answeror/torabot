@@ -1,0 +1,26 @@
+<div id=yandere-posts class=row>
+    {% for post in query.result.posts %}
+    <div class='col-sm-2 yandere-post'>
+        <div class='thumbnail'>
+            <a href='https://yande.re/post/show/{{ post.id }}' target=_blank><img alt='{{ post.tags }}' src='{{ post.preview_url }}'></a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<p>以上是全部搜索结果中的{{ len(query.result.posts) }}个, 完整列表参见<a href='{{ query.result.uri }}' target=_blank>这里</a>.</p>
+<script src='//cdnjs.cloudflare.com/ajax/libs/masonry/3.1.2/masonry.pkgd.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/3.0.4/jquery.imagesloaded.min.js'></script>
+<script>
+    $(function() {
+        var $container = $('#yandere-posts');
+        $container.masonry({
+            columnWidth: $container.find('.yandere-post').outerWidth(),
+            itemSelector: '.yandere-post'
+        });
+        $container.find('.yandere-post').each(function() {
+            $(this).imagesLoaded(function() {
+                $container.masonry();
+            });
+        });
+    });
+</script>
