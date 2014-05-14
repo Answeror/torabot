@@ -15,3 +15,21 @@ def test_spy_post_uri():
         assert_greater(len(d.posts), 0)
         d = mod(name).spy(uri, 60)
         assert_greater(len(d.posts), 0)
+
+
+@need_scrapyd
+def check_spy_query(query):
+    app = make()
+    with app.test_client():
+        d = mod(name).spy(json.dumps(dict(method='query', query=query)), 60)
+        assert_greater(len(d.posts), 0)
+        d = mod(name).spy(query, 60)
+        assert_greater(len(d.posts), 0)
+
+
+def test_spy_query():
+    for query in [
+        'pantyhose feet',
+        'pantyhose -feet'
+    ]:
+        yield check_spy_query, query

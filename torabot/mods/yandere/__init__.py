@@ -40,6 +40,5 @@ class Yandere(
                 )
 
     def spy(self, query, timeout):
-        from .query import parse, regular
-        query = parse(query)
+        from .query import regular
         return super(Yandere, self).spy(regular(query), timeout)

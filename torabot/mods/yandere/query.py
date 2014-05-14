@@ -8,10 +8,16 @@ def parse_posts_uri(query):
         return bunchr(method='posts_uri', uri=query)
 
 
+def parse_query(query):
+    if isinstance(query, str):
+        return bunchr(method='query', query=query)
+
+
 CANDIDATES = [
     parse_dict,
-    parse_posts_uri,
     parse_json,
+    parse_posts_uri,
+    parse_query,
 ]
 
 
