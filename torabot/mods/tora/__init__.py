@@ -71,8 +71,10 @@ class Tora(Mod):
 
 def _translate(query):
     try:
-        query = json.loads(query)
-        return json.dumps(translate_recursive(query), sort_keys=True)
+        d = json.loads(query)
+        if not isinstance(d, dict):
+            raise Exception('not standard')
+        return json.dumps(translate_recursive(d), sort_keys=True)
     except:
         return translate(query)
 

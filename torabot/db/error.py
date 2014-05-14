@@ -6,6 +6,14 @@ class DBError(Exception):
     pass
 
 
+class UserNotExistError(DBError):
+    pass
+
+
+class EmailNotExistError(DBError):
+    pass
+
+
 class InvalidArgumentError(DBError):
     pass
 
@@ -30,6 +38,10 @@ class DeleteEmailInUseError(DBError):
     pass
 
 
+class WatchCountLimitError(DBError):
+    pass
+
+
 def error_guard(f):
     @wraps(f)
     def inner(*args, **kargs):
@@ -48,5 +60,7 @@ def error_guard(f):
                 raise DeleteMainEmainError from e
             if 'email count reach limit' in str(e):
                 raise EmailCountLimitError from e
+            if 'watch count reach limit' in str(e):
+                raise WatchCountLimitError from e
             raise
     return inner

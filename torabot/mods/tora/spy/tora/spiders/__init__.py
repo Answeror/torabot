@@ -32,6 +32,8 @@ class Tora(RedisSpider):
     def make_list_request(self, query):
         try:
             d = json.loads(query)
+            if not isinstance(d, dict):
+                raise Exception('not standard')
             simple = False
         except:
             simple = True

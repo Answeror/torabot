@@ -310,6 +310,7 @@ def example_search(kind):
 
 def _search(kind, snapshot):
     text = get_standard_query()
+    log.info('search: %r' % text)
     with appccontext(commit=True) as conn:
         q = query(
             conn=conn,

@@ -9,7 +9,10 @@ def hash(query):
 def order(query):
     if not isinstance(query, dict):
         try:
-            query = json.loads(query)
+            d = json.loads(query)
+            if not isinstance(d, dict):
+                raise Exception('not standard')
+            query = d
         except:
             return query
     assert isinstance(query, dict)

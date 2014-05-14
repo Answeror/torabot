@@ -1,5 +1,6 @@
 from sqlalchemy.sql import text as sql
 from ..ut.bunch import bunchr
+from .error import error_guard, UserNotExistError, EmailNotExistError
 
 
 def fill_id(conn, user_id, email_id):
@@ -21,9 +22,15 @@ def fill_id(conn, user_id, email_id):
         if user_id:
             user_id = user_id[0]
 
+    if user_id is None:
+        raise UserNotExistError()
+    if email_id is None:
+        raise EmailNotExistError()
+
     return user_id, email_id
 
 
+@error_guard
 def watch(conn, query_id, user_id=None, email_id=None, name=None):
     user_id, email_id = fill_id(conn, user_id, email_id)
     if user_id is None or email_id is None:

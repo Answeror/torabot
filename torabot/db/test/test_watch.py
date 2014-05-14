@@ -2,6 +2,7 @@ from nose.tools import assert_raises, assert_is_not_none
 from ..user import add_user
 from ..watch import watch, get_watches_bi_user_id
 from ..query import add_query
+from ..error import WatchCountLimitError
 from . import g
 
 
@@ -25,7 +26,13 @@ def test_maxwatch():
         for query_id in query_ids[:-1]:
             watch(g.connection, user_id=user_id, query_id=query_id)
 
-        assert_raises(Exception, watch, g.connection, user_id, query_ids[-1])
+        assert_raises(
+            WatchCountLimitError,
+            watch,
+            conn=g.connection,
+            user_id=user_id,
+            query_id=query_ids[-1]
+        )
         trans.rollback()
 
 
