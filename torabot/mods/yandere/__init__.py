@@ -5,6 +5,7 @@ from ..mixins import (
     NoEmptyQueryMixin,
     make_blueprint_mixin
 )
+from .query import get_query_text
 
 
 name = 'yandere'
@@ -20,7 +21,7 @@ class Yandere(
     display_name = 'yande.re'
     has_advanced_search = False
     description = '二次元高清图站, 直接订阅诸如 https://yande.re/post?tags=pantyhose 的链接.'
-    normal_search_prompt = '订阅地址'
+    normal_search_prompt = '订阅地址/tags'
 
     def view(self, name):
         from .views import web, email
@@ -36,7 +37,7 @@ class Yandere(
                 yield bunchr(
                     kind='post.new',
                     post=post,
-                    query_text=new.query.uri
+                    query_text=get_query_text(new.query)
                 )
 
     def spy(self, query, timeout):

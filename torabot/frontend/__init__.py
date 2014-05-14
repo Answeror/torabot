@@ -11,6 +11,7 @@ from flask import (
     url_for,
 )
 from .. import db
+from ..mods.spy import SpyTimeoutError
 from .errors import AuthError
 from .response import make_response_content
 
@@ -34,6 +35,7 @@ def register_error_handlers(app):
     app.errorhandler(db.error.InvalidEmailError)(partial(simple_error_guard, text='无效邮箱.', status_code=400))
     app.errorhandler(db.error.UniqueConstraintError)(partial(simple_error_guard, text='重复值错误.', status_code=400))
     app.errorhandler(db.error.DeleteEmailInUseError)(partial(simple_error_guard, text='请退订相关订阅后再删除该邮箱.', status_code=400))
+    app.errorhandler(SpyTimeoutError)(partial(simple_error_guard, text='更新姬反应不过来了... 请稍后重新查询 >_<', status_code=500))
     app.errorhandler(Exception)(general_error_guard)
 
 

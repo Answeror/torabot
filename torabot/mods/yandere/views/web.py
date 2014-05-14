@@ -9,6 +9,7 @@ log = Logger(__name__)
 def format_query_result(query):
     return {
         'posts_uri': format_posts_result,
+        'query': format_posts_result,
     }[parse_query(query.text).method](query)
 
 

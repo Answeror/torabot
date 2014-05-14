@@ -23,3 +23,10 @@ CANDIDATES = [
 
 parse = partial(try_parse, candidates=CANDIDATES)
 regular = partial(try_regular, candidates=CANDIDATES)
+
+
+def get_query_text(query):
+    return {
+        'posts_uri': lambda: query.uri,
+        'query': lambda: query.query,
+    }[query.method]()

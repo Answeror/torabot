@@ -12,6 +12,10 @@ log = Logger(__name__)
 redis = Redis()
 
 
+class SpyTimeoutError(Exception):
+    pass
+
+
 def lives(kind):
     r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
     if not r.ok or r.json()['status'] != 'ok':
@@ -65,11 +69,10 @@ def spy(kind, query, timeout, slaves, options={}):
         timeout=timeout
     )
     if resp:
-        r = json.loads(resp[1].decode('ascii'))
+        r = json.loads(resp[1].decode('utf-8'))
         if r.get('ok', True):
             return bunchr(r)
-        message = r.get('message', '')
-    else:
-        message = ''
+        message = r.get('message', 'no error message')
+        raise Exception('spy %s for %s failed: %s' % (kind, query, message))
 
-    raise Exception('spy %s for %s failed: %s' % (kind, query, message))
+    raise SpyTimeoutError()
