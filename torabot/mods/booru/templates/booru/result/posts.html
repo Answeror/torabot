@@ -1,8 +1,8 @@
-<div id=yandere-posts class=row>
+<div id=booru-posts class=row>
     {% for post in query.result.posts %}
-    <div class='col-sm-2 yandere-post'>
+    <div class='col-sm-2 booru-post'>
         <div class='thumbnail'>
-            <a href='https://yande.re/post/show/{{ post.id }}' target=_blank><img alt='{{ post.tags }}' src='{{ post.preview_url }}'></a>
+            <a href='{{ post_uri_template.format(post.id) }}' target=_blank><img alt='{{ post.tags }}' src='{{ post.preview_url }}'></a>
         </div>
     </div>
     {% endfor %}
@@ -12,12 +12,12 @@
 <script src='//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/3.0.4/jquery.imagesloaded.min.js'></script>
 <script>
     $(function() {
-        var $container = $('#yandere-posts');
+        var $container = $('#booru-posts');
         $container.masonry({
-            columnWidth: $container.find('.yandere-post').outerWidth(),
-            itemSelector: '.yandere-post'
+            columnWidth: $container.find('.booru-post').outerWidth(),
+            itemSelector: '.booru-post'
         });
-        $container.find('.yandere-post').each(function() {
+        $container.find('.booru-post').each(function() {
             $(this).imagesLoaded(function() {
                 $container.masonry();
             });

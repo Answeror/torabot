@@ -49,10 +49,11 @@ class Mod(object, metaclass=abc.ABCMeta):
     def format_help_page(self):
         return ''
 
-    def spy(self, query, timeout):
+    def spy(self, query, timeout, options={}):
         return spy(
             self.name,
             query,
             timeout=timeout,
-            slaves=self.conf.get('TORABOT_SPY_SLAVES', 1)
+            slaves=self.conf.get('TORABOT_SPY_SLAVES', 1),
+            options=options,
         )

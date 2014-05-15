@@ -37,10 +37,6 @@ def make_blueprint_mixin(import_name):
 
 class ViewMixin(object):
 
-    @abc.abstractmethod
-    def view(self, name):
-        pass
-
     def format_notice_status(self, view, notice):
         return self.view(view).format_notice_status(notice)
 
