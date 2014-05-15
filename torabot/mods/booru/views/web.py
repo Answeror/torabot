@@ -9,9 +9,14 @@ class WebView(object):
         display_name,
         post_uri_template,
         posts_url,
+        tags,
+        preview_url,
     ):
         self.display_name = display_name
         self.post_uri_template = post_uri_template
+        self.tags = tags
+        self.preview_url = preview_url
+        self.posts_url = posts_url
 
     def format_query_result(self, query):
         return {
@@ -24,6 +29,8 @@ class WebView(object):
             'booru/result/posts.html',
             query=query,
             post_uri_template=self.post_uri_template,
+            tags=self.tags,
+            preview_url=self.preview_url,
         )
 
     def format_new_post_notice(self, notice):

@@ -9,10 +9,14 @@ class EmailView(object):
         display_name,
         post_uri_template,
         referer,
+        tags,
+        preview_url,
     ):
         self.display_name = display_name
         self.post_uri_template = post_uri_template
         self.referer = referer
+        self.tags = tags
+        self.preview_url = preview_url
 
     def format_new_post_notice(self, notice):
         return '\n'.join([
@@ -23,7 +27,7 @@ class EmailView(object):
             'tags: %(tags)s',
         ]) % dict(
             query=notice.change.query_text,
-            tags=notice.change.post.tags,
+            tags=self.tags(notice.change.post),
         )
 
     def format_notice_body(self, notice):
@@ -38,11 +42,11 @@ class EmailView(object):
 
     def new_post_notice_attachments(self, notice):
         r = requests.get(
-            notice.change.post.preview_url,
+            self.preview_url(notice.change.post),
             headers=dict(referer=self.referer)
         )
         return [Bunch(
-            name=notice.change.post.tags,
+            name=self.tags(notice.change.post),
             mime=r.headers['content-type'],
             data=r.content,
         )]

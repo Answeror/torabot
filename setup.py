@@ -13,6 +13,7 @@ setup(
             'bilibili = torabot.mods.bilibili:Bilibili',
             'yyets = torabot.mods.yyets:Yyets',
             'yandere = torabot.mods.yandere:Yandere',
+            'danbooru = torabot.mods.danbooru:Danbooru',
         ]
     },
 )

@@ -2,7 +2,7 @@
     {% for post in query.result.posts %}
     <div class='col-sm-2 booru-post'>
         <div class='thumbnail'>
-            <a href='{{ post_uri_template.format(post.id) }}' target=_blank><img alt='{{ post.tags }}' src='{{ post.preview_url }}'></a>
+            <a href='{{ post_uri_template.format(post.id) }}' target=_blank><img alt='{{ tags(post) }}' src='{{ preview_url(post) }}'></a>
         </div>
     </div>
     {% endfor %}

@@ -1,6 +1,5 @@
 from stevedore.extension import ExtensionManager
 from logbook import Logger
-from .local import get_current_conf
 
 
 log = Logger(__name__)
@@ -12,11 +11,19 @@ class Mod(object):
         if app:
             self.init_app(app)
 
-        self.manager = ExtensionManager(
-            'torabot.mods',
-            invoke_on_load=True,
-            invoke_args=(get_current_conf(),)
-        )
+    @property
+    def manager(self):
+        name = '_manager'
+        value = getattr(self, name, None)
+        if value is None:
+            from .local import get_current_conf
+            value = ExtensionManager(
+                'torabot.mods',
+                invoke_on_load=True,
+                invoke_args=(get_current_conf(),)
+            )
+            setattr(self, name ,value)
+        return value
 
     def init_app(self, app):
         self.register_mod_blueprints(app)

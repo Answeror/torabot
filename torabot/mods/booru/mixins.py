@@ -11,11 +11,15 @@ class BooruMixin(object):
                 display_name=self.display_name,
                 post_uri_template=self.post_uri_template,
                 posts_url=self.posts_url,
+                tags=self.tags,
+                preview_url=self.preview_url,
             ),
             'email': email.EmailView(
                 display_name=self.display_name,
                 post_uri_template=self.post_uri_template,
                 referer=self.referer,
+                tags=self.tags,
+                preview_url=self.preview_url,
             ),
         }[name]
 
@@ -31,4 +35,6 @@ class BooruMixin(object):
 
     def spy(self, query, timeout):
         from .query import regular
-        return super(BooruMixin, self).spy(regular(query), timeout)
+        result = super(BooruMixin, self).spy(regular(query), timeout)
+        result.posts = [p for p in result.posts if self.preview_url(p)]
+        return result
