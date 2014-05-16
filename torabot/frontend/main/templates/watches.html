@@ -13,7 +13,7 @@
     {% set rest = user.maxwatch - total %}
     {% set threshold = config['TORABOT_REST_WATCH_HIGHLIGHT_THRESHOLD'] %}
     {% set rest_tag = "strong" if rest < threshold else "span" %}
-    <p>已用订阅查询{{ total }}个, 还可订阅<{{ rest_tag }}{% if rest < threshold %} class=text-danger{% endif %}>{{ rest }}</{{ rest_tag }}>个. {% if current_user.has_not_activated_email %}<span class=text-warning>您有邮箱尚未激活, 未激活的邮箱不会收到更新通知. <a href='{{ url_for("main.notice_conf") }}'>点我</a>立即激活.</span>{% endif %}</p>
+    <p>已用订阅查询<a href='{{ url_for(".faq") + "#faq-watch-limit" }}'>{{ total }}</a>个, 还可订阅<a href='{{ url_for(".faq") + "#faq-watch-limit" }}'><{{ rest_tag }}{% if rest < threshold %} class=text-danger{% endif %}>{{ rest }}</{{ rest_tag }}></a>个. {% if current_user.has_not_activated_email %}<span class=text-warning>您有邮箱尚未激活, 未激活的邮箱不会收到更新通知. <a href='{{ url_for("main.notice_conf") }}'>点我</a>立即激活.</span>{% endif %}</p>
     <table id=watch-table class='table table-condensed table-striped fixed-table'>
         <thead>
             <tr>

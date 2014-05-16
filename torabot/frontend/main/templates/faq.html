@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% set suffix = "(之一, 如果有人<a target=_blank href='https://github.com/Answeror/torabot'>参与</a>本项目的话)" %}
+<ol class=faq>
+    <li id=faq-watch-limit>
+        <p><strong>为什么我只能订阅{% if is_user %}{{ current_user.maxwatch }}{% else %}config['TORABOT_DEFAULT_MAXWATCH']{% endif %}个条目?</strong></p>
+        <p>每一条订阅都需要消耗更新姬的脑容量. 为了公平起见, 我们不希望更新姬被<a target=_blank href='http://zh.moegirl.org/%E5%85%AC%E8%BD%A6#.E5.85.AC.E8.BD.A6.E7.A7.81.E6.9C.89.E5.8C.96'>公车私有化</a>. 如果您欲求不满, 请<a target=_blank href='mailto:torabot+expand@aip.io'>邮件联系更新姬</a>.</a></p>
+    </li>
+    <li id=faq-only-google-login>
+        <p><strong>为什么torabot只支持Google账户登录?</strong></p>
+        <p>因为作者{{ suffix|safe }}是google厨, 并且他相信<a target=_blank href='http://www.zhihu.com/question/20160175/answer/14170867'>使用gmail的用户素质相对较高</a>. <del>另一个原因是他很懒.</del></p>
+    </li>
+    <li id=faq-ugly>
+        <p><strong>为什么网站这么丑/不好用?</strong></p>
+        <p>因为作者{{ suffix|safe }}<del>太搓了, </del>是一介码农, 不懂设计. 如果您有好点子, 欢迎<a target=_blank href='https://github.com/Answeror/torabot/issues'>提出来</a>.</p>
+    </li>
+    <li id=faq-require-feature>
+        <p><strong>这里能订阅XXX吗?</strong></p>
+        <p>你可以关注导航条的下拉框, 以及<a target=_blank href='https://github.com/Answeror/torabot'>项目主页</a>. 如果这里没有您需要的功能, 请到<a target=_blank href='https://github.com/Answeror/torabot/issues'>这里</a>提交.</p>
+    </li>
+</ol>
+{% endblock %}

@@ -382,6 +382,11 @@ def about():
     return render_template('about.html')
 
 
+@bp.route('/faq')
+def faq():
+    return render_template('faq.html')
+
+
 @bp.route('/help/<name>')
 def help(name):
     return render_template(
