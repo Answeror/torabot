@@ -14,7 +14,7 @@
     $(function() {
         var $container = $('#booru-posts');
         $container.masonry({
-            columnWidth: $container.find('.booru-post').outerWidth(),
+            columnWidth: '.booru-post',
             itemSelector: '.booru-post'
         });
         $container.find('.booru-post').each(function() {
