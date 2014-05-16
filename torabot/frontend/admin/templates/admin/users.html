@@ -18,11 +18,6 @@
     {{ super() }}
     {{ macros.xeditable_js() }}
     {{ macros.jsoneditor_js() }}
-    <script>
-        $(function() {
-            $('.user-table').find('.editable-field').popup_text_edit();
-        });
-    </script>
 {% endblock %}
 {% block content %}
     <table class='user-table table table-hover'>
@@ -40,12 +35,13 @@
         <tbody>
             {% for user in users %}
             <tr>
+                {% set placement = '' if not loop.first else ' data-placement=bottom' %}
                 <td>{{ user.id }}</td>
-                <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="name") }}'>{{ user.name }}</a></td>
-                <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="email") }}'>{{ user.email }}</a></td>
-                <td><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="openid") }}'>{{ user.openid }}</a></td>
+                <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="name") }}'>{{ user.name }}</a></td>
+                <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="email") }}'>{{ user.email }}</a></td>
+                <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="openid") }}'>{{ user.openid }}</a></td>
                 <td>{{ user.watch_count }}</td>
-                <td><a href=# class=editable-field data-kind=int data-uri='{{ url_for(".user", id=user.id, field="maxwatch") }}'>{{ user.maxwatch }}</a></td>
+                <td><a{{ placement }} href=# class=editable-field data-kind=int data-uri='{{ url_for(".user", id=user.id, field="maxwatch") }}'>{{ user.maxwatch }}</a></td>
                 <td>{{ momentjs(user.ctime).fromnow() }}</td>
             </tr>
             {% endfor %}

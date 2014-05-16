@@ -8,8 +8,8 @@ $(function() {
     };
 });
 $(function() {
-    $.fn.popup_text_edit = function() {
-        $(this).editable({
+    $.fn.popup_text_edit = function(options) {
+        $(this).editable($.extend({}, {
             type: 'text',
             mode: 'popup',
             url: function(params) {
@@ -46,7 +46,7 @@ $(function() {
                     }
                 });
             }
-        });
+        }, options || {}));
     }
 });
 $(function(){

@@ -21,7 +21,6 @@
             $('.query-field').click(function() {
                 $(location).attr('href', $(this).data('uri'));
             });
-            $('.query-table').find('.editable-field').popup_text_edit();
         });
     </script>
 {% endblock %}
@@ -40,8 +39,9 @@
         <tbody>
             {% for q in queries %}
             <tr>
+                {% set placement = '' if not loop.first else ' data-placement=bottom' %}
                 <td class=col-sm-1>{{ q.id }}</td>
-                <td class=col-sm-2><a href=# class=editable-field data-kind=text data-uri='{{ url_for(".query", id=q.id, field="kind") }}'>{{ q.kind }}</a></td>
+                <td class=col-sm-2><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".query", id=q.id, field="kind") }}'>{{ q.kind }}</a></td>
                 <td class='query-field col-sm-4' data-uri='{{ url_for(".query", id=q.id, field="text") }}'>{{ q.text }}</td>
                 <td class='query-field col-sm-4' data-uri='{{ url_for(".query", id=q.id, field="result") }}'>{{ q.result }}</td>
                 <td class=col-sm-1>{{ momentjs(q.ctime).fromnow() }}</td>

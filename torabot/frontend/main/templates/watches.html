@@ -7,11 +7,6 @@
 {% block foot %}
     {{ super() }}
     {{ macros.xeditable_js() }}
-    <script>
-        $(function() {
-            $('#watch-table').find('.editable-field').popup_text_edit();
-        });
-    </script>
 {% endblock %}
 {% block content %}
     {% if watches %}
@@ -35,7 +30,7 @@
             <td class=hidden-xs>{{ momentjs(watch.ctime).calendar() }}</td>
             <td><span class='label label-primary'>{{ mod(watch.query_kind).display_name }}</span></td>
             <td><span class='label label-{% if watch.email_activated %}info{% else %}danger{% endif %}' title='{{ watch.email_text }}{% if not watch.email_activated %} (未激活){% endif %}'>{{ watch.email_label if watch.email_label else watch.email_text }}</span></td>
-            <td><a class=editable-field data-kind=text title='重命名' href=# data-field=name data-args='{"user_id": {{ watch.user_id }}, "email_id": {{ watch.email_id }}, "query_id": {{ watch.query_id }}}' data-uri='{{ url_for(".rename_watch") }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
+            <td><a class=editable-field{% if loop.first %} data-placement=bottom{% endif %} data-kind=text title='重命名' href=# data-field=name data-args='{"user_id": {{ watch.user_id }}, "email_id": {{ watch.email_id }}, "query_id": {{ watch.query_id }}}' data-uri='{{ url_for(".rename_watch") }}'>{{ watch.name if watch.name else watch.query_text }}</a></td>
             <td>
                 <div class=pull-right>
                     <a class='btn btn-xs btn-default' href='{{ url_for(".search", kind=watch.query_kind, q=watch.query_text) }}'>查看</a>

@@ -36,7 +36,13 @@
 {%- endmacro %}
 
 {% macro xeditable_js() -%}
-<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js'></script>
+<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js'>
+</script>
+<script>
+    $(function() {
+        $('.editable-field').popup_text_edit();
+    });
+</script>
 {%- endmacro %}
 
 {% macro intro_js() -%}
