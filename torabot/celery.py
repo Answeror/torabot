@@ -29,5 +29,11 @@ def log_to_file():
     tasks.log_to_file()
 
 
+@app.task
+def tell_admin_safe(*args, **kargs):
+    from torabot import tasks
+    return tasks.tell_admin_safe(*args, **kargs)
+
+
 if __name__ == '__main__':
     app.start()

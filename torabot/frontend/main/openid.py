@@ -26,12 +26,11 @@ from flask import (
 )
 from itsdangerous import BadSignature
 from ... import db
-from ...ut.session import makeappsession as makesession
 from . import bp
 from logbook import Logger
 from ...core.local import is_user
 from ...core.connection import autoccontext
-from ...core.user import send_activation_email, get_serializer, check_openid
+from ...core.user import send_activation_email, get_serializer, check_openid, add_user
 
 
 oid = OpenID()
@@ -147,14 +146,7 @@ def prof():
             flash('Error: you have to enter a valid email address')
         else:
             flash('Profile successfully created')
-            with makesession(commit=True) as session:
-                user_id = db.add_user(
-                    session.connection(),
-                    name=name,
-                    email=email,
-                    openid=flask_session['openid'],
-                )
-                user = db.get_user_detail_bi_id(session.connection(), user_id)
+            user = add_user(name, email, flask_session['openid'])
             send_activation_email(
                 email_id=user.emails[0].id,
                 email_text=email,

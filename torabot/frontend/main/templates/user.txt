@@ -1,0 +1,4 @@
+新用户 {{ user.name }} 注册了.
+
+id: {{ user.id }}
+email: {{ user.email }}

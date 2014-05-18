@@ -3,8 +3,10 @@ from flask import url_for, current_app, render_template
 from itsdangerous import URLSafeSerializer
 from ..ut.bunch import Bunch
 from .. import db
+from .. import celery
 from .connection import autoccontext
 from .email import send as send_email
+from .local import get_current_conf
 
 
 log = Logger(__name__)
@@ -120,3 +122,19 @@ def get_serializer(secret_key=None):
     if secret_key is None:
         secret_key = current_app.secret_key
     return URLSafeSerializer(secret_key)
+
+
+def add_user(name, email, openid):
+    with autoccontext(commit=True) as conn:
+        user_id = db.add_user(
+            conn,
+            name=name,
+            email=email,
+            openid=openid,
+        )
+        user = db.get_user_detail_bi_id(conn, user_id)
+
+    if get_current_conf().get('TORABOT_TELL_ADMIN_NEW_USER'):
+        celery.tell_admin_safe.delay(text=render_template('user.txt', user=user))
+
+    return user
