@@ -1,0 +1,13 @@
+{
+    "family": "torabot",
+    "name": "main",
+    "version": "0.1.0",
+    "spm": {
+        "include": "all",
+        "alias": {
+            "seajs-style": "seajs/seajs-style/1.0.2/seajs-style",
+            "cookie": "arale/cookie/1.0.2/cookie"
+        },
+        "output": ["init.js", "style.css"]
+    }
+}
