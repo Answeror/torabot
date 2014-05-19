@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate, COMMASPACE
 from logbook import Logger
+from mimetypes import guess_extension
 
 
 ENCODING = 'utf-8'
@@ -16,7 +17,7 @@ ENCODING = 'utf-8'
 log = Logger(__name__)
 
 
-def send(sender_addr, password, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None, save=False, host='smtp.gmail.com', port=587):
+def pack(sender_addr, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None):
     if sender_name is None:
         sender_name = sender_addr
     sender_name = Header(sender_name, ENCODING).encode()
@@ -44,6 +45,20 @@ def send(sender_addr, password, recipient_addrs, subject, text=None, attachments
 
     for child in format_attachments(attachments):
         msg_related.attach(child)
+
+    return msg_root
+
+
+def send(sender_addr, password, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None, save=False, host='smtp.gmail.com', port=587):
+    msg_root = pack(
+        sender_addr=sender_addr,
+        recipient_addrs=recipient_addrs,
+        subject=subject,
+        text=text,
+        attachments=attachments,
+        sender_name=sender_name,
+        html=html,
+    )
 
     if port is None:
         smtp = smtplib.SMTP(host)
@@ -86,12 +101,17 @@ def get_attachment_name(a):
             name = os.path.basename(a.path)
         else:
             name = str(uuid4())
-    return name
+    ext = guess_extension(get_mime(a)) or ''
+    return name + ext
+
+
+def get_mime(a):
+    return a.get('mime', 'application/octet-stream')
 
 
 def format_attachments(attachments):
     for a in attachments:
-        maintype, subtype = a.get('mime', 'application/octet-stream').split('/', 1)
+        maintype, subtype = get_mime(a).split('/', 1)
         data = get_attachment_data(a)
         if maintype == 'text':
             # Note: we should handle calculating the charset
@@ -128,7 +148,7 @@ if __name__ == '__main__':
         '测试中文',
         [Bunch(
             path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'nerv.png'),
-            mime='application/image',
+            mime='image/png',
             name='例大祭11カット'
         )],
         host=conf['TORABOT_EMAIL_HOST'],
