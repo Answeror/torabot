@@ -1,16 +1,54 @@
-<table class='table table-condensed table-striped'>
-    <thead>
-        <tr>
-            <td class=col-sm-8>名称</td>
-            <td class=col-sm-4>时间</td>
-        </tr>
-    </thead>
-    <tbody>
+{% from 'feed/macros.html' import format_entry_content with context %}
+<style>
+.torabot .feed-entry .header {
+    font-size: 157%;
+}
+</style>
+<div class=panel-group id=accordion>
     {% for entry in query.result.data.entries %}
-    <tr>
-        <td><a href="{{ entry.link }}" target=_blank>{{ entry.title }}</a></td>
-        <td>{{ entry.published }}</td>
-    </tr>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href='#feed-entry-{{ loop.index0 }}'><span class=ddd>{{ entry.title }}</span></a>
+            </h4>
+        </div>
+        <div id='feed-entry-{{ loop.index0 }}' class="panel-collapse collapse">
+            <div class=panel-body>
+                {{ format_entry_content(entry) }}
+            </div>
+            <table class='table table-condensed'>
+                <tbody>
+                    <tr>
+                        <td class='col-sm-2 text-right'><strong>链接</strong></td>
+                        <td class=col-sm-10><a href='{{ entry.link }}' target=_blank>{{ entry.link }}</a></td>
+                    </tr>
+                    {% if 'published_parsed' in entry %}
+                    <tr>
+                        <td class='col-sm-2 text-right'><strong>发布时间</strong></td>
+                        <td class=col-sm-10>{{ momentjs(entry.published_parsed).fromnow() }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if 'updated_parsed' in entry %}
+                    <tr>
+                        <td class='col-sm-2 text-right'><strong>更新时间</strong></td>
+                        <td class=col-sm-10>{{ momentjs(entry.updated_parsed).fromnow() }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if 'author' in entry %}
+                    <tr>
+                        <td class='col-sm-2 text-right'><strong>作者</strong></td>
+                        <td class=col-sm-10><a href='{{ entry.author_link }}' target=_blank>{{ entry.formatted_author }}</a></td>
+                    </tr>
+                    {% endif %}
+                    {% if 'summary' in entry and entry.summary.strip() %}
+                    <tr>
+                        <td class='col-sm-2 text-right'><strong>摘要</strong></td>
+                        <td class=col-sm-10>{{ entry.summary }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% endfor %}
-    </tbody>
-</table>
+</div>

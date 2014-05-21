@@ -1,0 +1,15 @@
+{% macro format_entry_content(entry) -%}
+<div class=feed-entry>
+    <h1 class=header><a href='{{ entry.link }}' target=_blank>{{ entry.title }}</a></h1>
+    {% if not entry.best_content_empty %}
+    <hr>
+    <div class=body>
+        {% if entry.is_html %}
+        {{ entry.best_content.value|safe }}
+        {% else %}
+        <pre>{{ entry.best_content.value }}</pre>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{%- endmacro %}
