@@ -15,7 +15,7 @@
         {{ macros.jquery_js() }}
         {% endblock %}
     </head>
-    <body {% if snapshot %}class=snapshot{% endif %} class='yue torabot'>
+    <body class='yue torabot{% if snapshot %} snapshot{% endif %}'>
         {% block body %}{% endblock %}
     </body>
     <foot>

@@ -1,6 +1,8 @@
 from sqlalchemy.sql import text as sql
 from psycopg2.extras import Json
 from datetime import datetime
+import jsonpickle
+import json
 from ..ut.bunch import bunchr
 from .error import error_guard
 
@@ -19,7 +21,7 @@ def get_or_add_query_bi_kind_and_text(conn, kind, text):
         sql('select * from get_or_add_query_bi_kind_and_text(:kind, :text)'),
         kind=kind, text=text
     )
-    return bunchr(**result.fetchone())
+    return mq(**result.fetchone())
 
 
 def set_query_result(conn, query_id, result):
@@ -36,7 +38,7 @@ def get_query_bi_kind_and_text(conn, kind, text):
         kind=kind,
         text=text
     ).fetchone()
-    return None if ret is None else bunchr(**ret)
+    return None if ret is None else mq(**ret)
 
 
 def get_query_count(conn):
@@ -64,7 +66,7 @@ def get_active_queries(conn, offset=None, limit=None):
         '' if offset is None else 'offset :offset',
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))
-    return [bunchr(**row) for row in result.fetchall()]
+    return [mq(**row) for row in result.fetchall()]
 
 
 def get_sorted_active_queries(conn, offset=None, limit=None):
@@ -80,7 +82,7 @@ def get_sorted_active_queries(conn, offset=None, limit=None):
         '' if offset is None else 'offset :offset',
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))
-    return [bunchr(**row) for row in result.fetchall()]
+    return [mq(**row) for row in result.fetchall()]
 
 
 def get_active_query_count(conn):
@@ -121,7 +123,11 @@ def get_queries(conn, offset=None, limit=None):
         '' if offset is None else 'offset :offset',
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))
-    return [bunchr(**row) for row in result.fetchall()]
+    return [mq(**row) for row in result.fetchall()]
+
+
+def mq(result, **kargs):
+    return bunchr(result=jsonpickle.decode(json.dumps(result)), **kargs)
 
 
 def get_query_bi_id(conn, id):
@@ -129,7 +135,7 @@ def get_query_bi_id(conn, id):
         sql('select * from query where id = :id'),
         id=id
     ).fetchone()
-    return None if ret is None else bunchr(**ret)
+    return None if ret is None else mq(**ret)
 
 
 @error_guard
