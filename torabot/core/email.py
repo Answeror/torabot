@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate, COMMASPACE
 from logbook import Logger
-from mimetypes import guess_extension
+import mimetypes
 
 
 ENCODING = 'utf-8'
@@ -92,6 +92,14 @@ def get_attachment_data(a):
         with open(a.path, 'rb') as f:
             data = f.read()
     return data
+
+
+def guess_extension(mime):
+    ext = mimetypes.guess_extension(mime)
+    # 163 mail not recognize .jpe
+    # for why jpe:
+    # http://stackoverflow.com/a/11396288/238472
+    return '.jpeg' if ext == '.jpe' else ext
 
 
 def get_attachment_name(a):

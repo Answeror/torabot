@@ -1,11 +1,11 @@
 import os
-from nose.tools import assert_in
+from nose.tools import assert_equal
 from ...ut.bunch import Bunch
-from ..email import pack
+from ..email import pack, guess_extension
 
 
 def test_pack():
-    s = pack(
+    assert pack(
         'sender',
         ['answeror@gmail.com'],
         'head',
@@ -16,4 +16,8 @@ def test_pack():
             name='例大祭11カット'
         )],
     ).as_string()
-    assert_in('.png', s)
+
+
+def test_guess_extension():
+    assert_equal(guess_extension('image/png'), '.png')
+    assert_equal(guess_extension('image/jpeg'), '.jpeg')
