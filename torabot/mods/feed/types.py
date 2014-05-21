@@ -57,10 +57,7 @@ class Entry(Wrap):
 
     @property
     def is_html(self):
-        if self.best_content.type not in ('text/html', 'application/xhtml+xml'):
-            return False
-        s = self.best_content.value.strip()
-        return s and (s[0], s[-1]) == ('<', '>')
+        return self.best_content.type in ('text/html', 'application/xhtml+xml')
 
     def _make_best_content(self):
         """Select the best content from an entry.
