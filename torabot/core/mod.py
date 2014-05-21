@@ -1,8 +1,4 @@
 from stevedore.extension import ExtensionManager
-from logbook import Logger
-
-
-log = Logger(__name__)
 
 
 class Mod(object):
@@ -22,7 +18,7 @@ class Mod(object):
                 invoke_on_load=True,
                 invoke_args=(get_current_conf(),)
             )
-            setattr(self, name ,value)
+            setattr(self, name, value)
         return value
 
     def init_app(self, app):
@@ -32,7 +28,6 @@ class Mod(object):
     def register_mod_blueprints(self, app):
         with app.app_context():
             for m in mods():
-                log.info('load mod {}', m.name)
                 bp = getattr(m, 'blueprint', None)
                 if bp is not None:
                     app.register_blueprint(bp)

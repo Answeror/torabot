@@ -14,4 +14,4 @@ def test_format_notice():
         })
     ]:
         for view in ['web', 'email']:
-            yield check_format_notice_body_not_none, name, 'web', notice
+            yield check_format_notice_body_not_none, name, view, notice
