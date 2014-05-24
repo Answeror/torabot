@@ -1,13 +1,5 @@
 {% import 'macros.html' as macros with context %}
 {% extends "layout.html" %}
-{% block head %}
-    {{ super() }}
-    {{ macros.xeditable_css() }}
-{% endblock %}
-{% block foot %}
-    {{ super() }}
-    {{ macros.xeditable_js() }}
-{% endblock %}
 {% block content %}
     {% if watches %}
     {% set rest = user.maxwatch - total %}

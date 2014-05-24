@@ -2,8 +2,6 @@
 {% extends "layout.html" %}
 {% block head %}
     {{ super() }}
-    {{ macros.xeditable_css() }}
-    {{ macros.jsoneditor_css() }}
     <style>
         .user-table { table-layout:fixed; }
         .user-table td {
@@ -13,11 +11,6 @@
         }
         .user-field { cursor: pointer; }
     </style>
-{% endblock %}
-{% block foot %}
-    {{ super() }}
-    {{ macros.xeditable_js() }}
-    {{ macros.jsoneditor_js() }}
 {% endblock %}
 {% block content %}
     <table class='user-table table table-hover'>

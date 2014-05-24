@@ -24,7 +24,7 @@ body.snapshot::after {
 }
 
 .intro .navbar {
-    margin-bottom: 0; !important
+    margin-bottom: 0 !important;
 }
 
 .vspace-top-small {
@@ -36,11 +36,11 @@ body.snapshot::after {
 }
 
 .vspace-top-large {
-    margin-top: 59px; !important
+    margin-top: 59px !important;
 }
 
 .vspace-bottom-large {
-    margin-bottom: 59px; !important
+    margin-bottom: 59px !important;
 }
 
 .control-text {
@@ -74,7 +74,7 @@ span.w {
 }
 
 .inline-block {
-    display: inline-block; !important
+    display: inline-block !important;
 }
 
 .fixed-table {
@@ -87,7 +87,7 @@ span.w {
 }
 
 .carousel-control.left, .carousel-control.right {
-    background: none; !important
+    background: none !important;
 }
 
 .bulletin {
@@ -123,7 +123,7 @@ span.w {
 }
 
 .intro-tooltip {
-    min-width: 250px; !important
+    min-width: 250px !important;
 }
 
 .not-important {
@@ -149,3 +149,14 @@ span.w {
     text-overflow: ellipsis;
     display: block;
 }
+
+.torabot .mod-select {
+    border-right: none !important;
+    margin-bottom: 0 !important;
+    width: 120px !important;
+}
+
+.torabot .mod-select .selectpicker {
+    border-right: none !important;
+    border-radius: 0 !important;
+};

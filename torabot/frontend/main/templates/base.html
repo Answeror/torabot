@@ -7,9 +7,23 @@
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <title>{% block title %}torabot{% endblock %}</title>
         {{ macros.bootstrap_css() }}
-        {{ macros.switch_css() }}
         <link rel='stylesheet' href='{{ url_for("main.static", filename="dist/style.css") }}'>
         {{ macros.jquery_js() }}
+        <script>
+            $(function(){
+                seajs.config({
+                    base: '{{ url_for("main.static", filename="sea-modules") }}'
+                }).use('torabot/main/0.1.0/init{% if debug %}-debug{% endif %}');
+                {% if intro and not snapshot %}
+                seajs.use('torabot/main/0.1.0/intro{% if debug %}-debug{% endif %}', function(m){
+                    m.init({
+                        pixiv_search_options_uri: '{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}',
+                        pixiv_search_result_uri: '{{ url_for("main.search", kind="pixiv", method="ranking", mode="daily", limit=10)|safe }}'
+                    });
+                });
+                {% endif %}
+            });
+        </script>
         {% endblock %}
     </head>
     <body class='yue torabot{% if snapshot %} snapshot{% endif %}'>
@@ -19,14 +33,7 @@
         {% block foot %}
         {{ macros.google_js() }}
         {{ macros.bootstrap_js() }}
-        {{ macros.moment_js() }}
-        {{ macros.pnotify_js() }}
-        {{ macros.switch_js() }}
         <script src='{{ url_for("main.static", filename="sea-modules/seajs/seajs/2.2.1/sea.js") }}'></script>
-        <script src='{{ url_for("main.static", filename="dist/init-debug.js") }}'></script>
-        <script>
-            seajs.use('torabot/main/0.1.0/init-debug');
-        </script>
         {% endblock %}
     </foot>
 </html>

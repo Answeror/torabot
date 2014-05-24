@@ -24,8 +24,10 @@ $(function(){
 <div class='container vspace-top-small'>
     {% block content %}{% endblock %}
     {% block footer %}
+    {% if not snapshot %}
     <hr>
     {% include 'footer.html' %}
+    {% endif %}
     {% endblock %}
 </div>
 {% block after_container %}{% endblock %}

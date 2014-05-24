@@ -82,6 +82,7 @@ def inject_locals():
         intro=intro,
         is_user_activated=is_user_activated,
         current_user=current_user,
+        debug=current_app.config['TORABOT_DEBUG'],
     )
 
 

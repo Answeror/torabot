@@ -2,7 +2,6 @@
 {% extends "layout.html" %}
 {% block head %}
     {{ super() }}
-    {{ macros.xeditable_css() }}
     <style>
         .query-table { table-layout:fixed; }
         .query-table td {
@@ -15,7 +14,6 @@
 {% endblock %}
 {% block foot %}
     {{ super() }}
-    {{ macros.xeditable_js() }}
     <script>
         $(function() {
             $('.query-field').click(function() {

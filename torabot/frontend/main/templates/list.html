@@ -1,4 +1,20 @@
 {% extends "layout.html" %}
+{% block foot %}
+    {{ super() }}
+    <script>
+        $(function(){
+            seajs.use('torabot/main/0.1.0/search-result{% if debug %}-debug{% endif %}', function(m){
+                m.init({
+                    current_user_id: {{ current_user_id }},
+                    query_id: {{ query.id }},
+                    watch_uri: '{{ url_for("main.watch") }}',
+                    unwatch_uri: '{{ url_for("main.unwatch") }}',
+                    email_id: {{ states[0].id }}
+                });
+            });
+        });
+    </script>
+{% endblock %}
 {% block navbar %}
 {% include "listnav.html" %}
 {% endblock %}

@@ -1,10 +1,9 @@
 define(function(require){
-    require('seajs-style')
+    require('seajs-style');
     require('./ut');
+    require('./moment');
+    require('./pnotify.custom.min');
+    require('./switch');
+    require('./xeditable');
     require('./search');
-
-    Cookie = require('cookie');
-    if (Cookie.get('intro') != '0') {
-        require('./intro');
-    }
 });

@@ -4,7 +4,7 @@
             <button name=help type=button class='intro-help btn btn-default' title='帮助'>?</button>
         </span>
         <span class='intro-select-mod input-group-btn'>
-            <select class="form-control" name=kind style='margin-right: -1px; width: 120px;'>
+            <select class="mod-select form-control" name=kind data-live-search=true data-container=body>
                 {% for m in mods %}
                 <option
                     value='{{ m.name }}'
