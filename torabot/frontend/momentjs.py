@@ -1,10 +1,12 @@
 from jinja2 import Markup
+from datetime import datetime
+import time
 
 
 class Momentjs(object):
 
     def __init__(self, timestamp):
-        self.timestamp = timestamp
+        self.timestamp = time_to_datetime(timestamp) if isinstance(timestamp, time.struct_time) else timestamp
 
     def render(self, format):
         return Markup("<span class=momentjs data-format='%s'>%s</span>" % (
@@ -24,3 +26,7 @@ class Momentjs(object):
 
 def momentjs(timestamp):
     return Momentjs(timestamp)
+
+
+def time_to_datetime(t):
+    return datetime.fromtimestamp(time.mktime(t))

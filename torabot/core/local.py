@@ -1,13 +1,6 @@
 from werkzeug.local import LocalProxy
 from flask import g, session, request
 from .. import db
-from .connection import autoccontext
-from .user import (
-    get_user_detail_bi_openid as core_get_user_detail_bi_openid,
-    get_user_id_bi_openid as core_get_user_id_bi_openid,
-    get_user_name_bi_openid as core_get_user_name_bi_openid,
-    check_openid,
-)
 
 
 def get_current_conf():
@@ -26,6 +19,7 @@ def get_is_user():
     name = '_is_user'
     value = getattr(g, name, None)
     if value is None:
+        from .user import check_openid
         value = 'openid' in session and check_openid(session['openid'])
         setattr(g, name, value)
     return value
@@ -41,6 +35,7 @@ def get_is_user_activated():
         if not is_user:
             value = False
         else:
+            from .connection import autoccontext
             with autoccontext() as conn:
                 value = db.user_activated_bi_id(conn, current_user_id._get_current_object())
         setattr(g, name, value)
@@ -71,7 +66,8 @@ def get_current_user():
     name = '_current_user'
     value = getattr(g, name, None)
     if value is None:
-        value = core_get_user_detail_bi_openid(session['openid'])
+        from .user import get_user_detail_bi_openid
+        value = get_user_detail_bi_openid(session['openid'])
         setattr(g, name, value)
         if value:
             g.current_user_loaded = True
@@ -92,7 +88,8 @@ def get_current_user_id():
             if g.get('current_user_loaded', False):
                 value = current_user.id
             else:
-                value = core_get_user_id_bi_openid(session['openid'])
+                from .user import get_user_id_bi_openid
+                value = get_user_id_bi_openid(session['openid'])
         setattr(g, name, value)
     return value
 
@@ -111,7 +108,8 @@ def get_current_username():
             if g.get('current_user_loaded', False):
                 value = current_user.name
             else:
-                value = core_get_user_name_bi_openid(session['openid'])
+                from .user import get_user_name_bi_openid
+                value = get_user_name_bi_openid(session['openid'])
         setattr(g, name, value)
     return value
 

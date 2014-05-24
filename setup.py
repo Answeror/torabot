@@ -14,6 +14,7 @@ setup(
             'yyets = torabot.mods.yyets:Yyets',
             'yandere = torabot.mods.yandere:Yandere',
             'danbooru = torabot.mods.danbooru:Danbooru',
+            'feed = torabot.mods.feed:Feed',
         ]
     },
 )

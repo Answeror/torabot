@@ -11,12 +11,14 @@ anyjson==0.3.3
 beautifulsoup4==4.3.2
 billiard==3.3.0.16
 celery==3.1.9
+feedparser==5.1.3
 fn==0.2.13
 gunicorn==18.0
 html5lib==0.999
 httmock==1.0.7
 itsdangerous==0.23
 joblib==0.7.1
+jsonpickle==0.7.1
 kombu==3.0.12
 nose==1.3.0
 psycopg2==2.5.1

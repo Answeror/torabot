@@ -142,3 +142,10 @@ span.w {
     text-shadow: none;
     background: rgba(65,131,196,0.4);
 }
+
+.torabot .ddd {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
