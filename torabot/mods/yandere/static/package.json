@@ -1,0 +1,11 @@
+{
+    "family": "torabot",
+    "name": "yandere",
+    "version": "0.1.0",
+    "spm": {
+        "alias": {
+            "main/search": "main/search"
+        },
+        "output": ["yandere.js"]
+    }
+}

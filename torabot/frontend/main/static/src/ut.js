@@ -6,4 +6,16 @@ define(function(require, exports, module){
         },
         enumerable: false
     });
+
+    RegExp.escape = function(str) {
+        return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\(');
+    };
+
+    $.torabot = {};
+    $.torabot.cast = function(type, value) {
+        return ({
+            text: function(x) { return x.toString(); },
+            int: parseInt
+        })[type](value);
+    };
 });

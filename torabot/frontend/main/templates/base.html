@@ -12,10 +12,27 @@
         <script>
             $(function(){
                 seajs.config({
-                    base: '{{ url_for("main.static", filename="sea-modules") }}'
-                }).use('torabot/main/0.1.0/init{% if debug %}-debug{% endif %}');
+                    base: '{{ url_for("main.static", filename="sea-modules") }}',
+                    paths: {
+                        'main': 'torabot/main/0.1.0',
+                        'yandere': 'torabot/yandere/0.1.0'
+                    },
+                    alias: {
+                        'yandere': 'yandere/yandere',
+                        'yandere-debug': 'yandere/yandere-debug'
+                    }
+                }).use('main/init{% if debug %}-debug{% endif %}', function(m){
+                    m.init({
+                        mods: [{
+                            name: 'yandere{% if debug %}-debug{% endif %}',
+                            options: {
+                                source: ({% include 'tags.json' %}).data
+                            }
+                        }]
+                    });
+                });
                 {% if intro and not snapshot %}
-                seajs.use('torabot/main/0.1.0/intro{% if debug %}-debug{% endif %}', function(m){
+                seajs.use('main/intro{% if debug %}-debug{% endif %}', function(m){
                     m.init({
                         pixiv_search_options_uri: '{{ url_for("main.advanced_search", kind="pixiv", method="ranking") }}',
                         pixiv_search_result_uri: '{{ url_for("main.search", kind="pixiv", method="ranking", mode="daily", limit=10)|safe }}'

@@ -17,7 +17,9 @@
                 {% endfor %}
             </select>
         </span>
-        <input type="text" class='intro-query form-control' name=q value='{{ query_text }}'>
+        <span class='intro-query input-group-btn'>
+            <input type="text" class=form-control name=q value='{{ query_text }}'>
+        </span>
         <span name=buttons class="input-group-btn">
             <button name=search type="submit" class='intro-search btn btn-default' title='搜索'>
                 <span class='glyphicon glyphicon-search'></span>
