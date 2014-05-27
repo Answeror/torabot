@@ -8,7 +8,8 @@
             "seajs-style": "seajs/seajs-style/1.0.2/seajs-style",
             "cookie": "arale/cookie/1.0.2/cookie",
             "bootstrap-select": "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select",
-            "bootstrap-select.css": "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select.css"
+            "bootstrap-select.css": "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select.css",
+            "handlebars": "./handlebars-v1.3.0"
         },
         "output": ["init.js", "intro.js", "search-result.js", "style.css"]
     }

@@ -20,10 +20,12 @@ define(function(require, exports, module){
         },
         match: function(q, cb){
             var ret = self.complete_tag(q);
-            cb($.map(ret[0], function(r){ return {value: r}; }));
+            cb($.map(require('main/ut').zip(ret[0], ret[1]), function(args){ console.log(args); return {value: args[0], alias: args[1].join(' ')}; }));
         },
         init: function(options){
             self.options = options;
+        },
+        activate: function(){
             require('main/search').$q.typeahead({
                 hint: true,
                 highlight: true,
@@ -31,9 +33,19 @@ define(function(require, exports, module){
             }, {
                 name: 'yandere',
                 displayKey: 'value',
-                source: self.match
+                source: self.match,
+                templates: {
+                    suggestion: require('handlebars').compile('<p><strong>{{value}}</strong>{{#if alias}} - {{alias}}{{/if}}</p>')
+                }
             });
+        },
+        deactivate: function(){
+            require('main/search').$q.typeahead('destroy');
         }
     };
-    exports.init = self.init;
+    module.exports = {
+        init: self.init,
+        activate: self.activate,
+        deactivate: self.deactivate
+    };
 });

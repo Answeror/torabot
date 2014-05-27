@@ -4,7 +4,9 @@
     "version": "0.1.0",
     "spm": {
         "alias": {
-            "main/search": "main/search"
+            "main/search": "main/search",
+            "main/ut": "main/ut",
+            "handlebars": "main/handlebars-v1.3.0"
         },
         "output": ["yandere.js"]
     }

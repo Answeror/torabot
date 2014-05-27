@@ -1,4 +1,4 @@
-define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug", "./retrieve_tag_search-debug", "./reorder_search_results-debug", "./split_result-debug", "main/search-debug" ], function(require, exports, module) {
+define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug", "./retrieve_tag_search-debug", "./reorder_search_results-debug", "./split_result-debug", "main/ut-debug", "main/search-debug", "main/handlebars-v1.3.0-debug" ], function(require, exports, module) {
     var self = {
         create_tag_search_regex: require("./create_tag_search_regex-debug"),
         retrieve_tag_search: require("./retrieve_tag_search-debug"),
@@ -24,14 +24,18 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
         },
         match: function(q, cb) {
             var ret = self.complete_tag(q);
-            cb($.map(ret[0], function(r) {
+            cb($.map(require("main/ut-debug").zip(ret[0], ret[1]), function(args) {
+                console.log(args);
                 return {
-                    value: r
+                    value: args[0],
+                    alias: args[1].join(" ")
                 };
             }));
         },
         init: function(options) {
             self.options = options;
+        },
+        activate: function() {
             require("main/search-debug").$q.typeahead({
                 hint: true,
                 highlight: true,
@@ -39,11 +43,21 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
             }, {
                 name: "yandere",
                 displayKey: "value",
-                source: self.match
+                source: self.match,
+                templates: {
+                    suggestion: require("main/handlebars-v1.3.0-debug").compile("<p><strong>{{value}}</strong>{{#if alias}} - {{alias}}{{/if}}</p>")
+                }
             });
+        },
+        deactivate: function() {
+            require("main/search-debug").$q.typeahead("destroy");
         }
     };
-    exports.init = self.init;
+    module.exports = {
+        init: self.init,
+        activate: self.activate,
+        deactivate: self.deactivate
+    };
 });
 
 // https://github.com/moebooru/moebooru/blob/0aa622f2fbdb81a19578c999775ce3bbb2fc49b2/lib/assets/javascripts/moe-legacy/tag_completion.js
