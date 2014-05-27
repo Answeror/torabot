@@ -58,9 +58,6 @@ define(function(require, exports, module){
                     });
                 }
                 var current_mod = self.get_mod_path($selected.val());
-                console.log($selected.val());
-                console.log(self.options.mods);
-                console.log(current_mod);
                 if (current_mod) {
                     require.async(current_mod, function(m){
                         m.activate();

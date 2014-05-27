@@ -19,13 +19,37 @@ define(function(require, exports, module){
             if ("sqe".indexOf(tag) != -1) results.unshift("0`" + tag + "` ");
         },
         match: function(q, cb){
-            var ret = self.complete_tag(q);
-            cb($.map(require('main/ut').zip(ret[0], ret[1]), function(args){ console.log(args); return {value: args[0], alias: args[1].join(' ')}; }));
+            var tag = q.split(' ').slice(-1)[0];
+            if (tag) {
+                var ret = self.complete_tag(tag);
+                cb($.map(require('main/ut').zip(ret[0], ret[1]), function(args){
+                    return {
+                        value: args[0],
+                        alias: args[1].map(function(x){
+                            return {value: x};
+                        })
+                    };
+                }));
+            }
         },
         init: function(options){
             self.options = options;
         },
         activate: function(){
+            var last_query = null;
+            var update_query = function(suggestion, options){
+                options = $.extend({
+                    query: null,
+                    set: function(value){ return require('main/search').$q.val(value); }
+                }, options);
+                var query = options.query;
+                if (!query) {
+                    last_query = query = require('main/search').$q.typeahead('val');
+                }
+                var tags = query.split(' ').slice(0, -1);
+                tags.push(suggestion.value);
+                return options.set(tags.join(' '));
+            };
             require('main/search').$q.typeahead({
                 hint: true,
                 highlight: true,
@@ -35,8 +59,23 @@ define(function(require, exports, module){
                 displayKey: 'value',
                 source: self.match,
                 templates: {
-                    suggestion: require('handlebars').compile('<p><strong>{{value}}</strong>{{#if alias}} - {{alias}}{{/if}}</p>')
+                    suggestion: require('handlebars').compile([
+                        "<p class=completion-item>",
+                        "<strong class=ellipsis>{{value}}</strong>",
+                        "{{#if alias}}<br>{{#each alias}}<span class='ellipsis label label-default'>{{value}}</span> {{/each}}{{/if}}",
+                        "</p>"
+                    ].join(''))
                 }
+            }).on('typeahead:cursorchanged', function(e, suggestion, dataset){
+                update_query(suggestion);
+                e.preventDefault();
+            }).on('typeahead:selected', function(e, suggestion, dataset){
+                var $this = $(this);
+                update_query(suggestion, {
+                    query: last_query,
+                    set: function(value) { return $this.typeahead('val', value); }
+                });
+                e.preventDefault();
             });
         },
         deactivate: function(){

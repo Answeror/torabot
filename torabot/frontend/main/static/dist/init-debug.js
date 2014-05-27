@@ -12506,9 +12506,6 @@ define("torabot/main/0.1.0/search-debug", [ "silviomoreto-bootstrap-select-0e1b2
                     });
                 }
                 var current_mod = self.get_mod_path($selected.val());
-                console.log($selected.val());
-                console.log(self.options.mods);
-                console.log(current_mod);
                 if (current_mod) {
                     require.async(current_mod, function(m) {
                         m.activate();

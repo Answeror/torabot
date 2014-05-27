@@ -159,4 +159,27 @@ span.w {
 .torabot .mod-select .selectpicker {
     border-right: none !important;
     border-radius: 0 !important;
-};
+}
+
+.torabot .search-form .tt-dropdown-menu {
+    min-width: 194px !important;
+    max-width: 272px !important;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.torabot .ellipsis {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.torabot .completion-item strong {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.torabot .completion-item .label {
+    display: inline-block !important;
+    max-width: 100%;
+}
