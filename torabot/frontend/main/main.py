@@ -3,6 +3,7 @@ from functools import wraps
 from nose.tools import assert_in
 import json
 from flask import (
+    jsonify,
     request,
     current_app,
     render_template,
@@ -394,6 +395,11 @@ def help(name):
         query_kind=name,
         content=mod(name).format_help_page()
     )
+
+
+@bp.route('/completion-options/<kind>')
+def completion_options(kind):
+    return jsonify(dict(result=mod(kind).completion_options))
 
 
 @bp.context_processor

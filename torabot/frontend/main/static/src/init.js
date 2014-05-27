@@ -5,6 +5,7 @@ define(function(require, exports, module){
     require('./pnotify.custom.min');
     require('./switch');
     require('./xeditable');
+    require('./jquery.storage');
     require('handlebars');
 
     var self = {

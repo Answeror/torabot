@@ -6,10 +6,12 @@
         <li><a id=start-intro class=text-success href='{{ url_for("main.intro") }}'>开始教程</a></li>
     </ul>
     <div class=pull-right>
+        {% if not debug %}
         <ul class='pull-left list-inline'>
             <li><div class=g-plusone data-size=medium data-href='http://torabot.aip.io'></div></li>
             <li><iframe src="http://ghbtns.com/github-btn.html?user=Answeror&repo=torabot&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe></li>
         </ul>
+        {% endif %}
         <p class=pull-left><a href=#>回到顶部</a></p>
     </div>
 </footer>

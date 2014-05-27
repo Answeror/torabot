@@ -32,10 +32,39 @@ define(function(require, exports, module){
                 }));
             }
         },
-        init: function(options){
-            self.options = options;
+        default_options: {
+            completion_cache_timeout: 600,
+            source: ''
         },
+        init: function(options){
+            self.options = $.extend({}, self.default_options, options);
+        },
+        activated: false,
         activate: function(){
+            if (self.activated) return;
+            var timekey = 'yandere_completion_options_time';
+            var datakey = 'yandere_completion_options';
+            var last_time = $.localStorage(timekey);
+            var last_data = $.localStorage(datakey);
+            if (last_data && last_time && self.now() - last_time < 1000 * self.options.completion_cache_timeout) {
+                self.options.source = last_data.result.data;
+                self.activate_();
+            } else {
+                $.ajax({
+                    url: self.options.completion_options_uri,
+                    type: 'get'
+                }).done(function(data){
+                    self.options.source = data.result.data;
+                    self.activate_();
+                    $.localStorage(datakey, data);
+                    $.localStorage(timekey, self.now());
+                });
+            }
+        },
+        now: function(){
+            return (new Date()).getTime();
+        },
+        activate_: function(){
             var last_query = null;
             var update_query = function(suggestion, options){
                 options = $.extend({
@@ -77,9 +106,12 @@ define(function(require, exports, module){
                 });
                 e.preventDefault();
             });
+            self.activated = true;
         },
         deactivate: function(){
+            if (!self.activated) return;
             require('main/search').$q.typeahead('destroy');
+            self.activated = false;
         }
     };
     module.exports = {

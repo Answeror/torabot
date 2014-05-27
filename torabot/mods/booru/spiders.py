@@ -23,12 +23,15 @@ class Booru(RedisSpider):
     def json_query_url(self):
         return self.posts_url + u'.json'
 
-    def make_requests_from_query(self, query):
-        query = json.loads(query)
-        for req in {
+    def make_method_dict(self):
+        return {
             'posts_uri': self.make_posts_uri_requests,
             'query': self.make_query_requests,
-        }[query['method']](query):
+        }
+
+    def make_requests_from_query(self, query):
+        query = json.loads(query)
+        for req in self.make_method_dict()[query['method']](query):
             yield req
 
     def make_posts_uri_requests(self, query):
@@ -61,9 +64,8 @@ class Booru(RedisSpider):
                 posts=json.loads(response.body_as_unicode())
             )
         except Exception as e:
-            return failed(query, str(e))
+            return self.failed(query, str(e))
 
-
-def failed(query, message):
-    log.msg('parse failed: %s' % message, level=log.ERROR)
-    return Result(ok=False, query=query, message=message)
+    def failed(self, query, message):
+        log.msg('parse failed: %s' % message, level=log.ERROR)
+        return Result(ok=False, query=query, message=message)

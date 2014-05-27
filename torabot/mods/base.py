@@ -9,6 +9,9 @@ class Mod(object, metaclass=abc.ABCMeta):
     normal_search_prompt = ''
     description = ''
     allow_empty_query = False
+    frontend_need_init = False
+    frontend_options = {}
+    completion_options = {}
 
     def __init__(self, conf={}):
         self.conf = conf

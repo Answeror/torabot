@@ -14,21 +14,28 @@
                 seajs.config({
                     base: '{{ url_for("main.static", filename="sea-modules") }}',
                     paths: {
-                        'main': 'torabot/main/0.1.0',
-                        'yandere': 'torabot/yandere/0.1.0'
+                        {% for m in mods if m.frontend_need_init %}
+                        '{{ m.name }}': 'torabot/{{ m.name }}/0.1.0',
+                        {% endfor %}
+                        'main': 'torabot/main/0.1.0'
                     },
                     alias: {
-                        'yandere': 'yandere/yandere',
-                        'yandere-debug': 'yandere/yandere-debug'
+                        {% for m in mods if m.frontend_need_init %}
+                        {% if not loop.first %},{% endif %}
+                        '{{ m.name }}': '{{ m.name }}/{{ m.name }}',
+                        '{{ m.name }}-debug': '{{ m.name }}/{{ m.name }}-debug'
+                        {% endfor %}
                     }
                 }).use('main/init{% if debug %}-debug{% endif %}', function(m){
                     m.init({
-                        mods: [{
-                            name: 'yandere{% if debug %}-debug{% endif %}',
-                            options: {
-                                source: ({% include 'tags.json' %}).data
+                        mods: [
+                            {% for m in mods if m.frontend_need_init %}
+                            {
+                                name: '{{ m.name }}{% if debug %}-debug{% endif %}',
+                                options: {{ m.frontend_options|tojson|safe }}
                             }
-                        }]
+                            {% endfor %}
+                        ]
                     });
                 });
                 {% if intro and not snapshot %}
