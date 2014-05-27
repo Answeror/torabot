@@ -56,6 +56,10 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
                 self.options.source = last_data.result.data;
                 self.activate_();
             } else {
+                if (last_data) {
+                    self.options.source = last_data.result.data;
+                    self.activate_();
+                }
                 $.ajax({
                     url: self.options.completion_options_uri,
                     type: "get"
@@ -71,6 +75,7 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
             return new Date().getTime();
         },
         activate_: function() {
+            if (self.activated) return;
             var last_query = null;
             var update_query = function(suggestion, options) {
                 options = $.extend({

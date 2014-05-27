@@ -50,6 +50,10 @@ define(function(require, exports, module){
                 self.options.source = last_data.result.data;
                 self.activate_();
             } else {
+                if (last_data) {
+                    self.options.source = last_data.result.data;
+                    self.activate_();
+                }
                 $.ajax({
                     url: self.options.completion_options_uri,
                     type: 'get'
@@ -65,6 +69,7 @@ define(function(require, exports, module){
             return (new Date()).getTime();
         },
         activate_: function(){
+            if (self.activated) return;
             var last_query = null;
             var update_query = function(suggestion, options){
                 options = $.extend({
