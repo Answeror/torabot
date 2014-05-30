@@ -1,4 +1,4 @@
-define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug", "./retrieve_tag_search-debug", "./reorder_search_results-debug", "./split_result-debug", "main/ut-debug", "main/search-debug", "main/handlebars-v1.3.0-debug" ], function(require, exports, module) {
+define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug", "./retrieve_tag_search-debug", "./reorder_search_results-debug", "./split_result-debug", "main/ut-debug", "main/completion-debug" ], function(require, exports, module) {
     var self = {
         create_tag_search_regex: require("./create_tag_search_regex-debug"),
         retrieve_tag_search: require("./retrieve_tag_search-debug"),
@@ -44,10 +44,15 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
         },
         init: function(options) {
             self.options = $.extend({}, self.default_options, options);
+            self.completion = require("main/completion-debug").make({
+                source: self.match
+            });
         },
-        activated: false,
+        activated: function() {
+            return self.completion.activated();
+        },
         activate: function() {
-            if (self.activated) return;
+            if (self.activated()) return;
             var timekey = "yandere_completion_options_time";
             var datakey = "yandere_completion_options";
             var last_time = $.localStorage(timekey);
@@ -75,53 +80,10 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
             return new Date().getTime();
         },
         activate_: function() {
-            if (self.activated) return;
-            var last_query = null;
-            var update_query = function(suggestion, options) {
-                options = $.extend({
-                    query: null,
-                    set: function(value) {
-                        return require("main/search-debug").$q.val(value);
-                    }
-                }, options);
-                var query = options.query;
-                if (!query) {
-                    last_query = query = require("main/search-debug").$q.typeahead("val");
-                }
-                var tags = query.split(" ").slice(0, -1);
-                tags.push(suggestion.value);
-                return options.set(tags.join(" "));
-            };
-            require("main/search-debug").$q.typeahead({
-                hint: true,
-                highlight: true,
-                minLength: 1
-            }, {
-                name: "yandere",
-                displayKey: "value",
-                source: self.match,
-                templates: {
-                    suggestion: require("main/handlebars-v1.3.0-debug").compile([ "<p class=completion-item>", "<strong class=ellipsis>{{value}}</strong>", "{{#if alias}}<br>{{#each alias}}<span class='ellipsis label label-default'>{{value}}</span> {{/each}}{{/if}}", "</p>" ].join(""))
-                }
-            }).on("typeahead:cursorchanged", function(e, suggestion, dataset) {
-                update_query(suggestion);
-                e.preventDefault();
-            }).on("typeahead:selected", function(e, suggestion, dataset) {
-                var $this = $(this);
-                update_query(suggestion, {
-                    query: last_query,
-                    set: function(value) {
-                        return $this.typeahead("val", value);
-                    }
-                });
-                e.preventDefault();
-            });
-            self.activated = true;
+            return self.completion.activate();
         },
         deactivate: function() {
-            if (!self.activated) return;
-            require("main/search-debug").$q.typeahead("destroy");
-            self.activated = false;
+            return self.completion.deactivate();
         }
     };
     module.exports = {

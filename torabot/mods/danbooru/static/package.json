@@ -1,14 +1,13 @@
 {
     "family": "torabot",
-    "name": "yandere",
+    "name": "danbooru",
     "version": "0.1.0",
     "spm": {
         "alias": {
-            "main/completion": "main/completion",
             "main/search": "main/search",
             "main/ut": "main/ut",
             "handlebars": "main/handlebars-v1.3.0"
         },
-        "output": ["yandere.js"]
+        "output": ["danbooru.js"]
     }
 }
