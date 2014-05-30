@@ -12,13 +12,6 @@
         {{ bulletin_text|safe }}
     </div>
 </div>
-<script>
-$(function(){
-    $('.bulletin').bind('closed.bs.alert', function(){
-        $.cookie('hide_bulletin_id', $('.bulletin *[name="id"]').prop('value'), {path: '/'});
-    })
-})
-</script>
 {% endif %}
 {% endblock %}
 <div class='container vspace-top-small'>
