@@ -83,6 +83,7 @@ define("torabot/yandere/0.1.0/yandere-debug", [ "./create_tag_search_regex-debug
             return self.completion.activate();
         },
         deactivate: function() {
+            console.log("yandere deactivate");
             return self.completion.deactivate();
         }
     };

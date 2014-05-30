@@ -60,3 +60,6 @@ class Mod(object, metaclass=abc.ABCMeta):
             slaves=self.conf.get('TORABOT_SPY_SLAVES', 1),
             options=options,
         )
+
+    def get(self, arg):
+        return {}

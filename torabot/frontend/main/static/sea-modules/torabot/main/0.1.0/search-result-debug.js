@@ -1,4 +1,4 @@
-define("torabot/main/0.1.0/search-result-debug", [ "./init-debug", "seajs/seajs-style/1.0.2/seajs-style-debug", "./ut-debug", "./bulletin-debug", "arale/cookie/1.0.2/cookie-debug", "./moment-debug", "./moment/moment-debug", "./moment/lang/zh-cn-debug", "./pnotify.custom.min-debug", "./switch-debug", "./bootstrap-switch/bootstrap-switch-debug", "./xeditable-debug", "./xeditable/xeditable-debug", "./xeditable/xeditable-debug.css", "./jquery.storage-debug", "./handlebars-v1.3.0-debug", "./search-debug", "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "./typeahead.jquery-debug" ], function(require, exports, module) {
+define("torabot/main/0.1.0/search-result-debug", [ "./init-debug", "seajs/seajs-style/1.0.2/seajs-style-debug", "./ut-debug", "./bulletin-debug", "arale/cookie/1.0.2/cookie-debug", "./completion-debug", "./search-debug", "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "./typeahead.jquery-debug", "./handlebars-v1.3.0-debug", "./moment-debug", "./moment/moment-debug", "./moment/lang/zh-cn-debug", "./pnotify.custom.min-debug", "./switch-debug", "./bootstrap-switch/bootstrap-switch-debug", "./xeditable-debug", "./xeditable/xeditable-debug", "./xeditable/xeditable-debug.css", "./jquery.storage-debug" ], function(require, exports, module) {
     require("./init-debug");
     var self = {
         $watch_form: $("#watch-form"),
@@ -134,10 +134,11 @@ define("torabot/main/0.1.0/search-result-debug", [ "./init-debug", "seajs/seajs-
     exports.init = self.init;
 });
 
-define("torabot/main/0.1.0/init-debug", [ "seajs/seajs-style/1.0.2/seajs-style-debug", "torabot/main/0.1.0/ut-debug", "torabot/main/0.1.0/bulletin-debug", "arale/cookie/1.0.2/cookie-debug", "torabot/main/0.1.0/moment-debug", "torabot/main/0.1.0/moment/moment-debug", "torabot/main/0.1.0/moment/lang/zh-cn-debug", "torabot/main/0.1.0/pnotify.custom.min-debug", "torabot/main/0.1.0/switch-debug", "torabot/main/0.1.0/bootstrap-switch/bootstrap-switch-debug", "torabot/main/0.1.0/xeditable-debug", "torabot/main/0.1.0/xeditable/xeditable-debug", "torabot/main/0.1.0/jquery.storage-debug", "torabot/main/0.1.0/handlebars-v1.3.0-debug", "torabot/main/0.1.0/search-debug", "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "torabot/main/0.1.0/typeahead.jquery-debug" ], function(require, exports, module) {
+define("torabot/main/0.1.0/init-debug", [ "seajs/seajs-style/1.0.2/seajs-style-debug", "torabot/main/0.1.0/ut-debug", "torabot/main/0.1.0/bulletin-debug", "arale/cookie/1.0.2/cookie-debug", "torabot/main/0.1.0/completion-debug", "torabot/main/0.1.0/search-debug", "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "torabot/main/0.1.0/typeahead.jquery-debug", "torabot/main/0.1.0/handlebars-v1.3.0-debug", "torabot/main/0.1.0/moment-debug", "torabot/main/0.1.0/moment/moment-debug", "torabot/main/0.1.0/moment/lang/zh-cn-debug", "torabot/main/0.1.0/pnotify.custom.min-debug", "torabot/main/0.1.0/switch-debug", "torabot/main/0.1.0/bootstrap-switch/bootstrap-switch-debug", "torabot/main/0.1.0/xeditable-debug", "torabot/main/0.1.0/xeditable/xeditable-debug", "torabot/main/0.1.0/jquery.storage-debug" ], function(require, exports, module) {
     require("seajs/seajs-style/1.0.2/seajs-style-debug");
     require("torabot/main/0.1.0/ut-debug");
     require("torabot/main/0.1.0/bulletin-debug");
+    require("torabot/main/0.1.0/completion-debug");
     require("torabot/main/0.1.0/moment-debug");
     require("torabot/main/0.1.0/pnotify.custom.min-debug");
     require("torabot/main/0.1.0/switch-debug");
@@ -408,6 +409,5364 @@ define("arale/cookie/1.0.2/cookie-debug", [], function(require, exports) {
     function same(s) {
         return s;
     }
+});
+
+define("torabot/main/0.1.0/completion-debug", [ "torabot/main/0.1.0/search-debug", "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "torabot/main/0.1.0/typeahead.jquery-debug", "torabot/main/0.1.0/handlebars-v1.3.0-debug" ], function(require, exports, module) {
+    exports.make = function(options) {
+        options = $.extend({
+            source: null
+        }, options);
+        var self = {
+            _activated: false,
+            activated: function() {
+                return self._activated;
+            },
+            activate: function() {
+                if (self._activated) return;
+                var last_query = null;
+                var update_query = function(suggestion, options) {
+                    options = $.extend({
+                        query: null,
+                        set: function(value) {
+                            return require("torabot/main/0.1.0/search-debug").$q.val(value);
+                        }
+                    }, options);
+                    var query = options.query;
+                    if (!query) {
+                        last_query = query = require("torabot/main/0.1.0/search-debug").$q.typeahead("val");
+                    }
+                    var tags = query.split(" ").slice(0, -1);
+                    tags.push(suggestion.value);
+                    return options.set(tags.join(" "));
+                };
+                require("torabot/main/0.1.0/search-debug").$q.typeahead({
+                    hint: true,
+                    highlight: true,
+                    minLength: 1
+                }, {
+                    name: "completion",
+                    displayKey: "value",
+                    source: options.source,
+                    templates: {
+                        suggestion: require("torabot/main/0.1.0/handlebars-v1.3.0-debug").compile([ "<p class=completion-item>", "<strong class=ellipsis>{{value}}</strong>", "{{#if alias}}<br>{{#each alias}}<span class='ellipsis label label-default'>{{value}}</span> {{/each}}{{/if}}", "</p>" ].join(""))
+                    }
+                }).on("typeahead:cursorchanged", function(e, suggestion, dataset) {
+                    update_query(suggestion);
+                    e.preventDefault();
+                }).on("typeahead:selected", function(e, suggestion, dataset) {
+                    var $this = $(this);
+                    update_query(suggestion, {
+                        query: last_query,
+                        set: function(value) {
+                            return $this.typeahead("val", value);
+                        }
+                    });
+                    e.preventDefault();
+                });
+                self._activated = true;
+            },
+            deactivate: function() {
+                if (!self._activated) return;
+                require("torabot/main/0.1.0/search-debug").$q.typeahead("destroy");
+                self._activated = false;
+            }
+        };
+        return self;
+    };
+});
+
+define("torabot/main/0.1.0/search-debug", [ "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "torabot/main/0.1.0/typeahead.jquery-debug" ], function(require, exports, module) {
+    require("silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug.css");
+    require("silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug");
+    require("torabot/main/0.1.0/typeahead.jquery-debug");
+    var self = {
+        init_select: function() {
+            $(".mod-select").selectpicker({
+                noneResultsText: "无匹配项"
+            });
+        },
+        init_main: function() {
+            self.$form = $('form[name="search"]');
+            self.$q = self.$form.find('input[name="q"]');
+            self.init_select();
+            var $mods = self.$form.find('select[name="kind"]');
+            self.$form.find('button[name="help"]').click(function(e) {
+                e.preventDefault();
+                $(location).attr("href", "/help/" + $mods.find("option:selected").val());
+            });
+            var $search = self.$form.find('button[name="search"]');
+            $search.click(function(e) {
+                e.preventDefault();
+                var $selected = $mods.find("option:selected");
+                var kind = $selected.val();
+                var text = self.$q.val();
+                if (!text && !$selected.data("allow-empty-query")) {
+                    new PNotify({
+                        text: "查询不能为空",
+                        type: "error",
+                        icon: false
+                    });
+                    return;
+                }
+                $(location).attr("href", "/search/" + kind + "?" + $.param({
+                    q: text
+                }));
+            });
+            var $advanced = self.$form.find('button[name="advanced"]');
+            $advanced.click(function(e) {
+                e.preventDefault();
+                $(location).attr("href", "/search/advanced/" + $mods.find("option:selected").val());
+            });
+            var $buttons = self.$form.find('span[name="buttons"]');
+            var on_change_mod = function() {
+                var $selected = $(this).find("option:selected");
+                $advanced.prop("disabled", !$selected.data("has-advanced-search"));
+                self.$q.prop("disabled", !$selected.data("has-normal-search"));
+                $search.prop("disabled", !$selected.data("has-normal-search"));
+                if ($selected.data("has-normal-search")) {
+                    self.$q.prop("placeholder", $selected.data("normal-search-prompt"));
+                } else {
+                    self.$q.prop("placeholder", "请使用高级搜索");
+                }
+                if (self.previous_mod) {
+                    require.async(self.previous_mod, function(m) {
+                        m.deactivate();
+                    });
+                }
+                var current_mod = self.get_mod_path($selected.val());
+                if (current_mod) {
+                    require.async(current_mod, function(m) {
+                        m.activate();
+                    });
+                }
+                self.previous_mod = current_mod;
+            };
+            $mods.ready(on_change_mod).change(on_change_mod);
+        },
+        get_mod_path: function(selected) {
+            for (var i = 0; i < self.options.mods.length; ++i) {
+                var mod = self.options.mods[i];
+                if (selected == mod || selected + "-debug" == mod) return mod;
+            }
+        },
+        previous_mod: null,
+        default_options: {
+            mods: []
+        },
+        init: function(options) {
+            self.options = $.extend({}, self.default_options, options);
+            self.init_main();
+        }
+    };
+    module.exports = self;
+});
+
+define("silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug.css", [], function() {
+    seajs.importStyle(".bootstrap-select.btn-group:not(.input-group-btn),.bootstrap-select.btn-group[class*=span]{float:none;display:inline-block;margin-bottom:10px;margin-left:0}.form-search .bootstrap-select.btn-group,.form-inline .bootstrap-select.btn-group,.form-horizontal .bootstrap-select.btn-group{margin-bottom:0}.bootstrap-select.form-control{margin-bottom:0;padding:0;border:0}.bootstrap-select.btn-group.pull-right,.bootstrap-select.btn-group[class*=span].pull-right,.row-fluid .bootstrap-select.btn-group[class*=span].pull-right{float:right}.input-append .bootstrap-select.btn-group{margin-left:-1px}.input-prepend .bootstrap-select.btn-group{margin-right:-1px}.bootstrap-select:not([class*=span]):not([class*=col-]):not([class*=form-control]):not(.input-group-btn){width:220px}.bootstrap-select{width:220px\\0}.bootstrap-select.form-control:not([class*=span]){width:100%}.bootstrap-select>.btn{width:100%;padding-right:25px}.error .bootstrap-select .btn{border:1px solid #b94a48}.bootstrap-select.show-menu-arrow.open>.btn{z-index:2051}.bootstrap-select .btn:focus{outline:thin dotted #333!important;outline:5px auto -webkit-focus-ring-color!important;outline-offset:-2px}.bootstrap-select.btn-group .btn .filter-option{display:inline-block;overflow:hidden;width:100%;float:left;text-align:left}.bootstrap-select.btn-group .btn .caret{position:absolute;top:50%;right:12px;margin-top:-2px;vertical-align:middle}.bootstrap-select.btn-group>.disabled,.bootstrap-select.btn-group .dropdown-menu li.disabled>a{cursor:not-allowed}.bootstrap-select.btn-group>.disabled:focus{outline:0!important}.bootstrap-select.btn-group[class*=span] .btn{width:100%}.bootstrap-select.btn-group .dropdown-menu{min-width:100%;z-index:2000;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.bootstrap-select.btn-group .dropdown-menu.inner{position:static;border:0;padding:0;margin:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}.bootstrap-select.btn-group .dropdown-menu dt{display:block;padding:3px 20px;cursor:default}.bootstrap-select.btn-group .div-contain{overflow:hidden}.bootstrap-select.btn-group .dropdown-menu li{position:relative}.bootstrap-select.btn-group .dropdown-menu li>a.opt{position:relative;padding-left:35px}.bootstrap-select.btn-group .dropdown-menu li>a{cursor:pointer}.bootstrap-select.btn-group .dropdown-menu li>dt small{font-weight:400}.bootstrap-select.btn-group.show-tick .dropdown-menu li.selected a i.check-mark{position:absolute;display:inline-block;right:15px;margin-top:2.5px}.bootstrap-select.btn-group .dropdown-menu li a i.check-mark{display:none}.bootstrap-select.btn-group.show-tick .dropdown-menu li a span.text{margin-right:34px}.bootstrap-select.btn-group .dropdown-menu li small{padding-left:.5em}.bootstrap-select.btn-group .dropdown-menu li:not(.disabled)>a:hover small,.bootstrap-select.btn-group .dropdown-menu li:not(.disabled)>a:focus small,.bootstrap-select.btn-group .dropdown-menu li.active:not(.disabled)>a small{color:#64b1d8;color:rgba(255,255,255,.4)}.bootstrap-select.btn-group .dropdown-menu li>dt small{font-weight:400}.bootstrap-select.show-menu-arrow .dropdown-toggle:before{content:'';display:inline-block;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:7px solid #CCC;border-bottom-color:rgba(0,0,0,.2);position:absolute;bottom:-4px;left:9px;display:none}.bootstrap-select.show-menu-arrow .dropdown-toggle:after{content:'';display:inline-block;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:6px solid #fff;position:absolute;bottom:-4px;left:10px;display:none}.bootstrap-select.show-menu-arrow.dropup .dropdown-toggle:before{bottom:auto;top:-3px;border-top:7px solid #ccc;border-bottom:0;border-top-color:rgba(0,0,0,.2)}.bootstrap-select.show-menu-arrow.dropup .dropdown-toggle:after{bottom:auto;top:-3px;border-top:6px solid #fff;border-bottom:0}.bootstrap-select.show-menu-arrow.pull-right .dropdown-toggle:before{right:12px;left:auto}.bootstrap-select.show-menu-arrow.pull-right .dropdown-toggle:after{right:13px;left:auto}.bootstrap-select.show-menu-arrow.open>.dropdown-toggle:before,.bootstrap-select.show-menu-arrow.open>.dropdown-toggle:after{display:block}.bootstrap-select.btn-group .no-results{padding:3px;background:#f5f5f5;margin:0 5px}.bootstrap-select.btn-group .dropdown-menu .notify{position:absolute;bottom:5px;width:96%;margin:0 2%;min-height:26px;padding:3px 5px;background:#f5f5f5;border:1px solid #e3e3e3;box-shadow:inset 0 1px 1px rgba(0,0,0,.05);pointer-events:none;opacity:.9;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.mobile-device{position:absolute;top:0;left:0;display:block!important;width:100%;height:100%!important;opacity:0}.bootstrap-select.fit-width{width:auto!important}.bootstrap-select.btn-group.fit-width .btn .filter-option{position:static}.bootstrap-select.btn-group.fit-width .btn .caret{position:static;top:auto;margin-top:-1px}.control-group.error .bootstrap-select .dropdown-toggle{border-color:#b94a48}.bootstrap-select-searchbox,.bootstrap-select .bs-actionsbox{padding:4px 8px}.bootstrap-select .bs-actionsbox{float:left;width:100%;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.bootstrap-select-searchbox+.bs-actionsbox{padding:0 8px 4px}.bootstrap-select-searchbox input{margin-bottom:0}.bootstrap-select .bs-actionsbox .btn-group button{width:50%}");
+});
+
+/*!
+ * bootstrap-select v1.5.4
+ * http://silviomoreto.github.io/bootstrap-select/
+ *
+ * Copyright 2013 bootstrap-select
+ * Licensed under the MIT license
+ */
+!function($) {
+    "use strict";
+    $.expr[":"].icontains = function(obj, index, meta) {
+        return $(obj).text().toUpperCase().indexOf(meta[3].toUpperCase()) >= 0;
+    };
+    var Selectpicker = function(element, options, e) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        this.$element = $(element);
+        this.$newElement = null;
+        this.$button = null;
+        this.$menu = null;
+        this.$lis = null;
+        //Merge defaults, options and data-attributes to make our options
+        this.options = $.extend({}, $.fn.selectpicker.defaults, this.$element.data(), typeof options == "object" && options);
+        //If we have no title yet, check the attribute 'title' (this is missed by jq as its not a data-attribute
+        if (this.options.title === null) {
+            this.options.title = this.$element.attr("title");
+        }
+        //Expose public methods
+        this.val = Selectpicker.prototype.val;
+        this.render = Selectpicker.prototype.render;
+        this.refresh = Selectpicker.prototype.refresh;
+        this.setStyle = Selectpicker.prototype.setStyle;
+        this.selectAll = Selectpicker.prototype.selectAll;
+        this.deselectAll = Selectpicker.prototype.deselectAll;
+        this.init();
+    };
+    Selectpicker.prototype = {
+        constructor: Selectpicker,
+        init: function() {
+            var that = this, id = this.$element.attr("id");
+            this.$element.hide();
+            this.multiple = this.$element.prop("multiple");
+            this.autofocus = this.$element.prop("autofocus");
+            this.$newElement = this.createView();
+            this.$element.after(this.$newElement);
+            this.$menu = this.$newElement.find("> .dropdown-menu");
+            this.$button = this.$newElement.find("> button");
+            this.$searchbox = this.$newElement.find("input");
+            if (id !== undefined) {
+                this.$button.attr("data-id", id);
+                $('label[for="' + id + '"]').click(function(e) {
+                    e.preventDefault();
+                    that.$button.focus();
+                });
+            }
+            this.checkDisabled();
+            this.clickListener();
+            if (this.options.liveSearch) this.liveSearchListener();
+            this.render();
+            this.liHeight();
+            this.setStyle();
+            this.setWidth();
+            if (this.options.container) this.selectPosition();
+            this.$menu.data("this", this);
+            this.$newElement.data("this", this);
+        },
+        createDropdown: function() {
+            //If we are multiple, then add the show-tick class by default
+            var multiple = this.multiple ? " show-tick" : "";
+            var inputGroup = this.$element.parent().hasClass("input-group") ? " input-group-btn" : "";
+            var autofocus = this.autofocus ? " autofocus" : "";
+            var header = this.options.header ? '<div class="popover-title"><button type="button" class="close" aria-hidden="true">&times;</button>' + this.options.header + "</div>" : "";
+            var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox"><input type="text" class="input-block-level form-control" /></div>' : "";
+            var actionsbox = this.options.actionsBox ? '<div class="bs-actionsbox">' + '<div class="btn-group btn-block">' + '<button class="actions-btn bs-select-all btn btn-sm btn-default">' + "Select All" + "</button>" + '<button class="actions-btn bs-deselect-all btn btn-sm btn-default">' + "Deselect All" + "</button>" + "</div>" + "</div>" : "";
+            var drop = '<div class="btn-group bootstrap-select' + multiple + inputGroup + '">' + '<button type="button" class="btn dropdown-toggle selectpicker" data-toggle="dropdown"' + autofocus + ">" + '<span class="filter-option pull-left"></span>&nbsp;' + '<span class="caret"></span>' + "</button>" + '<div class="dropdown-menu open">' + header + searchbox + actionsbox + '<ul class="dropdown-menu inner selectpicker" role="menu">' + "</ul>" + "</div>" + "</div>";
+            return $(drop);
+        },
+        createView: function() {
+            var $drop = this.createDropdown();
+            var $li = this.createLi();
+            $drop.find("ul").append($li);
+            return $drop;
+        },
+        reloadLi: function() {
+            //Remove all children.
+            this.destroyLi();
+            //Re build
+            var $li = this.createLi();
+            this.$menu.find("ul").append($li);
+        },
+        destroyLi: function() {
+            this.$menu.find("li").remove();
+        },
+        createLi: function() {
+            var that = this, _liA = [], _liHtml = "";
+            this.$element.find("option").each(function() {
+                var $this = $(this);
+                //Get the class and text for the option
+                var optionClass = $this.attr("class") || "";
+                var inline = $this.attr("style") || "";
+                var text = $this.data("content") ? $this.data("content") : $this.html();
+                var subtext = $this.data("subtext") !== undefined ? '<small class="muted text-muted">' + $this.data("subtext") + "</small>" : "";
+                var icon = $this.data("icon") !== undefined ? '<i class="' + that.options.iconBase + " " + $this.data("icon") + '"></i> ' : "";
+                if (icon !== "" && ($this.is(":disabled") || $this.parent().is(":disabled"))) {
+                    icon = "<span>" + icon + "</span>";
+                }
+                if (!$this.data("content")) {
+                    //Prepend any icon and append any subtext to the main text.
+                    text = icon + '<span class="text">' + text + subtext + "</span>";
+                }
+                if (that.options.hideDisabled && ($this.is(":disabled") || $this.parent().is(":disabled"))) {
+                    _liA.push('<a style="min-height: 0; padding: 0"></a>');
+                } else if ($this.parent().is("optgroup") && $this.data("divider") !== true) {
+                    if ($this.index() === 0) {
+                        //Get the opt group label
+                        var label = $this.parent().attr("label");
+                        var labelSubtext = $this.parent().data("subtext") !== undefined ? '<small class="muted text-muted">' + $this.parent().data("subtext") + "</small>" : "";
+                        var labelIcon = $this.parent().data("icon") ? '<i class="' + $this.parent().data("icon") + '"></i> ' : "";
+                        label = labelIcon + '<span class="text">' + label + labelSubtext + "</span>";
+                        if ($this[0].index !== 0) {
+                            _liA.push('<div class="div-contain"><div class="divider"></div></div>' + "<dt>" + label + "</dt>" + that.createA(text, "opt " + optionClass, inline));
+                        } else {
+                            _liA.push("<dt>" + label + "</dt>" + that.createA(text, "opt " + optionClass, inline));
+                        }
+                    } else {
+                        _liA.push(that.createA(text, "opt " + optionClass, inline));
+                    }
+                } else if ($this.data("divider") === true) {
+                    _liA.push('<div class="div-contain"><div class="divider"></div></div>');
+                } else if ($(this).data("hidden") === true) {
+                    _liA.push("<a></a>");
+                } else {
+                    _liA.push(that.createA(text, optionClass, inline));
+                }
+            });
+            $.each(_liA, function(i, item) {
+                var hide = item === "<a></a>" ? 'class="hide is-hidden"' : "";
+                _liHtml += '<li rel="' + i + '"' + hide + ">" + item + "</li>";
+            });
+            //If we are not multiple, and we dont have a selected item, and we dont have a title, select the first element so something is set in the button
+            if (!this.multiple && this.$element.find("option:selected").length === 0 && !this.options.title) {
+                this.$element.find("option").eq(0).prop("selected", true).attr("selected", "selected");
+            }
+            return $(_liHtml);
+        },
+        createA: function(text, classes, inline) {
+            return '<a tabindex="0" class="' + classes + '" style="' + inline + '">' + text + '<i class="' + this.options.iconBase + " " + this.options.tickIcon + ' icon-ok check-mark"></i>' + "</a>";
+        },
+        render: function(updateLi) {
+            var that = this;
+            //Update the LI to match the SELECT
+            if (updateLi !== false) {
+                this.$element.find("option").each(function(index) {
+                    that.setDisabled(index, $(this).is(":disabled") || $(this).parent().is(":disabled"));
+                    that.setSelected(index, $(this).is(":selected"));
+                });
+            }
+            this.tabIndex();
+            var selectedItems = this.$element.find("option:selected").map(function() {
+                var $this = $(this);
+                var icon = $this.data("icon") && that.options.showIcon ? '<i class="' + that.options.iconBase + " " + $this.data("icon") + '"></i> ' : "";
+                var subtext;
+                if (that.options.showSubtext && $this.attr("data-subtext") && !that.multiple) {
+                    subtext = ' <small class="muted text-muted">' + $this.data("subtext") + "</small>";
+                } else {
+                    subtext = "";
+                }
+                if ($this.data("content") && that.options.showContent) {
+                    return $this.data("content");
+                } else if ($this.attr("title") !== undefined) {
+                    return $this.attr("title");
+                } else {
+                    return icon + $this.html() + subtext;
+                }
+            }).toArray();
+            //Fixes issue in IE10 occurring when no default option is selected and at least one option is disabled
+            //Convert all the values into a comma delimited string
+            var title = !this.multiple ? selectedItems[0] : selectedItems.join(this.options.multipleSeparator);
+            //If this is multi select, and the selectText type is count, the show 1 of 2 selected etc..
+            if (this.multiple && this.options.selectedTextFormat.indexOf("count") > -1) {
+                var max = this.options.selectedTextFormat.split(">");
+                var notDisabled = this.options.hideDisabled ? ":not([disabled])" : "";
+                if (max.length > 1 && selectedItems.length > max[1] || max.length == 1 && selectedItems.length >= 2) {
+                    title = this.options.countSelectedText.replace("{0}", selectedItems.length).replace("{1}", this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"])' + notDisabled).length);
+                }
+            }
+            this.options.title = this.$element.attr("title");
+            //If we dont have a title, then use the default, or if nothing is set at all, use the not selected text
+            if (!title) {
+                title = this.options.title !== undefined ? this.options.title : this.options.noneSelectedText;
+            }
+            this.$button.attr("title", $.trim(title));
+            this.$newElement.find(".filter-option").html(title);
+        },
+        setStyle: function(style, status) {
+            if (this.$element.attr("class")) {
+                this.$newElement.addClass(this.$element.attr("class").replace(/selectpicker|mobile-device/gi, ""));
+            }
+            var buttonClass = style ? style : this.options.style;
+            if (status == "add") {
+                this.$button.addClass(buttonClass);
+            } else if (status == "remove") {
+                this.$button.removeClass(buttonClass);
+            } else {
+                this.$button.removeClass(this.options.style);
+                this.$button.addClass(buttonClass);
+            }
+        },
+        liHeight: function() {
+            if (this.options.size === false) return;
+            var $selectClone = this.$menu.parent().clone().find("> .dropdown-toggle").prop("autofocus", false).end().appendTo("body"), $menuClone = $selectClone.addClass("open").find("> .dropdown-menu"), liHeight = $menuClone.find("li > a").outerHeight(), headerHeight = this.options.header ? $menuClone.find(".popover-title").outerHeight() : 0, searchHeight = this.options.liveSearch ? $menuClone.find(".bootstrap-select-searchbox").outerHeight() : 0, actionsHeight = this.options.actionsBox ? $menuClone.find(".bs-actionsbox").outerHeight() : 0;
+            $selectClone.remove();
+            this.$newElement.data("liHeight", liHeight).data("headerHeight", headerHeight).data("searchHeight", searchHeight).data("actionsHeight", actionsHeight);
+        },
+        setSize: function() {
+            var that = this, menu = this.$menu, menuInner = menu.find(".inner"), selectHeight = this.$newElement.outerHeight(), liHeight = this.$newElement.data("liHeight"), headerHeight = this.$newElement.data("headerHeight"), searchHeight = this.$newElement.data("searchHeight"), actionsHeight = this.$newElement.data("actionsHeight"), divHeight = menu.find("li .divider").outerHeight(true), menuPadding = parseInt(menu.css("padding-top")) + parseInt(menu.css("padding-bottom")) + parseInt(menu.css("border-top-width")) + parseInt(menu.css("border-bottom-width")), notDisabled = this.options.hideDisabled ? ":not(.disabled)" : "", $window = $(window), menuExtras = menuPadding + parseInt(menu.css("margin-top")) + parseInt(menu.css("margin-bottom")) + 2, menuHeight, selectOffsetTop, selectOffsetBot, posVert = function() {
+                selectOffsetTop = that.$newElement.offset().top - $window.scrollTop();
+                selectOffsetBot = $window.height() - selectOffsetTop - selectHeight;
+            };
+            posVert();
+            if (this.options.header) menu.css("padding-top", 0);
+            if (this.options.size == "auto") {
+                var getSize = function() {
+                    var minHeight, lisVis = that.$lis.not(".hide");
+                    posVert();
+                    menuHeight = selectOffsetBot - menuExtras;
+                    if (that.options.dropupAuto) {
+                        that.$newElement.toggleClass("dropup", selectOffsetTop > selectOffsetBot && menuHeight - menuExtras < menu.height());
+                    }
+                    if (that.$newElement.hasClass("dropup")) {
+                        menuHeight = selectOffsetTop - menuExtras;
+                    }
+                    if (lisVis.length + lisVis.find("dt").length > 3) {
+                        minHeight = liHeight * 3 + menuExtras - 2;
+                    } else {
+                        minHeight = 0;
+                    }
+                    menu.css({
+                        "max-height": menuHeight + "px",
+                        overflow: "hidden",
+                        "min-height": minHeight + headerHeight + searchHeight + actionsHeight + "px"
+                    });
+                    menuInner.css({
+                        "max-height": menuHeight - headerHeight - searchHeight - actionsHeight - menuPadding + "px",
+                        "overflow-y": "auto",
+                        "min-height": Math.max(minHeight - menuPadding, 0) + "px"
+                    });
+                };
+                getSize();
+                this.$searchbox.off("input.getSize propertychange.getSize").on("input.getSize propertychange.getSize", getSize);
+                $(window).off("resize.getSize").on("resize.getSize", getSize);
+                $(window).off("scroll.getSize").on("scroll.getSize", getSize);
+            } else if (this.options.size && this.options.size != "auto" && menu.find("li" + notDisabled).length > this.options.size) {
+                var optIndex = menu.find("li" + notDisabled + " > *").filter(":not(.div-contain)").slice(0, this.options.size).last().parent().index();
+                var divLength = menu.find("li").slice(0, optIndex + 1).find(".div-contain").length;
+                menuHeight = liHeight * this.options.size + divLength * divHeight + menuPadding;
+                if (that.options.dropupAuto) {
+                    this.$newElement.toggleClass("dropup", selectOffsetTop > selectOffsetBot && menuHeight < menu.height());
+                }
+                menu.css({
+                    "max-height": menuHeight + headerHeight + searchHeight + actionsHeight + "px",
+                    overflow: "hidden"
+                });
+                menuInner.css({
+                    "max-height": menuHeight - menuPadding + "px",
+                    "overflow-y": "auto"
+                });
+            }
+        },
+        setWidth: function() {
+            if (this.options.width == "auto") {
+                this.$menu.css("min-width", "0");
+                // Get correct width if element hidden
+                var selectClone = this.$newElement.clone().appendTo("body");
+                var ulWidth = selectClone.find("> .dropdown-menu").css("width");
+                var btnWidth = selectClone.css("width", "auto").find("> button").css("width");
+                selectClone.remove();
+                // Set width to whatever's larger, button title or longest option
+                this.$newElement.css("width", Math.max(parseInt(ulWidth), parseInt(btnWidth)) + "px");
+            } else if (this.options.width == "fit") {
+                // Remove inline min-width so width can be changed from 'auto'
+                this.$menu.css("min-width", "");
+                this.$newElement.css("width", "").addClass("fit-width");
+            } else if (this.options.width) {
+                // Remove inline min-width so width can be changed from 'auto'
+                this.$menu.css("min-width", "");
+                this.$newElement.css("width", this.options.width);
+            } else {
+                // Remove inline min-width/width so width can be changed
+                this.$menu.css("min-width", "");
+                this.$newElement.css("width", "");
+            }
+            // Remove fit-width class if width is changed programmatically
+            if (this.$newElement.hasClass("fit-width") && this.options.width !== "fit") {
+                this.$newElement.removeClass("fit-width");
+            }
+        },
+        selectPosition: function() {
+            var that = this, drop = "<div />", $drop = $(drop), pos, actualHeight, getPlacement = function($element) {
+                $drop.addClass($element.attr("class").replace(/form-control/gi, "")).toggleClass("dropup", $element.hasClass("dropup"));
+                pos = $element.offset();
+                actualHeight = $element.hasClass("dropup") ? 0 : $element[0].offsetHeight;
+                $drop.css({
+                    top: pos.top + actualHeight,
+                    left: pos.left,
+                    width: $element[0].offsetWidth,
+                    position: "absolute"
+                });
+            };
+            this.$newElement.on("click", function() {
+                if (that.isDisabled()) {
+                    return;
+                }
+                getPlacement($(this));
+                $drop.appendTo(that.options.container);
+                $drop.toggleClass("open", !$(this).hasClass("open"));
+                $drop.append(that.$menu);
+            });
+            $(window).resize(function() {
+                getPlacement(that.$newElement);
+            });
+            $(window).on("scroll", function() {
+                getPlacement(that.$newElement);
+            });
+            $("html").on("click", function(e) {
+                if ($(e.target).closest(that.$newElement).length < 1) {
+                    $drop.removeClass("open");
+                }
+            });
+        },
+        mobile: function() {
+            this.$element.addClass("mobile-device").appendTo(this.$newElement);
+            if (this.options.container) this.$menu.hide();
+        },
+        refresh: function() {
+            this.$lis = null;
+            this.reloadLi();
+            this.render();
+            this.setWidth();
+            this.setStyle();
+            this.checkDisabled();
+            this.liHeight();
+        },
+        update: function() {
+            this.reloadLi();
+            this.setWidth();
+            this.setStyle();
+            this.checkDisabled();
+            this.liHeight();
+        },
+        setSelected: function(index, selected) {
+            if (this.$lis == null) this.$lis = this.$menu.find("li");
+            $(this.$lis[index]).toggleClass("selected", selected);
+        },
+        setDisabled: function(index, disabled) {
+            if (this.$lis == null) this.$lis = this.$menu.find("li");
+            if (disabled) {
+                $(this.$lis[index]).addClass("disabled").find("a").attr("href", "#").attr("tabindex", -1);
+            } else {
+                $(this.$lis[index]).removeClass("disabled").find("a").removeAttr("href").attr("tabindex", 0);
+            }
+        },
+        isDisabled: function() {
+            return this.$element.is(":disabled");
+        },
+        checkDisabled: function() {
+            var that = this;
+            if (this.isDisabled()) {
+                this.$button.addClass("disabled").attr("tabindex", -1);
+            } else {
+                if (this.$button.hasClass("disabled")) {
+                    this.$button.removeClass("disabled");
+                }
+                if (this.$button.attr("tabindex") == -1) {
+                    if (!this.$element.data("tabindex")) this.$button.removeAttr("tabindex");
+                }
+            }
+            this.$button.click(function() {
+                return !that.isDisabled();
+            });
+        },
+        tabIndex: function() {
+            if (this.$element.is("[tabindex]")) {
+                this.$element.data("tabindex", this.$element.attr("tabindex"));
+                this.$button.attr("tabindex", this.$element.data("tabindex"));
+            }
+        },
+        clickListener: function() {
+            var that = this;
+            $("body").on("touchstart.dropdown", ".dropdown-menu", function(e) {
+                e.stopPropagation();
+            });
+            this.$newElement.on("click", function() {
+                that.setSize();
+                if (!that.options.liveSearch && !that.multiple) {
+                    setTimeout(function() {
+                        that.$menu.find(".selected a").focus();
+                    }, 10);
+                }
+            });
+            this.$menu.on("click", "li a", function(e) {
+                var clickedIndex = $(this).parent().index(), prevValue = that.$element.val(), prevIndex = that.$element.prop("selectedIndex");
+                //Dont close on multi choice menu
+                if (that.multiple) {
+                    e.stopPropagation();
+                }
+                e.preventDefault();
+                //Dont run if we have been disabled
+                if (!that.isDisabled() && !$(this).parent().hasClass("disabled")) {
+                    var $options = that.$element.find("option"), $option = $options.eq(clickedIndex), state = $option.prop("selected"), $optgroup = $option.parent("optgroup"), maxOptions = that.options.maxOptions, maxOptionsGrp = $optgroup.data("maxOptions") || false;
+                    //Deselect all others if not multi select box
+                    if (!that.multiple) {
+                        $options.prop("selected", false);
+                        $option.prop("selected", true);
+                        that.$menu.find(".selected").removeClass("selected");
+                        that.setSelected(clickedIndex, true);
+                    } else {
+                        $option.prop("selected", !state);
+                        that.setSelected(clickedIndex, !state);
+                        if (maxOptions !== false || maxOptionsGrp !== false) {
+                            var maxReached = maxOptions < $options.filter(":selected").length, maxReachedGrp = maxOptionsGrp < $optgroup.find("option:selected").length, maxOptionsArr = that.options.maxOptionsText, maxTxt = maxOptionsArr[0].replace("{n}", maxOptions), maxTxtGrp = maxOptionsArr[1].replace("{n}", maxOptionsGrp), $notify = $('<div class="notify"></div>');
+                            if (maxOptions && maxReached || maxOptionsGrp && maxReachedGrp) {
+                                // If {var} is set in array, replace it
+                                if (maxOptionsArr[2]) {
+                                    maxTxt = maxTxt.replace("{var}", maxOptionsArr[2][maxOptions > 1 ? 0 : 1]);
+                                    maxTxtGrp = maxTxtGrp.replace("{var}", maxOptionsArr[2][maxOptionsGrp > 1 ? 0 : 1]);
+                                }
+                                $option.prop("selected", false);
+                                that.$menu.append($notify);
+                                if (maxOptions && maxReached) {
+                                    $notify.append($("<div>" + maxTxt + "</div>"));
+                                    that.$element.trigger("maxReached.bs.select");
+                                }
+                                if (maxOptionsGrp && maxReachedGrp) {
+                                    $notify.append($("<div>" + maxTxtGrp + "</div>"));
+                                    that.$element.trigger("maxReachedGrp.bs.select");
+                                }
+                                setTimeout(function() {
+                                    that.setSelected(clickedIndex, false);
+                                }, 10);
+                                $notify.delay(750).fadeOut(300, function() {
+                                    $(this).remove();
+                                });
+                            }
+                        }
+                    }
+                    if (!that.multiple) {
+                        that.$button.focus();
+                    } else if (that.options.liveSearch) {
+                        that.$searchbox.focus();
+                    }
+                    // Trigger select 'change'
+                    if (prevValue != that.$element.val() && that.multiple || prevIndex != that.$element.prop("selectedIndex") && !that.multiple) {
+                        that.$element.change();
+                    }
+                }
+            });
+            this.$menu.on("click", "li.disabled a, li dt, li .div-contain, .popover-title, .popover-title :not(.close)", function(e) {
+                if (e.target == this) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!that.options.liveSearch) {
+                        that.$button.focus();
+                    } else {
+                        that.$searchbox.focus();
+                    }
+                }
+            });
+            this.$menu.on("click", ".popover-title .close", function() {
+                that.$button.focus();
+            });
+            this.$searchbox.on("click", function(e) {
+                e.stopPropagation();
+            });
+            this.$menu.on("click", ".actions-btn", function(e) {
+                if (that.options.liveSearch) {
+                    that.$searchbox.focus();
+                } else {
+                    that.$button.focus();
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                if ($(this).is(".bs-select-all")) {
+                    that.selectAll();
+                } else {
+                    that.deselectAll();
+                }
+                that.$element.change();
+            });
+            this.$element.change(function() {
+                that.render(false);
+            });
+        },
+        liveSearchListener: function() {
+            var that = this, no_results = $('<li class="no-results"></li>');
+            this.$newElement.on("click.dropdown.data-api", function() {
+                that.$menu.find(".active").removeClass("active");
+                if (!!that.$searchbox.val()) {
+                    that.$searchbox.val("");
+                    that.$lis.not(".is-hidden").removeClass("hide");
+                    if (!!no_results.parent().length) no_results.remove();
+                }
+                if (!that.multiple) that.$menu.find(".selected").addClass("active");
+                setTimeout(function() {
+                    that.$searchbox.focus();
+                }, 10);
+            });
+            this.$searchbox.on("input propertychange", function() {
+                if (that.$searchbox.val()) {
+                    that.$lis.not(".is-hidden").removeClass("hide").find("a").not(":icontains(" + that.$searchbox.val() + ")").parent().addClass("hide");
+                    if (!that.$menu.find("li").filter(":visible:not(.no-results)").length) {
+                        if (!!no_results.parent().length) no_results.remove();
+                        no_results.html(that.options.noneResultsText + ' "' + that.$searchbox.val() + '"').show();
+                        that.$menu.find("li").last().after(no_results);
+                    } else if (!!no_results.parent().length) {
+                        no_results.remove();
+                    }
+                } else {
+                    that.$lis.not(".is-hidden").removeClass("hide");
+                    if (!!no_results.parent().length) no_results.remove();
+                }
+                that.$menu.find("li.active").removeClass("active");
+                that.$menu.find("li").filter(":visible:not(.divider)").eq(0).addClass("active").find("a").focus();
+                $(this).focus();
+            });
+            this.$menu.on("mouseenter", "a", function(e) {
+                that.$menu.find(".active").removeClass("active");
+                $(e.currentTarget).parent().not(".disabled").addClass("active");
+            });
+            this.$menu.on("mouseleave", "a", function() {
+                that.$menu.find(".active").removeClass("active");
+            });
+        },
+        val: function(value) {
+            if (value !== undefined) {
+                this.$element.val(value);
+                this.$element.change();
+                return this.$element;
+            } else {
+                return this.$element.val();
+            }
+        },
+        selectAll: function() {
+            if (this.$lis == null) this.$lis = this.$menu.find("li");
+            this.$element.find("option:enabled").prop("selected", true);
+            $(this.$lis).filter(":not(.disabled)").addClass("selected");
+            this.render(false);
+        },
+        deselectAll: function() {
+            if (this.$lis == null) this.$lis = this.$menu.find("li");
+            this.$element.find("option:enabled").prop("selected", false);
+            $(this.$lis).filter(":not(.disabled)").removeClass("selected");
+            this.render(false);
+        },
+        keydown: function(e) {
+            var $this, $items, $parent, index, next, first, last, prev, nextPrev, that, prevIndex, isActive, keyCodeMap = {
+                32: " ",
+                48: "0",
+                49: "1",
+                50: "2",
+                51: "3",
+                52: "4",
+                53: "5",
+                54: "6",
+                55: "7",
+                56: "8",
+                57: "9",
+                59: ";",
+                65: "a",
+                66: "b",
+                67: "c",
+                68: "d",
+                69: "e",
+                70: "f",
+                71: "g",
+                72: "h",
+                73: "i",
+                74: "j",
+                75: "k",
+                76: "l",
+                77: "m",
+                78: "n",
+                79: "o",
+                80: "p",
+                81: "q",
+                82: "r",
+                83: "s",
+                84: "t",
+                85: "u",
+                86: "v",
+                87: "w",
+                88: "x",
+                89: "y",
+                90: "z",
+                96: "0",
+                97: "1",
+                98: "2",
+                99: "3",
+                100: "4",
+                101: "5",
+                102: "6",
+                103: "7",
+                104: "8",
+                105: "9"
+            };
+            $this = $(this);
+            $parent = $this.parent();
+            if ($this.is("input")) $parent = $this.parent().parent();
+            that = $parent.data("this");
+            if (that.options.liveSearch) $parent = $this.parent().parent();
+            if (that.options.container) $parent = that.$menu;
+            $items = $("[role=menu] li:not(.divider) a", $parent);
+            isActive = that.$menu.parent().hasClass("open");
+            if (!isActive && /([0-9]|[A-z])/.test(String.fromCharCode(e.keyCode))) {
+                if (!that.options.container) {
+                    that.setSize();
+                    that.$menu.parent().addClass("open");
+                    isActive = that.$menu.parent().hasClass("open");
+                } else {
+                    that.$newElement.trigger("click");
+                }
+                that.$searchbox.focus();
+            }
+            if (that.options.liveSearch) {
+                if (/(^9$|27)/.test(e.keyCode) && isActive && that.$menu.find(".active").length === 0) {
+                    e.preventDefault();
+                    that.$menu.parent().removeClass("open");
+                    that.$button.focus();
+                }
+                $items = $("[role=menu] li:not(.divider):visible", $parent);
+                if (!$this.val() && !/(38|40)/.test(e.keyCode)) {
+                    if ($items.filter(".active").length === 0) {
+                        $items = that.$newElement.find("li").filter(":icontains(" + keyCodeMap[e.keyCode] + ")");
+                    }
+                }
+            }
+            if (!$items.length) return;
+            if (/(38|40)/.test(e.keyCode)) {
+                index = $items.index($items.filter(":focus"));
+                first = $items.parent(":not(.disabled):visible").first().index();
+                last = $items.parent(":not(.disabled):visible").last().index();
+                next = $items.eq(index).parent().nextAll(":not(.disabled):visible").eq(0).index();
+                prev = $items.eq(index).parent().prevAll(":not(.disabled):visible").eq(0).index();
+                nextPrev = $items.eq(next).parent().prevAll(":not(.disabled):visible").eq(0).index();
+                if (that.options.liveSearch) {
+                    $items.each(function(i) {
+                        if ($(this).is(":not(.disabled)")) {
+                            $(this).data("index", i);
+                        }
+                    });
+                    index = $items.index($items.filter(".active"));
+                    first = $items.filter(":not(.disabled):visible").first().data("index");
+                    last = $items.filter(":not(.disabled):visible").last().data("index");
+                    next = $items.eq(index).nextAll(":not(.disabled):visible").eq(0).data("index");
+                    prev = $items.eq(index).prevAll(":not(.disabled):visible").eq(0).data("index");
+                    nextPrev = $items.eq(next).prevAll(":not(.disabled):visible").eq(0).data("index");
+                }
+                prevIndex = $this.data("prevIndex");
+                if (e.keyCode == 38) {
+                    if (that.options.liveSearch) index -= 1;
+                    if (index != nextPrev && index > prev) index = prev;
+                    if (index < first) index = first;
+                    if (index == prevIndex) index = last;
+                }
+                if (e.keyCode == 40) {
+                    if (that.options.liveSearch) index += 1;
+                    if (index == -1) index = 0;
+                    if (index != nextPrev && index < next) index = next;
+                    if (index > last) index = last;
+                    if (index == prevIndex) index = first;
+                }
+                $this.data("prevIndex", index);
+                if (!that.options.liveSearch) {
+                    $items.eq(index).focus();
+                } else {
+                    e.preventDefault();
+                    if (!$this.is(".dropdown-toggle")) {
+                        $items.removeClass("active");
+                        $items.eq(index).addClass("active").find("a").focus();
+                        $this.focus();
+                    }
+                }
+            } else if (!$this.is("input")) {
+                var keyIndex = [], count, prevKey;
+                $items.each(function() {
+                    if ($(this).parent().is(":not(.disabled)")) {
+                        if ($.trim($(this).text().toLowerCase()).substring(0, 1) == keyCodeMap[e.keyCode]) {
+                            keyIndex.push($(this).parent().index());
+                        }
+                    }
+                });
+                count = $(document).data("keycount");
+                count++;
+                $(document).data("keycount", count);
+                prevKey = $.trim($(":focus").text().toLowerCase()).substring(0, 1);
+                if (prevKey != keyCodeMap[e.keyCode]) {
+                    count = 1;
+                    $(document).data("keycount", count);
+                } else if (count >= keyIndex.length) {
+                    $(document).data("keycount", 0);
+                    if (count > keyIndex.length) count = 1;
+                }
+                $items.eq(keyIndex[count - 1]).focus();
+            }
+            // Select focused option if "Enter", "Spacebar", "Tab" are pressed inside the menu.
+            if (/(13|32|^9$)/.test(e.keyCode) && isActive) {
+                if (!/(32)/.test(e.keyCode)) e.preventDefault();
+                if (!that.options.liveSearch) {
+                    $(":focus").click();
+                } else if (!/(32)/.test(e.keyCode)) {
+                    that.$menu.find(".active a").click();
+                    $this.focus();
+                }
+                $(document).data("keycount", 0);
+            }
+            if (/(^9$|27)/.test(e.keyCode) && isActive && (that.multiple || that.options.liveSearch) || /(27)/.test(e.keyCode) && !isActive) {
+                that.$menu.parent().removeClass("open");
+                that.$button.focus();
+            }
+        },
+        hide: function() {
+            this.$newElement.hide();
+        },
+        show: function() {
+            this.$newElement.show();
+        },
+        destroy: function() {
+            this.$newElement.remove();
+            this.$element.remove();
+        }
+    };
+    $.fn.selectpicker = function(option, event) {
+        //get the args of the outer function..
+        var args = arguments;
+        var value;
+        var chain = this.each(function() {
+            if ($(this).is("select")) {
+                var $this = $(this), data = $this.data("selectpicker"), options = typeof option == "object" && option;
+                if (!data) {
+                    $this.data("selectpicker", data = new Selectpicker(this, options, event));
+                } else if (options) {
+                    for (var i in options) {
+                        data.options[i] = options[i];
+                    }
+                }
+                if (typeof option == "string") {
+                    //Copy the value of option, as once we shift the arguments
+                    //it also shifts the value of option.
+                    var property = option;
+                    if (data[property] instanceof Function) {
+                        [].shift.apply(args);
+                        value = data[property].apply(data, args);
+                    } else {
+                        value = data.options[property];
+                    }
+                }
+            }
+        });
+        if (value !== undefined) {
+            return value;
+        } else {
+            return chain;
+        }
+    };
+    $.fn.selectpicker.defaults = {
+        style: "btn-default",
+        size: "auto",
+        title: null,
+        selectedTextFormat: "values",
+        noneSelectedText: "Nothing selected",
+        noneResultsText: "No results match",
+        countSelectedText: "{0} of {1} selected",
+        maxOptionsText: [ "Limit reached ({n} {var} max)", "Group limit reached ({n} {var} max)", [ "items", "item" ] ],
+        width: false,
+        container: false,
+        hideDisabled: false,
+        showSubtext: false,
+        showIcon: true,
+        showContent: true,
+        dropupAuto: true,
+        header: false,
+        liveSearch: false,
+        actionsBox: false,
+        multipleSeparator: ", ",
+        iconBase: "glyphicon",
+        tickIcon: "glyphicon-ok",
+        maxOptions: false
+    };
+    $(document).data("keycount", 0).on("keydown", ".bootstrap-select [data-toggle=dropdown], .bootstrap-select [role=menu], .bootstrap-select-searchbox input", Selectpicker.prototype.keydown).on("focusin.modal", ".bootstrap-select [data-toggle=dropdown], .bootstrap-select [role=menu], .bootstrap-select-searchbox input", function(e) {
+        e.stopPropagation();
+    });
+}(window.jQuery);
+
+define("torabot/main/0.1.0/typeahead.jquery-debug", [], function(require, exports, module) {
+    /*!
+ * typeahead.js 0.10.2
+ * https://github.com/twitter/typeahead.js
+ * Copyright 2013-2014 Twitter, Inc. and other contributors; Licensed MIT
+ */
+    (function($) {
+        var _ = {
+            isMsie: function() {
+                return /(msie|trident)/i.test(navigator.userAgent) ? navigator.userAgent.match(/(msie |rv:)(\d+(.\d+)?)/i)[2] : false;
+            },
+            isBlankString: function(str) {
+                return !str || /^\s*$/.test(str);
+            },
+            escapeRegExChars: function(str) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            },
+            isString: function(obj) {
+                return typeof obj === "string";
+            },
+            isNumber: function(obj) {
+                return typeof obj === "number";
+            },
+            isArray: $.isArray,
+            isFunction: $.isFunction,
+            isObject: $.isPlainObject,
+            isUndefined: function(obj) {
+                return typeof obj === "undefined";
+            },
+            bind: $.proxy,
+            each: function(collection, cb) {
+                $.each(collection, reverseArgs);
+                function reverseArgs(index, value) {
+                    return cb(value, index);
+                }
+            },
+            map: $.map,
+            filter: $.grep,
+            every: function(obj, test) {
+                var result = true;
+                if (!obj) {
+                    return result;
+                }
+                $.each(obj, function(key, val) {
+                    if (!(result = test.call(null, val, key, obj))) {
+                        return false;
+                    }
+                });
+                return !!result;
+            },
+            some: function(obj, test) {
+                var result = false;
+                if (!obj) {
+                    return result;
+                }
+                $.each(obj, function(key, val) {
+                    if (result = test.call(null, val, key, obj)) {
+                        return false;
+                    }
+                });
+                return !!result;
+            },
+            mixin: $.extend,
+            getUniqueId: function() {
+                var counter = 0;
+                return function() {
+                    return counter++;
+                };
+            }(),
+            templatify: function templatify(obj) {
+                return $.isFunction(obj) ? obj : template;
+                function template() {
+                    return String(obj);
+                }
+            },
+            defer: function(fn) {
+                setTimeout(fn, 0);
+            },
+            debounce: function(func, wait, immediate) {
+                var timeout, result;
+                return function() {
+                    var context = this, args = arguments, later, callNow;
+                    later = function() {
+                        timeout = null;
+                        if (!immediate) {
+                            result = func.apply(context, args);
+                        }
+                    };
+                    callNow = immediate && !timeout;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                    if (callNow) {
+                        result = func.apply(context, args);
+                    }
+                    return result;
+                };
+            },
+            throttle: function(func, wait) {
+                var context, args, timeout, result, previous, later;
+                previous = 0;
+                later = function() {
+                    previous = new Date();
+                    timeout = null;
+                    result = func.apply(context, args);
+                };
+                return function() {
+                    var now = new Date(), remaining = wait - (now - previous);
+                    context = this;
+                    args = arguments;
+                    if (remaining <= 0) {
+                        clearTimeout(timeout);
+                        timeout = null;
+                        previous = now;
+                        result = func.apply(context, args);
+                    } else if (!timeout) {
+                        timeout = setTimeout(later, remaining);
+                    }
+                    return result;
+                };
+            },
+            noop: function() {}
+        };
+        var html = {
+            wrapper: '<span class="twitter-typeahead"></span>',
+            dropdown: '<span class="tt-dropdown-menu"></span>',
+            dataset: '<div class="tt-dataset-%CLASS%"></div>',
+            suggestions: '<span class="tt-suggestions"></span>',
+            suggestion: '<div class="tt-suggestion"></div>'
+        };
+        var css = {
+            wrapper: {
+                position: "relative",
+                display: "inline-block"
+            },
+            hint: {
+                position: "absolute",
+                top: "0",
+                left: "0",
+                borderColor: "transparent",
+                boxShadow: "none"
+            },
+            input: {
+                position: "relative",
+                verticalAlign: "top",
+                backgroundColor: "transparent"
+            },
+            inputWithNoHint: {
+                position: "relative",
+                verticalAlign: "top"
+            },
+            dropdown: {
+                position: "absolute",
+                top: "100%",
+                left: "0",
+                zIndex: "100",
+                display: "none"
+            },
+            suggestions: {
+                display: "block"
+            },
+            suggestion: {
+                whiteSpace: "nowrap",
+                cursor: "pointer"
+            },
+            suggestionChild: {
+                whiteSpace: "normal"
+            },
+            ltr: {
+                left: "0",
+                right: "auto"
+            },
+            rtl: {
+                left: "auto",
+                right: " 0"
+            }
+        };
+        if (_.isMsie()) {
+            _.mixin(css.input, {
+                backgroundImage: "url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)"
+            });
+        }
+        if (_.isMsie() && _.isMsie() <= 7) {
+            _.mixin(css.input, {
+                marginTop: "-1px"
+            });
+        }
+        var EventBus = function() {
+            var namespace = "typeahead:";
+            function EventBus(o) {
+                if (!o || !o.el) {
+                    $.error("EventBus initialized without el");
+                }
+                this.$el = $(o.el);
+            }
+            _.mixin(EventBus.prototype, {
+                trigger: function(type) {
+                    var args = [].slice.call(arguments, 1);
+                    this.$el.trigger(namespace + type, args);
+                }
+            });
+            return EventBus;
+        }();
+        var EventEmitter = function() {
+            var splitter = /\s+/, nextTick = getNextTick();
+            return {
+                onSync: onSync,
+                onAsync: onAsync,
+                off: off,
+                trigger: trigger
+            };
+            function on(method, types, cb, context) {
+                var type;
+                if (!cb) {
+                    return this;
+                }
+                types = types.split(splitter);
+                cb = context ? bindContext(cb, context) : cb;
+                this._callbacks = this._callbacks || {};
+                while (type = types.shift()) {
+                    this._callbacks[type] = this._callbacks[type] || {
+                        sync: [],
+                        async: []
+                    };
+                    this._callbacks[type][method].push(cb);
+                }
+                return this;
+            }
+            function onAsync(types, cb, context) {
+                return on.call(this, "async", types, cb, context);
+            }
+            function onSync(types, cb, context) {
+                return on.call(this, "sync", types, cb, context);
+            }
+            function off(types) {
+                var type;
+                if (!this._callbacks) {
+                    return this;
+                }
+                types = types.split(splitter);
+                while (type = types.shift()) {
+                    delete this._callbacks[type];
+                }
+                return this;
+            }
+            function trigger(types) {
+                var type, callbacks, args, syncFlush, asyncFlush;
+                if (!this._callbacks) {
+                    return this;
+                }
+                types = types.split(splitter);
+                args = [].slice.call(arguments, 1);
+                while ((type = types.shift()) && (callbacks = this._callbacks[type])) {
+                    syncFlush = getFlush(callbacks.sync, this, [ type ].concat(args));
+                    asyncFlush = getFlush(callbacks.async, this, [ type ].concat(args));
+                    syncFlush() && nextTick(asyncFlush);
+                }
+                return this;
+            }
+            function getFlush(callbacks, context, args) {
+                return flush;
+                function flush() {
+                    var cancelled;
+                    for (var i = 0; !cancelled && i < callbacks.length; i += 1) {
+                        cancelled = callbacks[i].apply(context, args) === false;
+                    }
+                    return !cancelled;
+                }
+            }
+            function getNextTick() {
+                var nextTickFn;
+                if (window.setImmediate) {
+                    nextTickFn = function nextTickSetImmediate(fn) {
+                        setImmediate(function() {
+                            fn();
+                        });
+                    };
+                } else {
+                    nextTickFn = function nextTickSetTimeout(fn) {
+                        setTimeout(function() {
+                            fn();
+                        }, 0);
+                    };
+                }
+                return nextTickFn;
+            }
+            function bindContext(fn, context) {
+                return fn.bind ? fn.bind(context) : function() {
+                    fn.apply(context, [].slice.call(arguments, 0));
+                };
+            }
+        }();
+        var highlight = function(doc) {
+            var defaults = {
+                node: null,
+                pattern: null,
+                tagName: "strong",
+                className: null,
+                wordsOnly: false,
+                caseSensitive: false
+            };
+            return function hightlight(o) {
+                var regex;
+                o = _.mixin({}, defaults, o);
+                if (!o.node || !o.pattern) {
+                    return;
+                }
+                o.pattern = _.isArray(o.pattern) ? o.pattern : [ o.pattern ];
+                regex = getRegex(o.pattern, o.caseSensitive, o.wordsOnly);
+                traverse(o.node, hightlightTextNode);
+                function hightlightTextNode(textNode) {
+                    var match, patternNode;
+                    if (match = regex.exec(textNode.data)) {
+                        wrapperNode = doc.createElement(o.tagName);
+                        o.className && (wrapperNode.className = o.className);
+                        patternNode = textNode.splitText(match.index);
+                        patternNode.splitText(match[0].length);
+                        wrapperNode.appendChild(patternNode.cloneNode(true));
+                        textNode.parentNode.replaceChild(wrapperNode, patternNode);
+                    }
+                    return !!match;
+                }
+                function traverse(el, hightlightTextNode) {
+                    var childNode, TEXT_NODE_TYPE = 3;
+                    for (var i = 0; i < el.childNodes.length; i++) {
+                        childNode = el.childNodes[i];
+                        if (childNode.nodeType === TEXT_NODE_TYPE) {
+                            i += hightlightTextNode(childNode) ? 1 : 0;
+                        } else {
+                            traverse(childNode, hightlightTextNode);
+                        }
+                    }
+                }
+            };
+            function getRegex(patterns, caseSensitive, wordsOnly) {
+                var escapedPatterns = [], regexStr;
+                for (var i = 0; i < patterns.length; i++) {
+                    escapedPatterns.push(_.escapeRegExChars(patterns[i]));
+                }
+                regexStr = wordsOnly ? "\\b(" + escapedPatterns.join("|") + ")\\b" : "(" + escapedPatterns.join("|") + ")";
+                return caseSensitive ? new RegExp(regexStr) : new RegExp(regexStr, "i");
+            }
+        }(window.document);
+        var Input = function() {
+            var specialKeyCodeMap;
+            specialKeyCodeMap = {
+                9: "tab",
+                27: "esc",
+                37: "left",
+                39: "right",
+                13: "enter",
+                38: "up",
+                40: "down"
+            };
+            function Input(o) {
+                var that = this, onBlur, onFocus, onKeydown, onInput;
+                o = o || {};
+                if (!o.input) {
+                    $.error("input is missing");
+                }
+                onBlur = _.bind(this._onBlur, this);
+                onFocus = _.bind(this._onFocus, this);
+                onKeydown = _.bind(this._onKeydown, this);
+                onInput = _.bind(this._onInput, this);
+                this.$hint = $(o.hint);
+                this.$input = $(o.input).on("blur.tt", onBlur).on("focus.tt", onFocus).on("keydown.tt", onKeydown);
+                if (this.$hint.length === 0) {
+                    this.setHint = this.getHint = this.clearHint = this.clearHintIfInvalid = _.noop;
+                }
+                if (!_.isMsie()) {
+                    this.$input.on("input.tt", onInput);
+                } else {
+                    this.$input.on("keydown.tt keypress.tt cut.tt paste.tt", function($e) {
+                        if (specialKeyCodeMap[$e.which || $e.keyCode]) {
+                            return;
+                        }
+                        _.defer(_.bind(that._onInput, that, $e));
+                    });
+                }
+                this.query = this.$input.val();
+                this.$overflowHelper = buildOverflowHelper(this.$input);
+            }
+            Input.normalizeQuery = function(str) {
+                return (str || "").replace(/^\s*/g, "").replace(/\s{2,}/g, " ");
+            };
+            _.mixin(Input.prototype, EventEmitter, {
+                _onBlur: function onBlur() {
+                    this.resetInputValue();
+                    this.trigger("blurred");
+                },
+                _onFocus: function onFocus() {
+                    this.trigger("focused");
+                },
+                _onKeydown: function onKeydown($e) {
+                    var keyName = specialKeyCodeMap[$e.which || $e.keyCode];
+                    this._managePreventDefault(keyName, $e);
+                    if (keyName && this._shouldTrigger(keyName, $e)) {
+                        this.trigger(keyName + "Keyed", $e);
+                    }
+                },
+                _onInput: function onInput() {
+                    this._checkInputValue();
+                },
+                _managePreventDefault: function managePreventDefault(keyName, $e) {
+                    var preventDefault, hintValue, inputValue;
+                    switch (keyName) {
+                      case "tab":
+                        hintValue = this.getHint();
+                        inputValue = this.getInputValue();
+                        preventDefault = hintValue && hintValue !== inputValue && !withModifier($e);
+                        break;
+
+                      case "up":
+                      case "down":
+                        preventDefault = !withModifier($e);
+                        break;
+
+                      default:
+                        preventDefault = false;
+                    }
+                    preventDefault && $e.preventDefault();
+                },
+                _shouldTrigger: function shouldTrigger(keyName, $e) {
+                    var trigger;
+                    switch (keyName) {
+                      case "tab":
+                        trigger = !withModifier($e);
+                        break;
+
+                      default:
+                        trigger = true;
+                    }
+                    return trigger;
+                },
+                _checkInputValue: function checkInputValue() {
+                    var inputValue, areEquivalent, hasDifferentWhitespace;
+                    inputValue = this.getInputValue();
+                    areEquivalent = areQueriesEquivalent(inputValue, this.query);
+                    hasDifferentWhitespace = areEquivalent ? this.query.length !== inputValue.length : false;
+                    if (!areEquivalent) {
+                        this.trigger("queryChanged", this.query = inputValue);
+                    } else if (hasDifferentWhitespace) {
+                        this.trigger("whitespaceChanged", this.query);
+                    }
+                },
+                focus: function focus() {
+                    this.$input.focus();
+                },
+                blur: function blur() {
+                    this.$input.blur();
+                },
+                getQuery: function getQuery() {
+                    return this.query;
+                },
+                setQuery: function setQuery(query) {
+                    this.query = query;
+                },
+                getInputValue: function getInputValue() {
+                    return this.$input.val();
+                },
+                setInputValue: function setInputValue(value, silent) {
+                    this.$input.val(value);
+                    silent ? this.clearHint() : this._checkInputValue();
+                },
+                resetInputValue: function resetInputValue() {
+                    this.setInputValue(this.query, true);
+                },
+                getHint: function getHint() {
+                    return this.$hint.val();
+                },
+                setHint: function setHint(value) {
+                    this.$hint.val(value);
+                },
+                clearHint: function clearHint() {
+                    this.setHint("");
+                },
+                clearHintIfInvalid: function clearHintIfInvalid() {
+                    var val, hint, valIsPrefixOfHint, isValid;
+                    val = this.getInputValue();
+                    hint = this.getHint();
+                    valIsPrefixOfHint = val !== hint && hint.indexOf(val) === 0;
+                    isValid = val !== "" && valIsPrefixOfHint && !this.hasOverflow();
+                    !isValid && this.clearHint();
+                },
+                getLanguageDirection: function getLanguageDirection() {
+                    return (this.$input.css("direction") || "ltr").toLowerCase();
+                },
+                hasOverflow: function hasOverflow() {
+                    var constraint = this.$input.width() - 2;
+                    this.$overflowHelper.text(this.getInputValue());
+                    return this.$overflowHelper.width() >= constraint;
+                },
+                isCursorAtEnd: function() {
+                    var valueLength, selectionStart, range;
+                    valueLength = this.$input.val().length;
+                    selectionStart = this.$input[0].selectionStart;
+                    if (_.isNumber(selectionStart)) {
+                        return selectionStart === valueLength;
+                    } else if (document.selection) {
+                        range = document.selection.createRange();
+                        range.moveStart("character", -valueLength);
+                        return valueLength === range.text.length;
+                    }
+                    return true;
+                },
+                destroy: function destroy() {
+                    this.$hint.off(".tt");
+                    this.$input.off(".tt");
+                    this.$hint = this.$input = this.$overflowHelper = null;
+                }
+            });
+            return Input;
+            function buildOverflowHelper($input) {
+                return $('<pre aria-hidden="true"></pre>').css({
+                    position: "absolute",
+                    visibility: "hidden",
+                    whiteSpace: "pre",
+                    fontFamily: $input.css("font-family"),
+                    fontSize: $input.css("font-size"),
+                    fontStyle: $input.css("font-style"),
+                    fontVariant: $input.css("font-variant"),
+                    fontWeight: $input.css("font-weight"),
+                    wordSpacing: $input.css("word-spacing"),
+                    letterSpacing: $input.css("letter-spacing"),
+                    textIndent: $input.css("text-indent"),
+                    textRendering: $input.css("text-rendering"),
+                    textTransform: $input.css("text-transform")
+                }).insertAfter($input);
+            }
+            function areQueriesEquivalent(a, b) {
+                return Input.normalizeQuery(a) === Input.normalizeQuery(b);
+            }
+            function withModifier($e) {
+                return $e.altKey || $e.ctrlKey || $e.metaKey || $e.shiftKey;
+            }
+        }();
+        var Dataset = function() {
+            var datasetKey = "ttDataset", valueKey = "ttValue", datumKey = "ttDatum";
+            function Dataset(o) {
+                o = o || {};
+                o.templates = o.templates || {};
+                if (!o.source) {
+                    $.error("missing source");
+                }
+                if (o.name && !isValidName(o.name)) {
+                    $.error("invalid dataset name: " + o.name);
+                }
+                this.query = null;
+                this.highlight = !!o.highlight;
+                this.name = o.name || _.getUniqueId();
+                this.source = o.source;
+                this.displayFn = getDisplayFn(o.display || o.displayKey);
+                this.templates = getTemplates(o.templates, this.displayFn);
+                this.$el = $(html.dataset.replace("%CLASS%", this.name));
+            }
+            Dataset.extractDatasetName = function extractDatasetName(el) {
+                return $(el).data(datasetKey);
+            };
+            Dataset.extractValue = function extractDatum(el) {
+                return $(el).data(valueKey);
+            };
+            Dataset.extractDatum = function extractDatum(el) {
+                return $(el).data(datumKey);
+            };
+            _.mixin(Dataset.prototype, EventEmitter, {
+                _render: function render(query, suggestions) {
+                    if (!this.$el) {
+                        return;
+                    }
+                    var that = this, hasSuggestions;
+                    this.$el.empty();
+                    hasSuggestions = suggestions && suggestions.length;
+                    if (!hasSuggestions && this.templates.empty) {
+                        this.$el.html(getEmptyHtml()).prepend(that.templates.header ? getHeaderHtml() : null).append(that.templates.footer ? getFooterHtml() : null);
+                    } else if (hasSuggestions) {
+                        this.$el.html(getSuggestionsHtml()).prepend(that.templates.header ? getHeaderHtml() : null).append(that.templates.footer ? getFooterHtml() : null);
+                    }
+                    this.trigger("rendered");
+                    function getEmptyHtml() {
+                        return that.templates.empty({
+                            query: query,
+                            isEmpty: true
+                        });
+                    }
+                    function getSuggestionsHtml() {
+                        var $suggestions, nodes;
+                        $suggestions = $(html.suggestions).css(css.suggestions);
+                        nodes = _.map(suggestions, getSuggestionNode);
+                        $suggestions.append.apply($suggestions, nodes);
+                        that.highlight && highlight({
+                            node: $suggestions[0],
+                            pattern: query
+                        });
+                        return $suggestions;
+                        function getSuggestionNode(suggestion) {
+                            var $el;
+                            $el = $(html.suggestion).append(that.templates.suggestion(suggestion)).data(datasetKey, that.name).data(valueKey, that.displayFn(suggestion)).data(datumKey, suggestion);
+                            $el.children().each(function() {
+                                $(this).css(css.suggestionChild);
+                            });
+                            return $el;
+                        }
+                    }
+                    function getHeaderHtml() {
+                        return that.templates.header({
+                            query: query,
+                            isEmpty: !hasSuggestions
+                        });
+                    }
+                    function getFooterHtml() {
+                        return that.templates.footer({
+                            query: query,
+                            isEmpty: !hasSuggestions
+                        });
+                    }
+                },
+                getRoot: function getRoot() {
+                    return this.$el;
+                },
+                update: function update(query) {
+                    var that = this;
+                    this.query = query;
+                    this.canceled = false;
+                    this.source(query, render);
+                    function render(suggestions) {
+                        if (!that.canceled && query === that.query) {
+                            that._render(query, suggestions);
+                        }
+                    }
+                },
+                cancel: function cancel() {
+                    this.canceled = true;
+                },
+                clear: function clear() {
+                    this.cancel();
+                    this.$el.empty();
+                    this.trigger("rendered");
+                },
+                isEmpty: function isEmpty() {
+                    return this.$el.is(":empty");
+                },
+                destroy: function destroy() {
+                    this.$el = null;
+                }
+            });
+            return Dataset;
+            function getDisplayFn(display) {
+                display = display || "value";
+                return _.isFunction(display) ? display : displayFn;
+                function displayFn(obj) {
+                    return obj[display];
+                }
+            }
+            function getTemplates(templates, displayFn) {
+                return {
+                    empty: templates.empty && _.templatify(templates.empty),
+                    header: templates.header && _.templatify(templates.header),
+                    footer: templates.footer && _.templatify(templates.footer),
+                    suggestion: templates.suggestion || suggestionTemplate
+                };
+                function suggestionTemplate(context) {
+                    return "<p>" + displayFn(context) + "</p>";
+                }
+            }
+            function isValidName(str) {
+                return /^[_a-zA-Z0-9-]+$/.test(str);
+            }
+        }();
+        var Dropdown = function() {
+            function Dropdown(o) {
+                var that = this, onSuggestionClick, onSuggestionMouseEnter, onSuggestionMouseLeave;
+                o = o || {};
+                if (!o.menu) {
+                    $.error("menu is required");
+                }
+                this.isOpen = false;
+                this.isEmpty = true;
+                this.datasets = _.map(o.datasets, initializeDataset);
+                onSuggestionClick = _.bind(this._onSuggestionClick, this);
+                onSuggestionMouseEnter = _.bind(this._onSuggestionMouseEnter, this);
+                onSuggestionMouseLeave = _.bind(this._onSuggestionMouseLeave, this);
+                this.$menu = $(o.menu).on("click.tt", ".tt-suggestion", onSuggestionClick).on("mouseenter.tt", ".tt-suggestion", onSuggestionMouseEnter).on("mouseleave.tt", ".tt-suggestion", onSuggestionMouseLeave);
+                _.each(this.datasets, function(dataset) {
+                    that.$menu.append(dataset.getRoot());
+                    dataset.onSync("rendered", that._onRendered, that);
+                });
+            }
+            _.mixin(Dropdown.prototype, EventEmitter, {
+                _onSuggestionClick: function onSuggestionClick($e) {
+                    this.trigger("suggestionClicked", $($e.currentTarget));
+                },
+                _onSuggestionMouseEnter: function onSuggestionMouseEnter($e) {
+                    this._removeCursor();
+                    this._setCursor($($e.currentTarget), true);
+                },
+                _onSuggestionMouseLeave: function onSuggestionMouseLeave() {
+                    this._removeCursor();
+                },
+                _onRendered: function onRendered() {
+                    this.isEmpty = _.every(this.datasets, isDatasetEmpty);
+                    this.isEmpty ? this._hide() : this.isOpen && this._show();
+                    this.trigger("datasetRendered");
+                    function isDatasetEmpty(dataset) {
+                        return dataset.isEmpty();
+                    }
+                },
+                _hide: function() {
+                    this.$menu.hide();
+                },
+                _show: function() {
+                    this.$menu.css("display", "block");
+                },
+                _getSuggestions: function getSuggestions() {
+                    return this.$menu.find(".tt-suggestion");
+                },
+                _getCursor: function getCursor() {
+                    return this.$menu.find(".tt-cursor").first();
+                },
+                _setCursor: function setCursor($el, silent) {
+                    $el.first().addClass("tt-cursor");
+                    !silent && this.trigger("cursorMoved");
+                },
+                _removeCursor: function removeCursor() {
+                    this._getCursor().removeClass("tt-cursor");
+                },
+                _moveCursor: function moveCursor(increment) {
+                    var $suggestions, $oldCursor, newCursorIndex, $newCursor;
+                    if (!this.isOpen) {
+                        return;
+                    }
+                    $oldCursor = this._getCursor();
+                    $suggestions = this._getSuggestions();
+                    this._removeCursor();
+                    newCursorIndex = $suggestions.index($oldCursor) + increment;
+                    newCursorIndex = (newCursorIndex + 1) % ($suggestions.length + 1) - 1;
+                    if (newCursorIndex === -1) {
+                        this.trigger("cursorRemoved");
+                        return;
+                    } else if (newCursorIndex < -1) {
+                        newCursorIndex = $suggestions.length - 1;
+                    }
+                    this._setCursor($newCursor = $suggestions.eq(newCursorIndex));
+                    this._ensureVisible($newCursor);
+                },
+                _ensureVisible: function ensureVisible($el) {
+                    var elTop, elBottom, menuScrollTop, menuHeight;
+                    elTop = $el.position().top;
+                    elBottom = elTop + $el.outerHeight(true);
+                    menuScrollTop = this.$menu.scrollTop();
+                    menuHeight = this.$menu.height() + parseInt(this.$menu.css("paddingTop"), 10) + parseInt(this.$menu.css("paddingBottom"), 10);
+                    if (elTop < 0) {
+                        this.$menu.scrollTop(menuScrollTop + elTop);
+                    } else if (menuHeight < elBottom) {
+                        this.$menu.scrollTop(menuScrollTop + (elBottom - menuHeight));
+                    }
+                },
+                close: function close() {
+                    if (this.isOpen) {
+                        this.isOpen = false;
+                        this._removeCursor();
+                        this._hide();
+                        this.trigger("closed");
+                    }
+                },
+                open: function open() {
+                    if (!this.isOpen) {
+                        this.isOpen = true;
+                        !this.isEmpty && this._show();
+                        this.trigger("opened");
+                    }
+                },
+                setLanguageDirection: function setLanguageDirection(dir) {
+                    this.$menu.css(dir === "ltr" ? css.ltr : css.rtl);
+                },
+                moveCursorUp: function moveCursorUp() {
+                    this._moveCursor(-1);
+                },
+                moveCursorDown: function moveCursorDown() {
+                    this._moveCursor(+1);
+                },
+                getDatumForSuggestion: function getDatumForSuggestion($el) {
+                    var datum = null;
+                    if ($el.length) {
+                        datum = {
+                            raw: Dataset.extractDatum($el),
+                            value: Dataset.extractValue($el),
+                            datasetName: Dataset.extractDatasetName($el)
+                        };
+                    }
+                    return datum;
+                },
+                getDatumForCursor: function getDatumForCursor() {
+                    return this.getDatumForSuggestion(this._getCursor().first());
+                },
+                getDatumForTopSuggestion: function getDatumForTopSuggestion() {
+                    return this.getDatumForSuggestion(this._getSuggestions().first());
+                },
+                update: function update(query) {
+                    _.each(this.datasets, updateDataset);
+                    function updateDataset(dataset) {
+                        dataset.update(query);
+                    }
+                },
+                empty: function empty() {
+                    _.each(this.datasets, clearDataset);
+                    this.isEmpty = true;
+                    function clearDataset(dataset) {
+                        dataset.clear();
+                    }
+                },
+                isVisible: function isVisible() {
+                    return this.isOpen && !this.isEmpty;
+                },
+                destroy: function destroy() {
+                    this.$menu.off(".tt");
+                    this.$menu = null;
+                    _.each(this.datasets, destroyDataset);
+                    function destroyDataset(dataset) {
+                        dataset.destroy();
+                    }
+                }
+            });
+            return Dropdown;
+            function initializeDataset(oDataset) {
+                return new Dataset(oDataset);
+            }
+        }();
+        var Typeahead = function() {
+            var attrsKey = "ttAttrs";
+            function Typeahead(o) {
+                var $menu, $input, $hint;
+                o = o || {};
+                if (!o.input) {
+                    $.error("missing input");
+                }
+                this.isActivated = false;
+                this.autoselect = !!o.autoselect;
+                this.minLength = _.isNumber(o.minLength) ? o.minLength : 1;
+                this.$node = buildDomStructure(o.input, o.withHint);
+                $menu = this.$node.find(".tt-dropdown-menu");
+                $input = this.$node.find(".tt-input");
+                $hint = this.$node.find(".tt-hint");
+                $input.on("blur.tt", function($e) {
+                    var active, isActive, hasActive;
+                    active = document.activeElement;
+                    isActive = $menu.is(active);
+                    hasActive = $menu.has(active).length > 0;
+                    if (_.isMsie() && (isActive || hasActive)) {
+                        $e.preventDefault();
+                        $e.stopImmediatePropagation();
+                        _.defer(function() {
+                            $input.focus();
+                        });
+                    }
+                });
+                $menu.on("mousedown.tt", function($e) {
+                    $e.preventDefault();
+                });
+                this.eventBus = o.eventBus || new EventBus({
+                    el: $input
+                });
+                this.dropdown = new Dropdown({
+                    menu: $menu,
+                    datasets: o.datasets
+                }).onSync("suggestionClicked", this._onSuggestionClicked, this).onSync("cursorMoved", this._onCursorMoved, this).onSync("cursorRemoved", this._onCursorRemoved, this).onSync("opened", this._onOpened, this).onSync("closed", this._onClosed, this).onAsync("datasetRendered", this._onDatasetRendered, this);
+                this.input = new Input({
+                    input: $input,
+                    hint: $hint
+                }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("leftKeyed", this._onLeftKeyed, this).onSync("rightKeyed", this._onRightKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
+                this._setLanguageDirection();
+            }
+            _.mixin(Typeahead.prototype, {
+                _onSuggestionClicked: function onSuggestionClicked(type, $el) {
+                    var datum;
+                    if (datum = this.dropdown.getDatumForSuggestion($el)) {
+                        this._select(datum);
+                    }
+                },
+                _onCursorMoved: function onCursorMoved() {
+                    var datum = this.dropdown.getDatumForCursor();
+                    this.input.setInputValue(datum.value, true);
+                    this.eventBus.trigger("cursorchanged", datum.raw, datum.datasetName);
+                },
+                _onCursorRemoved: function onCursorRemoved() {
+                    this.input.resetInputValue();
+                    this._updateHint();
+                },
+                _onDatasetRendered: function onDatasetRendered() {
+                    this._updateHint();
+                },
+                _onOpened: function onOpened() {
+                    this._updateHint();
+                    this.eventBus.trigger("opened");
+                },
+                _onClosed: function onClosed() {
+                    this.input.clearHint();
+                    this.eventBus.trigger("closed");
+                },
+                _onFocused: function onFocused() {
+                    this.isActivated = true;
+                    this.dropdown.open();
+                },
+                _onBlurred: function onBlurred() {
+                    this.isActivated = false;
+                    this.dropdown.empty();
+                    this.dropdown.close();
+                },
+                _onEnterKeyed: function onEnterKeyed(type, $e) {
+                    var cursorDatum, topSuggestionDatum;
+                    cursorDatum = this.dropdown.getDatumForCursor();
+                    topSuggestionDatum = this.dropdown.getDatumForTopSuggestion();
+                    if (cursorDatum) {
+                        this._select(cursorDatum);
+                        $e.preventDefault();
+                    } else if (this.autoselect && topSuggestionDatum) {
+                        this._select(topSuggestionDatum);
+                        $e.preventDefault();
+                    }
+                },
+                _onTabKeyed: function onTabKeyed(type, $e) {
+                    var datum;
+                    if (datum = this.dropdown.getDatumForCursor()) {
+                        this._select(datum);
+                        $e.preventDefault();
+                    } else {
+                        this._autocomplete(true);
+                    }
+                },
+                _onEscKeyed: function onEscKeyed() {
+                    this.dropdown.close();
+                    this.input.resetInputValue();
+                },
+                _onUpKeyed: function onUpKeyed() {
+                    var query = this.input.getQuery();
+                    this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp();
+                    this.dropdown.open();
+                },
+                _onDownKeyed: function onDownKeyed() {
+                    var query = this.input.getQuery();
+                    this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown();
+                    this.dropdown.open();
+                },
+                _onLeftKeyed: function onLeftKeyed() {
+                    this.dir === "rtl" && this._autocomplete();
+                },
+                _onRightKeyed: function onRightKeyed() {
+                    this.dir === "ltr" && this._autocomplete();
+                },
+                _onQueryChanged: function onQueryChanged(e, query) {
+                    this.input.clearHintIfInvalid();
+                    query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.empty();
+                    this.dropdown.open();
+                    this._setLanguageDirection();
+                },
+                _onWhitespaceChanged: function onWhitespaceChanged() {
+                    this._updateHint();
+                    this.dropdown.open();
+                },
+                _setLanguageDirection: function setLanguageDirection() {
+                    var dir;
+                    if (this.dir !== (dir = this.input.getLanguageDirection())) {
+                        this.dir = dir;
+                        this.$node.css("direction", dir);
+                        this.dropdown.setLanguageDirection(dir);
+                    }
+                },
+                _updateHint: function updateHint() {
+                    var datum, val, query, escapedQuery, frontMatchRegEx, match;
+                    datum = this.dropdown.getDatumForTopSuggestion();
+                    if (datum && this.dropdown.isVisible() && !this.input.hasOverflow()) {
+                        val = this.input.getInputValue();
+                        query = Input.normalizeQuery(val);
+                        escapedQuery = _.escapeRegExChars(query);
+                        frontMatchRegEx = new RegExp("^(?:" + escapedQuery + ")(.+$)", "i");
+                        match = frontMatchRegEx.exec(datum.value);
+                        match ? this.input.setHint(val + match[1]) : this.input.clearHint();
+                    } else {
+                        this.input.clearHint();
+                    }
+                },
+                _autocomplete: function autocomplete(laxCursor) {
+                    var hint, query, isCursorAtEnd, datum;
+                    hint = this.input.getHint();
+                    query = this.input.getQuery();
+                    isCursorAtEnd = laxCursor || this.input.isCursorAtEnd();
+                    if (hint && query !== hint && isCursorAtEnd) {
+                        datum = this.dropdown.getDatumForTopSuggestion();
+                        datum && this.input.setInputValue(datum.value);
+                        this.eventBus.trigger("autocompleted", datum.raw, datum.datasetName);
+                    }
+                },
+                _select: function select(datum) {
+                    this.input.setQuery(datum.value);
+                    this.input.setInputValue(datum.value, true);
+                    this._setLanguageDirection();
+                    this.eventBus.trigger("selected", datum.raw, datum.datasetName);
+                    this.dropdown.close();
+                    _.defer(_.bind(this.dropdown.empty, this.dropdown));
+                },
+                open: function open() {
+                    this.dropdown.open();
+                },
+                close: function close() {
+                    this.dropdown.close();
+                },
+                setVal: function setVal(val) {
+                    if (this.isActivated) {
+                        this.input.setInputValue(val);
+                    } else {
+                        this.input.setQuery(val);
+                        this.input.setInputValue(val, true);
+                    }
+                    this._setLanguageDirection();
+                },
+                getVal: function getVal() {
+                    return this.input.getQuery();
+                },
+                destroy: function destroy() {
+                    this.input.destroy();
+                    this.dropdown.destroy();
+                    destroyDomStructure(this.$node);
+                    this.$node = null;
+                }
+            });
+            return Typeahead;
+            function buildDomStructure(input, withHint) {
+                var $input, $wrapper, $dropdown, $hint;
+                $input = $(input);
+                $wrapper = $(html.wrapper).css(css.wrapper);
+                $dropdown = $(html.dropdown).css(css.dropdown);
+                $hint = $input.clone().css(css.hint).css(getBackgroundStyles($input));
+                $hint.val("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
+                    autocomplete: "off",
+                    spellcheck: "false"
+                });
+                $input.data(attrsKey, {
+                    dir: $input.attr("dir"),
+                    autocomplete: $input.attr("autocomplete"),
+                    spellcheck: $input.attr("spellcheck"),
+                    style: $input.attr("style")
+                });
+                $input.addClass("tt-input").attr({
+                    autocomplete: "off",
+                    spellcheck: false
+                }).css(withHint ? css.input : css.inputWithNoHint);
+                try {
+                    !$input.attr("dir") && $input.attr("dir", "auto");
+                } catch (e) {}
+                return $input.wrap($wrapper).parent().prepend(withHint ? $hint : null).append($dropdown);
+            }
+            function getBackgroundStyles($el) {
+                return {
+                    backgroundAttachment: $el.css("background-attachment"),
+                    backgroundClip: $el.css("background-clip"),
+                    backgroundColor: $el.css("background-color"),
+                    backgroundImage: $el.css("background-image"),
+                    backgroundOrigin: $el.css("background-origin"),
+                    backgroundPosition: $el.css("background-position"),
+                    backgroundRepeat: $el.css("background-repeat"),
+                    backgroundSize: $el.css("background-size")
+                };
+            }
+            function destroyDomStructure($node) {
+                var $input = $node.find(".tt-input");
+                _.each($input.data(attrsKey), function(val, key) {
+                    _.isUndefined(val) ? $input.removeAttr(key) : $input.attr(key, val);
+                });
+                $input.detach().removeData(attrsKey).removeClass("tt-input").insertAfter($node);
+                $node.remove();
+            }
+        }();
+        (function() {
+            var old, typeaheadKey, methods;
+            old = $.fn.typeahead;
+            typeaheadKey = "ttTypeahead";
+            methods = {
+                initialize: function initialize(o, datasets) {
+                    datasets = _.isArray(datasets) ? datasets : [].slice.call(arguments, 1);
+                    o = o || {};
+                    return this.each(attach);
+                    function attach() {
+                        var $input = $(this), eventBus, typeahead;
+                        _.each(datasets, function(d) {
+                            d.highlight = !!o.highlight;
+                        });
+                        typeahead = new Typeahead({
+                            input: $input,
+                            eventBus: eventBus = new EventBus({
+                                el: $input
+                            }),
+                            withHint: _.isUndefined(o.hint) ? true : !!o.hint,
+                            minLength: o.minLength,
+                            autoselect: o.autoselect,
+                            datasets: datasets
+                        });
+                        $input.data(typeaheadKey, typeahead);
+                    }
+                },
+                open: function open() {
+                    return this.each(openTypeahead);
+                    function openTypeahead() {
+                        var $input = $(this), typeahead;
+                        if (typeahead = $input.data(typeaheadKey)) {
+                            typeahead.open();
+                        }
+                    }
+                },
+                close: function close() {
+                    return this.each(closeTypeahead);
+                    function closeTypeahead() {
+                        var $input = $(this), typeahead;
+                        if (typeahead = $input.data(typeaheadKey)) {
+                            typeahead.close();
+                        }
+                    }
+                },
+                val: function val(newVal) {
+                    return !arguments.length ? getVal(this.first()) : this.each(setVal);
+                    function setVal() {
+                        var $input = $(this), typeahead;
+                        if (typeahead = $input.data(typeaheadKey)) {
+                            typeahead.setVal(newVal);
+                        }
+                    }
+                    function getVal($input) {
+                        var typeahead, query;
+                        if (typeahead = $input.data(typeaheadKey)) {
+                            query = typeahead.getVal();
+                        }
+                        return query;
+                    }
+                },
+                destroy: function destroy() {
+                    return this.each(unattach);
+                    function unattach() {
+                        var $input = $(this), typeahead;
+                        if (typeahead = $input.data(typeaheadKey)) {
+                            typeahead.destroy();
+                            $input.removeData(typeaheadKey);
+                        }
+                    }
+                }
+            };
+            $.fn.typeahead = function(method) {
+                if (methods[method]) {
+                    return methods[method].apply(this, [].slice.call(arguments, 1));
+                } else {
+                    return methods.initialize.apply(this, arguments);
+                }
+            };
+            $.fn.typeahead.noConflict = function noConflict() {
+                $.fn.typeahead = old;
+                return this;
+            };
+        })();
+    })(window.jQuery);
+});
+
+define("torabot/main/0.1.0/handlebars-v1.3.0-debug", [], function(require, exports, module) {
+    /*!
+
+ handlebars v1.3.0
+
+Copyright (C) 2011 by Yehuda Katz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+@license
+*/
+    /* exported Handlebars */
+    var Handlebars = function() {
+        // handlebars/safe-string.js
+        var __module4__ = function() {
+            "use strict";
+            var __exports__;
+            // Build out our basic SafeString type
+            function SafeString(string) {
+                this.string = string;
+            }
+            SafeString.prototype.toString = function() {
+                return "" + this.string;
+            };
+            __exports__ = SafeString;
+            return __exports__;
+        }();
+        // handlebars/utils.js
+        var __module3__ = function(__dependency1__) {
+            "use strict";
+            var __exports__ = {};
+            /*jshint -W004 */
+            var SafeString = __dependency1__;
+            var escape = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#x27;",
+                "`": "&#x60;"
+            };
+            var badChars = /[&<>"'`]/g;
+            var possible = /[&<>"'`]/;
+            function escapeChar(chr) {
+                return escape[chr] || "&amp;";
+            }
+            function extend(obj, value) {
+                for (var key in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, key)) {
+                        obj[key] = value[key];
+                    }
+                }
+            }
+            __exports__.extend = extend;
+            var toString = Object.prototype.toString;
+            __exports__.toString = toString;
+            // Sourced from lodash
+            // https://github.com/bestiejs/lodash/blob/master/LICENSE.txt
+            var isFunction = function(value) {
+                return typeof value === "function";
+            };
+            // fallback for older versions of Chrome and Safari
+            if (isFunction(/x/)) {
+                isFunction = function(value) {
+                    return typeof value === "function" && toString.call(value) === "[object Function]";
+                };
+            }
+            var isFunction;
+            __exports__.isFunction = isFunction;
+            var isArray = Array.isArray || function(value) {
+                return value && typeof value === "object" ? toString.call(value) === "[object Array]" : false;
+            };
+            __exports__.isArray = isArray;
+            function escapeExpression(string) {
+                // don't escape SafeStrings, since they're already safe
+                if (string instanceof SafeString) {
+                    return string.toString();
+                } else if (!string && string !== 0) {
+                    return "";
+                }
+                // Force a string conversion as this will be done by the append regardless and
+                // the regex test will do this transparently behind the scenes, causing issues if
+                // an object's to string has escaped characters in it.
+                string = "" + string;
+                if (!possible.test(string)) {
+                    return string;
+                }
+                return string.replace(badChars, escapeChar);
+            }
+            __exports__.escapeExpression = escapeExpression;
+            function isEmpty(value) {
+                if (!value && value !== 0) {
+                    return true;
+                } else if (isArray(value) && value.length === 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            __exports__.isEmpty = isEmpty;
+            return __exports__;
+        }(__module4__);
+        // handlebars/exception.js
+        var __module5__ = function() {
+            "use strict";
+            var __exports__;
+            var errorProps = [ "description", "fileName", "lineNumber", "message", "name", "number", "stack" ];
+            function Exception(message, node) {
+                var line;
+                if (node && node.firstLine) {
+                    line = node.firstLine;
+                    message += " - " + line + ":" + node.firstColumn;
+                }
+                var tmp = Error.prototype.constructor.call(this, message);
+                // Unfortunately errors are not enumerable in Chrome (at least), so `for prop in tmp` doesn't work.
+                for (var idx = 0; idx < errorProps.length; idx++) {
+                    this[errorProps[idx]] = tmp[errorProps[idx]];
+                }
+                if (line) {
+                    this.lineNumber = line;
+                    this.column = node.firstColumn;
+                }
+            }
+            Exception.prototype = new Error();
+            __exports__ = Exception;
+            return __exports__;
+        }();
+        // handlebars/base.js
+        var __module2__ = function(__dependency1__, __dependency2__) {
+            "use strict";
+            var __exports__ = {};
+            var Utils = __dependency1__;
+            var Exception = __dependency2__;
+            var VERSION = "1.3.0";
+            __exports__.VERSION = VERSION;
+            var COMPILER_REVISION = 4;
+            __exports__.COMPILER_REVISION = COMPILER_REVISION;
+            var REVISION_CHANGES = {
+                1: "<= 1.0.rc.2",
+                // 1.0.rc.2 is actually rev2 but doesn't report it
+                2: "== 1.0.0-rc.3",
+                3: "== 1.0.0-rc.4",
+                4: ">= 1.0.0"
+            };
+            __exports__.REVISION_CHANGES = REVISION_CHANGES;
+            var isArray = Utils.isArray, isFunction = Utils.isFunction, toString = Utils.toString, objectType = "[object Object]";
+            function HandlebarsEnvironment(helpers, partials) {
+                this.helpers = helpers || {};
+                this.partials = partials || {};
+                registerDefaultHelpers(this);
+            }
+            __exports__.HandlebarsEnvironment = HandlebarsEnvironment;
+            HandlebarsEnvironment.prototype = {
+                constructor: HandlebarsEnvironment,
+                logger: logger,
+                log: log,
+                registerHelper: function(name, fn, inverse) {
+                    if (toString.call(name) === objectType) {
+                        if (inverse || fn) {
+                            throw new Exception("Arg not supported with multiple helpers");
+                        }
+                        Utils.extend(this.helpers, name);
+                    } else {
+                        if (inverse) {
+                            fn.not = inverse;
+                        }
+                        this.helpers[name] = fn;
+                    }
+                },
+                registerPartial: function(name, str) {
+                    if (toString.call(name) === objectType) {
+                        Utils.extend(this.partials, name);
+                    } else {
+                        this.partials[name] = str;
+                    }
+                }
+            };
+            function registerDefaultHelpers(instance) {
+                instance.registerHelper("helperMissing", function(arg) {
+                    if (arguments.length === 2) {
+                        return undefined;
+                    } else {
+                        throw new Exception("Missing helper: '" + arg + "'");
+                    }
+                });
+                instance.registerHelper("blockHelperMissing", function(context, options) {
+                    var inverse = options.inverse || function() {}, fn = options.fn;
+                    if (isFunction(context)) {
+                        context = context.call(this);
+                    }
+                    if (context === true) {
+                        return fn(this);
+                    } else if (context === false || context == null) {
+                        return inverse(this);
+                    } else if (isArray(context)) {
+                        if (context.length > 0) {
+                            return instance.helpers.each(context, options);
+                        } else {
+                            return inverse(this);
+                        }
+                    } else {
+                        return fn(context);
+                    }
+                });
+                instance.registerHelper("each", function(context, options) {
+                    var fn = options.fn, inverse = options.inverse;
+                    var i = 0, ret = "", data;
+                    if (isFunction(context)) {
+                        context = context.call(this);
+                    }
+                    if (options.data) {
+                        data = createFrame(options.data);
+                    }
+                    if (context && typeof context === "object") {
+                        if (isArray(context)) {
+                            for (var j = context.length; i < j; i++) {
+                                if (data) {
+                                    data.index = i;
+                                    data.first = i === 0;
+                                    data.last = i === context.length - 1;
+                                }
+                                ret = ret + fn(context[i], {
+                                    data: data
+                                });
+                            }
+                        } else {
+                            for (var key in context) {
+                                if (context.hasOwnProperty(key)) {
+                                    if (data) {
+                                        data.key = key;
+                                        data.index = i;
+                                        data.first = i === 0;
+                                    }
+                                    ret = ret + fn(context[key], {
+                                        data: data
+                                    });
+                                    i++;
+                                }
+                            }
+                        }
+                    }
+                    if (i === 0) {
+                        ret = inverse(this);
+                    }
+                    return ret;
+                });
+                instance.registerHelper("if", function(conditional, options) {
+                    if (isFunction(conditional)) {
+                        conditional = conditional.call(this);
+                    }
+                    // Default behavior is to render the positive path if the value is truthy and not empty.
+                    // The `includeZero` option may be set to treat the condtional as purely not empty based on the
+                    // behavior of isEmpty. Effectively this determines if 0 is handled by the positive path or negative.
+                    if (!options.hash.includeZero && !conditional || Utils.isEmpty(conditional)) {
+                        return options.inverse(this);
+                    } else {
+                        return options.fn(this);
+                    }
+                });
+                instance.registerHelper("unless", function(conditional, options) {
+                    return instance.helpers["if"].call(this, conditional, {
+                        fn: options.inverse,
+                        inverse: options.fn,
+                        hash: options.hash
+                    });
+                });
+                instance.registerHelper("with", function(context, options) {
+                    if (isFunction(context)) {
+                        context = context.call(this);
+                    }
+                    if (!Utils.isEmpty(context)) return options.fn(context);
+                });
+                instance.registerHelper("log", function(context, options) {
+                    var level = options.data && options.data.level != null ? parseInt(options.data.level, 10) : 1;
+                    instance.log(level, context);
+                });
+            }
+            var logger = {
+                methodMap: {
+                    0: "debug",
+                    1: "info",
+                    2: "warn",
+                    3: "error"
+                },
+                // State enum
+                DEBUG: 0,
+                INFO: 1,
+                WARN: 2,
+                ERROR: 3,
+                level: 3,
+                // can be overridden in the host environment
+                log: function(level, obj) {
+                    if (logger.level <= level) {
+                        var method = logger.methodMap[level];
+                        if (typeof console !== "undefined" && console[method]) {
+                            console[method].call(console, obj);
+                        }
+                    }
+                }
+            };
+            __exports__.logger = logger;
+            function log(level, obj) {
+                logger.log(level, obj);
+            }
+            __exports__.log = log;
+            var createFrame = function(object) {
+                var obj = {};
+                Utils.extend(obj, object);
+                return obj;
+            };
+            __exports__.createFrame = createFrame;
+            return __exports__;
+        }(__module3__, __module5__);
+        // handlebars/runtime.js
+        var __module6__ = function(__dependency1__, __dependency2__, __dependency3__) {
+            "use strict";
+            var __exports__ = {};
+            var Utils = __dependency1__;
+            var Exception = __dependency2__;
+            var COMPILER_REVISION = __dependency3__.COMPILER_REVISION;
+            var REVISION_CHANGES = __dependency3__.REVISION_CHANGES;
+            function checkRevision(compilerInfo) {
+                var compilerRevision = compilerInfo && compilerInfo[0] || 1, currentRevision = COMPILER_REVISION;
+                if (compilerRevision !== currentRevision) {
+                    if (compilerRevision < currentRevision) {
+                        var runtimeVersions = REVISION_CHANGES[currentRevision], compilerVersions = REVISION_CHANGES[compilerRevision];
+                        throw new Exception("Template was precompiled with an older version of Handlebars than the current runtime. " + "Please update your precompiler to a newer version (" + runtimeVersions + ") or downgrade your runtime to an older version (" + compilerVersions + ").");
+                    } else {
+                        // Use the embedded version info since the runtime doesn't know about this revision yet
+                        throw new Exception("Template was precompiled with a newer version of Handlebars than the current runtime. " + "Please update your runtime to a newer version (" + compilerInfo[1] + ").");
+                    }
+                }
+            }
+            __exports__.checkRevision = checkRevision;
+            // TODO: Remove this line and break up compilePartial
+            function template(templateSpec, env) {
+                if (!env) {
+                    throw new Exception("No environment passed to template");
+                }
+                // Note: Using env.VM references rather than local var references throughout this section to allow
+                // for external users to override these as psuedo-supported APIs.
+                var invokePartialWrapper = function(partial, name, context, helpers, partials, data) {
+                    var result = env.VM.invokePartial.apply(this, arguments);
+                    if (result != null) {
+                        return result;
+                    }
+                    if (env.compile) {
+                        var options = {
+                            helpers: helpers,
+                            partials: partials,
+                            data: data
+                        };
+                        partials[name] = env.compile(partial, {
+                            data: data !== undefined
+                        }, env);
+                        return partials[name](context, options);
+                    } else {
+                        throw new Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
+                    }
+                };
+                // Just add water
+                var container = {
+                    escapeExpression: Utils.escapeExpression,
+                    invokePartial: invokePartialWrapper,
+                    programs: [],
+                    program: function(i, fn, data) {
+                        var programWrapper = this.programs[i];
+                        if (data) {
+                            programWrapper = program(i, fn, data);
+                        } else if (!programWrapper) {
+                            programWrapper = this.programs[i] = program(i, fn);
+                        }
+                        return programWrapper;
+                    },
+                    merge: function(param, common) {
+                        var ret = param || common;
+                        if (param && common && param !== common) {
+                            ret = {};
+                            Utils.extend(ret, common);
+                            Utils.extend(ret, param);
+                        }
+                        return ret;
+                    },
+                    programWithDepth: env.VM.programWithDepth,
+                    noop: env.VM.noop,
+                    compilerInfo: null
+                };
+                return function(context, options) {
+                    options = options || {};
+                    var namespace = options.partial ? options : env, helpers, partials;
+                    if (!options.partial) {
+                        helpers = options.helpers;
+                        partials = options.partials;
+                    }
+                    var result = templateSpec.call(container, namespace, context, helpers, partials, options.data);
+                    if (!options.partial) {
+                        env.VM.checkRevision(container.compilerInfo);
+                    }
+                    return result;
+                };
+            }
+            __exports__.template = template;
+            function programWithDepth(i, fn, data) {
+                var args = Array.prototype.slice.call(arguments, 3);
+                var prog = function(context, options) {
+                    options = options || {};
+                    return fn.apply(this, [ context, options.data || data ].concat(args));
+                };
+                prog.program = i;
+                prog.depth = args.length;
+                return prog;
+            }
+            __exports__.programWithDepth = programWithDepth;
+            function program(i, fn, data) {
+                var prog = function(context, options) {
+                    options = options || {};
+                    return fn(context, options.data || data);
+                };
+                prog.program = i;
+                prog.depth = 0;
+                return prog;
+            }
+            __exports__.program = program;
+            function invokePartial(partial, name, context, helpers, partials, data) {
+                var options = {
+                    partial: true,
+                    helpers: helpers,
+                    partials: partials,
+                    data: data
+                };
+                if (partial === undefined) {
+                    throw new Exception("The partial " + name + " could not be found");
+                } else if (partial instanceof Function) {
+                    return partial(context, options);
+                }
+            }
+            __exports__.invokePartial = invokePartial;
+            function noop() {
+                return "";
+            }
+            __exports__.noop = noop;
+            return __exports__;
+        }(__module3__, __module5__, __module2__);
+        // handlebars.runtime.js
+        var __module1__ = function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__) {
+            "use strict";
+            var __exports__;
+            /*globals Handlebars: true */
+            var base = __dependency1__;
+            // Each of these augment the Handlebars object. No need to setup here.
+            // (This is done to easily share code between commonjs and browse envs)
+            var SafeString = __dependency2__;
+            var Exception = __dependency3__;
+            var Utils = __dependency4__;
+            var runtime = __dependency5__;
+            // For compatibility and usage outside of module systems, make the Handlebars object a namespace
+            var create = function() {
+                var hb = new base.HandlebarsEnvironment();
+                Utils.extend(hb, base);
+                hb.SafeString = SafeString;
+                hb.Exception = Exception;
+                hb.Utils = Utils;
+                hb.VM = runtime;
+                hb.template = function(spec) {
+                    return runtime.template(spec, hb);
+                };
+                return hb;
+            };
+            var Handlebars = create();
+            Handlebars.create = create;
+            __exports__ = Handlebars;
+            return __exports__;
+        }(__module2__, __module4__, __module5__, __module3__, __module6__);
+        // handlebars/compiler/ast.js
+        var __module7__ = function(__dependency1__) {
+            "use strict";
+            var __exports__;
+            var Exception = __dependency1__;
+            function LocationInfo(locInfo) {
+                locInfo = locInfo || {};
+                this.firstLine = locInfo.first_line;
+                this.firstColumn = locInfo.first_column;
+                this.lastColumn = locInfo.last_column;
+                this.lastLine = locInfo.last_line;
+            }
+            var AST = {
+                ProgramNode: function(statements, inverseStrip, inverse, locInfo) {
+                    var inverseLocationInfo, firstInverseNode;
+                    if (arguments.length === 3) {
+                        locInfo = inverse;
+                        inverse = null;
+                    } else if (arguments.length === 2) {
+                        locInfo = inverseStrip;
+                        inverseStrip = null;
+                    }
+                    LocationInfo.call(this, locInfo);
+                    this.type = "program";
+                    this.statements = statements;
+                    this.strip = {};
+                    if (inverse) {
+                        firstInverseNode = inverse[0];
+                        if (firstInverseNode) {
+                            inverseLocationInfo = {
+                                first_line: firstInverseNode.firstLine,
+                                last_line: firstInverseNode.lastLine,
+                                last_column: firstInverseNode.lastColumn,
+                                first_column: firstInverseNode.firstColumn
+                            };
+                            this.inverse = new AST.ProgramNode(inverse, inverseStrip, inverseLocationInfo);
+                        } else {
+                            this.inverse = new AST.ProgramNode(inverse, inverseStrip);
+                        }
+                        this.strip.right = inverseStrip.left;
+                    } else if (inverseStrip) {
+                        this.strip.left = inverseStrip.right;
+                    }
+                },
+                MustacheNode: function(rawParams, hash, open, strip, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "mustache";
+                    this.strip = strip;
+                    // Open may be a string parsed from the parser or a passed boolean flag
+                    if (open != null && open.charAt) {
+                        // Must use charAt to support IE pre-10
+                        var escapeFlag = open.charAt(3) || open.charAt(2);
+                        this.escaped = escapeFlag !== "{" && escapeFlag !== "&";
+                    } else {
+                        this.escaped = !!open;
+                    }
+                    if (rawParams instanceof AST.SexprNode) {
+                        this.sexpr = rawParams;
+                    } else {
+                        // Support old AST API
+                        this.sexpr = new AST.SexprNode(rawParams, hash);
+                    }
+                    this.sexpr.isRoot = true;
+                    // Support old AST API that stored this info in MustacheNode
+                    this.id = this.sexpr.id;
+                    this.params = this.sexpr.params;
+                    this.hash = this.sexpr.hash;
+                    this.eligibleHelper = this.sexpr.eligibleHelper;
+                    this.isHelper = this.sexpr.isHelper;
+                },
+                SexprNode: function(rawParams, hash, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "sexpr";
+                    this.hash = hash;
+                    var id = this.id = rawParams[0];
+                    var params = this.params = rawParams.slice(1);
+                    // a mustache is an eligible helper if:
+                    // * its id is simple (a single part, not `this` or `..`)
+                    var eligibleHelper = this.eligibleHelper = id.isSimple;
+                    // a mustache is definitely a helper if:
+                    // * it is an eligible helper, and
+                    // * it has at least one parameter or hash segment
+                    this.isHelper = eligibleHelper && (params.length || hash);
+                },
+                PartialNode: function(partialName, context, strip, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "partial";
+                    this.partialName = partialName;
+                    this.context = context;
+                    this.strip = strip;
+                },
+                BlockNode: function(mustache, program, inverse, close, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    if (mustache.sexpr.id.original !== close.path.original) {
+                        throw new Exception(mustache.sexpr.id.original + " doesn't match " + close.path.original, this);
+                    }
+                    this.type = "block";
+                    this.mustache = mustache;
+                    this.program = program;
+                    this.inverse = inverse;
+                    this.strip = {
+                        left: mustache.strip.left,
+                        right: close.strip.right
+                    };
+                    (program || inverse).strip.left = mustache.strip.right;
+                    (inverse || program).strip.right = close.strip.left;
+                    if (inverse && !program) {
+                        this.isInverse = true;
+                    }
+                },
+                ContentNode: function(string, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "content";
+                    this.string = string;
+                },
+                HashNode: function(pairs, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "hash";
+                    this.pairs = pairs;
+                },
+                IdNode: function(parts, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "ID";
+                    var original = "", dig = [], depth = 0;
+                    for (var i = 0, l = parts.length; i < l; i++) {
+                        var part = parts[i].part;
+                        original += (parts[i].separator || "") + part;
+                        if (part === ".." || part === "." || part === "this") {
+                            if (dig.length > 0) {
+                                throw new Exception("Invalid path: " + original, this);
+                            } else if (part === "..") {
+                                depth++;
+                            } else {
+                                this.isScoped = true;
+                            }
+                        } else {
+                            dig.push(part);
+                        }
+                    }
+                    this.original = original;
+                    this.parts = dig;
+                    this.string = dig.join(".");
+                    this.depth = depth;
+                    // an ID is simple if it only has one part, and that part is not
+                    // `..` or `this`.
+                    this.isSimple = parts.length === 1 && !this.isScoped && depth === 0;
+                    this.stringModeValue = this.string;
+                },
+                PartialNameNode: function(name, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "PARTIAL_NAME";
+                    this.name = name.original;
+                },
+                DataNode: function(id, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "DATA";
+                    this.id = id;
+                },
+                StringNode: function(string, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "STRING";
+                    this.original = this.string = this.stringModeValue = string;
+                },
+                IntegerNode: function(integer, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "INTEGER";
+                    this.original = this.integer = integer;
+                    this.stringModeValue = Number(integer);
+                },
+                BooleanNode: function(bool, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "BOOLEAN";
+                    this.bool = bool;
+                    this.stringModeValue = bool === "true";
+                },
+                CommentNode: function(comment, locInfo) {
+                    LocationInfo.call(this, locInfo);
+                    this.type = "comment";
+                    this.comment = comment;
+                }
+            };
+            // Must be exported as an object rather than the root of the module as the jison lexer
+            // most modify the object to operate properly.
+            __exports__ = AST;
+            return __exports__;
+        }(__module5__);
+        // handlebars/compiler/parser.js
+        var __module9__ = function() {
+            "use strict";
+            var __exports__;
+            /* jshint ignore:start */
+            /* Jison generated parser */
+            var handlebars = function() {
+                var parser = {
+                    trace: function trace() {},
+                    yy: {},
+                    symbols_: {
+                        error: 2,
+                        root: 3,
+                        statements: 4,
+                        EOF: 5,
+                        program: 6,
+                        simpleInverse: 7,
+                        statement: 8,
+                        openInverse: 9,
+                        closeBlock: 10,
+                        openBlock: 11,
+                        mustache: 12,
+                        partial: 13,
+                        CONTENT: 14,
+                        COMMENT: 15,
+                        OPEN_BLOCK: 16,
+                        sexpr: 17,
+                        CLOSE: 18,
+                        OPEN_INVERSE: 19,
+                        OPEN_ENDBLOCK: 20,
+                        path: 21,
+                        OPEN: 22,
+                        OPEN_UNESCAPED: 23,
+                        CLOSE_UNESCAPED: 24,
+                        OPEN_PARTIAL: 25,
+                        partialName: 26,
+                        partial_option0: 27,
+                        sexpr_repetition0: 28,
+                        sexpr_option0: 29,
+                        dataName: 30,
+                        param: 31,
+                        STRING: 32,
+                        INTEGER: 33,
+                        BOOLEAN: 34,
+                        OPEN_SEXPR: 35,
+                        CLOSE_SEXPR: 36,
+                        hash: 37,
+                        hash_repetition_plus0: 38,
+                        hashSegment: 39,
+                        ID: 40,
+                        EQUALS: 41,
+                        DATA: 42,
+                        pathSegments: 43,
+                        SEP: 44,
+                        $accept: 0,
+                        $end: 1
+                    },
+                    terminals_: {
+                        2: "error",
+                        5: "EOF",
+                        14: "CONTENT",
+                        15: "COMMENT",
+                        16: "OPEN_BLOCK",
+                        18: "CLOSE",
+                        19: "OPEN_INVERSE",
+                        20: "OPEN_ENDBLOCK",
+                        22: "OPEN",
+                        23: "OPEN_UNESCAPED",
+                        24: "CLOSE_UNESCAPED",
+                        25: "OPEN_PARTIAL",
+                        32: "STRING",
+                        33: "INTEGER",
+                        34: "BOOLEAN",
+                        35: "OPEN_SEXPR",
+                        36: "CLOSE_SEXPR",
+                        40: "ID",
+                        41: "EQUALS",
+                        42: "DATA",
+                        44: "SEP"
+                    },
+                    productions_: [ 0, [ 3, 2 ], [ 3, 1 ], [ 6, 2 ], [ 6, 3 ], [ 6, 2 ], [ 6, 1 ], [ 6, 1 ], [ 6, 0 ], [ 4, 1 ], [ 4, 2 ], [ 8, 3 ], [ 8, 3 ], [ 8, 1 ], [ 8, 1 ], [ 8, 1 ], [ 8, 1 ], [ 11, 3 ], [ 9, 3 ], [ 10, 3 ], [ 12, 3 ], [ 12, 3 ], [ 13, 4 ], [ 7, 2 ], [ 17, 3 ], [ 17, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 3 ], [ 37, 1 ], [ 39, 3 ], [ 26, 1 ], [ 26, 1 ], [ 26, 1 ], [ 30, 2 ], [ 21, 1 ], [ 43, 3 ], [ 43, 1 ], [ 27, 0 ], [ 27, 1 ], [ 28, 0 ], [ 28, 2 ], [ 29, 0 ], [ 29, 1 ], [ 38, 1 ], [ 38, 2 ] ],
+                    performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate, $$, _$) {
+                        var $0 = $$.length - 1;
+                        switch (yystate) {
+                          case 1:
+                            return new yy.ProgramNode($$[$0 - 1], this._$);
+                            break;
+
+                          case 2:
+                            return new yy.ProgramNode([], this._$);
+                            break;
+
+                          case 3:
+                            this.$ = new yy.ProgramNode([], $$[$0 - 1], $$[$0], this._$);
+                            break;
+
+                          case 4:
+                            this.$ = new yy.ProgramNode($$[$0 - 2], $$[$0 - 1], $$[$0], this._$);
+                            break;
+
+                          case 5:
+                            this.$ = new yy.ProgramNode($$[$0 - 1], $$[$0], [], this._$);
+                            break;
+
+                          case 6:
+                            this.$ = new yy.ProgramNode($$[$0], this._$);
+                            break;
+
+                          case 7:
+                            this.$ = new yy.ProgramNode([], this._$);
+                            break;
+
+                          case 8:
+                            this.$ = new yy.ProgramNode([], this._$);
+                            break;
+
+                          case 9:
+                            this.$ = [ $$[$0] ];
+                            break;
+
+                          case 10:
+                            $$[$0 - 1].push($$[$0]);
+                            this.$ = $$[$0 - 1];
+                            break;
+
+                          case 11:
+                            this.$ = new yy.BlockNode($$[$0 - 2], $$[$0 - 1].inverse, $$[$0 - 1], $$[$0], this._$);
+                            break;
+
+                          case 12:
+                            this.$ = new yy.BlockNode($$[$0 - 2], $$[$0 - 1], $$[$0 - 1].inverse, $$[$0], this._$);
+                            break;
+
+                          case 13:
+                            this.$ = $$[$0];
+                            break;
+
+                          case 14:
+                            this.$ = $$[$0];
+                            break;
+
+                          case 15:
+                            this.$ = new yy.ContentNode($$[$0], this._$);
+                            break;
+
+                          case 16:
+                            this.$ = new yy.CommentNode($$[$0], this._$);
+                            break;
+
+                          case 17:
+                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
+                            break;
+
+                          case 18:
+                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
+                            break;
+
+                          case 19:
+                            this.$ = {
+                                path: $$[$0 - 1],
+                                strip: stripFlags($$[$0 - 2], $$[$0])
+                            };
+                            break;
+
+                          case 20:
+                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
+                            break;
+
+                          case 21:
+                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
+                            break;
+
+                          case 22:
+                            this.$ = new yy.PartialNode($$[$0 - 2], $$[$0 - 1], stripFlags($$[$0 - 3], $$[$0]), this._$);
+                            break;
+
+                          case 23:
+                            this.$ = stripFlags($$[$0 - 1], $$[$0]);
+                            break;
+
+                          case 24:
+                            this.$ = new yy.SexprNode([ $$[$0 - 2] ].concat($$[$0 - 1]), $$[$0], this._$);
+                            break;
+
+                          case 25:
+                            this.$ = new yy.SexprNode([ $$[$0] ], null, this._$);
+                            break;
+
+                          case 26:
+                            this.$ = $$[$0];
+                            break;
+
+                          case 27:
+                            this.$ = new yy.StringNode($$[$0], this._$);
+                            break;
+
+                          case 28:
+                            this.$ = new yy.IntegerNode($$[$0], this._$);
+                            break;
+
+                          case 29:
+                            this.$ = new yy.BooleanNode($$[$0], this._$);
+                            break;
+
+                          case 30:
+                            this.$ = $$[$0];
+                            break;
+
+                          case 31:
+                            $$[$0 - 1].isHelper = true;
+                            this.$ = $$[$0 - 1];
+                            break;
+
+                          case 32:
+                            this.$ = new yy.HashNode($$[$0], this._$);
+                            break;
+
+                          case 33:
+                            this.$ = [ $$[$0 - 2], $$[$0] ];
+                            break;
+
+                          case 34:
+                            this.$ = new yy.PartialNameNode($$[$0], this._$);
+                            break;
+
+                          case 35:
+                            this.$ = new yy.PartialNameNode(new yy.StringNode($$[$0], this._$), this._$);
+                            break;
+
+                          case 36:
+                            this.$ = new yy.PartialNameNode(new yy.IntegerNode($$[$0], this._$));
+                            break;
+
+                          case 37:
+                            this.$ = new yy.DataNode($$[$0], this._$);
+                            break;
+
+                          case 38:
+                            this.$ = new yy.IdNode($$[$0], this._$);
+                            break;
+
+                          case 39:
+                            $$[$0 - 2].push({
+                                part: $$[$0],
+                                separator: $$[$0 - 1]
+                            });
+                            this.$ = $$[$0 - 2];
+                            break;
+
+                          case 40:
+                            this.$ = [ {
+                                part: $$[$0]
+                            } ];
+                            break;
+
+                          case 43:
+                            this.$ = [];
+                            break;
+
+                          case 44:
+                            $$[$0 - 1].push($$[$0]);
+                            break;
+
+                          case 47:
+                            this.$ = [ $$[$0] ];
+                            break;
+
+                          case 48:
+                            $$[$0 - 1].push($$[$0]);
+                            break;
+                        }
+                    },
+                    table: [ {
+                        3: 1,
+                        4: 2,
+                        5: [ 1, 3 ],
+                        8: 4,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 11 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        1: [ 3 ]
+                    }, {
+                        5: [ 1, 16 ],
+                        8: 17,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 11 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        1: [ 2, 2 ]
+                    }, {
+                        5: [ 2, 9 ],
+                        14: [ 2, 9 ],
+                        15: [ 2, 9 ],
+                        16: [ 2, 9 ],
+                        19: [ 2, 9 ],
+                        20: [ 2, 9 ],
+                        22: [ 2, 9 ],
+                        23: [ 2, 9 ],
+                        25: [ 2, 9 ]
+                    }, {
+                        4: 20,
+                        6: 18,
+                        7: 19,
+                        8: 4,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 21 ],
+                        20: [ 2, 8 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        4: 20,
+                        6: 22,
+                        7: 19,
+                        8: 4,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 21 ],
+                        20: [ 2, 8 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        5: [ 2, 13 ],
+                        14: [ 2, 13 ],
+                        15: [ 2, 13 ],
+                        16: [ 2, 13 ],
+                        19: [ 2, 13 ],
+                        20: [ 2, 13 ],
+                        22: [ 2, 13 ],
+                        23: [ 2, 13 ],
+                        25: [ 2, 13 ]
+                    }, {
+                        5: [ 2, 14 ],
+                        14: [ 2, 14 ],
+                        15: [ 2, 14 ],
+                        16: [ 2, 14 ],
+                        19: [ 2, 14 ],
+                        20: [ 2, 14 ],
+                        22: [ 2, 14 ],
+                        23: [ 2, 14 ],
+                        25: [ 2, 14 ]
+                    }, {
+                        5: [ 2, 15 ],
+                        14: [ 2, 15 ],
+                        15: [ 2, 15 ],
+                        16: [ 2, 15 ],
+                        19: [ 2, 15 ],
+                        20: [ 2, 15 ],
+                        22: [ 2, 15 ],
+                        23: [ 2, 15 ],
+                        25: [ 2, 15 ]
+                    }, {
+                        5: [ 2, 16 ],
+                        14: [ 2, 16 ],
+                        15: [ 2, 16 ],
+                        16: [ 2, 16 ],
+                        19: [ 2, 16 ],
+                        20: [ 2, 16 ],
+                        22: [ 2, 16 ],
+                        23: [ 2, 16 ],
+                        25: [ 2, 16 ]
+                    }, {
+                        17: 23,
+                        21: 24,
+                        30: 25,
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        17: 29,
+                        21: 24,
+                        30: 25,
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        17: 30,
+                        21: 24,
+                        30: 25,
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        17: 31,
+                        21: 24,
+                        30: 25,
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        21: 33,
+                        26: 32,
+                        32: [ 1, 34 ],
+                        33: [ 1, 35 ],
+                        40: [ 1, 28 ],
+                        43: 26
+                    }, {
+                        1: [ 2, 1 ]
+                    }, {
+                        5: [ 2, 10 ],
+                        14: [ 2, 10 ],
+                        15: [ 2, 10 ],
+                        16: [ 2, 10 ],
+                        19: [ 2, 10 ],
+                        20: [ 2, 10 ],
+                        22: [ 2, 10 ],
+                        23: [ 2, 10 ],
+                        25: [ 2, 10 ]
+                    }, {
+                        10: 36,
+                        20: [ 1, 37 ]
+                    }, {
+                        4: 38,
+                        8: 4,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 11 ],
+                        20: [ 2, 7 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        7: 39,
+                        8: 17,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 21 ],
+                        20: [ 2, 6 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        17: 23,
+                        18: [ 1, 40 ],
+                        21: 24,
+                        30: 25,
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        10: 41,
+                        20: [ 1, 37 ]
+                    }, {
+                        18: [ 1, 42 ]
+                    }, {
+                        18: [ 2, 43 ],
+                        24: [ 2, 43 ],
+                        28: 43,
+                        32: [ 2, 43 ],
+                        33: [ 2, 43 ],
+                        34: [ 2, 43 ],
+                        35: [ 2, 43 ],
+                        36: [ 2, 43 ],
+                        40: [ 2, 43 ],
+                        42: [ 2, 43 ]
+                    }, {
+                        18: [ 2, 25 ],
+                        24: [ 2, 25 ],
+                        36: [ 2, 25 ]
+                    }, {
+                        18: [ 2, 38 ],
+                        24: [ 2, 38 ],
+                        32: [ 2, 38 ],
+                        33: [ 2, 38 ],
+                        34: [ 2, 38 ],
+                        35: [ 2, 38 ],
+                        36: [ 2, 38 ],
+                        40: [ 2, 38 ],
+                        42: [ 2, 38 ],
+                        44: [ 1, 44 ]
+                    }, {
+                        21: 45,
+                        40: [ 1, 28 ],
+                        43: 26
+                    }, {
+                        18: [ 2, 40 ],
+                        24: [ 2, 40 ],
+                        32: [ 2, 40 ],
+                        33: [ 2, 40 ],
+                        34: [ 2, 40 ],
+                        35: [ 2, 40 ],
+                        36: [ 2, 40 ],
+                        40: [ 2, 40 ],
+                        42: [ 2, 40 ],
+                        44: [ 2, 40 ]
+                    }, {
+                        18: [ 1, 46 ]
+                    }, {
+                        18: [ 1, 47 ]
+                    }, {
+                        24: [ 1, 48 ]
+                    }, {
+                        18: [ 2, 41 ],
+                        21: 50,
+                        27: 49,
+                        40: [ 1, 28 ],
+                        43: 26
+                    }, {
+                        18: [ 2, 34 ],
+                        40: [ 2, 34 ]
+                    }, {
+                        18: [ 2, 35 ],
+                        40: [ 2, 35 ]
+                    }, {
+                        18: [ 2, 36 ],
+                        40: [ 2, 36 ]
+                    }, {
+                        5: [ 2, 11 ],
+                        14: [ 2, 11 ],
+                        15: [ 2, 11 ],
+                        16: [ 2, 11 ],
+                        19: [ 2, 11 ],
+                        20: [ 2, 11 ],
+                        22: [ 2, 11 ],
+                        23: [ 2, 11 ],
+                        25: [ 2, 11 ]
+                    }, {
+                        21: 51,
+                        40: [ 1, 28 ],
+                        43: 26
+                    }, {
+                        8: 17,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 11 ],
+                        20: [ 2, 3 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        4: 52,
+                        8: 4,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 11 ],
+                        20: [ 2, 5 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        14: [ 2, 23 ],
+                        15: [ 2, 23 ],
+                        16: [ 2, 23 ],
+                        19: [ 2, 23 ],
+                        20: [ 2, 23 ],
+                        22: [ 2, 23 ],
+                        23: [ 2, 23 ],
+                        25: [ 2, 23 ]
+                    }, {
+                        5: [ 2, 12 ],
+                        14: [ 2, 12 ],
+                        15: [ 2, 12 ],
+                        16: [ 2, 12 ],
+                        19: [ 2, 12 ],
+                        20: [ 2, 12 ],
+                        22: [ 2, 12 ],
+                        23: [ 2, 12 ],
+                        25: [ 2, 12 ]
+                    }, {
+                        14: [ 2, 18 ],
+                        15: [ 2, 18 ],
+                        16: [ 2, 18 ],
+                        19: [ 2, 18 ],
+                        20: [ 2, 18 ],
+                        22: [ 2, 18 ],
+                        23: [ 2, 18 ],
+                        25: [ 2, 18 ]
+                    }, {
+                        18: [ 2, 45 ],
+                        21: 56,
+                        24: [ 2, 45 ],
+                        29: 53,
+                        30: 60,
+                        31: 54,
+                        32: [ 1, 57 ],
+                        33: [ 1, 58 ],
+                        34: [ 1, 59 ],
+                        35: [ 1, 61 ],
+                        36: [ 2, 45 ],
+                        37: 55,
+                        38: 62,
+                        39: 63,
+                        40: [ 1, 64 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        40: [ 1, 65 ]
+                    }, {
+                        18: [ 2, 37 ],
+                        24: [ 2, 37 ],
+                        32: [ 2, 37 ],
+                        33: [ 2, 37 ],
+                        34: [ 2, 37 ],
+                        35: [ 2, 37 ],
+                        36: [ 2, 37 ],
+                        40: [ 2, 37 ],
+                        42: [ 2, 37 ]
+                    }, {
+                        14: [ 2, 17 ],
+                        15: [ 2, 17 ],
+                        16: [ 2, 17 ],
+                        19: [ 2, 17 ],
+                        20: [ 2, 17 ],
+                        22: [ 2, 17 ],
+                        23: [ 2, 17 ],
+                        25: [ 2, 17 ]
+                    }, {
+                        5: [ 2, 20 ],
+                        14: [ 2, 20 ],
+                        15: [ 2, 20 ],
+                        16: [ 2, 20 ],
+                        19: [ 2, 20 ],
+                        20: [ 2, 20 ],
+                        22: [ 2, 20 ],
+                        23: [ 2, 20 ],
+                        25: [ 2, 20 ]
+                    }, {
+                        5: [ 2, 21 ],
+                        14: [ 2, 21 ],
+                        15: [ 2, 21 ],
+                        16: [ 2, 21 ],
+                        19: [ 2, 21 ],
+                        20: [ 2, 21 ],
+                        22: [ 2, 21 ],
+                        23: [ 2, 21 ],
+                        25: [ 2, 21 ]
+                    }, {
+                        18: [ 1, 66 ]
+                    }, {
+                        18: [ 2, 42 ]
+                    }, {
+                        18: [ 1, 67 ]
+                    }, {
+                        8: 17,
+                        9: 5,
+                        11: 6,
+                        12: 7,
+                        13: 8,
+                        14: [ 1, 9 ],
+                        15: [ 1, 10 ],
+                        16: [ 1, 12 ],
+                        19: [ 1, 11 ],
+                        20: [ 2, 4 ],
+                        22: [ 1, 13 ],
+                        23: [ 1, 14 ],
+                        25: [ 1, 15 ]
+                    }, {
+                        18: [ 2, 24 ],
+                        24: [ 2, 24 ],
+                        36: [ 2, 24 ]
+                    }, {
+                        18: [ 2, 44 ],
+                        24: [ 2, 44 ],
+                        32: [ 2, 44 ],
+                        33: [ 2, 44 ],
+                        34: [ 2, 44 ],
+                        35: [ 2, 44 ],
+                        36: [ 2, 44 ],
+                        40: [ 2, 44 ],
+                        42: [ 2, 44 ]
+                    }, {
+                        18: [ 2, 46 ],
+                        24: [ 2, 46 ],
+                        36: [ 2, 46 ]
+                    }, {
+                        18: [ 2, 26 ],
+                        24: [ 2, 26 ],
+                        32: [ 2, 26 ],
+                        33: [ 2, 26 ],
+                        34: [ 2, 26 ],
+                        35: [ 2, 26 ],
+                        36: [ 2, 26 ],
+                        40: [ 2, 26 ],
+                        42: [ 2, 26 ]
+                    }, {
+                        18: [ 2, 27 ],
+                        24: [ 2, 27 ],
+                        32: [ 2, 27 ],
+                        33: [ 2, 27 ],
+                        34: [ 2, 27 ],
+                        35: [ 2, 27 ],
+                        36: [ 2, 27 ],
+                        40: [ 2, 27 ],
+                        42: [ 2, 27 ]
+                    }, {
+                        18: [ 2, 28 ],
+                        24: [ 2, 28 ],
+                        32: [ 2, 28 ],
+                        33: [ 2, 28 ],
+                        34: [ 2, 28 ],
+                        35: [ 2, 28 ],
+                        36: [ 2, 28 ],
+                        40: [ 2, 28 ],
+                        42: [ 2, 28 ]
+                    }, {
+                        18: [ 2, 29 ],
+                        24: [ 2, 29 ],
+                        32: [ 2, 29 ],
+                        33: [ 2, 29 ],
+                        34: [ 2, 29 ],
+                        35: [ 2, 29 ],
+                        36: [ 2, 29 ],
+                        40: [ 2, 29 ],
+                        42: [ 2, 29 ]
+                    }, {
+                        18: [ 2, 30 ],
+                        24: [ 2, 30 ],
+                        32: [ 2, 30 ],
+                        33: [ 2, 30 ],
+                        34: [ 2, 30 ],
+                        35: [ 2, 30 ],
+                        36: [ 2, 30 ],
+                        40: [ 2, 30 ],
+                        42: [ 2, 30 ]
+                    }, {
+                        17: 68,
+                        21: 24,
+                        30: 25,
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        18: [ 2, 32 ],
+                        24: [ 2, 32 ],
+                        36: [ 2, 32 ],
+                        39: 69,
+                        40: [ 1, 70 ]
+                    }, {
+                        18: [ 2, 47 ],
+                        24: [ 2, 47 ],
+                        36: [ 2, 47 ],
+                        40: [ 2, 47 ]
+                    }, {
+                        18: [ 2, 40 ],
+                        24: [ 2, 40 ],
+                        32: [ 2, 40 ],
+                        33: [ 2, 40 ],
+                        34: [ 2, 40 ],
+                        35: [ 2, 40 ],
+                        36: [ 2, 40 ],
+                        40: [ 2, 40 ],
+                        41: [ 1, 71 ],
+                        42: [ 2, 40 ],
+                        44: [ 2, 40 ]
+                    }, {
+                        18: [ 2, 39 ],
+                        24: [ 2, 39 ],
+                        32: [ 2, 39 ],
+                        33: [ 2, 39 ],
+                        34: [ 2, 39 ],
+                        35: [ 2, 39 ],
+                        36: [ 2, 39 ],
+                        40: [ 2, 39 ],
+                        42: [ 2, 39 ],
+                        44: [ 2, 39 ]
+                    }, {
+                        5: [ 2, 22 ],
+                        14: [ 2, 22 ],
+                        15: [ 2, 22 ],
+                        16: [ 2, 22 ],
+                        19: [ 2, 22 ],
+                        20: [ 2, 22 ],
+                        22: [ 2, 22 ],
+                        23: [ 2, 22 ],
+                        25: [ 2, 22 ]
+                    }, {
+                        5: [ 2, 19 ],
+                        14: [ 2, 19 ],
+                        15: [ 2, 19 ],
+                        16: [ 2, 19 ],
+                        19: [ 2, 19 ],
+                        20: [ 2, 19 ],
+                        22: [ 2, 19 ],
+                        23: [ 2, 19 ],
+                        25: [ 2, 19 ]
+                    }, {
+                        36: [ 1, 72 ]
+                    }, {
+                        18: [ 2, 48 ],
+                        24: [ 2, 48 ],
+                        36: [ 2, 48 ],
+                        40: [ 2, 48 ]
+                    }, {
+                        41: [ 1, 71 ]
+                    }, {
+                        21: 56,
+                        30: 60,
+                        31: 73,
+                        32: [ 1, 57 ],
+                        33: [ 1, 58 ],
+                        34: [ 1, 59 ],
+                        35: [ 1, 61 ],
+                        40: [ 1, 28 ],
+                        42: [ 1, 27 ],
+                        43: 26
+                    }, {
+                        18: [ 2, 31 ],
+                        24: [ 2, 31 ],
+                        32: [ 2, 31 ],
+                        33: [ 2, 31 ],
+                        34: [ 2, 31 ],
+                        35: [ 2, 31 ],
+                        36: [ 2, 31 ],
+                        40: [ 2, 31 ],
+                        42: [ 2, 31 ]
+                    }, {
+                        18: [ 2, 33 ],
+                        24: [ 2, 33 ],
+                        36: [ 2, 33 ],
+                        40: [ 2, 33 ]
+                    } ],
+                    defaultActions: {
+                        3: [ 2, 2 ],
+                        16: [ 2, 1 ],
+                        50: [ 2, 42 ]
+                    },
+                    parseError: function parseError(str, hash) {
+                        throw new Error(str);
+                    },
+                    parse: function parse(input) {
+                        var self = this, stack = [ 0 ], vstack = [ null ], lstack = [], table = this.table, yytext = "", yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
+                        this.lexer.setInput(input);
+                        this.lexer.yy = this.yy;
+                        this.yy.lexer = this.lexer;
+                        this.yy.parser = this;
+                        if (typeof this.lexer.yylloc == "undefined") this.lexer.yylloc = {};
+                        var yyloc = this.lexer.yylloc;
+                        lstack.push(yyloc);
+                        var ranges = this.lexer.options && this.lexer.options.ranges;
+                        if (typeof this.yy.parseError === "function") this.parseError = this.yy.parseError;
+                        function popStack(n) {
+                            stack.length = stack.length - 2 * n;
+                            vstack.length = vstack.length - n;
+                            lstack.length = lstack.length - n;
+                        }
+                        function lex() {
+                            var token;
+                            token = self.lexer.lex() || 1;
+                            if (typeof token !== "number") {
+                                token = self.symbols_[token] || token;
+                            }
+                            return token;
+                        }
+                        var symbol, preErrorSymbol, state, action, a, r, yyval = {}, p, len, newState, expected;
+                        while (true) {
+                            state = stack[stack.length - 1];
+                            if (this.defaultActions[state]) {
+                                action = this.defaultActions[state];
+                            } else {
+                                if (symbol === null || typeof symbol == "undefined") {
+                                    symbol = lex();
+                                }
+                                action = table[state] && table[state][symbol];
+                            }
+                            if (typeof action === "undefined" || !action.length || !action[0]) {
+                                var errStr = "";
+                                if (!recovering) {
+                                    expected = [];
+                                    for (p in table[state]) if (this.terminals_[p] && p > 2) {
+                                        expected.push("'" + this.terminals_[p] + "'");
+                                    }
+                                    if (this.lexer.showPosition) {
+                                        errStr = "Parse error on line " + (yylineno + 1) + ":\n" + this.lexer.showPosition() + "\nExpecting " + expected.join(", ") + ", got '" + (this.terminals_[symbol] || symbol) + "'";
+                                    } else {
+                                        errStr = "Parse error on line " + (yylineno + 1) + ": Unexpected " + (symbol == 1 ? "end of input" : "'" + (this.terminals_[symbol] || symbol) + "'");
+                                    }
+                                    this.parseError(errStr, {
+                                        text: this.lexer.match,
+                                        token: this.terminals_[symbol] || symbol,
+                                        line: this.lexer.yylineno,
+                                        loc: yyloc,
+                                        expected: expected
+                                    });
+                                }
+                            }
+                            if (action[0] instanceof Array && action.length > 1) {
+                                throw new Error("Parse Error: multiple actions possible at state: " + state + ", token: " + symbol);
+                            }
+                            switch (action[0]) {
+                              case 1:
+                                stack.push(symbol);
+                                vstack.push(this.lexer.yytext);
+                                lstack.push(this.lexer.yylloc);
+                                stack.push(action[1]);
+                                symbol = null;
+                                if (!preErrorSymbol) {
+                                    yyleng = this.lexer.yyleng;
+                                    yytext = this.lexer.yytext;
+                                    yylineno = this.lexer.yylineno;
+                                    yyloc = this.lexer.yylloc;
+                                    if (recovering > 0) recovering--;
+                                } else {
+                                    symbol = preErrorSymbol;
+                                    preErrorSymbol = null;
+                                }
+                                break;
+
+                              case 2:
+                                len = this.productions_[action[1]][1];
+                                yyval.$ = vstack[vstack.length - len];
+                                yyval._$ = {
+                                    first_line: lstack[lstack.length - (len || 1)].first_line,
+                                    last_line: lstack[lstack.length - 1].last_line,
+                                    first_column: lstack[lstack.length - (len || 1)].first_column,
+                                    last_column: lstack[lstack.length - 1].last_column
+                                };
+                                if (ranges) {
+                                    yyval._$.range = [ lstack[lstack.length - (len || 1)].range[0], lstack[lstack.length - 1].range[1] ];
+                                }
+                                r = this.performAction.call(yyval, yytext, yyleng, yylineno, this.yy, action[1], vstack, lstack);
+                                if (typeof r !== "undefined") {
+                                    return r;
+                                }
+                                if (len) {
+                                    stack = stack.slice(0, -1 * len * 2);
+                                    vstack = vstack.slice(0, -1 * len);
+                                    lstack = lstack.slice(0, -1 * len);
+                                }
+                                stack.push(this.productions_[action[1]][0]);
+                                vstack.push(yyval.$);
+                                lstack.push(yyval._$);
+                                newState = table[stack[stack.length - 2]][stack[stack.length - 1]];
+                                stack.push(newState);
+                                break;
+
+                              case 3:
+                                return true;
+                            }
+                        }
+                        return true;
+                    }
+                };
+                function stripFlags(open, close) {
+                    return {
+                        left: open.charAt(2) === "~",
+                        right: close.charAt(0) === "~" || close.charAt(1) === "~"
+                    };
+                }
+                /* Jison generated lexer */
+                var lexer = function() {
+                    var lexer = {
+                        EOF: 1,
+                        parseError: function parseError(str, hash) {
+                            if (this.yy.parser) {
+                                this.yy.parser.parseError(str, hash);
+                            } else {
+                                throw new Error(str);
+                            }
+                        },
+                        setInput: function(input) {
+                            this._input = input;
+                            this._more = this._less = this.done = false;
+                            this.yylineno = this.yyleng = 0;
+                            this.yytext = this.matched = this.match = "";
+                            this.conditionStack = [ "INITIAL" ];
+                            this.yylloc = {
+                                first_line: 1,
+                                first_column: 0,
+                                last_line: 1,
+                                last_column: 0
+                            };
+                            if (this.options.ranges) this.yylloc.range = [ 0, 0 ];
+                            this.offset = 0;
+                            return this;
+                        },
+                        input: function() {
+                            var ch = this._input[0];
+                            this.yytext += ch;
+                            this.yyleng++;
+                            this.offset++;
+                            this.match += ch;
+                            this.matched += ch;
+                            var lines = ch.match(/(?:\r\n?|\n).*/g);
+                            if (lines) {
+                                this.yylineno++;
+                                this.yylloc.last_line++;
+                            } else {
+                                this.yylloc.last_column++;
+                            }
+                            if (this.options.ranges) this.yylloc.range[1]++;
+                            this._input = this._input.slice(1);
+                            return ch;
+                        },
+                        unput: function(ch) {
+                            var len = ch.length;
+                            var lines = ch.split(/(?:\r\n?|\n)/g);
+                            this._input = ch + this._input;
+                            this.yytext = this.yytext.substr(0, this.yytext.length - len - 1);
+                            //this.yyleng -= len;
+                            this.offset -= len;
+                            var oldLines = this.match.split(/(?:\r\n?|\n)/g);
+                            this.match = this.match.substr(0, this.match.length - 1);
+                            this.matched = this.matched.substr(0, this.matched.length - 1);
+                            if (lines.length - 1) this.yylineno -= lines.length - 1;
+                            var r = this.yylloc.range;
+                            this.yylloc = {
+                                first_line: this.yylloc.first_line,
+                                last_line: this.yylineno + 1,
+                                first_column: this.yylloc.first_column,
+                                last_column: lines ? (lines.length === oldLines.length ? this.yylloc.first_column : 0) + oldLines[oldLines.length - lines.length].length - lines[0].length : this.yylloc.first_column - len
+                            };
+                            if (this.options.ranges) {
+                                this.yylloc.range = [ r[0], r[0] + this.yyleng - len ];
+                            }
+                            return this;
+                        },
+                        more: function() {
+                            this._more = true;
+                            return this;
+                        },
+                        less: function(n) {
+                            this.unput(this.match.slice(n));
+                        },
+                        pastInput: function() {
+                            var past = this.matched.substr(0, this.matched.length - this.match.length);
+                            return (past.length > 20 ? "..." : "") + past.substr(-20).replace(/\n/g, "");
+                        },
+                        upcomingInput: function() {
+                            var next = this.match;
+                            if (next.length < 20) {
+                                next += this._input.substr(0, 20 - next.length);
+                            }
+                            return (next.substr(0, 20) + (next.length > 20 ? "..." : "")).replace(/\n/g, "");
+                        },
+                        showPosition: function() {
+                            var pre = this.pastInput();
+                            var c = new Array(pre.length + 1).join("-");
+                            return pre + this.upcomingInput() + "\n" + c + "^";
+                        },
+                        next: function() {
+                            if (this.done) {
+                                return this.EOF;
+                            }
+                            if (!this._input) this.done = true;
+                            var token, match, tempMatch, index, col, lines;
+                            if (!this._more) {
+                                this.yytext = "";
+                                this.match = "";
+                            }
+                            var rules = this._currentRules();
+                            for (var i = 0; i < rules.length; i++) {
+                                tempMatch = this._input.match(this.rules[rules[i]]);
+                                if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
+                                    match = tempMatch;
+                                    index = i;
+                                    if (!this.options.flex) break;
+                                }
+                            }
+                            if (match) {
+                                lines = match[0].match(/(?:\r\n?|\n).*/g);
+                                if (lines) this.yylineno += lines.length;
+                                this.yylloc = {
+                                    first_line: this.yylloc.last_line,
+                                    last_line: this.yylineno + 1,
+                                    first_column: this.yylloc.last_column,
+                                    last_column: lines ? lines[lines.length - 1].length - lines[lines.length - 1].match(/\r?\n?/)[0].length : this.yylloc.last_column + match[0].length
+                                };
+                                this.yytext += match[0];
+                                this.match += match[0];
+                                this.matches = match;
+                                this.yyleng = this.yytext.length;
+                                if (this.options.ranges) {
+                                    this.yylloc.range = [ this.offset, this.offset += this.yyleng ];
+                                }
+                                this._more = false;
+                                this._input = this._input.slice(match[0].length);
+                                this.matched += match[0];
+                                token = this.performAction.call(this, this.yy, this, rules[index], this.conditionStack[this.conditionStack.length - 1]);
+                                if (this.done && this._input) this.done = false;
+                                if (token) return token; else return;
+                            }
+                            if (this._input === "") {
+                                return this.EOF;
+                            } else {
+                                return this.parseError("Lexical error on line " + (this.yylineno + 1) + ". Unrecognized text.\n" + this.showPosition(), {
+                                    text: "",
+                                    token: null,
+                                    line: this.yylineno
+                                });
+                            }
+                        },
+                        lex: function lex() {
+                            var r = this.next();
+                            if (typeof r !== "undefined") {
+                                return r;
+                            } else {
+                                return this.lex();
+                            }
+                        },
+                        begin: function begin(condition) {
+                            this.conditionStack.push(condition);
+                        },
+                        popState: function popState() {
+                            return this.conditionStack.pop();
+                        },
+                        _currentRules: function _currentRules() {
+                            return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
+                        },
+                        topState: function() {
+                            return this.conditionStack[this.conditionStack.length - 2];
+                        },
+                        pushState: function begin(condition) {
+                            this.begin(condition);
+                        }
+                    };
+                    lexer.options = {};
+                    lexer.performAction = function anonymous(yy, yy_, $avoiding_name_collisions, YY_START) {
+                        function strip(start, end) {
+                            return yy_.yytext = yy_.yytext.substr(start, yy_.yyleng - end);
+                        }
+                        var YYSTATE = YY_START;
+                        switch ($avoiding_name_collisions) {
+                          case 0:
+                            if (yy_.yytext.slice(-2) === "\\\\") {
+                                strip(0, 1);
+                                this.begin("mu");
+                            } else if (yy_.yytext.slice(-1) === "\\") {
+                                strip(0, 1);
+                                this.begin("emu");
+                            } else {
+                                this.begin("mu");
+                            }
+                            if (yy_.yytext) return 14;
+                            break;
+
+                          case 1:
+                            return 14;
+                            break;
+
+                          case 2:
+                            this.popState();
+                            return 14;
+                            break;
+
+                          case 3:
+                            strip(0, 4);
+                            this.popState();
+                            return 15;
+                            break;
+
+                          case 4:
+                            return 35;
+                            break;
+
+                          case 5:
+                            return 36;
+                            break;
+
+                          case 6:
+                            return 25;
+                            break;
+
+                          case 7:
+                            return 16;
+                            break;
+
+                          case 8:
+                            return 20;
+                            break;
+
+                          case 9:
+                            return 19;
+                            break;
+
+                          case 10:
+                            return 19;
+                            break;
+
+                          case 11:
+                            return 23;
+                            break;
+
+                          case 12:
+                            return 22;
+                            break;
+
+                          case 13:
+                            this.popState();
+                            this.begin("com");
+                            break;
+
+                          case 14:
+                            strip(3, 5);
+                            this.popState();
+                            return 15;
+                            break;
+
+                          case 15:
+                            return 22;
+                            break;
+
+                          case 16:
+                            return 41;
+                            break;
+
+                          case 17:
+                            return 40;
+                            break;
+
+                          case 18:
+                            return 40;
+                            break;
+
+                          case 19:
+                            return 44;
+                            break;
+
+                          case 20:
+                            // ignore whitespace
+                            break;
+
+                          case 21:
+                            this.popState();
+                            return 24;
+                            break;
+
+                          case 22:
+                            this.popState();
+                            return 18;
+                            break;
+
+                          case 23:
+                            yy_.yytext = strip(1, 2).replace(/\\"/g, '"');
+                            return 32;
+                            break;
+
+                          case 24:
+                            yy_.yytext = strip(1, 2).replace(/\\'/g, "'");
+                            return 32;
+                            break;
+
+                          case 25:
+                            return 42;
+                            break;
+
+                          case 26:
+                            return 34;
+                            break;
+
+                          case 27:
+                            return 34;
+                            break;
+
+                          case 28:
+                            return 33;
+                            break;
+
+                          case 29:
+                            return 40;
+                            break;
+
+                          case 30:
+                            yy_.yytext = strip(1, 2);
+                            return 40;
+                            break;
+
+                          case 31:
+                            return "INVALID";
+                            break;
+
+                          case 32:
+                            return 5;
+                            break;
+                        }
+                    };
+                    lexer.rules = [ /^(?:[^\x00]*?(?=(\{\{)))/, /^(?:[^\x00]+)/, /^(?:[^\x00]{2,}?(?=(\{\{|\\\{\{|\\\\\{\{|$)))/, /^(?:[\s\S]*?--\}\})/, /^(?:\()/, /^(?:\))/, /^(?:\{\{(~)?>)/, /^(?:\{\{(~)?#)/, /^(?:\{\{(~)?\/)/, /^(?:\{\{(~)?\^)/, /^(?:\{\{(~)?\s*else\b)/, /^(?:\{\{(~)?\{)/, /^(?:\{\{(~)?&)/, /^(?:\{\{!--)/, /^(?:\{\{![\s\S]*?\}\})/, /^(?:\{\{(~)?)/, /^(?:=)/, /^(?:\.\.)/, /^(?:\.(?=([=~}\s\/.)])))/, /^(?:[\/.])/, /^(?:\s+)/, /^(?:\}(~)?\}\})/, /^(?:(~)?\}\})/, /^(?:"(\\["]|[^"])*")/, /^(?:'(\\[']|[^'])*')/, /^(?:@)/, /^(?:true(?=([~}\s)])))/, /^(?:false(?=([~}\s)])))/, /^(?:-?[0-9]+(?=([~}\s)])))/, /^(?:([^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=([=~}\s\/.)]))))/, /^(?:\[[^\]]*\])/, /^(?:.)/, /^(?:$)/ ];
+                    lexer.conditions = {
+                        mu: {
+                            rules: [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 ],
+                            inclusive: false
+                        },
+                        emu: {
+                            rules: [ 2 ],
+                            inclusive: false
+                        },
+                        com: {
+                            rules: [ 3 ],
+                            inclusive: false
+                        },
+                        INITIAL: {
+                            rules: [ 0, 1, 32 ],
+                            inclusive: true
+                        }
+                    };
+                    return lexer;
+                }();
+                parser.lexer = lexer;
+                function Parser() {
+                    this.yy = {};
+                }
+                Parser.prototype = parser;
+                parser.Parser = Parser;
+                return new Parser();
+            }();
+            __exports__ = handlebars;
+            /* jshint ignore:end */
+            return __exports__;
+        }();
+        // handlebars/compiler/base.js
+        var __module8__ = function(__dependency1__, __dependency2__) {
+            "use strict";
+            var __exports__ = {};
+            var parser = __dependency1__;
+            var AST = __dependency2__;
+            __exports__.parser = parser;
+            function parse(input) {
+                // Just return if an already-compile AST was passed in.
+                if (input.constructor === AST.ProgramNode) {
+                    return input;
+                }
+                parser.yy = AST;
+                return parser.parse(input);
+            }
+            __exports__.parse = parse;
+            return __exports__;
+        }(__module9__, __module7__);
+        // handlebars/compiler/compiler.js
+        var __module10__ = function(__dependency1__) {
+            "use strict";
+            var __exports__ = {};
+            var Exception = __dependency1__;
+            function Compiler() {}
+            __exports__.Compiler = Compiler;
+            // the foundHelper register will disambiguate helper lookup from finding a
+            // function in a context. This is necessary for mustache compatibility, which
+            // requires that context functions in blocks are evaluated by blockHelperMissing,
+            // and then proceed as if the resulting value was provided to blockHelperMissing.
+            Compiler.prototype = {
+                compiler: Compiler,
+                disassemble: function() {
+                    var opcodes = this.opcodes, opcode, out = [], params, param;
+                    for (var i = 0, l = opcodes.length; i < l; i++) {
+                        opcode = opcodes[i];
+                        if (opcode.opcode === "DECLARE") {
+                            out.push("DECLARE " + opcode.name + "=" + opcode.value);
+                        } else {
+                            params = [];
+                            for (var j = 0; j < opcode.args.length; j++) {
+                                param = opcode.args[j];
+                                if (typeof param === "string") {
+                                    param = '"' + param.replace("\n", "\\n") + '"';
+                                }
+                                params.push(param);
+                            }
+                            out.push(opcode.opcode + " " + params.join(" "));
+                        }
+                    }
+                    return out.join("\n");
+                },
+                equals: function(other) {
+                    var len = this.opcodes.length;
+                    if (other.opcodes.length !== len) {
+                        return false;
+                    }
+                    for (var i = 0; i < len; i++) {
+                        var opcode = this.opcodes[i], otherOpcode = other.opcodes[i];
+                        if (opcode.opcode !== otherOpcode.opcode || opcode.args.length !== otherOpcode.args.length) {
+                            return false;
+                        }
+                        for (var j = 0; j < opcode.args.length; j++) {
+                            if (opcode.args[j] !== otherOpcode.args[j]) {
+                                return false;
+                            }
+                        }
+                    }
+                    len = this.children.length;
+                    if (other.children.length !== len) {
+                        return false;
+                    }
+                    for (i = 0; i < len; i++) {
+                        if (!this.children[i].equals(other.children[i])) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                guid: 0,
+                compile: function(program, options) {
+                    this.opcodes = [];
+                    this.children = [];
+                    this.depths = {
+                        list: []
+                    };
+                    this.options = options;
+                    // These changes will propagate to the other compiler components
+                    var knownHelpers = this.options.knownHelpers;
+                    this.options.knownHelpers = {
+                        helperMissing: true,
+                        blockHelperMissing: true,
+                        each: true,
+                        "if": true,
+                        unless: true,
+                        "with": true,
+                        log: true
+                    };
+                    if (knownHelpers) {
+                        for (var name in knownHelpers) {
+                            this.options.knownHelpers[name] = knownHelpers[name];
+                        }
+                    }
+                    return this.accept(program);
+                },
+                accept: function(node) {
+                    var strip = node.strip || {}, ret;
+                    if (strip.left) {
+                        this.opcode("strip");
+                    }
+                    ret = this[node.type](node);
+                    if (strip.right) {
+                        this.opcode("strip");
+                    }
+                    return ret;
+                },
+                program: function(program) {
+                    var statements = program.statements;
+                    for (var i = 0, l = statements.length; i < l; i++) {
+                        this.accept(statements[i]);
+                    }
+                    this.isSimple = l === 1;
+                    this.depths.list = this.depths.list.sort(function(a, b) {
+                        return a - b;
+                    });
+                    return this;
+                },
+                compileProgram: function(program) {
+                    var result = new this.compiler().compile(program, this.options);
+                    var guid = this.guid++, depth;
+                    this.usePartial = this.usePartial || result.usePartial;
+                    this.children[guid] = result;
+                    for (var i = 0, l = result.depths.list.length; i < l; i++) {
+                        depth = result.depths.list[i];
+                        if (depth < 2) {
+                            continue;
+                        } else {
+                            this.addDepth(depth - 1);
+                        }
+                    }
+                    return guid;
+                },
+                block: function(block) {
+                    var mustache = block.mustache, program = block.program, inverse = block.inverse;
+                    if (program) {
+                        program = this.compileProgram(program);
+                    }
+                    if (inverse) {
+                        inverse = this.compileProgram(inverse);
+                    }
+                    var sexpr = mustache.sexpr;
+                    var type = this.classifySexpr(sexpr);
+                    if (type === "helper") {
+                        this.helperSexpr(sexpr, program, inverse);
+                    } else if (type === "simple") {
+                        this.simpleSexpr(sexpr);
+                        // now that the simple mustache is resolved, we need to
+                        // evaluate it by executing `blockHelperMissing`
+                        this.opcode("pushProgram", program);
+                        this.opcode("pushProgram", inverse);
+                        this.opcode("emptyHash");
+                        this.opcode("blockValue");
+                    } else {
+                        this.ambiguousSexpr(sexpr, program, inverse);
+                        // now that the simple mustache is resolved, we need to
+                        // evaluate it by executing `blockHelperMissing`
+                        this.opcode("pushProgram", program);
+                        this.opcode("pushProgram", inverse);
+                        this.opcode("emptyHash");
+                        this.opcode("ambiguousBlockValue");
+                    }
+                    this.opcode("append");
+                },
+                hash: function(hash) {
+                    var pairs = hash.pairs, pair, val;
+                    this.opcode("pushHash");
+                    for (var i = 0, l = pairs.length; i < l; i++) {
+                        pair = pairs[i];
+                        val = pair[1];
+                        if (this.options.stringParams) {
+                            if (val.depth) {
+                                this.addDepth(val.depth);
+                            }
+                            this.opcode("getContext", val.depth || 0);
+                            this.opcode("pushStringParam", val.stringModeValue, val.type);
+                            if (val.type === "sexpr") {
+                                // Subexpressions get evaluated and passed in
+                                // in string params mode.
+                                this.sexpr(val);
+                            }
+                        } else {
+                            this.accept(val);
+                        }
+                        this.opcode("assignToHash", pair[0]);
+                    }
+                    this.opcode("popHash");
+                },
+                partial: function(partial) {
+                    var partialName = partial.partialName;
+                    this.usePartial = true;
+                    if (partial.context) {
+                        this.ID(partial.context);
+                    } else {
+                        this.opcode("push", "depth0");
+                    }
+                    this.opcode("invokePartial", partialName.name);
+                    this.opcode("append");
+                },
+                content: function(content) {
+                    this.opcode("appendContent", content.string);
+                },
+                mustache: function(mustache) {
+                    this.sexpr(mustache.sexpr);
+                    if (mustache.escaped && !this.options.noEscape) {
+                        this.opcode("appendEscaped");
+                    } else {
+                        this.opcode("append");
+                    }
+                },
+                ambiguousSexpr: function(sexpr, program, inverse) {
+                    var id = sexpr.id, name = id.parts[0], isBlock = program != null || inverse != null;
+                    this.opcode("getContext", id.depth);
+                    this.opcode("pushProgram", program);
+                    this.opcode("pushProgram", inverse);
+                    this.opcode("invokeAmbiguous", name, isBlock);
+                },
+                simpleSexpr: function(sexpr) {
+                    var id = sexpr.id;
+                    if (id.type === "DATA") {
+                        this.DATA(id);
+                    } else if (id.parts.length) {
+                        this.ID(id);
+                    } else {
+                        // Simplified ID for `this`
+                        this.addDepth(id.depth);
+                        this.opcode("getContext", id.depth);
+                        this.opcode("pushContext");
+                    }
+                    this.opcode("resolvePossibleLambda");
+                },
+                helperSexpr: function(sexpr, program, inverse) {
+                    var params = this.setupFullMustacheParams(sexpr, program, inverse), name = sexpr.id.parts[0];
+                    if (this.options.knownHelpers[name]) {
+                        this.opcode("invokeKnownHelper", params.length, name);
+                    } else if (this.options.knownHelpersOnly) {
+                        throw new Exception("You specified knownHelpersOnly, but used the unknown helper " + name, sexpr);
+                    } else {
+                        this.opcode("invokeHelper", params.length, name, sexpr.isRoot);
+                    }
+                },
+                sexpr: function(sexpr) {
+                    var type = this.classifySexpr(sexpr);
+                    if (type === "simple") {
+                        this.simpleSexpr(sexpr);
+                    } else if (type === "helper") {
+                        this.helperSexpr(sexpr);
+                    } else {
+                        this.ambiguousSexpr(sexpr);
+                    }
+                },
+                ID: function(id) {
+                    this.addDepth(id.depth);
+                    this.opcode("getContext", id.depth);
+                    var name = id.parts[0];
+                    if (!name) {
+                        this.opcode("pushContext");
+                    } else {
+                        this.opcode("lookupOnContext", id.parts[0]);
+                    }
+                    for (var i = 1, l = id.parts.length; i < l; i++) {
+                        this.opcode("lookup", id.parts[i]);
+                    }
+                },
+                DATA: function(data) {
+                    this.options.data = true;
+                    if (data.id.isScoped || data.id.depth) {
+                        throw new Exception("Scoped data references are not supported: " + data.original, data);
+                    }
+                    this.opcode("lookupData");
+                    var parts = data.id.parts;
+                    for (var i = 0, l = parts.length; i < l; i++) {
+                        this.opcode("lookup", parts[i]);
+                    }
+                },
+                STRING: function(string) {
+                    this.opcode("pushString", string.string);
+                },
+                INTEGER: function(integer) {
+                    this.opcode("pushLiteral", integer.integer);
+                },
+                BOOLEAN: function(bool) {
+                    this.opcode("pushLiteral", bool.bool);
+                },
+                comment: function() {},
+                // HELPERS
+                opcode: function(name) {
+                    this.opcodes.push({
+                        opcode: name,
+                        args: [].slice.call(arguments, 1)
+                    });
+                },
+                declare: function(name, value) {
+                    this.opcodes.push({
+                        opcode: "DECLARE",
+                        name: name,
+                        value: value
+                    });
+                },
+                addDepth: function(depth) {
+                    if (depth === 0) {
+                        return;
+                    }
+                    if (!this.depths[depth]) {
+                        this.depths[depth] = true;
+                        this.depths.list.push(depth);
+                    }
+                },
+                classifySexpr: function(sexpr) {
+                    var isHelper = sexpr.isHelper;
+                    var isEligible = sexpr.eligibleHelper;
+                    var options = this.options;
+                    // if ambiguous, we can possibly resolve the ambiguity now
+                    if (isEligible && !isHelper) {
+                        var name = sexpr.id.parts[0];
+                        if (options.knownHelpers[name]) {
+                            isHelper = true;
+                        } else if (options.knownHelpersOnly) {
+                            isEligible = false;
+                        }
+                    }
+                    if (isHelper) {
+                        return "helper";
+                    } else if (isEligible) {
+                        return "ambiguous";
+                    } else {
+                        return "simple";
+                    }
+                },
+                pushParams: function(params) {
+                    var i = params.length, param;
+                    while (i--) {
+                        param = params[i];
+                        if (this.options.stringParams) {
+                            if (param.depth) {
+                                this.addDepth(param.depth);
+                            }
+                            this.opcode("getContext", param.depth || 0);
+                            this.opcode("pushStringParam", param.stringModeValue, param.type);
+                            if (param.type === "sexpr") {
+                                // Subexpressions get evaluated and passed in
+                                // in string params mode.
+                                this.sexpr(param);
+                            }
+                        } else {
+                            this[param.type](param);
+                        }
+                    }
+                },
+                setupFullMustacheParams: function(sexpr, program, inverse) {
+                    var params = sexpr.params;
+                    this.pushParams(params);
+                    this.opcode("pushProgram", program);
+                    this.opcode("pushProgram", inverse);
+                    if (sexpr.hash) {
+                        this.hash(sexpr.hash);
+                    } else {
+                        this.opcode("emptyHash");
+                    }
+                    return params;
+                }
+            };
+            function precompile(input, options, env) {
+                if (input == null || typeof input !== "string" && input.constructor !== env.AST.ProgramNode) {
+                    throw new Exception("You must pass a string or Handlebars AST to Handlebars.precompile. You passed " + input);
+                }
+                options = options || {};
+                if (!("data" in options)) {
+                    options.data = true;
+                }
+                var ast = env.parse(input);
+                var environment = new env.Compiler().compile(ast, options);
+                return new env.JavaScriptCompiler().compile(environment, options);
+            }
+            __exports__.precompile = precompile;
+            function compile(input, options, env) {
+                if (input == null || typeof input !== "string" && input.constructor !== env.AST.ProgramNode) {
+                    throw new Exception("You must pass a string or Handlebars AST to Handlebars.compile. You passed " + input);
+                }
+                options = options || {};
+                if (!("data" in options)) {
+                    options.data = true;
+                }
+                var compiled;
+                function compileInput() {
+                    var ast = env.parse(input);
+                    var environment = new env.Compiler().compile(ast, options);
+                    var templateSpec = new env.JavaScriptCompiler().compile(environment, options, undefined, true);
+                    return env.template(templateSpec);
+                }
+                // Template is only compiled on first use and cached after that point.
+                return function(context, options) {
+                    if (!compiled) {
+                        compiled = compileInput();
+                    }
+                    return compiled.call(this, context, options);
+                };
+            }
+            __exports__.compile = compile;
+            return __exports__;
+        }(__module5__);
+        // handlebars/compiler/javascript-compiler.js
+        var __module11__ = function(__dependency1__, __dependency2__) {
+            "use strict";
+            var __exports__;
+            var COMPILER_REVISION = __dependency1__.COMPILER_REVISION;
+            var REVISION_CHANGES = __dependency1__.REVISION_CHANGES;
+            var log = __dependency1__.log;
+            var Exception = __dependency2__;
+            function Literal(value) {
+                this.value = value;
+            }
+            function JavaScriptCompiler() {}
+            JavaScriptCompiler.prototype = {
+                // PUBLIC API: You can override these methods in a subclass to provide
+                // alternative compiled forms for name lookup and buffering semantics
+                nameLookup: function(parent, name) {
+                    var wrap, ret;
+                    if (parent.indexOf("depth") === 0) {
+                        wrap = true;
+                    }
+                    if (/^[0-9]+$/.test(name)) {
+                        ret = parent + "[" + name + "]";
+                    } else if (JavaScriptCompiler.isValidJavaScriptVariableName(name)) {
+                        ret = parent + "." + name;
+                    } else {
+                        ret = parent + "['" + name + "']";
+                    }
+                    if (wrap) {
+                        return "(" + parent + " && " + ret + ")";
+                    } else {
+                        return ret;
+                    }
+                },
+                compilerInfo: function() {
+                    var revision = COMPILER_REVISION, versions = REVISION_CHANGES[revision];
+                    return "this.compilerInfo = [" + revision + ",'" + versions + "'];\n";
+                },
+                appendToBuffer: function(string) {
+                    if (this.environment.isSimple) {
+                        return "return " + string + ";";
+                    } else {
+                        return {
+                            appendToBuffer: true,
+                            content: string,
+                            toString: function() {
+                                return "buffer += " + string + ";";
+                            }
+                        };
+                    }
+                },
+                initializeBuffer: function() {
+                    return this.quotedString("");
+                },
+                namespace: "Handlebars",
+                // END PUBLIC API
+                compile: function(environment, options, context, asObject) {
+                    this.environment = environment;
+                    this.options = options || {};
+                    log("debug", this.environment.disassemble() + "\n\n");
+                    this.name = this.environment.name;
+                    this.isChild = !!context;
+                    this.context = context || {
+                        programs: [],
+                        environments: [],
+                        aliases: {}
+                    };
+                    this.preamble();
+                    this.stackSlot = 0;
+                    this.stackVars = [];
+                    this.registers = {
+                        list: []
+                    };
+                    this.hashes = [];
+                    this.compileStack = [];
+                    this.inlineStack = [];
+                    this.compileChildren(environment, options);
+                    var opcodes = environment.opcodes, opcode;
+                    this.i = 0;
+                    for (var l = opcodes.length; this.i < l; this.i++) {
+                        opcode = opcodes[this.i];
+                        if (opcode.opcode === "DECLARE") {
+                            this[opcode.name] = opcode.value;
+                        } else {
+                            this[opcode.opcode].apply(this, opcode.args);
+                        }
+                        // Reset the stripNext flag if it was not set by this operation.
+                        if (opcode.opcode !== this.stripNext) {
+                            this.stripNext = false;
+                        }
+                    }
+                    // Flush any trailing content that might be pending.
+                    this.pushSource("");
+                    if (this.stackSlot || this.inlineStack.length || this.compileStack.length) {
+                        throw new Exception("Compile completed with content left on stack");
+                    }
+                    return this.createFunctionContext(asObject);
+                },
+                preamble: function() {
+                    var out = [];
+                    if (!this.isChild) {
+                        var namespace = this.namespace;
+                        var copies = "helpers = this.merge(helpers, " + namespace + ".helpers);";
+                        if (this.environment.usePartial) {
+                            copies = copies + " partials = this.merge(partials, " + namespace + ".partials);";
+                        }
+                        if (this.options.data) {
+                            copies = copies + " data = data || {};";
+                        }
+                        out.push(copies);
+                    } else {
+                        out.push("");
+                    }
+                    if (!this.environment.isSimple) {
+                        out.push(", buffer = " + this.initializeBuffer());
+                    } else {
+                        out.push("");
+                    }
+                    // track the last context pushed into place to allow skipping the
+                    // getContext opcode when it would be a noop
+                    this.lastContext = 0;
+                    this.source = out;
+                },
+                createFunctionContext: function(asObject) {
+                    var locals = this.stackVars.concat(this.registers.list);
+                    if (locals.length > 0) {
+                        this.source[1] = this.source[1] + ", " + locals.join(", ");
+                    }
+                    // Generate minimizer alias mappings
+                    if (!this.isChild) {
+                        for (var alias in this.context.aliases) {
+                            if (this.context.aliases.hasOwnProperty(alias)) {
+                                this.source[1] = this.source[1] + ", " + alias + "=" + this.context.aliases[alias];
+                            }
+                        }
+                    }
+                    if (this.source[1]) {
+                        this.source[1] = "var " + this.source[1].substring(2) + ";";
+                    }
+                    // Merge children
+                    if (!this.isChild) {
+                        this.source[1] += "\n" + this.context.programs.join("\n") + "\n";
+                    }
+                    if (!this.environment.isSimple) {
+                        this.pushSource("return buffer;");
+                    }
+                    var params = this.isChild ? [ "depth0", "data" ] : [ "Handlebars", "depth0", "helpers", "partials", "data" ];
+                    for (var i = 0, l = this.environment.depths.list.length; i < l; i++) {
+                        params.push("depth" + this.environment.depths.list[i]);
+                    }
+                    // Perform a second pass over the output to merge content when possible
+                    var source = this.mergeSource();
+                    if (!this.isChild) {
+                        source = this.compilerInfo() + source;
+                    }
+                    if (asObject) {
+                        params.push(source);
+                        return Function.apply(this, params);
+                    } else {
+                        var functionSource = "function " + (this.name || "") + "(" + params.join(",") + ") {\n  " + source + "}";
+                        log("debug", functionSource + "\n\n");
+                        return functionSource;
+                    }
+                },
+                mergeSource: function() {
+                    // WARN: We are not handling the case where buffer is still populated as the source should
+                    // not have buffer append operations as their final action.
+                    var source = "", buffer;
+                    for (var i = 0, len = this.source.length; i < len; i++) {
+                        var line = this.source[i];
+                        if (line.appendToBuffer) {
+                            if (buffer) {
+                                buffer = buffer + "\n    + " + line.content;
+                            } else {
+                                buffer = line.content;
+                            }
+                        } else {
+                            if (buffer) {
+                                source += "buffer += " + buffer + ";\n  ";
+                                buffer = undefined;
+                            }
+                            source += line + "\n  ";
+                        }
+                    }
+                    return source;
+                },
+                // [blockValue]
+                //
+                // On stack, before: hash, inverse, program, value
+                // On stack, after: return value of blockHelperMissing
+                //
+                // The purpose of this opcode is to take a block of the form
+                // `{{#foo}}...{{/foo}}`, resolve the value of `foo`, and
+                // replace it on the stack with the result of properly
+                // invoking blockHelperMissing.
+                blockValue: function() {
+                    this.context.aliases.blockHelperMissing = "helpers.blockHelperMissing";
+                    var params = [ "depth0" ];
+                    this.setupParams(0, params);
+                    this.replaceStack(function(current) {
+                        params.splice(1, 0, current);
+                        return "blockHelperMissing.call(" + params.join(", ") + ")";
+                    });
+                },
+                // [ambiguousBlockValue]
+                //
+                // On stack, before: hash, inverse, program, value
+                // Compiler value, before: lastHelper=value of last found helper, if any
+                // On stack, after, if no lastHelper: same as [blockValue]
+                // On stack, after, if lastHelper: value
+                ambiguousBlockValue: function() {
+                    this.context.aliases.blockHelperMissing = "helpers.blockHelperMissing";
+                    var params = [ "depth0" ];
+                    this.setupParams(0, params);
+                    var current = this.topStack();
+                    params.splice(1, 0, current);
+                    this.pushSource("if (!" + this.lastHelper + ") { " + current + " = blockHelperMissing.call(" + params.join(", ") + "); }");
+                },
+                // [appendContent]
+                //
+                // On stack, before: ...
+                // On stack, after: ...
+                //
+                // Appends the string value of `content` to the current buffer
+                appendContent: function(content) {
+                    if (this.pendingContent) {
+                        content = this.pendingContent + content;
+                    }
+                    if (this.stripNext) {
+                        content = content.replace(/^\s+/, "");
+                    }
+                    this.pendingContent = content;
+                },
+                // [strip]
+                //
+                // On stack, before: ...
+                // On stack, after: ...
+                //
+                // Removes any trailing whitespace from the prior content node and flags
+                // the next operation for stripping if it is a content node.
+                strip: function() {
+                    if (this.pendingContent) {
+                        this.pendingContent = this.pendingContent.replace(/\s+$/, "");
+                    }
+                    this.stripNext = "strip";
+                },
+                // [append]
+                //
+                // On stack, before: value, ...
+                // On stack, after: ...
+                //
+                // Coerces `value` to a String and appends it to the current buffer.
+                //
+                // If `value` is truthy, or 0, it is coerced into a string and appended
+                // Otherwise, the empty string is appended
+                append: function() {
+                    // Force anything that is inlined onto the stack so we don't have duplication
+                    // when we examine local
+                    this.flushInline();
+                    var local = this.popStack();
+                    this.pushSource("if(" + local + " || " + local + " === 0) { " + this.appendToBuffer(local) + " }");
+                    if (this.environment.isSimple) {
+                        this.pushSource("else { " + this.appendToBuffer("''") + " }");
+                    }
+                },
+                // [appendEscaped]
+                //
+                // On stack, before: value, ...
+                // On stack, after: ...
+                //
+                // Escape `value` and append it to the buffer
+                appendEscaped: function() {
+                    this.context.aliases.escapeExpression = "this.escapeExpression";
+                    this.pushSource(this.appendToBuffer("escapeExpression(" + this.popStack() + ")"));
+                },
+                // [getContext]
+                //
+                // On stack, before: ...
+                // On stack, after: ...
+                // Compiler value, after: lastContext=depth
+                //
+                // Set the value of the `lastContext` compiler value to the depth
+                getContext: function(depth) {
+                    if (this.lastContext !== depth) {
+                        this.lastContext = depth;
+                    }
+                },
+                // [lookupOnContext]
+                //
+                // On stack, before: ...
+                // On stack, after: currentContext[name], ...
+                //
+                // Looks up the value of `name` on the current context and pushes
+                // it onto the stack.
+                lookupOnContext: function(name) {
+                    this.push(this.nameLookup("depth" + this.lastContext, name, "context"));
+                },
+                // [pushContext]
+                //
+                // On stack, before: ...
+                // On stack, after: currentContext, ...
+                //
+                // Pushes the value of the current context onto the stack.
+                pushContext: function() {
+                    this.pushStackLiteral("depth" + this.lastContext);
+                },
+                // [resolvePossibleLambda]
+                //
+                // On stack, before: value, ...
+                // On stack, after: resolved value, ...
+                //
+                // If the `value` is a lambda, replace it on the stack by
+                // the return value of the lambda
+                resolvePossibleLambda: function() {
+                    this.context.aliases.functionType = '"function"';
+                    this.replaceStack(function(current) {
+                        return "typeof " + current + " === functionType ? " + current + ".apply(depth0) : " + current;
+                    });
+                },
+                // [lookup]
+                //
+                // On stack, before: value, ...
+                // On stack, after: value[name], ...
+                //
+                // Replace the value on the stack with the result of looking
+                // up `name` on `value`
+                lookup: function(name) {
+                    this.replaceStack(function(current) {
+                        return current + " == null || " + current + " === false ? " + current + " : " + this.nameLookup(current, name, "context");
+                    });
+                },
+                // [lookupData]
+                //
+                // On stack, before: ...
+                // On stack, after: data, ...
+                //
+                // Push the data lookup operator
+                lookupData: function() {
+                    this.pushStackLiteral("data");
+                },
+                // [pushStringParam]
+                //
+                // On stack, before: ...
+                // On stack, after: string, currentContext, ...
+                //
+                // This opcode is designed for use in string mode, which
+                // provides the string value of a parameter along with its
+                // depth rather than resolving it immediately.
+                pushStringParam: function(string, type) {
+                    this.pushStackLiteral("depth" + this.lastContext);
+                    this.pushString(type);
+                    // If it's a subexpression, the string result
+                    // will be pushed after this opcode.
+                    if (type !== "sexpr") {
+                        if (typeof string === "string") {
+                            this.pushString(string);
+                        } else {
+                            this.pushStackLiteral(string);
+                        }
+                    }
+                },
+                emptyHash: function() {
+                    this.pushStackLiteral("{}");
+                    if (this.options.stringParams) {
+                        this.push("{}");
+                        // hashContexts
+                        this.push("{}");
+                    }
+                },
+                pushHash: function() {
+                    if (this.hash) {
+                        this.hashes.push(this.hash);
+                    }
+                    this.hash = {
+                        values: [],
+                        types: [],
+                        contexts: []
+                    };
+                },
+                popHash: function() {
+                    var hash = this.hash;
+                    this.hash = this.hashes.pop();
+                    if (this.options.stringParams) {
+                        this.push("{" + hash.contexts.join(",") + "}");
+                        this.push("{" + hash.types.join(",") + "}");
+                    }
+                    this.push("{\n    " + hash.values.join(",\n    ") + "\n  }");
+                },
+                // [pushString]
+                //
+                // On stack, before: ...
+                // On stack, after: quotedString(string), ...
+                //
+                // Push a quoted version of `string` onto the stack
+                pushString: function(string) {
+                    this.pushStackLiteral(this.quotedString(string));
+                },
+                // [push]
+                //
+                // On stack, before: ...
+                // On stack, after: expr, ...
+                //
+                // Push an expression onto the stack
+                push: function(expr) {
+                    this.inlineStack.push(expr);
+                    return expr;
+                },
+                // [pushLiteral]
+                //
+                // On stack, before: ...
+                // On stack, after: value, ...
+                //
+                // Pushes a value onto the stack. This operation prevents
+                // the compiler from creating a temporary variable to hold
+                // it.
+                pushLiteral: function(value) {
+                    this.pushStackLiteral(value);
+                },
+                // [pushProgram]
+                //
+                // On stack, before: ...
+                // On stack, after: program(guid), ...
+                //
+                // Push a program expression onto the stack. This takes
+                // a compile-time guid and converts it into a runtime-accessible
+                // expression.
+                pushProgram: function(guid) {
+                    if (guid != null) {
+                        this.pushStackLiteral(this.programExpression(guid));
+                    } else {
+                        this.pushStackLiteral(null);
+                    }
+                },
+                // [invokeHelper]
+                //
+                // On stack, before: hash, inverse, program, params..., ...
+                // On stack, after: result of helper invocation
+                //
+                // Pops off the helper's parameters, invokes the helper,
+                // and pushes the helper's return value onto the stack.
+                //
+                // If the helper is not found, `helperMissing` is called.
+                invokeHelper: function(paramSize, name, isRoot) {
+                    this.context.aliases.helperMissing = "helpers.helperMissing";
+                    this.useRegister("helper");
+                    var helper = this.lastHelper = this.setupHelper(paramSize, name, true);
+                    var nonHelper = this.nameLookup("depth" + this.lastContext, name, "context");
+                    var lookup = "helper = " + helper.name + " || " + nonHelper;
+                    if (helper.paramsInit) {
+                        lookup += "," + helper.paramsInit;
+                    }
+                    this.push("(" + lookup + ",helper " + "? helper.call(" + helper.callParams + ") " + ": helperMissing.call(" + helper.helperMissingParams + "))");
+                    // Always flush subexpressions. This is both to prevent the compounding size issue that
+                    // occurs when the code has to be duplicated for inlining and also to prevent errors
+                    // due to the incorrect options object being passed due to the shared register.
+                    if (!isRoot) {
+                        this.flushInline();
+                    }
+                },
+                // [invokeKnownHelper]
+                //
+                // On stack, before: hash, inverse, program, params..., ...
+                // On stack, after: result of helper invocation
+                //
+                // This operation is used when the helper is known to exist,
+                // so a `helperMissing` fallback is not required.
+                invokeKnownHelper: function(paramSize, name) {
+                    var helper = this.setupHelper(paramSize, name);
+                    this.push(helper.name + ".call(" + helper.callParams + ")");
+                },
+                // [invokeAmbiguous]
+                //
+                // On stack, before: hash, inverse, program, params..., ...
+                // On stack, after: result of disambiguation
+                //
+                // This operation is used when an expression like `{{foo}}`
+                // is provided, but we don't know at compile-time whether it
+                // is a helper or a path.
+                //
+                // This operation emits more code than the other options,
+                // and can be avoided by passing the `knownHelpers` and
+                // `knownHelpersOnly` flags at compile-time.
+                invokeAmbiguous: function(name, helperCall) {
+                    this.context.aliases.functionType = '"function"';
+                    this.useRegister("helper");
+                    this.emptyHash();
+                    var helper = this.setupHelper(0, name, helperCall);
+                    var helperName = this.lastHelper = this.nameLookup("helpers", name, "helper");
+                    var nonHelper = this.nameLookup("depth" + this.lastContext, name, "context");
+                    var nextStack = this.nextStack();
+                    if (helper.paramsInit) {
+                        this.pushSource(helper.paramsInit);
+                    }
+                    this.pushSource("if (helper = " + helperName + ") { " + nextStack + " = helper.call(" + helper.callParams + "); }");
+                    this.pushSource("else { helper = " + nonHelper + "; " + nextStack + " = typeof helper === functionType ? helper.call(" + helper.callParams + ") : helper; }");
+                },
+                // [invokePartial]
+                //
+                // On stack, before: context, ...
+                // On stack after: result of partial invocation
+                //
+                // This operation pops off a context, invokes a partial with that context,
+                // and pushes the result of the invocation back.
+                invokePartial: function(name) {
+                    var params = [ this.nameLookup("partials", name, "partial"), "'" + name + "'", this.popStack(), "helpers", "partials" ];
+                    if (this.options.data) {
+                        params.push("data");
+                    }
+                    this.context.aliases.self = "this";
+                    this.push("self.invokePartial(" + params.join(", ") + ")");
+                },
+                // [assignToHash]
+                //
+                // On stack, before: value, hash, ...
+                // On stack, after: hash, ...
+                //
+                // Pops a value and hash off the stack, assigns `hash[key] = value`
+                // and pushes the hash back onto the stack.
+                assignToHash: function(key) {
+                    var value = this.popStack(), context, type;
+                    if (this.options.stringParams) {
+                        type = this.popStack();
+                        context = this.popStack();
+                    }
+                    var hash = this.hash;
+                    if (context) {
+                        hash.contexts.push("'" + key + "': " + context);
+                    }
+                    if (type) {
+                        hash.types.push("'" + key + "': " + type);
+                    }
+                    hash.values.push("'" + key + "': (" + value + ")");
+                },
+                // HELPERS
+                compiler: JavaScriptCompiler,
+                compileChildren: function(environment, options) {
+                    var children = environment.children, child, compiler;
+                    for (var i = 0, l = children.length; i < l; i++) {
+                        child = children[i];
+                        compiler = new this.compiler();
+                        var index = this.matchExistingProgram(child);
+                        if (index == null) {
+                            this.context.programs.push("");
+                            // Placeholder to prevent name conflicts for nested children
+                            index = this.context.programs.length;
+                            child.index = index;
+                            child.name = "program" + index;
+                            this.context.programs[index] = compiler.compile(child, options, this.context);
+                            this.context.environments[index] = child;
+                        } else {
+                            child.index = index;
+                            child.name = "program" + index;
+                        }
+                    }
+                },
+                matchExistingProgram: function(child) {
+                    for (var i = 0, len = this.context.environments.length; i < len; i++) {
+                        var environment = this.context.environments[i];
+                        if (environment && environment.equals(child)) {
+                            return i;
+                        }
+                    }
+                },
+                programExpression: function(guid) {
+                    this.context.aliases.self = "this";
+                    if (guid == null) {
+                        return "self.noop";
+                    }
+                    var child = this.environment.children[guid], depths = child.depths.list, depth;
+                    var programParams = [ child.index, child.name, "data" ];
+                    for (var i = 0, l = depths.length; i < l; i++) {
+                        depth = depths[i];
+                        if (depth === 1) {
+                            programParams.push("depth0");
+                        } else {
+                            programParams.push("depth" + (depth - 1));
+                        }
+                    }
+                    return (depths.length === 0 ? "self.program(" : "self.programWithDepth(") + programParams.join(", ") + ")";
+                },
+                register: function(name, val) {
+                    this.useRegister(name);
+                    this.pushSource(name + " = " + val + ";");
+                },
+                useRegister: function(name) {
+                    if (!this.registers[name]) {
+                        this.registers[name] = true;
+                        this.registers.list.push(name);
+                    }
+                },
+                pushStackLiteral: function(item) {
+                    return this.push(new Literal(item));
+                },
+                pushSource: function(source) {
+                    if (this.pendingContent) {
+                        this.source.push(this.appendToBuffer(this.quotedString(this.pendingContent)));
+                        this.pendingContent = undefined;
+                    }
+                    if (source) {
+                        this.source.push(source);
+                    }
+                },
+                pushStack: function(item) {
+                    this.flushInline();
+                    var stack = this.incrStack();
+                    if (item) {
+                        this.pushSource(stack + " = " + item + ";");
+                    }
+                    this.compileStack.push(stack);
+                    return stack;
+                },
+                replaceStack: function(callback) {
+                    var prefix = "", inline = this.isInline(), stack, createdStack, usedLiteral;
+                    // If we are currently inline then we want to merge the inline statement into the
+                    // replacement statement via ','
+                    if (inline) {
+                        var top = this.popStack(true);
+                        if (top instanceof Literal) {
+                            // Literals do not need to be inlined
+                            stack = top.value;
+                            usedLiteral = true;
+                        } else {
+                            // Get or create the current stack name for use by the inline
+                            createdStack = !this.stackSlot;
+                            var name = !createdStack ? this.topStackName() : this.incrStack();
+                            prefix = "(" + this.push(name) + " = " + top + "),";
+                            stack = this.topStack();
+                        }
+                    } else {
+                        stack = this.topStack();
+                    }
+                    var item = callback.call(this, stack);
+                    if (inline) {
+                        if (!usedLiteral) {
+                            this.popStack();
+                        }
+                        if (createdStack) {
+                            this.stackSlot--;
+                        }
+                        this.push("(" + prefix + item + ")");
+                    } else {
+                        // Prevent modification of the context depth variable. Through replaceStack
+                        if (!/^stack/.test(stack)) {
+                            stack = this.nextStack();
+                        }
+                        this.pushSource(stack + " = (" + prefix + item + ");");
+                    }
+                    return stack;
+                },
+                nextStack: function() {
+                    return this.pushStack();
+                },
+                incrStack: function() {
+                    this.stackSlot++;
+                    if (this.stackSlot > this.stackVars.length) {
+                        this.stackVars.push("stack" + this.stackSlot);
+                    }
+                    return this.topStackName();
+                },
+                topStackName: function() {
+                    return "stack" + this.stackSlot;
+                },
+                flushInline: function() {
+                    var inlineStack = this.inlineStack;
+                    if (inlineStack.length) {
+                        this.inlineStack = [];
+                        for (var i = 0, len = inlineStack.length; i < len; i++) {
+                            var entry = inlineStack[i];
+                            if (entry instanceof Literal) {
+                                this.compileStack.push(entry);
+                            } else {
+                                this.pushStack(entry);
+                            }
+                        }
+                    }
+                },
+                isInline: function() {
+                    return this.inlineStack.length;
+                },
+                popStack: function(wrapped) {
+                    var inline = this.isInline(), item = (inline ? this.inlineStack : this.compileStack).pop();
+                    if (!wrapped && item instanceof Literal) {
+                        return item.value;
+                    } else {
+                        if (!inline) {
+                            if (!this.stackSlot) {
+                                throw new Exception("Invalid stack pop");
+                            }
+                            this.stackSlot--;
+                        }
+                        return item;
+                    }
+                },
+                topStack: function(wrapped) {
+                    var stack = this.isInline() ? this.inlineStack : this.compileStack, item = stack[stack.length - 1];
+                    if (!wrapped && item instanceof Literal) {
+                        return item.value;
+                    } else {
+                        return item;
+                    }
+                },
+                quotedString: function(str) {
+                    return '"' + str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029") + '"';
+                },
+                setupHelper: function(paramSize, name, missingParams) {
+                    var params = [], paramsInit = this.setupParams(paramSize, params, missingParams);
+                    var foundHelper = this.nameLookup("helpers", name, "helper");
+                    return {
+                        params: params,
+                        paramsInit: paramsInit,
+                        name: foundHelper,
+                        callParams: [ "depth0" ].concat(params).join(", "),
+                        helperMissingParams: missingParams && [ "depth0", this.quotedString(name) ].concat(params).join(", ")
+                    };
+                },
+                setupOptions: function(paramSize, params) {
+                    var options = [], contexts = [], types = [], param, inverse, program;
+                    options.push("hash:" + this.popStack());
+                    if (this.options.stringParams) {
+                        options.push("hashTypes:" + this.popStack());
+                        options.push("hashContexts:" + this.popStack());
+                    }
+                    inverse = this.popStack();
+                    program = this.popStack();
+                    // Avoid setting fn and inverse if neither are set. This allows
+                    // helpers to do a check for `if (options.fn)`
+                    if (program || inverse) {
+                        if (!program) {
+                            this.context.aliases.self = "this";
+                            program = "self.noop";
+                        }
+                        if (!inverse) {
+                            this.context.aliases.self = "this";
+                            inverse = "self.noop";
+                        }
+                        options.push("inverse:" + inverse);
+                        options.push("fn:" + program);
+                    }
+                    for (var i = 0; i < paramSize; i++) {
+                        param = this.popStack();
+                        params.push(param);
+                        if (this.options.stringParams) {
+                            types.push(this.popStack());
+                            contexts.push(this.popStack());
+                        }
+                    }
+                    if (this.options.stringParams) {
+                        options.push("contexts:[" + contexts.join(",") + "]");
+                        options.push("types:[" + types.join(",") + "]");
+                    }
+                    if (this.options.data) {
+                        options.push("data:data");
+                    }
+                    return options;
+                },
+                // the params and contexts arguments are passed in arrays
+                // to fill in
+                setupParams: function(paramSize, params, useRegister) {
+                    var options = "{" + this.setupOptions(paramSize, params).join(",") + "}";
+                    if (useRegister) {
+                        this.useRegister("options");
+                        params.push("options");
+                        return "options=" + options;
+                    } else {
+                        params.push(options);
+                        return "";
+                    }
+                }
+            };
+            var reservedWords = ("break else new var" + " case finally return void" + " catch for switch while" + " continue function this with" + " default if throw" + " delete in try" + " do instanceof typeof" + " abstract enum int short" + " boolean export interface static" + " byte extends long super" + " char final native synchronized" + " class float package throws" + " const goto private transient" + " debugger implements protected volatile" + " double import public let yield").split(" ");
+            var compilerWords = JavaScriptCompiler.RESERVED_WORDS = {};
+            for (var i = 0, l = reservedWords.length; i < l; i++) {
+                compilerWords[reservedWords[i]] = true;
+            }
+            JavaScriptCompiler.isValidJavaScriptVariableName = function(name) {
+                if (!JavaScriptCompiler.RESERVED_WORDS[name] && /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name)) {
+                    return true;
+                }
+                return false;
+            };
+            __exports__ = JavaScriptCompiler;
+            return __exports__;
+        }(__module2__, __module5__);
+        // handlebars.js
+        var __module0__ = function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__) {
+            "use strict";
+            var __exports__;
+            /*globals Handlebars: true */
+            var Handlebars = __dependency1__;
+            // Compiler imports
+            var AST = __dependency2__;
+            var Parser = __dependency3__.parser;
+            var parse = __dependency3__.parse;
+            var Compiler = __dependency4__.Compiler;
+            var compile = __dependency4__.compile;
+            var precompile = __dependency4__.precompile;
+            var JavaScriptCompiler = __dependency5__;
+            var _create = Handlebars.create;
+            var create = function() {
+                var hb = _create();
+                hb.compile = function(input, options) {
+                    return compile(input, options, hb);
+                };
+                hb.precompile = function(input, options) {
+                    return precompile(input, options, hb);
+                };
+                hb.AST = AST;
+                hb.Compiler = Compiler;
+                hb.JavaScriptCompiler = JavaScriptCompiler;
+                hb.Parser = Parser;
+                hb.parse = parse;
+                return hb;
+            };
+            Handlebars = create();
+            Handlebars.create = create;
+            __exports__ = Handlebars;
+            return __exports__;
+        }(__module1__, __module7__, __module8__, __module10__, __module11__);
+        return __module0__;
+    }();
+    module.exports = Handlebars;
 });
 
 define("torabot/main/0.1.0/moment-debug", [ "torabot/main/0.1.0/moment/moment-debug", "torabot/main/0.1.0/moment/lang/zh-cn-debug" ], function(require) {
@@ -9554,5298 +14913,4 @@ define("torabot/main/0.1.0/jquery.storage-debug", [], function(require) {
             $[method].options = defaults;
         });
     })(jQuery, window, document);
-});
-
-define("torabot/main/0.1.0/handlebars-v1.3.0-debug", [], function(require, exports, module) {
-    /*!
-
- handlebars v1.3.0
-
-Copyright (C) 2011 by Yehuda Katz
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-@license
-*/
-    /* exported Handlebars */
-    var Handlebars = function() {
-        // handlebars/safe-string.js
-        var __module4__ = function() {
-            "use strict";
-            var __exports__;
-            // Build out our basic SafeString type
-            function SafeString(string) {
-                this.string = string;
-            }
-            SafeString.prototype.toString = function() {
-                return "" + this.string;
-            };
-            __exports__ = SafeString;
-            return __exports__;
-        }();
-        // handlebars/utils.js
-        var __module3__ = function(__dependency1__) {
-            "use strict";
-            var __exports__ = {};
-            /*jshint -W004 */
-            var SafeString = __dependency1__;
-            var escape = {
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#x27;",
-                "`": "&#x60;"
-            };
-            var badChars = /[&<>"'`]/g;
-            var possible = /[&<>"'`]/;
-            function escapeChar(chr) {
-                return escape[chr] || "&amp;";
-            }
-            function extend(obj, value) {
-                for (var key in value) {
-                    if (Object.prototype.hasOwnProperty.call(value, key)) {
-                        obj[key] = value[key];
-                    }
-                }
-            }
-            __exports__.extend = extend;
-            var toString = Object.prototype.toString;
-            __exports__.toString = toString;
-            // Sourced from lodash
-            // https://github.com/bestiejs/lodash/blob/master/LICENSE.txt
-            var isFunction = function(value) {
-                return typeof value === "function";
-            };
-            // fallback for older versions of Chrome and Safari
-            if (isFunction(/x/)) {
-                isFunction = function(value) {
-                    return typeof value === "function" && toString.call(value) === "[object Function]";
-                };
-            }
-            var isFunction;
-            __exports__.isFunction = isFunction;
-            var isArray = Array.isArray || function(value) {
-                return value && typeof value === "object" ? toString.call(value) === "[object Array]" : false;
-            };
-            __exports__.isArray = isArray;
-            function escapeExpression(string) {
-                // don't escape SafeStrings, since they're already safe
-                if (string instanceof SafeString) {
-                    return string.toString();
-                } else if (!string && string !== 0) {
-                    return "";
-                }
-                // Force a string conversion as this will be done by the append regardless and
-                // the regex test will do this transparently behind the scenes, causing issues if
-                // an object's to string has escaped characters in it.
-                string = "" + string;
-                if (!possible.test(string)) {
-                    return string;
-                }
-                return string.replace(badChars, escapeChar);
-            }
-            __exports__.escapeExpression = escapeExpression;
-            function isEmpty(value) {
-                if (!value && value !== 0) {
-                    return true;
-                } else if (isArray(value) && value.length === 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-            __exports__.isEmpty = isEmpty;
-            return __exports__;
-        }(__module4__);
-        // handlebars/exception.js
-        var __module5__ = function() {
-            "use strict";
-            var __exports__;
-            var errorProps = [ "description", "fileName", "lineNumber", "message", "name", "number", "stack" ];
-            function Exception(message, node) {
-                var line;
-                if (node && node.firstLine) {
-                    line = node.firstLine;
-                    message += " - " + line + ":" + node.firstColumn;
-                }
-                var tmp = Error.prototype.constructor.call(this, message);
-                // Unfortunately errors are not enumerable in Chrome (at least), so `for prop in tmp` doesn't work.
-                for (var idx = 0; idx < errorProps.length; idx++) {
-                    this[errorProps[idx]] = tmp[errorProps[idx]];
-                }
-                if (line) {
-                    this.lineNumber = line;
-                    this.column = node.firstColumn;
-                }
-            }
-            Exception.prototype = new Error();
-            __exports__ = Exception;
-            return __exports__;
-        }();
-        // handlebars/base.js
-        var __module2__ = function(__dependency1__, __dependency2__) {
-            "use strict";
-            var __exports__ = {};
-            var Utils = __dependency1__;
-            var Exception = __dependency2__;
-            var VERSION = "1.3.0";
-            __exports__.VERSION = VERSION;
-            var COMPILER_REVISION = 4;
-            __exports__.COMPILER_REVISION = COMPILER_REVISION;
-            var REVISION_CHANGES = {
-                1: "<= 1.0.rc.2",
-                // 1.0.rc.2 is actually rev2 but doesn't report it
-                2: "== 1.0.0-rc.3",
-                3: "== 1.0.0-rc.4",
-                4: ">= 1.0.0"
-            };
-            __exports__.REVISION_CHANGES = REVISION_CHANGES;
-            var isArray = Utils.isArray, isFunction = Utils.isFunction, toString = Utils.toString, objectType = "[object Object]";
-            function HandlebarsEnvironment(helpers, partials) {
-                this.helpers = helpers || {};
-                this.partials = partials || {};
-                registerDefaultHelpers(this);
-            }
-            __exports__.HandlebarsEnvironment = HandlebarsEnvironment;
-            HandlebarsEnvironment.prototype = {
-                constructor: HandlebarsEnvironment,
-                logger: logger,
-                log: log,
-                registerHelper: function(name, fn, inverse) {
-                    if (toString.call(name) === objectType) {
-                        if (inverse || fn) {
-                            throw new Exception("Arg not supported with multiple helpers");
-                        }
-                        Utils.extend(this.helpers, name);
-                    } else {
-                        if (inverse) {
-                            fn.not = inverse;
-                        }
-                        this.helpers[name] = fn;
-                    }
-                },
-                registerPartial: function(name, str) {
-                    if (toString.call(name) === objectType) {
-                        Utils.extend(this.partials, name);
-                    } else {
-                        this.partials[name] = str;
-                    }
-                }
-            };
-            function registerDefaultHelpers(instance) {
-                instance.registerHelper("helperMissing", function(arg) {
-                    if (arguments.length === 2) {
-                        return undefined;
-                    } else {
-                        throw new Exception("Missing helper: '" + arg + "'");
-                    }
-                });
-                instance.registerHelper("blockHelperMissing", function(context, options) {
-                    var inverse = options.inverse || function() {}, fn = options.fn;
-                    if (isFunction(context)) {
-                        context = context.call(this);
-                    }
-                    if (context === true) {
-                        return fn(this);
-                    } else if (context === false || context == null) {
-                        return inverse(this);
-                    } else if (isArray(context)) {
-                        if (context.length > 0) {
-                            return instance.helpers.each(context, options);
-                        } else {
-                            return inverse(this);
-                        }
-                    } else {
-                        return fn(context);
-                    }
-                });
-                instance.registerHelper("each", function(context, options) {
-                    var fn = options.fn, inverse = options.inverse;
-                    var i = 0, ret = "", data;
-                    if (isFunction(context)) {
-                        context = context.call(this);
-                    }
-                    if (options.data) {
-                        data = createFrame(options.data);
-                    }
-                    if (context && typeof context === "object") {
-                        if (isArray(context)) {
-                            for (var j = context.length; i < j; i++) {
-                                if (data) {
-                                    data.index = i;
-                                    data.first = i === 0;
-                                    data.last = i === context.length - 1;
-                                }
-                                ret = ret + fn(context[i], {
-                                    data: data
-                                });
-                            }
-                        } else {
-                            for (var key in context) {
-                                if (context.hasOwnProperty(key)) {
-                                    if (data) {
-                                        data.key = key;
-                                        data.index = i;
-                                        data.first = i === 0;
-                                    }
-                                    ret = ret + fn(context[key], {
-                                        data: data
-                                    });
-                                    i++;
-                                }
-                            }
-                        }
-                    }
-                    if (i === 0) {
-                        ret = inverse(this);
-                    }
-                    return ret;
-                });
-                instance.registerHelper("if", function(conditional, options) {
-                    if (isFunction(conditional)) {
-                        conditional = conditional.call(this);
-                    }
-                    // Default behavior is to render the positive path if the value is truthy and not empty.
-                    // The `includeZero` option may be set to treat the condtional as purely not empty based on the
-                    // behavior of isEmpty. Effectively this determines if 0 is handled by the positive path or negative.
-                    if (!options.hash.includeZero && !conditional || Utils.isEmpty(conditional)) {
-                        return options.inverse(this);
-                    } else {
-                        return options.fn(this);
-                    }
-                });
-                instance.registerHelper("unless", function(conditional, options) {
-                    return instance.helpers["if"].call(this, conditional, {
-                        fn: options.inverse,
-                        inverse: options.fn,
-                        hash: options.hash
-                    });
-                });
-                instance.registerHelper("with", function(context, options) {
-                    if (isFunction(context)) {
-                        context = context.call(this);
-                    }
-                    if (!Utils.isEmpty(context)) return options.fn(context);
-                });
-                instance.registerHelper("log", function(context, options) {
-                    var level = options.data && options.data.level != null ? parseInt(options.data.level, 10) : 1;
-                    instance.log(level, context);
-                });
-            }
-            var logger = {
-                methodMap: {
-                    0: "debug",
-                    1: "info",
-                    2: "warn",
-                    3: "error"
-                },
-                // State enum
-                DEBUG: 0,
-                INFO: 1,
-                WARN: 2,
-                ERROR: 3,
-                level: 3,
-                // can be overridden in the host environment
-                log: function(level, obj) {
-                    if (logger.level <= level) {
-                        var method = logger.methodMap[level];
-                        if (typeof console !== "undefined" && console[method]) {
-                            console[method].call(console, obj);
-                        }
-                    }
-                }
-            };
-            __exports__.logger = logger;
-            function log(level, obj) {
-                logger.log(level, obj);
-            }
-            __exports__.log = log;
-            var createFrame = function(object) {
-                var obj = {};
-                Utils.extend(obj, object);
-                return obj;
-            };
-            __exports__.createFrame = createFrame;
-            return __exports__;
-        }(__module3__, __module5__);
-        // handlebars/runtime.js
-        var __module6__ = function(__dependency1__, __dependency2__, __dependency3__) {
-            "use strict";
-            var __exports__ = {};
-            var Utils = __dependency1__;
-            var Exception = __dependency2__;
-            var COMPILER_REVISION = __dependency3__.COMPILER_REVISION;
-            var REVISION_CHANGES = __dependency3__.REVISION_CHANGES;
-            function checkRevision(compilerInfo) {
-                var compilerRevision = compilerInfo && compilerInfo[0] || 1, currentRevision = COMPILER_REVISION;
-                if (compilerRevision !== currentRevision) {
-                    if (compilerRevision < currentRevision) {
-                        var runtimeVersions = REVISION_CHANGES[currentRevision], compilerVersions = REVISION_CHANGES[compilerRevision];
-                        throw new Exception("Template was precompiled with an older version of Handlebars than the current runtime. " + "Please update your precompiler to a newer version (" + runtimeVersions + ") or downgrade your runtime to an older version (" + compilerVersions + ").");
-                    } else {
-                        // Use the embedded version info since the runtime doesn't know about this revision yet
-                        throw new Exception("Template was precompiled with a newer version of Handlebars than the current runtime. " + "Please update your runtime to a newer version (" + compilerInfo[1] + ").");
-                    }
-                }
-            }
-            __exports__.checkRevision = checkRevision;
-            // TODO: Remove this line and break up compilePartial
-            function template(templateSpec, env) {
-                if (!env) {
-                    throw new Exception("No environment passed to template");
-                }
-                // Note: Using env.VM references rather than local var references throughout this section to allow
-                // for external users to override these as psuedo-supported APIs.
-                var invokePartialWrapper = function(partial, name, context, helpers, partials, data) {
-                    var result = env.VM.invokePartial.apply(this, arguments);
-                    if (result != null) {
-                        return result;
-                    }
-                    if (env.compile) {
-                        var options = {
-                            helpers: helpers,
-                            partials: partials,
-                            data: data
-                        };
-                        partials[name] = env.compile(partial, {
-                            data: data !== undefined
-                        }, env);
-                        return partials[name](context, options);
-                    } else {
-                        throw new Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
-                    }
-                };
-                // Just add water
-                var container = {
-                    escapeExpression: Utils.escapeExpression,
-                    invokePartial: invokePartialWrapper,
-                    programs: [],
-                    program: function(i, fn, data) {
-                        var programWrapper = this.programs[i];
-                        if (data) {
-                            programWrapper = program(i, fn, data);
-                        } else if (!programWrapper) {
-                            programWrapper = this.programs[i] = program(i, fn);
-                        }
-                        return programWrapper;
-                    },
-                    merge: function(param, common) {
-                        var ret = param || common;
-                        if (param && common && param !== common) {
-                            ret = {};
-                            Utils.extend(ret, common);
-                            Utils.extend(ret, param);
-                        }
-                        return ret;
-                    },
-                    programWithDepth: env.VM.programWithDepth,
-                    noop: env.VM.noop,
-                    compilerInfo: null
-                };
-                return function(context, options) {
-                    options = options || {};
-                    var namespace = options.partial ? options : env, helpers, partials;
-                    if (!options.partial) {
-                        helpers = options.helpers;
-                        partials = options.partials;
-                    }
-                    var result = templateSpec.call(container, namespace, context, helpers, partials, options.data);
-                    if (!options.partial) {
-                        env.VM.checkRevision(container.compilerInfo);
-                    }
-                    return result;
-                };
-            }
-            __exports__.template = template;
-            function programWithDepth(i, fn, data) {
-                var args = Array.prototype.slice.call(arguments, 3);
-                var prog = function(context, options) {
-                    options = options || {};
-                    return fn.apply(this, [ context, options.data || data ].concat(args));
-                };
-                prog.program = i;
-                prog.depth = args.length;
-                return prog;
-            }
-            __exports__.programWithDepth = programWithDepth;
-            function program(i, fn, data) {
-                var prog = function(context, options) {
-                    options = options || {};
-                    return fn(context, options.data || data);
-                };
-                prog.program = i;
-                prog.depth = 0;
-                return prog;
-            }
-            __exports__.program = program;
-            function invokePartial(partial, name, context, helpers, partials, data) {
-                var options = {
-                    partial: true,
-                    helpers: helpers,
-                    partials: partials,
-                    data: data
-                };
-                if (partial === undefined) {
-                    throw new Exception("The partial " + name + " could not be found");
-                } else if (partial instanceof Function) {
-                    return partial(context, options);
-                }
-            }
-            __exports__.invokePartial = invokePartial;
-            function noop() {
-                return "";
-            }
-            __exports__.noop = noop;
-            return __exports__;
-        }(__module3__, __module5__, __module2__);
-        // handlebars.runtime.js
-        var __module1__ = function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__) {
-            "use strict";
-            var __exports__;
-            /*globals Handlebars: true */
-            var base = __dependency1__;
-            // Each of these augment the Handlebars object. No need to setup here.
-            // (This is done to easily share code between commonjs and browse envs)
-            var SafeString = __dependency2__;
-            var Exception = __dependency3__;
-            var Utils = __dependency4__;
-            var runtime = __dependency5__;
-            // For compatibility and usage outside of module systems, make the Handlebars object a namespace
-            var create = function() {
-                var hb = new base.HandlebarsEnvironment();
-                Utils.extend(hb, base);
-                hb.SafeString = SafeString;
-                hb.Exception = Exception;
-                hb.Utils = Utils;
-                hb.VM = runtime;
-                hb.template = function(spec) {
-                    return runtime.template(spec, hb);
-                };
-                return hb;
-            };
-            var Handlebars = create();
-            Handlebars.create = create;
-            __exports__ = Handlebars;
-            return __exports__;
-        }(__module2__, __module4__, __module5__, __module3__, __module6__);
-        // handlebars/compiler/ast.js
-        var __module7__ = function(__dependency1__) {
-            "use strict";
-            var __exports__;
-            var Exception = __dependency1__;
-            function LocationInfo(locInfo) {
-                locInfo = locInfo || {};
-                this.firstLine = locInfo.first_line;
-                this.firstColumn = locInfo.first_column;
-                this.lastColumn = locInfo.last_column;
-                this.lastLine = locInfo.last_line;
-            }
-            var AST = {
-                ProgramNode: function(statements, inverseStrip, inverse, locInfo) {
-                    var inverseLocationInfo, firstInverseNode;
-                    if (arguments.length === 3) {
-                        locInfo = inverse;
-                        inverse = null;
-                    } else if (arguments.length === 2) {
-                        locInfo = inverseStrip;
-                        inverseStrip = null;
-                    }
-                    LocationInfo.call(this, locInfo);
-                    this.type = "program";
-                    this.statements = statements;
-                    this.strip = {};
-                    if (inverse) {
-                        firstInverseNode = inverse[0];
-                        if (firstInverseNode) {
-                            inverseLocationInfo = {
-                                first_line: firstInverseNode.firstLine,
-                                last_line: firstInverseNode.lastLine,
-                                last_column: firstInverseNode.lastColumn,
-                                first_column: firstInverseNode.firstColumn
-                            };
-                            this.inverse = new AST.ProgramNode(inverse, inverseStrip, inverseLocationInfo);
-                        } else {
-                            this.inverse = new AST.ProgramNode(inverse, inverseStrip);
-                        }
-                        this.strip.right = inverseStrip.left;
-                    } else if (inverseStrip) {
-                        this.strip.left = inverseStrip.right;
-                    }
-                },
-                MustacheNode: function(rawParams, hash, open, strip, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "mustache";
-                    this.strip = strip;
-                    // Open may be a string parsed from the parser or a passed boolean flag
-                    if (open != null && open.charAt) {
-                        // Must use charAt to support IE pre-10
-                        var escapeFlag = open.charAt(3) || open.charAt(2);
-                        this.escaped = escapeFlag !== "{" && escapeFlag !== "&";
-                    } else {
-                        this.escaped = !!open;
-                    }
-                    if (rawParams instanceof AST.SexprNode) {
-                        this.sexpr = rawParams;
-                    } else {
-                        // Support old AST API
-                        this.sexpr = new AST.SexprNode(rawParams, hash);
-                    }
-                    this.sexpr.isRoot = true;
-                    // Support old AST API that stored this info in MustacheNode
-                    this.id = this.sexpr.id;
-                    this.params = this.sexpr.params;
-                    this.hash = this.sexpr.hash;
-                    this.eligibleHelper = this.sexpr.eligibleHelper;
-                    this.isHelper = this.sexpr.isHelper;
-                },
-                SexprNode: function(rawParams, hash, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "sexpr";
-                    this.hash = hash;
-                    var id = this.id = rawParams[0];
-                    var params = this.params = rawParams.slice(1);
-                    // a mustache is an eligible helper if:
-                    // * its id is simple (a single part, not `this` or `..`)
-                    var eligibleHelper = this.eligibleHelper = id.isSimple;
-                    // a mustache is definitely a helper if:
-                    // * it is an eligible helper, and
-                    // * it has at least one parameter or hash segment
-                    this.isHelper = eligibleHelper && (params.length || hash);
-                },
-                PartialNode: function(partialName, context, strip, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "partial";
-                    this.partialName = partialName;
-                    this.context = context;
-                    this.strip = strip;
-                },
-                BlockNode: function(mustache, program, inverse, close, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    if (mustache.sexpr.id.original !== close.path.original) {
-                        throw new Exception(mustache.sexpr.id.original + " doesn't match " + close.path.original, this);
-                    }
-                    this.type = "block";
-                    this.mustache = mustache;
-                    this.program = program;
-                    this.inverse = inverse;
-                    this.strip = {
-                        left: mustache.strip.left,
-                        right: close.strip.right
-                    };
-                    (program || inverse).strip.left = mustache.strip.right;
-                    (inverse || program).strip.right = close.strip.left;
-                    if (inverse && !program) {
-                        this.isInverse = true;
-                    }
-                },
-                ContentNode: function(string, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "content";
-                    this.string = string;
-                },
-                HashNode: function(pairs, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "hash";
-                    this.pairs = pairs;
-                },
-                IdNode: function(parts, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "ID";
-                    var original = "", dig = [], depth = 0;
-                    for (var i = 0, l = parts.length; i < l; i++) {
-                        var part = parts[i].part;
-                        original += (parts[i].separator || "") + part;
-                        if (part === ".." || part === "." || part === "this") {
-                            if (dig.length > 0) {
-                                throw new Exception("Invalid path: " + original, this);
-                            } else if (part === "..") {
-                                depth++;
-                            } else {
-                                this.isScoped = true;
-                            }
-                        } else {
-                            dig.push(part);
-                        }
-                    }
-                    this.original = original;
-                    this.parts = dig;
-                    this.string = dig.join(".");
-                    this.depth = depth;
-                    // an ID is simple if it only has one part, and that part is not
-                    // `..` or `this`.
-                    this.isSimple = parts.length === 1 && !this.isScoped && depth === 0;
-                    this.stringModeValue = this.string;
-                },
-                PartialNameNode: function(name, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "PARTIAL_NAME";
-                    this.name = name.original;
-                },
-                DataNode: function(id, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "DATA";
-                    this.id = id;
-                },
-                StringNode: function(string, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "STRING";
-                    this.original = this.string = this.stringModeValue = string;
-                },
-                IntegerNode: function(integer, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "INTEGER";
-                    this.original = this.integer = integer;
-                    this.stringModeValue = Number(integer);
-                },
-                BooleanNode: function(bool, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "BOOLEAN";
-                    this.bool = bool;
-                    this.stringModeValue = bool === "true";
-                },
-                CommentNode: function(comment, locInfo) {
-                    LocationInfo.call(this, locInfo);
-                    this.type = "comment";
-                    this.comment = comment;
-                }
-            };
-            // Must be exported as an object rather than the root of the module as the jison lexer
-            // most modify the object to operate properly.
-            __exports__ = AST;
-            return __exports__;
-        }(__module5__);
-        // handlebars/compiler/parser.js
-        var __module9__ = function() {
-            "use strict";
-            var __exports__;
-            /* jshint ignore:start */
-            /* Jison generated parser */
-            var handlebars = function() {
-                var parser = {
-                    trace: function trace() {},
-                    yy: {},
-                    symbols_: {
-                        error: 2,
-                        root: 3,
-                        statements: 4,
-                        EOF: 5,
-                        program: 6,
-                        simpleInverse: 7,
-                        statement: 8,
-                        openInverse: 9,
-                        closeBlock: 10,
-                        openBlock: 11,
-                        mustache: 12,
-                        partial: 13,
-                        CONTENT: 14,
-                        COMMENT: 15,
-                        OPEN_BLOCK: 16,
-                        sexpr: 17,
-                        CLOSE: 18,
-                        OPEN_INVERSE: 19,
-                        OPEN_ENDBLOCK: 20,
-                        path: 21,
-                        OPEN: 22,
-                        OPEN_UNESCAPED: 23,
-                        CLOSE_UNESCAPED: 24,
-                        OPEN_PARTIAL: 25,
-                        partialName: 26,
-                        partial_option0: 27,
-                        sexpr_repetition0: 28,
-                        sexpr_option0: 29,
-                        dataName: 30,
-                        param: 31,
-                        STRING: 32,
-                        INTEGER: 33,
-                        BOOLEAN: 34,
-                        OPEN_SEXPR: 35,
-                        CLOSE_SEXPR: 36,
-                        hash: 37,
-                        hash_repetition_plus0: 38,
-                        hashSegment: 39,
-                        ID: 40,
-                        EQUALS: 41,
-                        DATA: 42,
-                        pathSegments: 43,
-                        SEP: 44,
-                        $accept: 0,
-                        $end: 1
-                    },
-                    terminals_: {
-                        2: "error",
-                        5: "EOF",
-                        14: "CONTENT",
-                        15: "COMMENT",
-                        16: "OPEN_BLOCK",
-                        18: "CLOSE",
-                        19: "OPEN_INVERSE",
-                        20: "OPEN_ENDBLOCK",
-                        22: "OPEN",
-                        23: "OPEN_UNESCAPED",
-                        24: "CLOSE_UNESCAPED",
-                        25: "OPEN_PARTIAL",
-                        32: "STRING",
-                        33: "INTEGER",
-                        34: "BOOLEAN",
-                        35: "OPEN_SEXPR",
-                        36: "CLOSE_SEXPR",
-                        40: "ID",
-                        41: "EQUALS",
-                        42: "DATA",
-                        44: "SEP"
-                    },
-                    productions_: [ 0, [ 3, 2 ], [ 3, 1 ], [ 6, 2 ], [ 6, 3 ], [ 6, 2 ], [ 6, 1 ], [ 6, 1 ], [ 6, 0 ], [ 4, 1 ], [ 4, 2 ], [ 8, 3 ], [ 8, 3 ], [ 8, 1 ], [ 8, 1 ], [ 8, 1 ], [ 8, 1 ], [ 11, 3 ], [ 9, 3 ], [ 10, 3 ], [ 12, 3 ], [ 12, 3 ], [ 13, 4 ], [ 7, 2 ], [ 17, 3 ], [ 17, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 1 ], [ 31, 3 ], [ 37, 1 ], [ 39, 3 ], [ 26, 1 ], [ 26, 1 ], [ 26, 1 ], [ 30, 2 ], [ 21, 1 ], [ 43, 3 ], [ 43, 1 ], [ 27, 0 ], [ 27, 1 ], [ 28, 0 ], [ 28, 2 ], [ 29, 0 ], [ 29, 1 ], [ 38, 1 ], [ 38, 2 ] ],
-                    performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate, $$, _$) {
-                        var $0 = $$.length - 1;
-                        switch (yystate) {
-                          case 1:
-                            return new yy.ProgramNode($$[$0 - 1], this._$);
-                            break;
-
-                          case 2:
-                            return new yy.ProgramNode([], this._$);
-                            break;
-
-                          case 3:
-                            this.$ = new yy.ProgramNode([], $$[$0 - 1], $$[$0], this._$);
-                            break;
-
-                          case 4:
-                            this.$ = new yy.ProgramNode($$[$0 - 2], $$[$0 - 1], $$[$0], this._$);
-                            break;
-
-                          case 5:
-                            this.$ = new yy.ProgramNode($$[$0 - 1], $$[$0], [], this._$);
-                            break;
-
-                          case 6:
-                            this.$ = new yy.ProgramNode($$[$0], this._$);
-                            break;
-
-                          case 7:
-                            this.$ = new yy.ProgramNode([], this._$);
-                            break;
-
-                          case 8:
-                            this.$ = new yy.ProgramNode([], this._$);
-                            break;
-
-                          case 9:
-                            this.$ = [ $$[$0] ];
-                            break;
-
-                          case 10:
-                            $$[$0 - 1].push($$[$0]);
-                            this.$ = $$[$0 - 1];
-                            break;
-
-                          case 11:
-                            this.$ = new yy.BlockNode($$[$0 - 2], $$[$0 - 1].inverse, $$[$0 - 1], $$[$0], this._$);
-                            break;
-
-                          case 12:
-                            this.$ = new yy.BlockNode($$[$0 - 2], $$[$0 - 1], $$[$0 - 1].inverse, $$[$0], this._$);
-                            break;
-
-                          case 13:
-                            this.$ = $$[$0];
-                            break;
-
-                          case 14:
-                            this.$ = $$[$0];
-                            break;
-
-                          case 15:
-                            this.$ = new yy.ContentNode($$[$0], this._$);
-                            break;
-
-                          case 16:
-                            this.$ = new yy.CommentNode($$[$0], this._$);
-                            break;
-
-                          case 17:
-                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
-                            break;
-
-                          case 18:
-                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
-                            break;
-
-                          case 19:
-                            this.$ = {
-                                path: $$[$0 - 1],
-                                strip: stripFlags($$[$0 - 2], $$[$0])
-                            };
-                            break;
-
-                          case 20:
-                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
-                            break;
-
-                          case 21:
-                            this.$ = new yy.MustacheNode($$[$0 - 1], null, $$[$0 - 2], stripFlags($$[$0 - 2], $$[$0]), this._$);
-                            break;
-
-                          case 22:
-                            this.$ = new yy.PartialNode($$[$0 - 2], $$[$0 - 1], stripFlags($$[$0 - 3], $$[$0]), this._$);
-                            break;
-
-                          case 23:
-                            this.$ = stripFlags($$[$0 - 1], $$[$0]);
-                            break;
-
-                          case 24:
-                            this.$ = new yy.SexprNode([ $$[$0 - 2] ].concat($$[$0 - 1]), $$[$0], this._$);
-                            break;
-
-                          case 25:
-                            this.$ = new yy.SexprNode([ $$[$0] ], null, this._$);
-                            break;
-
-                          case 26:
-                            this.$ = $$[$0];
-                            break;
-
-                          case 27:
-                            this.$ = new yy.StringNode($$[$0], this._$);
-                            break;
-
-                          case 28:
-                            this.$ = new yy.IntegerNode($$[$0], this._$);
-                            break;
-
-                          case 29:
-                            this.$ = new yy.BooleanNode($$[$0], this._$);
-                            break;
-
-                          case 30:
-                            this.$ = $$[$0];
-                            break;
-
-                          case 31:
-                            $$[$0 - 1].isHelper = true;
-                            this.$ = $$[$0 - 1];
-                            break;
-
-                          case 32:
-                            this.$ = new yy.HashNode($$[$0], this._$);
-                            break;
-
-                          case 33:
-                            this.$ = [ $$[$0 - 2], $$[$0] ];
-                            break;
-
-                          case 34:
-                            this.$ = new yy.PartialNameNode($$[$0], this._$);
-                            break;
-
-                          case 35:
-                            this.$ = new yy.PartialNameNode(new yy.StringNode($$[$0], this._$), this._$);
-                            break;
-
-                          case 36:
-                            this.$ = new yy.PartialNameNode(new yy.IntegerNode($$[$0], this._$));
-                            break;
-
-                          case 37:
-                            this.$ = new yy.DataNode($$[$0], this._$);
-                            break;
-
-                          case 38:
-                            this.$ = new yy.IdNode($$[$0], this._$);
-                            break;
-
-                          case 39:
-                            $$[$0 - 2].push({
-                                part: $$[$0],
-                                separator: $$[$0 - 1]
-                            });
-                            this.$ = $$[$0 - 2];
-                            break;
-
-                          case 40:
-                            this.$ = [ {
-                                part: $$[$0]
-                            } ];
-                            break;
-
-                          case 43:
-                            this.$ = [];
-                            break;
-
-                          case 44:
-                            $$[$0 - 1].push($$[$0]);
-                            break;
-
-                          case 47:
-                            this.$ = [ $$[$0] ];
-                            break;
-
-                          case 48:
-                            $$[$0 - 1].push($$[$0]);
-                            break;
-                        }
-                    },
-                    table: [ {
-                        3: 1,
-                        4: 2,
-                        5: [ 1, 3 ],
-                        8: 4,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 11 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        1: [ 3 ]
-                    }, {
-                        5: [ 1, 16 ],
-                        8: 17,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 11 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        1: [ 2, 2 ]
-                    }, {
-                        5: [ 2, 9 ],
-                        14: [ 2, 9 ],
-                        15: [ 2, 9 ],
-                        16: [ 2, 9 ],
-                        19: [ 2, 9 ],
-                        20: [ 2, 9 ],
-                        22: [ 2, 9 ],
-                        23: [ 2, 9 ],
-                        25: [ 2, 9 ]
-                    }, {
-                        4: 20,
-                        6: 18,
-                        7: 19,
-                        8: 4,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 21 ],
-                        20: [ 2, 8 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        4: 20,
-                        6: 22,
-                        7: 19,
-                        8: 4,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 21 ],
-                        20: [ 2, 8 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        5: [ 2, 13 ],
-                        14: [ 2, 13 ],
-                        15: [ 2, 13 ],
-                        16: [ 2, 13 ],
-                        19: [ 2, 13 ],
-                        20: [ 2, 13 ],
-                        22: [ 2, 13 ],
-                        23: [ 2, 13 ],
-                        25: [ 2, 13 ]
-                    }, {
-                        5: [ 2, 14 ],
-                        14: [ 2, 14 ],
-                        15: [ 2, 14 ],
-                        16: [ 2, 14 ],
-                        19: [ 2, 14 ],
-                        20: [ 2, 14 ],
-                        22: [ 2, 14 ],
-                        23: [ 2, 14 ],
-                        25: [ 2, 14 ]
-                    }, {
-                        5: [ 2, 15 ],
-                        14: [ 2, 15 ],
-                        15: [ 2, 15 ],
-                        16: [ 2, 15 ],
-                        19: [ 2, 15 ],
-                        20: [ 2, 15 ],
-                        22: [ 2, 15 ],
-                        23: [ 2, 15 ],
-                        25: [ 2, 15 ]
-                    }, {
-                        5: [ 2, 16 ],
-                        14: [ 2, 16 ],
-                        15: [ 2, 16 ],
-                        16: [ 2, 16 ],
-                        19: [ 2, 16 ],
-                        20: [ 2, 16 ],
-                        22: [ 2, 16 ],
-                        23: [ 2, 16 ],
-                        25: [ 2, 16 ]
-                    }, {
-                        17: 23,
-                        21: 24,
-                        30: 25,
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        17: 29,
-                        21: 24,
-                        30: 25,
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        17: 30,
-                        21: 24,
-                        30: 25,
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        17: 31,
-                        21: 24,
-                        30: 25,
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        21: 33,
-                        26: 32,
-                        32: [ 1, 34 ],
-                        33: [ 1, 35 ],
-                        40: [ 1, 28 ],
-                        43: 26
-                    }, {
-                        1: [ 2, 1 ]
-                    }, {
-                        5: [ 2, 10 ],
-                        14: [ 2, 10 ],
-                        15: [ 2, 10 ],
-                        16: [ 2, 10 ],
-                        19: [ 2, 10 ],
-                        20: [ 2, 10 ],
-                        22: [ 2, 10 ],
-                        23: [ 2, 10 ],
-                        25: [ 2, 10 ]
-                    }, {
-                        10: 36,
-                        20: [ 1, 37 ]
-                    }, {
-                        4: 38,
-                        8: 4,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 11 ],
-                        20: [ 2, 7 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        7: 39,
-                        8: 17,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 21 ],
-                        20: [ 2, 6 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        17: 23,
-                        18: [ 1, 40 ],
-                        21: 24,
-                        30: 25,
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        10: 41,
-                        20: [ 1, 37 ]
-                    }, {
-                        18: [ 1, 42 ]
-                    }, {
-                        18: [ 2, 43 ],
-                        24: [ 2, 43 ],
-                        28: 43,
-                        32: [ 2, 43 ],
-                        33: [ 2, 43 ],
-                        34: [ 2, 43 ],
-                        35: [ 2, 43 ],
-                        36: [ 2, 43 ],
-                        40: [ 2, 43 ],
-                        42: [ 2, 43 ]
-                    }, {
-                        18: [ 2, 25 ],
-                        24: [ 2, 25 ],
-                        36: [ 2, 25 ]
-                    }, {
-                        18: [ 2, 38 ],
-                        24: [ 2, 38 ],
-                        32: [ 2, 38 ],
-                        33: [ 2, 38 ],
-                        34: [ 2, 38 ],
-                        35: [ 2, 38 ],
-                        36: [ 2, 38 ],
-                        40: [ 2, 38 ],
-                        42: [ 2, 38 ],
-                        44: [ 1, 44 ]
-                    }, {
-                        21: 45,
-                        40: [ 1, 28 ],
-                        43: 26
-                    }, {
-                        18: [ 2, 40 ],
-                        24: [ 2, 40 ],
-                        32: [ 2, 40 ],
-                        33: [ 2, 40 ],
-                        34: [ 2, 40 ],
-                        35: [ 2, 40 ],
-                        36: [ 2, 40 ],
-                        40: [ 2, 40 ],
-                        42: [ 2, 40 ],
-                        44: [ 2, 40 ]
-                    }, {
-                        18: [ 1, 46 ]
-                    }, {
-                        18: [ 1, 47 ]
-                    }, {
-                        24: [ 1, 48 ]
-                    }, {
-                        18: [ 2, 41 ],
-                        21: 50,
-                        27: 49,
-                        40: [ 1, 28 ],
-                        43: 26
-                    }, {
-                        18: [ 2, 34 ],
-                        40: [ 2, 34 ]
-                    }, {
-                        18: [ 2, 35 ],
-                        40: [ 2, 35 ]
-                    }, {
-                        18: [ 2, 36 ],
-                        40: [ 2, 36 ]
-                    }, {
-                        5: [ 2, 11 ],
-                        14: [ 2, 11 ],
-                        15: [ 2, 11 ],
-                        16: [ 2, 11 ],
-                        19: [ 2, 11 ],
-                        20: [ 2, 11 ],
-                        22: [ 2, 11 ],
-                        23: [ 2, 11 ],
-                        25: [ 2, 11 ]
-                    }, {
-                        21: 51,
-                        40: [ 1, 28 ],
-                        43: 26
-                    }, {
-                        8: 17,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 11 ],
-                        20: [ 2, 3 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        4: 52,
-                        8: 4,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 11 ],
-                        20: [ 2, 5 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        14: [ 2, 23 ],
-                        15: [ 2, 23 ],
-                        16: [ 2, 23 ],
-                        19: [ 2, 23 ],
-                        20: [ 2, 23 ],
-                        22: [ 2, 23 ],
-                        23: [ 2, 23 ],
-                        25: [ 2, 23 ]
-                    }, {
-                        5: [ 2, 12 ],
-                        14: [ 2, 12 ],
-                        15: [ 2, 12 ],
-                        16: [ 2, 12 ],
-                        19: [ 2, 12 ],
-                        20: [ 2, 12 ],
-                        22: [ 2, 12 ],
-                        23: [ 2, 12 ],
-                        25: [ 2, 12 ]
-                    }, {
-                        14: [ 2, 18 ],
-                        15: [ 2, 18 ],
-                        16: [ 2, 18 ],
-                        19: [ 2, 18 ],
-                        20: [ 2, 18 ],
-                        22: [ 2, 18 ],
-                        23: [ 2, 18 ],
-                        25: [ 2, 18 ]
-                    }, {
-                        18: [ 2, 45 ],
-                        21: 56,
-                        24: [ 2, 45 ],
-                        29: 53,
-                        30: 60,
-                        31: 54,
-                        32: [ 1, 57 ],
-                        33: [ 1, 58 ],
-                        34: [ 1, 59 ],
-                        35: [ 1, 61 ],
-                        36: [ 2, 45 ],
-                        37: 55,
-                        38: 62,
-                        39: 63,
-                        40: [ 1, 64 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        40: [ 1, 65 ]
-                    }, {
-                        18: [ 2, 37 ],
-                        24: [ 2, 37 ],
-                        32: [ 2, 37 ],
-                        33: [ 2, 37 ],
-                        34: [ 2, 37 ],
-                        35: [ 2, 37 ],
-                        36: [ 2, 37 ],
-                        40: [ 2, 37 ],
-                        42: [ 2, 37 ]
-                    }, {
-                        14: [ 2, 17 ],
-                        15: [ 2, 17 ],
-                        16: [ 2, 17 ],
-                        19: [ 2, 17 ],
-                        20: [ 2, 17 ],
-                        22: [ 2, 17 ],
-                        23: [ 2, 17 ],
-                        25: [ 2, 17 ]
-                    }, {
-                        5: [ 2, 20 ],
-                        14: [ 2, 20 ],
-                        15: [ 2, 20 ],
-                        16: [ 2, 20 ],
-                        19: [ 2, 20 ],
-                        20: [ 2, 20 ],
-                        22: [ 2, 20 ],
-                        23: [ 2, 20 ],
-                        25: [ 2, 20 ]
-                    }, {
-                        5: [ 2, 21 ],
-                        14: [ 2, 21 ],
-                        15: [ 2, 21 ],
-                        16: [ 2, 21 ],
-                        19: [ 2, 21 ],
-                        20: [ 2, 21 ],
-                        22: [ 2, 21 ],
-                        23: [ 2, 21 ],
-                        25: [ 2, 21 ]
-                    }, {
-                        18: [ 1, 66 ]
-                    }, {
-                        18: [ 2, 42 ]
-                    }, {
-                        18: [ 1, 67 ]
-                    }, {
-                        8: 17,
-                        9: 5,
-                        11: 6,
-                        12: 7,
-                        13: 8,
-                        14: [ 1, 9 ],
-                        15: [ 1, 10 ],
-                        16: [ 1, 12 ],
-                        19: [ 1, 11 ],
-                        20: [ 2, 4 ],
-                        22: [ 1, 13 ],
-                        23: [ 1, 14 ],
-                        25: [ 1, 15 ]
-                    }, {
-                        18: [ 2, 24 ],
-                        24: [ 2, 24 ],
-                        36: [ 2, 24 ]
-                    }, {
-                        18: [ 2, 44 ],
-                        24: [ 2, 44 ],
-                        32: [ 2, 44 ],
-                        33: [ 2, 44 ],
-                        34: [ 2, 44 ],
-                        35: [ 2, 44 ],
-                        36: [ 2, 44 ],
-                        40: [ 2, 44 ],
-                        42: [ 2, 44 ]
-                    }, {
-                        18: [ 2, 46 ],
-                        24: [ 2, 46 ],
-                        36: [ 2, 46 ]
-                    }, {
-                        18: [ 2, 26 ],
-                        24: [ 2, 26 ],
-                        32: [ 2, 26 ],
-                        33: [ 2, 26 ],
-                        34: [ 2, 26 ],
-                        35: [ 2, 26 ],
-                        36: [ 2, 26 ],
-                        40: [ 2, 26 ],
-                        42: [ 2, 26 ]
-                    }, {
-                        18: [ 2, 27 ],
-                        24: [ 2, 27 ],
-                        32: [ 2, 27 ],
-                        33: [ 2, 27 ],
-                        34: [ 2, 27 ],
-                        35: [ 2, 27 ],
-                        36: [ 2, 27 ],
-                        40: [ 2, 27 ],
-                        42: [ 2, 27 ]
-                    }, {
-                        18: [ 2, 28 ],
-                        24: [ 2, 28 ],
-                        32: [ 2, 28 ],
-                        33: [ 2, 28 ],
-                        34: [ 2, 28 ],
-                        35: [ 2, 28 ],
-                        36: [ 2, 28 ],
-                        40: [ 2, 28 ],
-                        42: [ 2, 28 ]
-                    }, {
-                        18: [ 2, 29 ],
-                        24: [ 2, 29 ],
-                        32: [ 2, 29 ],
-                        33: [ 2, 29 ],
-                        34: [ 2, 29 ],
-                        35: [ 2, 29 ],
-                        36: [ 2, 29 ],
-                        40: [ 2, 29 ],
-                        42: [ 2, 29 ]
-                    }, {
-                        18: [ 2, 30 ],
-                        24: [ 2, 30 ],
-                        32: [ 2, 30 ],
-                        33: [ 2, 30 ],
-                        34: [ 2, 30 ],
-                        35: [ 2, 30 ],
-                        36: [ 2, 30 ],
-                        40: [ 2, 30 ],
-                        42: [ 2, 30 ]
-                    }, {
-                        17: 68,
-                        21: 24,
-                        30: 25,
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        18: [ 2, 32 ],
-                        24: [ 2, 32 ],
-                        36: [ 2, 32 ],
-                        39: 69,
-                        40: [ 1, 70 ]
-                    }, {
-                        18: [ 2, 47 ],
-                        24: [ 2, 47 ],
-                        36: [ 2, 47 ],
-                        40: [ 2, 47 ]
-                    }, {
-                        18: [ 2, 40 ],
-                        24: [ 2, 40 ],
-                        32: [ 2, 40 ],
-                        33: [ 2, 40 ],
-                        34: [ 2, 40 ],
-                        35: [ 2, 40 ],
-                        36: [ 2, 40 ],
-                        40: [ 2, 40 ],
-                        41: [ 1, 71 ],
-                        42: [ 2, 40 ],
-                        44: [ 2, 40 ]
-                    }, {
-                        18: [ 2, 39 ],
-                        24: [ 2, 39 ],
-                        32: [ 2, 39 ],
-                        33: [ 2, 39 ],
-                        34: [ 2, 39 ],
-                        35: [ 2, 39 ],
-                        36: [ 2, 39 ],
-                        40: [ 2, 39 ],
-                        42: [ 2, 39 ],
-                        44: [ 2, 39 ]
-                    }, {
-                        5: [ 2, 22 ],
-                        14: [ 2, 22 ],
-                        15: [ 2, 22 ],
-                        16: [ 2, 22 ],
-                        19: [ 2, 22 ],
-                        20: [ 2, 22 ],
-                        22: [ 2, 22 ],
-                        23: [ 2, 22 ],
-                        25: [ 2, 22 ]
-                    }, {
-                        5: [ 2, 19 ],
-                        14: [ 2, 19 ],
-                        15: [ 2, 19 ],
-                        16: [ 2, 19 ],
-                        19: [ 2, 19 ],
-                        20: [ 2, 19 ],
-                        22: [ 2, 19 ],
-                        23: [ 2, 19 ],
-                        25: [ 2, 19 ]
-                    }, {
-                        36: [ 1, 72 ]
-                    }, {
-                        18: [ 2, 48 ],
-                        24: [ 2, 48 ],
-                        36: [ 2, 48 ],
-                        40: [ 2, 48 ]
-                    }, {
-                        41: [ 1, 71 ]
-                    }, {
-                        21: 56,
-                        30: 60,
-                        31: 73,
-                        32: [ 1, 57 ],
-                        33: [ 1, 58 ],
-                        34: [ 1, 59 ],
-                        35: [ 1, 61 ],
-                        40: [ 1, 28 ],
-                        42: [ 1, 27 ],
-                        43: 26
-                    }, {
-                        18: [ 2, 31 ],
-                        24: [ 2, 31 ],
-                        32: [ 2, 31 ],
-                        33: [ 2, 31 ],
-                        34: [ 2, 31 ],
-                        35: [ 2, 31 ],
-                        36: [ 2, 31 ],
-                        40: [ 2, 31 ],
-                        42: [ 2, 31 ]
-                    }, {
-                        18: [ 2, 33 ],
-                        24: [ 2, 33 ],
-                        36: [ 2, 33 ],
-                        40: [ 2, 33 ]
-                    } ],
-                    defaultActions: {
-                        3: [ 2, 2 ],
-                        16: [ 2, 1 ],
-                        50: [ 2, 42 ]
-                    },
-                    parseError: function parseError(str, hash) {
-                        throw new Error(str);
-                    },
-                    parse: function parse(input) {
-                        var self = this, stack = [ 0 ], vstack = [ null ], lstack = [], table = this.table, yytext = "", yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
-                        this.lexer.setInput(input);
-                        this.lexer.yy = this.yy;
-                        this.yy.lexer = this.lexer;
-                        this.yy.parser = this;
-                        if (typeof this.lexer.yylloc == "undefined") this.lexer.yylloc = {};
-                        var yyloc = this.lexer.yylloc;
-                        lstack.push(yyloc);
-                        var ranges = this.lexer.options && this.lexer.options.ranges;
-                        if (typeof this.yy.parseError === "function") this.parseError = this.yy.parseError;
-                        function popStack(n) {
-                            stack.length = stack.length - 2 * n;
-                            vstack.length = vstack.length - n;
-                            lstack.length = lstack.length - n;
-                        }
-                        function lex() {
-                            var token;
-                            token = self.lexer.lex() || 1;
-                            if (typeof token !== "number") {
-                                token = self.symbols_[token] || token;
-                            }
-                            return token;
-                        }
-                        var symbol, preErrorSymbol, state, action, a, r, yyval = {}, p, len, newState, expected;
-                        while (true) {
-                            state = stack[stack.length - 1];
-                            if (this.defaultActions[state]) {
-                                action = this.defaultActions[state];
-                            } else {
-                                if (symbol === null || typeof symbol == "undefined") {
-                                    symbol = lex();
-                                }
-                                action = table[state] && table[state][symbol];
-                            }
-                            if (typeof action === "undefined" || !action.length || !action[0]) {
-                                var errStr = "";
-                                if (!recovering) {
-                                    expected = [];
-                                    for (p in table[state]) if (this.terminals_[p] && p > 2) {
-                                        expected.push("'" + this.terminals_[p] + "'");
-                                    }
-                                    if (this.lexer.showPosition) {
-                                        errStr = "Parse error on line " + (yylineno + 1) + ":\n" + this.lexer.showPosition() + "\nExpecting " + expected.join(", ") + ", got '" + (this.terminals_[symbol] || symbol) + "'";
-                                    } else {
-                                        errStr = "Parse error on line " + (yylineno + 1) + ": Unexpected " + (symbol == 1 ? "end of input" : "'" + (this.terminals_[symbol] || symbol) + "'");
-                                    }
-                                    this.parseError(errStr, {
-                                        text: this.lexer.match,
-                                        token: this.terminals_[symbol] || symbol,
-                                        line: this.lexer.yylineno,
-                                        loc: yyloc,
-                                        expected: expected
-                                    });
-                                }
-                            }
-                            if (action[0] instanceof Array && action.length > 1) {
-                                throw new Error("Parse Error: multiple actions possible at state: " + state + ", token: " + symbol);
-                            }
-                            switch (action[0]) {
-                              case 1:
-                                stack.push(symbol);
-                                vstack.push(this.lexer.yytext);
-                                lstack.push(this.lexer.yylloc);
-                                stack.push(action[1]);
-                                symbol = null;
-                                if (!preErrorSymbol) {
-                                    yyleng = this.lexer.yyleng;
-                                    yytext = this.lexer.yytext;
-                                    yylineno = this.lexer.yylineno;
-                                    yyloc = this.lexer.yylloc;
-                                    if (recovering > 0) recovering--;
-                                } else {
-                                    symbol = preErrorSymbol;
-                                    preErrorSymbol = null;
-                                }
-                                break;
-
-                              case 2:
-                                len = this.productions_[action[1]][1];
-                                yyval.$ = vstack[vstack.length - len];
-                                yyval._$ = {
-                                    first_line: lstack[lstack.length - (len || 1)].first_line,
-                                    last_line: lstack[lstack.length - 1].last_line,
-                                    first_column: lstack[lstack.length - (len || 1)].first_column,
-                                    last_column: lstack[lstack.length - 1].last_column
-                                };
-                                if (ranges) {
-                                    yyval._$.range = [ lstack[lstack.length - (len || 1)].range[0], lstack[lstack.length - 1].range[1] ];
-                                }
-                                r = this.performAction.call(yyval, yytext, yyleng, yylineno, this.yy, action[1], vstack, lstack);
-                                if (typeof r !== "undefined") {
-                                    return r;
-                                }
-                                if (len) {
-                                    stack = stack.slice(0, -1 * len * 2);
-                                    vstack = vstack.slice(0, -1 * len);
-                                    lstack = lstack.slice(0, -1 * len);
-                                }
-                                stack.push(this.productions_[action[1]][0]);
-                                vstack.push(yyval.$);
-                                lstack.push(yyval._$);
-                                newState = table[stack[stack.length - 2]][stack[stack.length - 1]];
-                                stack.push(newState);
-                                break;
-
-                              case 3:
-                                return true;
-                            }
-                        }
-                        return true;
-                    }
-                };
-                function stripFlags(open, close) {
-                    return {
-                        left: open.charAt(2) === "~",
-                        right: close.charAt(0) === "~" || close.charAt(1) === "~"
-                    };
-                }
-                /* Jison generated lexer */
-                var lexer = function() {
-                    var lexer = {
-                        EOF: 1,
-                        parseError: function parseError(str, hash) {
-                            if (this.yy.parser) {
-                                this.yy.parser.parseError(str, hash);
-                            } else {
-                                throw new Error(str);
-                            }
-                        },
-                        setInput: function(input) {
-                            this._input = input;
-                            this._more = this._less = this.done = false;
-                            this.yylineno = this.yyleng = 0;
-                            this.yytext = this.matched = this.match = "";
-                            this.conditionStack = [ "INITIAL" ];
-                            this.yylloc = {
-                                first_line: 1,
-                                first_column: 0,
-                                last_line: 1,
-                                last_column: 0
-                            };
-                            if (this.options.ranges) this.yylloc.range = [ 0, 0 ];
-                            this.offset = 0;
-                            return this;
-                        },
-                        input: function() {
-                            var ch = this._input[0];
-                            this.yytext += ch;
-                            this.yyleng++;
-                            this.offset++;
-                            this.match += ch;
-                            this.matched += ch;
-                            var lines = ch.match(/(?:\r\n?|\n).*/g);
-                            if (lines) {
-                                this.yylineno++;
-                                this.yylloc.last_line++;
-                            } else {
-                                this.yylloc.last_column++;
-                            }
-                            if (this.options.ranges) this.yylloc.range[1]++;
-                            this._input = this._input.slice(1);
-                            return ch;
-                        },
-                        unput: function(ch) {
-                            var len = ch.length;
-                            var lines = ch.split(/(?:\r\n?|\n)/g);
-                            this._input = ch + this._input;
-                            this.yytext = this.yytext.substr(0, this.yytext.length - len - 1);
-                            //this.yyleng -= len;
-                            this.offset -= len;
-                            var oldLines = this.match.split(/(?:\r\n?|\n)/g);
-                            this.match = this.match.substr(0, this.match.length - 1);
-                            this.matched = this.matched.substr(0, this.matched.length - 1);
-                            if (lines.length - 1) this.yylineno -= lines.length - 1;
-                            var r = this.yylloc.range;
-                            this.yylloc = {
-                                first_line: this.yylloc.first_line,
-                                last_line: this.yylineno + 1,
-                                first_column: this.yylloc.first_column,
-                                last_column: lines ? (lines.length === oldLines.length ? this.yylloc.first_column : 0) + oldLines[oldLines.length - lines.length].length - lines[0].length : this.yylloc.first_column - len
-                            };
-                            if (this.options.ranges) {
-                                this.yylloc.range = [ r[0], r[0] + this.yyleng - len ];
-                            }
-                            return this;
-                        },
-                        more: function() {
-                            this._more = true;
-                            return this;
-                        },
-                        less: function(n) {
-                            this.unput(this.match.slice(n));
-                        },
-                        pastInput: function() {
-                            var past = this.matched.substr(0, this.matched.length - this.match.length);
-                            return (past.length > 20 ? "..." : "") + past.substr(-20).replace(/\n/g, "");
-                        },
-                        upcomingInput: function() {
-                            var next = this.match;
-                            if (next.length < 20) {
-                                next += this._input.substr(0, 20 - next.length);
-                            }
-                            return (next.substr(0, 20) + (next.length > 20 ? "..." : "")).replace(/\n/g, "");
-                        },
-                        showPosition: function() {
-                            var pre = this.pastInput();
-                            var c = new Array(pre.length + 1).join("-");
-                            return pre + this.upcomingInput() + "\n" + c + "^";
-                        },
-                        next: function() {
-                            if (this.done) {
-                                return this.EOF;
-                            }
-                            if (!this._input) this.done = true;
-                            var token, match, tempMatch, index, col, lines;
-                            if (!this._more) {
-                                this.yytext = "";
-                                this.match = "";
-                            }
-                            var rules = this._currentRules();
-                            for (var i = 0; i < rules.length; i++) {
-                                tempMatch = this._input.match(this.rules[rules[i]]);
-                                if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
-                                    match = tempMatch;
-                                    index = i;
-                                    if (!this.options.flex) break;
-                                }
-                            }
-                            if (match) {
-                                lines = match[0].match(/(?:\r\n?|\n).*/g);
-                                if (lines) this.yylineno += lines.length;
-                                this.yylloc = {
-                                    first_line: this.yylloc.last_line,
-                                    last_line: this.yylineno + 1,
-                                    first_column: this.yylloc.last_column,
-                                    last_column: lines ? lines[lines.length - 1].length - lines[lines.length - 1].match(/\r?\n?/)[0].length : this.yylloc.last_column + match[0].length
-                                };
-                                this.yytext += match[0];
-                                this.match += match[0];
-                                this.matches = match;
-                                this.yyleng = this.yytext.length;
-                                if (this.options.ranges) {
-                                    this.yylloc.range = [ this.offset, this.offset += this.yyleng ];
-                                }
-                                this._more = false;
-                                this._input = this._input.slice(match[0].length);
-                                this.matched += match[0];
-                                token = this.performAction.call(this, this.yy, this, rules[index], this.conditionStack[this.conditionStack.length - 1]);
-                                if (this.done && this._input) this.done = false;
-                                if (token) return token; else return;
-                            }
-                            if (this._input === "") {
-                                return this.EOF;
-                            } else {
-                                return this.parseError("Lexical error on line " + (this.yylineno + 1) + ". Unrecognized text.\n" + this.showPosition(), {
-                                    text: "",
-                                    token: null,
-                                    line: this.yylineno
-                                });
-                            }
-                        },
-                        lex: function lex() {
-                            var r = this.next();
-                            if (typeof r !== "undefined") {
-                                return r;
-                            } else {
-                                return this.lex();
-                            }
-                        },
-                        begin: function begin(condition) {
-                            this.conditionStack.push(condition);
-                        },
-                        popState: function popState() {
-                            return this.conditionStack.pop();
-                        },
-                        _currentRules: function _currentRules() {
-                            return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
-                        },
-                        topState: function() {
-                            return this.conditionStack[this.conditionStack.length - 2];
-                        },
-                        pushState: function begin(condition) {
-                            this.begin(condition);
-                        }
-                    };
-                    lexer.options = {};
-                    lexer.performAction = function anonymous(yy, yy_, $avoiding_name_collisions, YY_START) {
-                        function strip(start, end) {
-                            return yy_.yytext = yy_.yytext.substr(start, yy_.yyleng - end);
-                        }
-                        var YYSTATE = YY_START;
-                        switch ($avoiding_name_collisions) {
-                          case 0:
-                            if (yy_.yytext.slice(-2) === "\\\\") {
-                                strip(0, 1);
-                                this.begin("mu");
-                            } else if (yy_.yytext.slice(-1) === "\\") {
-                                strip(0, 1);
-                                this.begin("emu");
-                            } else {
-                                this.begin("mu");
-                            }
-                            if (yy_.yytext) return 14;
-                            break;
-
-                          case 1:
-                            return 14;
-                            break;
-
-                          case 2:
-                            this.popState();
-                            return 14;
-                            break;
-
-                          case 3:
-                            strip(0, 4);
-                            this.popState();
-                            return 15;
-                            break;
-
-                          case 4:
-                            return 35;
-                            break;
-
-                          case 5:
-                            return 36;
-                            break;
-
-                          case 6:
-                            return 25;
-                            break;
-
-                          case 7:
-                            return 16;
-                            break;
-
-                          case 8:
-                            return 20;
-                            break;
-
-                          case 9:
-                            return 19;
-                            break;
-
-                          case 10:
-                            return 19;
-                            break;
-
-                          case 11:
-                            return 23;
-                            break;
-
-                          case 12:
-                            return 22;
-                            break;
-
-                          case 13:
-                            this.popState();
-                            this.begin("com");
-                            break;
-
-                          case 14:
-                            strip(3, 5);
-                            this.popState();
-                            return 15;
-                            break;
-
-                          case 15:
-                            return 22;
-                            break;
-
-                          case 16:
-                            return 41;
-                            break;
-
-                          case 17:
-                            return 40;
-                            break;
-
-                          case 18:
-                            return 40;
-                            break;
-
-                          case 19:
-                            return 44;
-                            break;
-
-                          case 20:
-                            // ignore whitespace
-                            break;
-
-                          case 21:
-                            this.popState();
-                            return 24;
-                            break;
-
-                          case 22:
-                            this.popState();
-                            return 18;
-                            break;
-
-                          case 23:
-                            yy_.yytext = strip(1, 2).replace(/\\"/g, '"');
-                            return 32;
-                            break;
-
-                          case 24:
-                            yy_.yytext = strip(1, 2).replace(/\\'/g, "'");
-                            return 32;
-                            break;
-
-                          case 25:
-                            return 42;
-                            break;
-
-                          case 26:
-                            return 34;
-                            break;
-
-                          case 27:
-                            return 34;
-                            break;
-
-                          case 28:
-                            return 33;
-                            break;
-
-                          case 29:
-                            return 40;
-                            break;
-
-                          case 30:
-                            yy_.yytext = strip(1, 2);
-                            return 40;
-                            break;
-
-                          case 31:
-                            return "INVALID";
-                            break;
-
-                          case 32:
-                            return 5;
-                            break;
-                        }
-                    };
-                    lexer.rules = [ /^(?:[^\x00]*?(?=(\{\{)))/, /^(?:[^\x00]+)/, /^(?:[^\x00]{2,}?(?=(\{\{|\\\{\{|\\\\\{\{|$)))/, /^(?:[\s\S]*?--\}\})/, /^(?:\()/, /^(?:\))/, /^(?:\{\{(~)?>)/, /^(?:\{\{(~)?#)/, /^(?:\{\{(~)?\/)/, /^(?:\{\{(~)?\^)/, /^(?:\{\{(~)?\s*else\b)/, /^(?:\{\{(~)?\{)/, /^(?:\{\{(~)?&)/, /^(?:\{\{!--)/, /^(?:\{\{![\s\S]*?\}\})/, /^(?:\{\{(~)?)/, /^(?:=)/, /^(?:\.\.)/, /^(?:\.(?=([=~}\s\/.)])))/, /^(?:[\/.])/, /^(?:\s+)/, /^(?:\}(~)?\}\})/, /^(?:(~)?\}\})/, /^(?:"(\\["]|[^"])*")/, /^(?:'(\\[']|[^'])*')/, /^(?:@)/, /^(?:true(?=([~}\s)])))/, /^(?:false(?=([~}\s)])))/, /^(?:-?[0-9]+(?=([~}\s)])))/, /^(?:([^\s!"#%-,\.\/;->@\[-\^`\{-~]+(?=([=~}\s\/.)]))))/, /^(?:\[[^\]]*\])/, /^(?:.)/, /^(?:$)/ ];
-                    lexer.conditions = {
-                        mu: {
-                            rules: [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 ],
-                            inclusive: false
-                        },
-                        emu: {
-                            rules: [ 2 ],
-                            inclusive: false
-                        },
-                        com: {
-                            rules: [ 3 ],
-                            inclusive: false
-                        },
-                        INITIAL: {
-                            rules: [ 0, 1, 32 ],
-                            inclusive: true
-                        }
-                    };
-                    return lexer;
-                }();
-                parser.lexer = lexer;
-                function Parser() {
-                    this.yy = {};
-                }
-                Parser.prototype = parser;
-                parser.Parser = Parser;
-                return new Parser();
-            }();
-            __exports__ = handlebars;
-            /* jshint ignore:end */
-            return __exports__;
-        }();
-        // handlebars/compiler/base.js
-        var __module8__ = function(__dependency1__, __dependency2__) {
-            "use strict";
-            var __exports__ = {};
-            var parser = __dependency1__;
-            var AST = __dependency2__;
-            __exports__.parser = parser;
-            function parse(input) {
-                // Just return if an already-compile AST was passed in.
-                if (input.constructor === AST.ProgramNode) {
-                    return input;
-                }
-                parser.yy = AST;
-                return parser.parse(input);
-            }
-            __exports__.parse = parse;
-            return __exports__;
-        }(__module9__, __module7__);
-        // handlebars/compiler/compiler.js
-        var __module10__ = function(__dependency1__) {
-            "use strict";
-            var __exports__ = {};
-            var Exception = __dependency1__;
-            function Compiler() {}
-            __exports__.Compiler = Compiler;
-            // the foundHelper register will disambiguate helper lookup from finding a
-            // function in a context. This is necessary for mustache compatibility, which
-            // requires that context functions in blocks are evaluated by blockHelperMissing,
-            // and then proceed as if the resulting value was provided to blockHelperMissing.
-            Compiler.prototype = {
-                compiler: Compiler,
-                disassemble: function() {
-                    var opcodes = this.opcodes, opcode, out = [], params, param;
-                    for (var i = 0, l = opcodes.length; i < l; i++) {
-                        opcode = opcodes[i];
-                        if (opcode.opcode === "DECLARE") {
-                            out.push("DECLARE " + opcode.name + "=" + opcode.value);
-                        } else {
-                            params = [];
-                            for (var j = 0; j < opcode.args.length; j++) {
-                                param = opcode.args[j];
-                                if (typeof param === "string") {
-                                    param = '"' + param.replace("\n", "\\n") + '"';
-                                }
-                                params.push(param);
-                            }
-                            out.push(opcode.opcode + " " + params.join(" "));
-                        }
-                    }
-                    return out.join("\n");
-                },
-                equals: function(other) {
-                    var len = this.opcodes.length;
-                    if (other.opcodes.length !== len) {
-                        return false;
-                    }
-                    for (var i = 0; i < len; i++) {
-                        var opcode = this.opcodes[i], otherOpcode = other.opcodes[i];
-                        if (opcode.opcode !== otherOpcode.opcode || opcode.args.length !== otherOpcode.args.length) {
-                            return false;
-                        }
-                        for (var j = 0; j < opcode.args.length; j++) {
-                            if (opcode.args[j] !== otherOpcode.args[j]) {
-                                return false;
-                            }
-                        }
-                    }
-                    len = this.children.length;
-                    if (other.children.length !== len) {
-                        return false;
-                    }
-                    for (i = 0; i < len; i++) {
-                        if (!this.children[i].equals(other.children[i])) {
-                            return false;
-                        }
-                    }
-                    return true;
-                },
-                guid: 0,
-                compile: function(program, options) {
-                    this.opcodes = [];
-                    this.children = [];
-                    this.depths = {
-                        list: []
-                    };
-                    this.options = options;
-                    // These changes will propagate to the other compiler components
-                    var knownHelpers = this.options.knownHelpers;
-                    this.options.knownHelpers = {
-                        helperMissing: true,
-                        blockHelperMissing: true,
-                        each: true,
-                        "if": true,
-                        unless: true,
-                        "with": true,
-                        log: true
-                    };
-                    if (knownHelpers) {
-                        for (var name in knownHelpers) {
-                            this.options.knownHelpers[name] = knownHelpers[name];
-                        }
-                    }
-                    return this.accept(program);
-                },
-                accept: function(node) {
-                    var strip = node.strip || {}, ret;
-                    if (strip.left) {
-                        this.opcode("strip");
-                    }
-                    ret = this[node.type](node);
-                    if (strip.right) {
-                        this.opcode("strip");
-                    }
-                    return ret;
-                },
-                program: function(program) {
-                    var statements = program.statements;
-                    for (var i = 0, l = statements.length; i < l; i++) {
-                        this.accept(statements[i]);
-                    }
-                    this.isSimple = l === 1;
-                    this.depths.list = this.depths.list.sort(function(a, b) {
-                        return a - b;
-                    });
-                    return this;
-                },
-                compileProgram: function(program) {
-                    var result = new this.compiler().compile(program, this.options);
-                    var guid = this.guid++, depth;
-                    this.usePartial = this.usePartial || result.usePartial;
-                    this.children[guid] = result;
-                    for (var i = 0, l = result.depths.list.length; i < l; i++) {
-                        depth = result.depths.list[i];
-                        if (depth < 2) {
-                            continue;
-                        } else {
-                            this.addDepth(depth - 1);
-                        }
-                    }
-                    return guid;
-                },
-                block: function(block) {
-                    var mustache = block.mustache, program = block.program, inverse = block.inverse;
-                    if (program) {
-                        program = this.compileProgram(program);
-                    }
-                    if (inverse) {
-                        inverse = this.compileProgram(inverse);
-                    }
-                    var sexpr = mustache.sexpr;
-                    var type = this.classifySexpr(sexpr);
-                    if (type === "helper") {
-                        this.helperSexpr(sexpr, program, inverse);
-                    } else if (type === "simple") {
-                        this.simpleSexpr(sexpr);
-                        // now that the simple mustache is resolved, we need to
-                        // evaluate it by executing `blockHelperMissing`
-                        this.opcode("pushProgram", program);
-                        this.opcode("pushProgram", inverse);
-                        this.opcode("emptyHash");
-                        this.opcode("blockValue");
-                    } else {
-                        this.ambiguousSexpr(sexpr, program, inverse);
-                        // now that the simple mustache is resolved, we need to
-                        // evaluate it by executing `blockHelperMissing`
-                        this.opcode("pushProgram", program);
-                        this.opcode("pushProgram", inverse);
-                        this.opcode("emptyHash");
-                        this.opcode("ambiguousBlockValue");
-                    }
-                    this.opcode("append");
-                },
-                hash: function(hash) {
-                    var pairs = hash.pairs, pair, val;
-                    this.opcode("pushHash");
-                    for (var i = 0, l = pairs.length; i < l; i++) {
-                        pair = pairs[i];
-                        val = pair[1];
-                        if (this.options.stringParams) {
-                            if (val.depth) {
-                                this.addDepth(val.depth);
-                            }
-                            this.opcode("getContext", val.depth || 0);
-                            this.opcode("pushStringParam", val.stringModeValue, val.type);
-                            if (val.type === "sexpr") {
-                                // Subexpressions get evaluated and passed in
-                                // in string params mode.
-                                this.sexpr(val);
-                            }
-                        } else {
-                            this.accept(val);
-                        }
-                        this.opcode("assignToHash", pair[0]);
-                    }
-                    this.opcode("popHash");
-                },
-                partial: function(partial) {
-                    var partialName = partial.partialName;
-                    this.usePartial = true;
-                    if (partial.context) {
-                        this.ID(partial.context);
-                    } else {
-                        this.opcode("push", "depth0");
-                    }
-                    this.opcode("invokePartial", partialName.name);
-                    this.opcode("append");
-                },
-                content: function(content) {
-                    this.opcode("appendContent", content.string);
-                },
-                mustache: function(mustache) {
-                    this.sexpr(mustache.sexpr);
-                    if (mustache.escaped && !this.options.noEscape) {
-                        this.opcode("appendEscaped");
-                    } else {
-                        this.opcode("append");
-                    }
-                },
-                ambiguousSexpr: function(sexpr, program, inverse) {
-                    var id = sexpr.id, name = id.parts[0], isBlock = program != null || inverse != null;
-                    this.opcode("getContext", id.depth);
-                    this.opcode("pushProgram", program);
-                    this.opcode("pushProgram", inverse);
-                    this.opcode("invokeAmbiguous", name, isBlock);
-                },
-                simpleSexpr: function(sexpr) {
-                    var id = sexpr.id;
-                    if (id.type === "DATA") {
-                        this.DATA(id);
-                    } else if (id.parts.length) {
-                        this.ID(id);
-                    } else {
-                        // Simplified ID for `this`
-                        this.addDepth(id.depth);
-                        this.opcode("getContext", id.depth);
-                        this.opcode("pushContext");
-                    }
-                    this.opcode("resolvePossibleLambda");
-                },
-                helperSexpr: function(sexpr, program, inverse) {
-                    var params = this.setupFullMustacheParams(sexpr, program, inverse), name = sexpr.id.parts[0];
-                    if (this.options.knownHelpers[name]) {
-                        this.opcode("invokeKnownHelper", params.length, name);
-                    } else if (this.options.knownHelpersOnly) {
-                        throw new Exception("You specified knownHelpersOnly, but used the unknown helper " + name, sexpr);
-                    } else {
-                        this.opcode("invokeHelper", params.length, name, sexpr.isRoot);
-                    }
-                },
-                sexpr: function(sexpr) {
-                    var type = this.classifySexpr(sexpr);
-                    if (type === "simple") {
-                        this.simpleSexpr(sexpr);
-                    } else if (type === "helper") {
-                        this.helperSexpr(sexpr);
-                    } else {
-                        this.ambiguousSexpr(sexpr);
-                    }
-                },
-                ID: function(id) {
-                    this.addDepth(id.depth);
-                    this.opcode("getContext", id.depth);
-                    var name = id.parts[0];
-                    if (!name) {
-                        this.opcode("pushContext");
-                    } else {
-                        this.opcode("lookupOnContext", id.parts[0]);
-                    }
-                    for (var i = 1, l = id.parts.length; i < l; i++) {
-                        this.opcode("lookup", id.parts[i]);
-                    }
-                },
-                DATA: function(data) {
-                    this.options.data = true;
-                    if (data.id.isScoped || data.id.depth) {
-                        throw new Exception("Scoped data references are not supported: " + data.original, data);
-                    }
-                    this.opcode("lookupData");
-                    var parts = data.id.parts;
-                    for (var i = 0, l = parts.length; i < l; i++) {
-                        this.opcode("lookup", parts[i]);
-                    }
-                },
-                STRING: function(string) {
-                    this.opcode("pushString", string.string);
-                },
-                INTEGER: function(integer) {
-                    this.opcode("pushLiteral", integer.integer);
-                },
-                BOOLEAN: function(bool) {
-                    this.opcode("pushLiteral", bool.bool);
-                },
-                comment: function() {},
-                // HELPERS
-                opcode: function(name) {
-                    this.opcodes.push({
-                        opcode: name,
-                        args: [].slice.call(arguments, 1)
-                    });
-                },
-                declare: function(name, value) {
-                    this.opcodes.push({
-                        opcode: "DECLARE",
-                        name: name,
-                        value: value
-                    });
-                },
-                addDepth: function(depth) {
-                    if (depth === 0) {
-                        return;
-                    }
-                    if (!this.depths[depth]) {
-                        this.depths[depth] = true;
-                        this.depths.list.push(depth);
-                    }
-                },
-                classifySexpr: function(sexpr) {
-                    var isHelper = sexpr.isHelper;
-                    var isEligible = sexpr.eligibleHelper;
-                    var options = this.options;
-                    // if ambiguous, we can possibly resolve the ambiguity now
-                    if (isEligible && !isHelper) {
-                        var name = sexpr.id.parts[0];
-                        if (options.knownHelpers[name]) {
-                            isHelper = true;
-                        } else if (options.knownHelpersOnly) {
-                            isEligible = false;
-                        }
-                    }
-                    if (isHelper) {
-                        return "helper";
-                    } else if (isEligible) {
-                        return "ambiguous";
-                    } else {
-                        return "simple";
-                    }
-                },
-                pushParams: function(params) {
-                    var i = params.length, param;
-                    while (i--) {
-                        param = params[i];
-                        if (this.options.stringParams) {
-                            if (param.depth) {
-                                this.addDepth(param.depth);
-                            }
-                            this.opcode("getContext", param.depth || 0);
-                            this.opcode("pushStringParam", param.stringModeValue, param.type);
-                            if (param.type === "sexpr") {
-                                // Subexpressions get evaluated and passed in
-                                // in string params mode.
-                                this.sexpr(param);
-                            }
-                        } else {
-                            this[param.type](param);
-                        }
-                    }
-                },
-                setupFullMustacheParams: function(sexpr, program, inverse) {
-                    var params = sexpr.params;
-                    this.pushParams(params);
-                    this.opcode("pushProgram", program);
-                    this.opcode("pushProgram", inverse);
-                    if (sexpr.hash) {
-                        this.hash(sexpr.hash);
-                    } else {
-                        this.opcode("emptyHash");
-                    }
-                    return params;
-                }
-            };
-            function precompile(input, options, env) {
-                if (input == null || typeof input !== "string" && input.constructor !== env.AST.ProgramNode) {
-                    throw new Exception("You must pass a string or Handlebars AST to Handlebars.precompile. You passed " + input);
-                }
-                options = options || {};
-                if (!("data" in options)) {
-                    options.data = true;
-                }
-                var ast = env.parse(input);
-                var environment = new env.Compiler().compile(ast, options);
-                return new env.JavaScriptCompiler().compile(environment, options);
-            }
-            __exports__.precompile = precompile;
-            function compile(input, options, env) {
-                if (input == null || typeof input !== "string" && input.constructor !== env.AST.ProgramNode) {
-                    throw new Exception("You must pass a string or Handlebars AST to Handlebars.compile. You passed " + input);
-                }
-                options = options || {};
-                if (!("data" in options)) {
-                    options.data = true;
-                }
-                var compiled;
-                function compileInput() {
-                    var ast = env.parse(input);
-                    var environment = new env.Compiler().compile(ast, options);
-                    var templateSpec = new env.JavaScriptCompiler().compile(environment, options, undefined, true);
-                    return env.template(templateSpec);
-                }
-                // Template is only compiled on first use and cached after that point.
-                return function(context, options) {
-                    if (!compiled) {
-                        compiled = compileInput();
-                    }
-                    return compiled.call(this, context, options);
-                };
-            }
-            __exports__.compile = compile;
-            return __exports__;
-        }(__module5__);
-        // handlebars/compiler/javascript-compiler.js
-        var __module11__ = function(__dependency1__, __dependency2__) {
-            "use strict";
-            var __exports__;
-            var COMPILER_REVISION = __dependency1__.COMPILER_REVISION;
-            var REVISION_CHANGES = __dependency1__.REVISION_CHANGES;
-            var log = __dependency1__.log;
-            var Exception = __dependency2__;
-            function Literal(value) {
-                this.value = value;
-            }
-            function JavaScriptCompiler() {}
-            JavaScriptCompiler.prototype = {
-                // PUBLIC API: You can override these methods in a subclass to provide
-                // alternative compiled forms for name lookup and buffering semantics
-                nameLookup: function(parent, name) {
-                    var wrap, ret;
-                    if (parent.indexOf("depth") === 0) {
-                        wrap = true;
-                    }
-                    if (/^[0-9]+$/.test(name)) {
-                        ret = parent + "[" + name + "]";
-                    } else if (JavaScriptCompiler.isValidJavaScriptVariableName(name)) {
-                        ret = parent + "." + name;
-                    } else {
-                        ret = parent + "['" + name + "']";
-                    }
-                    if (wrap) {
-                        return "(" + parent + " && " + ret + ")";
-                    } else {
-                        return ret;
-                    }
-                },
-                compilerInfo: function() {
-                    var revision = COMPILER_REVISION, versions = REVISION_CHANGES[revision];
-                    return "this.compilerInfo = [" + revision + ",'" + versions + "'];\n";
-                },
-                appendToBuffer: function(string) {
-                    if (this.environment.isSimple) {
-                        return "return " + string + ";";
-                    } else {
-                        return {
-                            appendToBuffer: true,
-                            content: string,
-                            toString: function() {
-                                return "buffer += " + string + ";";
-                            }
-                        };
-                    }
-                },
-                initializeBuffer: function() {
-                    return this.quotedString("");
-                },
-                namespace: "Handlebars",
-                // END PUBLIC API
-                compile: function(environment, options, context, asObject) {
-                    this.environment = environment;
-                    this.options = options || {};
-                    log("debug", this.environment.disassemble() + "\n\n");
-                    this.name = this.environment.name;
-                    this.isChild = !!context;
-                    this.context = context || {
-                        programs: [],
-                        environments: [],
-                        aliases: {}
-                    };
-                    this.preamble();
-                    this.stackSlot = 0;
-                    this.stackVars = [];
-                    this.registers = {
-                        list: []
-                    };
-                    this.hashes = [];
-                    this.compileStack = [];
-                    this.inlineStack = [];
-                    this.compileChildren(environment, options);
-                    var opcodes = environment.opcodes, opcode;
-                    this.i = 0;
-                    for (var l = opcodes.length; this.i < l; this.i++) {
-                        opcode = opcodes[this.i];
-                        if (opcode.opcode === "DECLARE") {
-                            this[opcode.name] = opcode.value;
-                        } else {
-                            this[opcode.opcode].apply(this, opcode.args);
-                        }
-                        // Reset the stripNext flag if it was not set by this operation.
-                        if (opcode.opcode !== this.stripNext) {
-                            this.stripNext = false;
-                        }
-                    }
-                    // Flush any trailing content that might be pending.
-                    this.pushSource("");
-                    if (this.stackSlot || this.inlineStack.length || this.compileStack.length) {
-                        throw new Exception("Compile completed with content left on stack");
-                    }
-                    return this.createFunctionContext(asObject);
-                },
-                preamble: function() {
-                    var out = [];
-                    if (!this.isChild) {
-                        var namespace = this.namespace;
-                        var copies = "helpers = this.merge(helpers, " + namespace + ".helpers);";
-                        if (this.environment.usePartial) {
-                            copies = copies + " partials = this.merge(partials, " + namespace + ".partials);";
-                        }
-                        if (this.options.data) {
-                            copies = copies + " data = data || {};";
-                        }
-                        out.push(copies);
-                    } else {
-                        out.push("");
-                    }
-                    if (!this.environment.isSimple) {
-                        out.push(", buffer = " + this.initializeBuffer());
-                    } else {
-                        out.push("");
-                    }
-                    // track the last context pushed into place to allow skipping the
-                    // getContext opcode when it would be a noop
-                    this.lastContext = 0;
-                    this.source = out;
-                },
-                createFunctionContext: function(asObject) {
-                    var locals = this.stackVars.concat(this.registers.list);
-                    if (locals.length > 0) {
-                        this.source[1] = this.source[1] + ", " + locals.join(", ");
-                    }
-                    // Generate minimizer alias mappings
-                    if (!this.isChild) {
-                        for (var alias in this.context.aliases) {
-                            if (this.context.aliases.hasOwnProperty(alias)) {
-                                this.source[1] = this.source[1] + ", " + alias + "=" + this.context.aliases[alias];
-                            }
-                        }
-                    }
-                    if (this.source[1]) {
-                        this.source[1] = "var " + this.source[1].substring(2) + ";";
-                    }
-                    // Merge children
-                    if (!this.isChild) {
-                        this.source[1] += "\n" + this.context.programs.join("\n") + "\n";
-                    }
-                    if (!this.environment.isSimple) {
-                        this.pushSource("return buffer;");
-                    }
-                    var params = this.isChild ? [ "depth0", "data" ] : [ "Handlebars", "depth0", "helpers", "partials", "data" ];
-                    for (var i = 0, l = this.environment.depths.list.length; i < l; i++) {
-                        params.push("depth" + this.environment.depths.list[i]);
-                    }
-                    // Perform a second pass over the output to merge content when possible
-                    var source = this.mergeSource();
-                    if (!this.isChild) {
-                        source = this.compilerInfo() + source;
-                    }
-                    if (asObject) {
-                        params.push(source);
-                        return Function.apply(this, params);
-                    } else {
-                        var functionSource = "function " + (this.name || "") + "(" + params.join(",") + ") {\n  " + source + "}";
-                        log("debug", functionSource + "\n\n");
-                        return functionSource;
-                    }
-                },
-                mergeSource: function() {
-                    // WARN: We are not handling the case where buffer is still populated as the source should
-                    // not have buffer append operations as their final action.
-                    var source = "", buffer;
-                    for (var i = 0, len = this.source.length; i < len; i++) {
-                        var line = this.source[i];
-                        if (line.appendToBuffer) {
-                            if (buffer) {
-                                buffer = buffer + "\n    + " + line.content;
-                            } else {
-                                buffer = line.content;
-                            }
-                        } else {
-                            if (buffer) {
-                                source += "buffer += " + buffer + ";\n  ";
-                                buffer = undefined;
-                            }
-                            source += line + "\n  ";
-                        }
-                    }
-                    return source;
-                },
-                // [blockValue]
-                //
-                // On stack, before: hash, inverse, program, value
-                // On stack, after: return value of blockHelperMissing
-                //
-                // The purpose of this opcode is to take a block of the form
-                // `{{#foo}}...{{/foo}}`, resolve the value of `foo`, and
-                // replace it on the stack with the result of properly
-                // invoking blockHelperMissing.
-                blockValue: function() {
-                    this.context.aliases.blockHelperMissing = "helpers.blockHelperMissing";
-                    var params = [ "depth0" ];
-                    this.setupParams(0, params);
-                    this.replaceStack(function(current) {
-                        params.splice(1, 0, current);
-                        return "blockHelperMissing.call(" + params.join(", ") + ")";
-                    });
-                },
-                // [ambiguousBlockValue]
-                //
-                // On stack, before: hash, inverse, program, value
-                // Compiler value, before: lastHelper=value of last found helper, if any
-                // On stack, after, if no lastHelper: same as [blockValue]
-                // On stack, after, if lastHelper: value
-                ambiguousBlockValue: function() {
-                    this.context.aliases.blockHelperMissing = "helpers.blockHelperMissing";
-                    var params = [ "depth0" ];
-                    this.setupParams(0, params);
-                    var current = this.topStack();
-                    params.splice(1, 0, current);
-                    this.pushSource("if (!" + this.lastHelper + ") { " + current + " = blockHelperMissing.call(" + params.join(", ") + "); }");
-                },
-                // [appendContent]
-                //
-                // On stack, before: ...
-                // On stack, after: ...
-                //
-                // Appends the string value of `content` to the current buffer
-                appendContent: function(content) {
-                    if (this.pendingContent) {
-                        content = this.pendingContent + content;
-                    }
-                    if (this.stripNext) {
-                        content = content.replace(/^\s+/, "");
-                    }
-                    this.pendingContent = content;
-                },
-                // [strip]
-                //
-                // On stack, before: ...
-                // On stack, after: ...
-                //
-                // Removes any trailing whitespace from the prior content node and flags
-                // the next operation for stripping if it is a content node.
-                strip: function() {
-                    if (this.pendingContent) {
-                        this.pendingContent = this.pendingContent.replace(/\s+$/, "");
-                    }
-                    this.stripNext = "strip";
-                },
-                // [append]
-                //
-                // On stack, before: value, ...
-                // On stack, after: ...
-                //
-                // Coerces `value` to a String and appends it to the current buffer.
-                //
-                // If `value` is truthy, or 0, it is coerced into a string and appended
-                // Otherwise, the empty string is appended
-                append: function() {
-                    // Force anything that is inlined onto the stack so we don't have duplication
-                    // when we examine local
-                    this.flushInline();
-                    var local = this.popStack();
-                    this.pushSource("if(" + local + " || " + local + " === 0) { " + this.appendToBuffer(local) + " }");
-                    if (this.environment.isSimple) {
-                        this.pushSource("else { " + this.appendToBuffer("''") + " }");
-                    }
-                },
-                // [appendEscaped]
-                //
-                // On stack, before: value, ...
-                // On stack, after: ...
-                //
-                // Escape `value` and append it to the buffer
-                appendEscaped: function() {
-                    this.context.aliases.escapeExpression = "this.escapeExpression";
-                    this.pushSource(this.appendToBuffer("escapeExpression(" + this.popStack() + ")"));
-                },
-                // [getContext]
-                //
-                // On stack, before: ...
-                // On stack, after: ...
-                // Compiler value, after: lastContext=depth
-                //
-                // Set the value of the `lastContext` compiler value to the depth
-                getContext: function(depth) {
-                    if (this.lastContext !== depth) {
-                        this.lastContext = depth;
-                    }
-                },
-                // [lookupOnContext]
-                //
-                // On stack, before: ...
-                // On stack, after: currentContext[name], ...
-                //
-                // Looks up the value of `name` on the current context and pushes
-                // it onto the stack.
-                lookupOnContext: function(name) {
-                    this.push(this.nameLookup("depth" + this.lastContext, name, "context"));
-                },
-                // [pushContext]
-                //
-                // On stack, before: ...
-                // On stack, after: currentContext, ...
-                //
-                // Pushes the value of the current context onto the stack.
-                pushContext: function() {
-                    this.pushStackLiteral("depth" + this.lastContext);
-                },
-                // [resolvePossibleLambda]
-                //
-                // On stack, before: value, ...
-                // On stack, after: resolved value, ...
-                //
-                // If the `value` is a lambda, replace it on the stack by
-                // the return value of the lambda
-                resolvePossibleLambda: function() {
-                    this.context.aliases.functionType = '"function"';
-                    this.replaceStack(function(current) {
-                        return "typeof " + current + " === functionType ? " + current + ".apply(depth0) : " + current;
-                    });
-                },
-                // [lookup]
-                //
-                // On stack, before: value, ...
-                // On stack, after: value[name], ...
-                //
-                // Replace the value on the stack with the result of looking
-                // up `name` on `value`
-                lookup: function(name) {
-                    this.replaceStack(function(current) {
-                        return current + " == null || " + current + " === false ? " + current + " : " + this.nameLookup(current, name, "context");
-                    });
-                },
-                // [lookupData]
-                //
-                // On stack, before: ...
-                // On stack, after: data, ...
-                //
-                // Push the data lookup operator
-                lookupData: function() {
-                    this.pushStackLiteral("data");
-                },
-                // [pushStringParam]
-                //
-                // On stack, before: ...
-                // On stack, after: string, currentContext, ...
-                //
-                // This opcode is designed for use in string mode, which
-                // provides the string value of a parameter along with its
-                // depth rather than resolving it immediately.
-                pushStringParam: function(string, type) {
-                    this.pushStackLiteral("depth" + this.lastContext);
-                    this.pushString(type);
-                    // If it's a subexpression, the string result
-                    // will be pushed after this opcode.
-                    if (type !== "sexpr") {
-                        if (typeof string === "string") {
-                            this.pushString(string);
-                        } else {
-                            this.pushStackLiteral(string);
-                        }
-                    }
-                },
-                emptyHash: function() {
-                    this.pushStackLiteral("{}");
-                    if (this.options.stringParams) {
-                        this.push("{}");
-                        // hashContexts
-                        this.push("{}");
-                    }
-                },
-                pushHash: function() {
-                    if (this.hash) {
-                        this.hashes.push(this.hash);
-                    }
-                    this.hash = {
-                        values: [],
-                        types: [],
-                        contexts: []
-                    };
-                },
-                popHash: function() {
-                    var hash = this.hash;
-                    this.hash = this.hashes.pop();
-                    if (this.options.stringParams) {
-                        this.push("{" + hash.contexts.join(",") + "}");
-                        this.push("{" + hash.types.join(",") + "}");
-                    }
-                    this.push("{\n    " + hash.values.join(",\n    ") + "\n  }");
-                },
-                // [pushString]
-                //
-                // On stack, before: ...
-                // On stack, after: quotedString(string), ...
-                //
-                // Push a quoted version of `string` onto the stack
-                pushString: function(string) {
-                    this.pushStackLiteral(this.quotedString(string));
-                },
-                // [push]
-                //
-                // On stack, before: ...
-                // On stack, after: expr, ...
-                //
-                // Push an expression onto the stack
-                push: function(expr) {
-                    this.inlineStack.push(expr);
-                    return expr;
-                },
-                // [pushLiteral]
-                //
-                // On stack, before: ...
-                // On stack, after: value, ...
-                //
-                // Pushes a value onto the stack. This operation prevents
-                // the compiler from creating a temporary variable to hold
-                // it.
-                pushLiteral: function(value) {
-                    this.pushStackLiteral(value);
-                },
-                // [pushProgram]
-                //
-                // On stack, before: ...
-                // On stack, after: program(guid), ...
-                //
-                // Push a program expression onto the stack. This takes
-                // a compile-time guid and converts it into a runtime-accessible
-                // expression.
-                pushProgram: function(guid) {
-                    if (guid != null) {
-                        this.pushStackLiteral(this.programExpression(guid));
-                    } else {
-                        this.pushStackLiteral(null);
-                    }
-                },
-                // [invokeHelper]
-                //
-                // On stack, before: hash, inverse, program, params..., ...
-                // On stack, after: result of helper invocation
-                //
-                // Pops off the helper's parameters, invokes the helper,
-                // and pushes the helper's return value onto the stack.
-                //
-                // If the helper is not found, `helperMissing` is called.
-                invokeHelper: function(paramSize, name, isRoot) {
-                    this.context.aliases.helperMissing = "helpers.helperMissing";
-                    this.useRegister("helper");
-                    var helper = this.lastHelper = this.setupHelper(paramSize, name, true);
-                    var nonHelper = this.nameLookup("depth" + this.lastContext, name, "context");
-                    var lookup = "helper = " + helper.name + " || " + nonHelper;
-                    if (helper.paramsInit) {
-                        lookup += "," + helper.paramsInit;
-                    }
-                    this.push("(" + lookup + ",helper " + "? helper.call(" + helper.callParams + ") " + ": helperMissing.call(" + helper.helperMissingParams + "))");
-                    // Always flush subexpressions. This is both to prevent the compounding size issue that
-                    // occurs when the code has to be duplicated for inlining and also to prevent errors
-                    // due to the incorrect options object being passed due to the shared register.
-                    if (!isRoot) {
-                        this.flushInline();
-                    }
-                },
-                // [invokeKnownHelper]
-                //
-                // On stack, before: hash, inverse, program, params..., ...
-                // On stack, after: result of helper invocation
-                //
-                // This operation is used when the helper is known to exist,
-                // so a `helperMissing` fallback is not required.
-                invokeKnownHelper: function(paramSize, name) {
-                    var helper = this.setupHelper(paramSize, name);
-                    this.push(helper.name + ".call(" + helper.callParams + ")");
-                },
-                // [invokeAmbiguous]
-                //
-                // On stack, before: hash, inverse, program, params..., ...
-                // On stack, after: result of disambiguation
-                //
-                // This operation is used when an expression like `{{foo}}`
-                // is provided, but we don't know at compile-time whether it
-                // is a helper or a path.
-                //
-                // This operation emits more code than the other options,
-                // and can be avoided by passing the `knownHelpers` and
-                // `knownHelpersOnly` flags at compile-time.
-                invokeAmbiguous: function(name, helperCall) {
-                    this.context.aliases.functionType = '"function"';
-                    this.useRegister("helper");
-                    this.emptyHash();
-                    var helper = this.setupHelper(0, name, helperCall);
-                    var helperName = this.lastHelper = this.nameLookup("helpers", name, "helper");
-                    var nonHelper = this.nameLookup("depth" + this.lastContext, name, "context");
-                    var nextStack = this.nextStack();
-                    if (helper.paramsInit) {
-                        this.pushSource(helper.paramsInit);
-                    }
-                    this.pushSource("if (helper = " + helperName + ") { " + nextStack + " = helper.call(" + helper.callParams + "); }");
-                    this.pushSource("else { helper = " + nonHelper + "; " + nextStack + " = typeof helper === functionType ? helper.call(" + helper.callParams + ") : helper; }");
-                },
-                // [invokePartial]
-                //
-                // On stack, before: context, ...
-                // On stack after: result of partial invocation
-                //
-                // This operation pops off a context, invokes a partial with that context,
-                // and pushes the result of the invocation back.
-                invokePartial: function(name) {
-                    var params = [ this.nameLookup("partials", name, "partial"), "'" + name + "'", this.popStack(), "helpers", "partials" ];
-                    if (this.options.data) {
-                        params.push("data");
-                    }
-                    this.context.aliases.self = "this";
-                    this.push("self.invokePartial(" + params.join(", ") + ")");
-                },
-                // [assignToHash]
-                //
-                // On stack, before: value, hash, ...
-                // On stack, after: hash, ...
-                //
-                // Pops a value and hash off the stack, assigns `hash[key] = value`
-                // and pushes the hash back onto the stack.
-                assignToHash: function(key) {
-                    var value = this.popStack(), context, type;
-                    if (this.options.stringParams) {
-                        type = this.popStack();
-                        context = this.popStack();
-                    }
-                    var hash = this.hash;
-                    if (context) {
-                        hash.contexts.push("'" + key + "': " + context);
-                    }
-                    if (type) {
-                        hash.types.push("'" + key + "': " + type);
-                    }
-                    hash.values.push("'" + key + "': (" + value + ")");
-                },
-                // HELPERS
-                compiler: JavaScriptCompiler,
-                compileChildren: function(environment, options) {
-                    var children = environment.children, child, compiler;
-                    for (var i = 0, l = children.length; i < l; i++) {
-                        child = children[i];
-                        compiler = new this.compiler();
-                        var index = this.matchExistingProgram(child);
-                        if (index == null) {
-                            this.context.programs.push("");
-                            // Placeholder to prevent name conflicts for nested children
-                            index = this.context.programs.length;
-                            child.index = index;
-                            child.name = "program" + index;
-                            this.context.programs[index] = compiler.compile(child, options, this.context);
-                            this.context.environments[index] = child;
-                        } else {
-                            child.index = index;
-                            child.name = "program" + index;
-                        }
-                    }
-                },
-                matchExistingProgram: function(child) {
-                    for (var i = 0, len = this.context.environments.length; i < len; i++) {
-                        var environment = this.context.environments[i];
-                        if (environment && environment.equals(child)) {
-                            return i;
-                        }
-                    }
-                },
-                programExpression: function(guid) {
-                    this.context.aliases.self = "this";
-                    if (guid == null) {
-                        return "self.noop";
-                    }
-                    var child = this.environment.children[guid], depths = child.depths.list, depth;
-                    var programParams = [ child.index, child.name, "data" ];
-                    for (var i = 0, l = depths.length; i < l; i++) {
-                        depth = depths[i];
-                        if (depth === 1) {
-                            programParams.push("depth0");
-                        } else {
-                            programParams.push("depth" + (depth - 1));
-                        }
-                    }
-                    return (depths.length === 0 ? "self.program(" : "self.programWithDepth(") + programParams.join(", ") + ")";
-                },
-                register: function(name, val) {
-                    this.useRegister(name);
-                    this.pushSource(name + " = " + val + ";");
-                },
-                useRegister: function(name) {
-                    if (!this.registers[name]) {
-                        this.registers[name] = true;
-                        this.registers.list.push(name);
-                    }
-                },
-                pushStackLiteral: function(item) {
-                    return this.push(new Literal(item));
-                },
-                pushSource: function(source) {
-                    if (this.pendingContent) {
-                        this.source.push(this.appendToBuffer(this.quotedString(this.pendingContent)));
-                        this.pendingContent = undefined;
-                    }
-                    if (source) {
-                        this.source.push(source);
-                    }
-                },
-                pushStack: function(item) {
-                    this.flushInline();
-                    var stack = this.incrStack();
-                    if (item) {
-                        this.pushSource(stack + " = " + item + ";");
-                    }
-                    this.compileStack.push(stack);
-                    return stack;
-                },
-                replaceStack: function(callback) {
-                    var prefix = "", inline = this.isInline(), stack, createdStack, usedLiteral;
-                    // If we are currently inline then we want to merge the inline statement into the
-                    // replacement statement via ','
-                    if (inline) {
-                        var top = this.popStack(true);
-                        if (top instanceof Literal) {
-                            // Literals do not need to be inlined
-                            stack = top.value;
-                            usedLiteral = true;
-                        } else {
-                            // Get or create the current stack name for use by the inline
-                            createdStack = !this.stackSlot;
-                            var name = !createdStack ? this.topStackName() : this.incrStack();
-                            prefix = "(" + this.push(name) + " = " + top + "),";
-                            stack = this.topStack();
-                        }
-                    } else {
-                        stack = this.topStack();
-                    }
-                    var item = callback.call(this, stack);
-                    if (inline) {
-                        if (!usedLiteral) {
-                            this.popStack();
-                        }
-                        if (createdStack) {
-                            this.stackSlot--;
-                        }
-                        this.push("(" + prefix + item + ")");
-                    } else {
-                        // Prevent modification of the context depth variable. Through replaceStack
-                        if (!/^stack/.test(stack)) {
-                            stack = this.nextStack();
-                        }
-                        this.pushSource(stack + " = (" + prefix + item + ");");
-                    }
-                    return stack;
-                },
-                nextStack: function() {
-                    return this.pushStack();
-                },
-                incrStack: function() {
-                    this.stackSlot++;
-                    if (this.stackSlot > this.stackVars.length) {
-                        this.stackVars.push("stack" + this.stackSlot);
-                    }
-                    return this.topStackName();
-                },
-                topStackName: function() {
-                    return "stack" + this.stackSlot;
-                },
-                flushInline: function() {
-                    var inlineStack = this.inlineStack;
-                    if (inlineStack.length) {
-                        this.inlineStack = [];
-                        for (var i = 0, len = inlineStack.length; i < len; i++) {
-                            var entry = inlineStack[i];
-                            if (entry instanceof Literal) {
-                                this.compileStack.push(entry);
-                            } else {
-                                this.pushStack(entry);
-                            }
-                        }
-                    }
-                },
-                isInline: function() {
-                    return this.inlineStack.length;
-                },
-                popStack: function(wrapped) {
-                    var inline = this.isInline(), item = (inline ? this.inlineStack : this.compileStack).pop();
-                    if (!wrapped && item instanceof Literal) {
-                        return item.value;
-                    } else {
-                        if (!inline) {
-                            if (!this.stackSlot) {
-                                throw new Exception("Invalid stack pop");
-                            }
-                            this.stackSlot--;
-                        }
-                        return item;
-                    }
-                },
-                topStack: function(wrapped) {
-                    var stack = this.isInline() ? this.inlineStack : this.compileStack, item = stack[stack.length - 1];
-                    if (!wrapped && item instanceof Literal) {
-                        return item.value;
-                    } else {
-                        return item;
-                    }
-                },
-                quotedString: function(str) {
-                    return '"' + str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029") + '"';
-                },
-                setupHelper: function(paramSize, name, missingParams) {
-                    var params = [], paramsInit = this.setupParams(paramSize, params, missingParams);
-                    var foundHelper = this.nameLookup("helpers", name, "helper");
-                    return {
-                        params: params,
-                        paramsInit: paramsInit,
-                        name: foundHelper,
-                        callParams: [ "depth0" ].concat(params).join(", "),
-                        helperMissingParams: missingParams && [ "depth0", this.quotedString(name) ].concat(params).join(", ")
-                    };
-                },
-                setupOptions: function(paramSize, params) {
-                    var options = [], contexts = [], types = [], param, inverse, program;
-                    options.push("hash:" + this.popStack());
-                    if (this.options.stringParams) {
-                        options.push("hashTypes:" + this.popStack());
-                        options.push("hashContexts:" + this.popStack());
-                    }
-                    inverse = this.popStack();
-                    program = this.popStack();
-                    // Avoid setting fn and inverse if neither are set. This allows
-                    // helpers to do a check for `if (options.fn)`
-                    if (program || inverse) {
-                        if (!program) {
-                            this.context.aliases.self = "this";
-                            program = "self.noop";
-                        }
-                        if (!inverse) {
-                            this.context.aliases.self = "this";
-                            inverse = "self.noop";
-                        }
-                        options.push("inverse:" + inverse);
-                        options.push("fn:" + program);
-                    }
-                    for (var i = 0; i < paramSize; i++) {
-                        param = this.popStack();
-                        params.push(param);
-                        if (this.options.stringParams) {
-                            types.push(this.popStack());
-                            contexts.push(this.popStack());
-                        }
-                    }
-                    if (this.options.stringParams) {
-                        options.push("contexts:[" + contexts.join(",") + "]");
-                        options.push("types:[" + types.join(",") + "]");
-                    }
-                    if (this.options.data) {
-                        options.push("data:data");
-                    }
-                    return options;
-                },
-                // the params and contexts arguments are passed in arrays
-                // to fill in
-                setupParams: function(paramSize, params, useRegister) {
-                    var options = "{" + this.setupOptions(paramSize, params).join(",") + "}";
-                    if (useRegister) {
-                        this.useRegister("options");
-                        params.push("options");
-                        return "options=" + options;
-                    } else {
-                        params.push(options);
-                        return "";
-                    }
-                }
-            };
-            var reservedWords = ("break else new var" + " case finally return void" + " catch for switch while" + " continue function this with" + " default if throw" + " delete in try" + " do instanceof typeof" + " abstract enum int short" + " boolean export interface static" + " byte extends long super" + " char final native synchronized" + " class float package throws" + " const goto private transient" + " debugger implements protected volatile" + " double import public let yield").split(" ");
-            var compilerWords = JavaScriptCompiler.RESERVED_WORDS = {};
-            for (var i = 0, l = reservedWords.length; i < l; i++) {
-                compilerWords[reservedWords[i]] = true;
-            }
-            JavaScriptCompiler.isValidJavaScriptVariableName = function(name) {
-                if (!JavaScriptCompiler.RESERVED_WORDS[name] && /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name)) {
-                    return true;
-                }
-                return false;
-            };
-            __exports__ = JavaScriptCompiler;
-            return __exports__;
-        }(__module2__, __module5__);
-        // handlebars.js
-        var __module0__ = function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__) {
-            "use strict";
-            var __exports__;
-            /*globals Handlebars: true */
-            var Handlebars = __dependency1__;
-            // Compiler imports
-            var AST = __dependency2__;
-            var Parser = __dependency3__.parser;
-            var parse = __dependency3__.parse;
-            var Compiler = __dependency4__.Compiler;
-            var compile = __dependency4__.compile;
-            var precompile = __dependency4__.precompile;
-            var JavaScriptCompiler = __dependency5__;
-            var _create = Handlebars.create;
-            var create = function() {
-                var hb = _create();
-                hb.compile = function(input, options) {
-                    return compile(input, options, hb);
-                };
-                hb.precompile = function(input, options) {
-                    return precompile(input, options, hb);
-                };
-                hb.AST = AST;
-                hb.Compiler = Compiler;
-                hb.JavaScriptCompiler = JavaScriptCompiler;
-                hb.Parser = Parser;
-                hb.parse = parse;
-                return hb;
-            };
-            Handlebars = create();
-            Handlebars.create = create;
-            __exports__ = Handlebars;
-            return __exports__;
-        }(__module1__, __module7__, __module8__, __module10__, __module11__);
-        return __module0__;
-    }();
-    module.exports = Handlebars;
-});
-
-define("torabot/main/0.1.0/search-debug", [ "silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug", "torabot/main/0.1.0/typeahead.jquery-debug" ], function(require, exports, module) {
-    require("silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug.css");
-    require("silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug");
-    require("torabot/main/0.1.0/typeahead.jquery-debug");
-    var self = {
-        init_select: function() {
-            $(".mod-select").selectpicker({
-                noneResultsText: "无匹配项"
-            });
-        },
-        init_main: function() {
-            self.$form = $('form[name="search"]');
-            self.$q = self.$form.find('input[name="q"]');
-            self.init_select();
-            var $mods = self.$form.find('select[name="kind"]');
-            self.$form.find('button[name="help"]').click(function(e) {
-                e.preventDefault();
-                $(location).attr("href", "/help/" + $mods.find("option:selected").val());
-            });
-            var $search = self.$form.find('button[name="search"]');
-            $search.click(function(e) {
-                e.preventDefault();
-                var $selected = $mods.find("option:selected");
-                var kind = $selected.val();
-                var text = self.$q.val();
-                if (!text && !$selected.data("allow-empty-query")) {
-                    new PNotify({
-                        text: "查询不能为空",
-                        type: "error",
-                        icon: false
-                    });
-                    return;
-                }
-                $(location).attr("href", "/search/" + kind + "?" + $.param({
-                    q: text
-                }));
-            });
-            var $advanced = self.$form.find('button[name="advanced"]');
-            $advanced.click(function(e) {
-                e.preventDefault();
-                $(location).attr("href", "/search/advanced/" + $mods.find("option:selected").val());
-            });
-            var $buttons = self.$form.find('span[name="buttons"]');
-            var on_change_mod = function() {
-                var $selected = $(this).find("option:selected");
-                $advanced.prop("disabled", !$selected.data("has-advanced-search"));
-                self.$q.prop("disabled", !$selected.data("has-normal-search"));
-                $search.prop("disabled", !$selected.data("has-normal-search"));
-                if ($selected.data("has-normal-search")) {
-                    self.$q.prop("placeholder", $selected.data("normal-search-prompt"));
-                } else {
-                    self.$q.prop("placeholder", "请使用高级搜索");
-                }
-                if (self.previous_mod) {
-                    require.async(self.previous_mod, function(m) {
-                        m.deactivate();
-                    });
-                }
-                var current_mod = self.get_mod_path($selected.val());
-                if (current_mod) {
-                    require.async(current_mod, function(m) {
-                        m.activate();
-                    });
-                }
-                self.previous_mod = current_mod;
-            };
-            $mods.ready(on_change_mod).change(on_change_mod);
-        },
-        get_mod_path: function(selected) {
-            for (var i = 0; i < self.options.mods.length; ++i) {
-                var mod = self.options.mods[i];
-                if (selected == mod || selected + "-debug" == mod) return mod;
-            }
-        },
-        previous_mod: null,
-        default_options: {
-            mods: []
-        },
-        init: function(options) {
-            self.options = $.extend({}, self.default_options, options);
-            self.init_main();
-        }
-    };
-    module.exports = self;
-});
-
-define("silviomoreto-bootstrap-select-0e1b27a/bootstrap-select-debug.css", [], function() {
-    seajs.importStyle(".bootstrap-select.btn-group:not(.input-group-btn),.bootstrap-select.btn-group[class*=span]{float:none;display:inline-block;margin-bottom:10px;margin-left:0}.form-search .bootstrap-select.btn-group,.form-inline .bootstrap-select.btn-group,.form-horizontal .bootstrap-select.btn-group{margin-bottom:0}.bootstrap-select.form-control{margin-bottom:0;padding:0;border:0}.bootstrap-select.btn-group.pull-right,.bootstrap-select.btn-group[class*=span].pull-right,.row-fluid .bootstrap-select.btn-group[class*=span].pull-right{float:right}.input-append .bootstrap-select.btn-group{margin-left:-1px}.input-prepend .bootstrap-select.btn-group{margin-right:-1px}.bootstrap-select:not([class*=span]):not([class*=col-]):not([class*=form-control]):not(.input-group-btn){width:220px}.bootstrap-select{width:220px\\0}.bootstrap-select.form-control:not([class*=span]){width:100%}.bootstrap-select>.btn{width:100%;padding-right:25px}.error .bootstrap-select .btn{border:1px solid #b94a48}.bootstrap-select.show-menu-arrow.open>.btn{z-index:2051}.bootstrap-select .btn:focus{outline:thin dotted #333!important;outline:5px auto -webkit-focus-ring-color!important;outline-offset:-2px}.bootstrap-select.btn-group .btn .filter-option{display:inline-block;overflow:hidden;width:100%;float:left;text-align:left}.bootstrap-select.btn-group .btn .caret{position:absolute;top:50%;right:12px;margin-top:-2px;vertical-align:middle}.bootstrap-select.btn-group>.disabled,.bootstrap-select.btn-group .dropdown-menu li.disabled>a{cursor:not-allowed}.bootstrap-select.btn-group>.disabled:focus{outline:0!important}.bootstrap-select.btn-group[class*=span] .btn{width:100%}.bootstrap-select.btn-group .dropdown-menu{min-width:100%;z-index:2000;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.bootstrap-select.btn-group .dropdown-menu.inner{position:static;border:0;padding:0;margin:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}.bootstrap-select.btn-group .dropdown-menu dt{display:block;padding:3px 20px;cursor:default}.bootstrap-select.btn-group .div-contain{overflow:hidden}.bootstrap-select.btn-group .dropdown-menu li{position:relative}.bootstrap-select.btn-group .dropdown-menu li>a.opt{position:relative;padding-left:35px}.bootstrap-select.btn-group .dropdown-menu li>a{cursor:pointer}.bootstrap-select.btn-group .dropdown-menu li>dt small{font-weight:400}.bootstrap-select.btn-group.show-tick .dropdown-menu li.selected a i.check-mark{position:absolute;display:inline-block;right:15px;margin-top:2.5px}.bootstrap-select.btn-group .dropdown-menu li a i.check-mark{display:none}.bootstrap-select.btn-group.show-tick .dropdown-menu li a span.text{margin-right:34px}.bootstrap-select.btn-group .dropdown-menu li small{padding-left:.5em}.bootstrap-select.btn-group .dropdown-menu li:not(.disabled)>a:hover small,.bootstrap-select.btn-group .dropdown-menu li:not(.disabled)>a:focus small,.bootstrap-select.btn-group .dropdown-menu li.active:not(.disabled)>a small{color:#64b1d8;color:rgba(255,255,255,.4)}.bootstrap-select.btn-group .dropdown-menu li>dt small{font-weight:400}.bootstrap-select.show-menu-arrow .dropdown-toggle:before{content:'';display:inline-block;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:7px solid #CCC;border-bottom-color:rgba(0,0,0,.2);position:absolute;bottom:-4px;left:9px;display:none}.bootstrap-select.show-menu-arrow .dropdown-toggle:after{content:'';display:inline-block;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:6px solid #fff;position:absolute;bottom:-4px;left:10px;display:none}.bootstrap-select.show-menu-arrow.dropup .dropdown-toggle:before{bottom:auto;top:-3px;border-top:7px solid #ccc;border-bottom:0;border-top-color:rgba(0,0,0,.2)}.bootstrap-select.show-menu-arrow.dropup .dropdown-toggle:after{bottom:auto;top:-3px;border-top:6px solid #fff;border-bottom:0}.bootstrap-select.show-menu-arrow.pull-right .dropdown-toggle:before{right:12px;left:auto}.bootstrap-select.show-menu-arrow.pull-right .dropdown-toggle:after{right:13px;left:auto}.bootstrap-select.show-menu-arrow.open>.dropdown-toggle:before,.bootstrap-select.show-menu-arrow.open>.dropdown-toggle:after{display:block}.bootstrap-select.btn-group .no-results{padding:3px;background:#f5f5f5;margin:0 5px}.bootstrap-select.btn-group .dropdown-menu .notify{position:absolute;bottom:5px;width:96%;margin:0 2%;min-height:26px;padding:3px 5px;background:#f5f5f5;border:1px solid #e3e3e3;box-shadow:inset 0 1px 1px rgba(0,0,0,.05);pointer-events:none;opacity:.9;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.mobile-device{position:absolute;top:0;left:0;display:block!important;width:100%;height:100%!important;opacity:0}.bootstrap-select.fit-width{width:auto!important}.bootstrap-select.btn-group.fit-width .btn .filter-option{position:static}.bootstrap-select.btn-group.fit-width .btn .caret{position:static;top:auto;margin-top:-1px}.control-group.error .bootstrap-select .dropdown-toggle{border-color:#b94a48}.bootstrap-select-searchbox,.bootstrap-select .bs-actionsbox{padding:4px 8px}.bootstrap-select .bs-actionsbox{float:left;width:100%;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.bootstrap-select-searchbox+.bs-actionsbox{padding:0 8px 4px}.bootstrap-select-searchbox input{margin-bottom:0}.bootstrap-select .bs-actionsbox .btn-group button{width:50%}");
-});
-
-/*!
- * bootstrap-select v1.5.4
- * http://silviomoreto.github.io/bootstrap-select/
- *
- * Copyright 2013 bootstrap-select
- * Licensed under the MIT license
- */
-!function($) {
-    "use strict";
-    $.expr[":"].icontains = function(obj, index, meta) {
-        return $(obj).text().toUpperCase().indexOf(meta[3].toUpperCase()) >= 0;
-    };
-    var Selectpicker = function(element, options, e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-        this.$element = $(element);
-        this.$newElement = null;
-        this.$button = null;
-        this.$menu = null;
-        this.$lis = null;
-        //Merge defaults, options and data-attributes to make our options
-        this.options = $.extend({}, $.fn.selectpicker.defaults, this.$element.data(), typeof options == "object" && options);
-        //If we have no title yet, check the attribute 'title' (this is missed by jq as its not a data-attribute
-        if (this.options.title === null) {
-            this.options.title = this.$element.attr("title");
-        }
-        //Expose public methods
-        this.val = Selectpicker.prototype.val;
-        this.render = Selectpicker.prototype.render;
-        this.refresh = Selectpicker.prototype.refresh;
-        this.setStyle = Selectpicker.prototype.setStyle;
-        this.selectAll = Selectpicker.prototype.selectAll;
-        this.deselectAll = Selectpicker.prototype.deselectAll;
-        this.init();
-    };
-    Selectpicker.prototype = {
-        constructor: Selectpicker,
-        init: function() {
-            var that = this, id = this.$element.attr("id");
-            this.$element.hide();
-            this.multiple = this.$element.prop("multiple");
-            this.autofocus = this.$element.prop("autofocus");
-            this.$newElement = this.createView();
-            this.$element.after(this.$newElement);
-            this.$menu = this.$newElement.find("> .dropdown-menu");
-            this.$button = this.$newElement.find("> button");
-            this.$searchbox = this.$newElement.find("input");
-            if (id !== undefined) {
-                this.$button.attr("data-id", id);
-                $('label[for="' + id + '"]').click(function(e) {
-                    e.preventDefault();
-                    that.$button.focus();
-                });
-            }
-            this.checkDisabled();
-            this.clickListener();
-            if (this.options.liveSearch) this.liveSearchListener();
-            this.render();
-            this.liHeight();
-            this.setStyle();
-            this.setWidth();
-            if (this.options.container) this.selectPosition();
-            this.$menu.data("this", this);
-            this.$newElement.data("this", this);
-        },
-        createDropdown: function() {
-            //If we are multiple, then add the show-tick class by default
-            var multiple = this.multiple ? " show-tick" : "";
-            var inputGroup = this.$element.parent().hasClass("input-group") ? " input-group-btn" : "";
-            var autofocus = this.autofocus ? " autofocus" : "";
-            var header = this.options.header ? '<div class="popover-title"><button type="button" class="close" aria-hidden="true">&times;</button>' + this.options.header + "</div>" : "";
-            var searchbox = this.options.liveSearch ? '<div class="bootstrap-select-searchbox"><input type="text" class="input-block-level form-control" /></div>' : "";
-            var actionsbox = this.options.actionsBox ? '<div class="bs-actionsbox">' + '<div class="btn-group btn-block">' + '<button class="actions-btn bs-select-all btn btn-sm btn-default">' + "Select All" + "</button>" + '<button class="actions-btn bs-deselect-all btn btn-sm btn-default">' + "Deselect All" + "</button>" + "</div>" + "</div>" : "";
-            var drop = '<div class="btn-group bootstrap-select' + multiple + inputGroup + '">' + '<button type="button" class="btn dropdown-toggle selectpicker" data-toggle="dropdown"' + autofocus + ">" + '<span class="filter-option pull-left"></span>&nbsp;' + '<span class="caret"></span>' + "</button>" + '<div class="dropdown-menu open">' + header + searchbox + actionsbox + '<ul class="dropdown-menu inner selectpicker" role="menu">' + "</ul>" + "</div>" + "</div>";
-            return $(drop);
-        },
-        createView: function() {
-            var $drop = this.createDropdown();
-            var $li = this.createLi();
-            $drop.find("ul").append($li);
-            return $drop;
-        },
-        reloadLi: function() {
-            //Remove all children.
-            this.destroyLi();
-            //Re build
-            var $li = this.createLi();
-            this.$menu.find("ul").append($li);
-        },
-        destroyLi: function() {
-            this.$menu.find("li").remove();
-        },
-        createLi: function() {
-            var that = this, _liA = [], _liHtml = "";
-            this.$element.find("option").each(function() {
-                var $this = $(this);
-                //Get the class and text for the option
-                var optionClass = $this.attr("class") || "";
-                var inline = $this.attr("style") || "";
-                var text = $this.data("content") ? $this.data("content") : $this.html();
-                var subtext = $this.data("subtext") !== undefined ? '<small class="muted text-muted">' + $this.data("subtext") + "</small>" : "";
-                var icon = $this.data("icon") !== undefined ? '<i class="' + that.options.iconBase + " " + $this.data("icon") + '"></i> ' : "";
-                if (icon !== "" && ($this.is(":disabled") || $this.parent().is(":disabled"))) {
-                    icon = "<span>" + icon + "</span>";
-                }
-                if (!$this.data("content")) {
-                    //Prepend any icon and append any subtext to the main text.
-                    text = icon + '<span class="text">' + text + subtext + "</span>";
-                }
-                if (that.options.hideDisabled && ($this.is(":disabled") || $this.parent().is(":disabled"))) {
-                    _liA.push('<a style="min-height: 0; padding: 0"></a>');
-                } else if ($this.parent().is("optgroup") && $this.data("divider") !== true) {
-                    if ($this.index() === 0) {
-                        //Get the opt group label
-                        var label = $this.parent().attr("label");
-                        var labelSubtext = $this.parent().data("subtext") !== undefined ? '<small class="muted text-muted">' + $this.parent().data("subtext") + "</small>" : "";
-                        var labelIcon = $this.parent().data("icon") ? '<i class="' + $this.parent().data("icon") + '"></i> ' : "";
-                        label = labelIcon + '<span class="text">' + label + labelSubtext + "</span>";
-                        if ($this[0].index !== 0) {
-                            _liA.push('<div class="div-contain"><div class="divider"></div></div>' + "<dt>" + label + "</dt>" + that.createA(text, "opt " + optionClass, inline));
-                        } else {
-                            _liA.push("<dt>" + label + "</dt>" + that.createA(text, "opt " + optionClass, inline));
-                        }
-                    } else {
-                        _liA.push(that.createA(text, "opt " + optionClass, inline));
-                    }
-                } else if ($this.data("divider") === true) {
-                    _liA.push('<div class="div-contain"><div class="divider"></div></div>');
-                } else if ($(this).data("hidden") === true) {
-                    _liA.push("<a></a>");
-                } else {
-                    _liA.push(that.createA(text, optionClass, inline));
-                }
-            });
-            $.each(_liA, function(i, item) {
-                var hide = item === "<a></a>" ? 'class="hide is-hidden"' : "";
-                _liHtml += '<li rel="' + i + '"' + hide + ">" + item + "</li>";
-            });
-            //If we are not multiple, and we dont have a selected item, and we dont have a title, select the first element so something is set in the button
-            if (!this.multiple && this.$element.find("option:selected").length === 0 && !this.options.title) {
-                this.$element.find("option").eq(0).prop("selected", true).attr("selected", "selected");
-            }
-            return $(_liHtml);
-        },
-        createA: function(text, classes, inline) {
-            return '<a tabindex="0" class="' + classes + '" style="' + inline + '">' + text + '<i class="' + this.options.iconBase + " " + this.options.tickIcon + ' icon-ok check-mark"></i>' + "</a>";
-        },
-        render: function(updateLi) {
-            var that = this;
-            //Update the LI to match the SELECT
-            if (updateLi !== false) {
-                this.$element.find("option").each(function(index) {
-                    that.setDisabled(index, $(this).is(":disabled") || $(this).parent().is(":disabled"));
-                    that.setSelected(index, $(this).is(":selected"));
-                });
-            }
-            this.tabIndex();
-            var selectedItems = this.$element.find("option:selected").map(function() {
-                var $this = $(this);
-                var icon = $this.data("icon") && that.options.showIcon ? '<i class="' + that.options.iconBase + " " + $this.data("icon") + '"></i> ' : "";
-                var subtext;
-                if (that.options.showSubtext && $this.attr("data-subtext") && !that.multiple) {
-                    subtext = ' <small class="muted text-muted">' + $this.data("subtext") + "</small>";
-                } else {
-                    subtext = "";
-                }
-                if ($this.data("content") && that.options.showContent) {
-                    return $this.data("content");
-                } else if ($this.attr("title") !== undefined) {
-                    return $this.attr("title");
-                } else {
-                    return icon + $this.html() + subtext;
-                }
-            }).toArray();
-            //Fixes issue in IE10 occurring when no default option is selected and at least one option is disabled
-            //Convert all the values into a comma delimited string
-            var title = !this.multiple ? selectedItems[0] : selectedItems.join(this.options.multipleSeparator);
-            //If this is multi select, and the selectText type is count, the show 1 of 2 selected etc..
-            if (this.multiple && this.options.selectedTextFormat.indexOf("count") > -1) {
-                var max = this.options.selectedTextFormat.split(">");
-                var notDisabled = this.options.hideDisabled ? ":not([disabled])" : "";
-                if (max.length > 1 && selectedItems.length > max[1] || max.length == 1 && selectedItems.length >= 2) {
-                    title = this.options.countSelectedText.replace("{0}", selectedItems.length).replace("{1}", this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"])' + notDisabled).length);
-                }
-            }
-            this.options.title = this.$element.attr("title");
-            //If we dont have a title, then use the default, or if nothing is set at all, use the not selected text
-            if (!title) {
-                title = this.options.title !== undefined ? this.options.title : this.options.noneSelectedText;
-            }
-            this.$button.attr("title", $.trim(title));
-            this.$newElement.find(".filter-option").html(title);
-        },
-        setStyle: function(style, status) {
-            if (this.$element.attr("class")) {
-                this.$newElement.addClass(this.$element.attr("class").replace(/selectpicker|mobile-device/gi, ""));
-            }
-            var buttonClass = style ? style : this.options.style;
-            if (status == "add") {
-                this.$button.addClass(buttonClass);
-            } else if (status == "remove") {
-                this.$button.removeClass(buttonClass);
-            } else {
-                this.$button.removeClass(this.options.style);
-                this.$button.addClass(buttonClass);
-            }
-        },
-        liHeight: function() {
-            if (this.options.size === false) return;
-            var $selectClone = this.$menu.parent().clone().find("> .dropdown-toggle").prop("autofocus", false).end().appendTo("body"), $menuClone = $selectClone.addClass("open").find("> .dropdown-menu"), liHeight = $menuClone.find("li > a").outerHeight(), headerHeight = this.options.header ? $menuClone.find(".popover-title").outerHeight() : 0, searchHeight = this.options.liveSearch ? $menuClone.find(".bootstrap-select-searchbox").outerHeight() : 0, actionsHeight = this.options.actionsBox ? $menuClone.find(".bs-actionsbox").outerHeight() : 0;
-            $selectClone.remove();
-            this.$newElement.data("liHeight", liHeight).data("headerHeight", headerHeight).data("searchHeight", searchHeight).data("actionsHeight", actionsHeight);
-        },
-        setSize: function() {
-            var that = this, menu = this.$menu, menuInner = menu.find(".inner"), selectHeight = this.$newElement.outerHeight(), liHeight = this.$newElement.data("liHeight"), headerHeight = this.$newElement.data("headerHeight"), searchHeight = this.$newElement.data("searchHeight"), actionsHeight = this.$newElement.data("actionsHeight"), divHeight = menu.find("li .divider").outerHeight(true), menuPadding = parseInt(menu.css("padding-top")) + parseInt(menu.css("padding-bottom")) + parseInt(menu.css("border-top-width")) + parseInt(menu.css("border-bottom-width")), notDisabled = this.options.hideDisabled ? ":not(.disabled)" : "", $window = $(window), menuExtras = menuPadding + parseInt(menu.css("margin-top")) + parseInt(menu.css("margin-bottom")) + 2, menuHeight, selectOffsetTop, selectOffsetBot, posVert = function() {
-                selectOffsetTop = that.$newElement.offset().top - $window.scrollTop();
-                selectOffsetBot = $window.height() - selectOffsetTop - selectHeight;
-            };
-            posVert();
-            if (this.options.header) menu.css("padding-top", 0);
-            if (this.options.size == "auto") {
-                var getSize = function() {
-                    var minHeight, lisVis = that.$lis.not(".hide");
-                    posVert();
-                    menuHeight = selectOffsetBot - menuExtras;
-                    if (that.options.dropupAuto) {
-                        that.$newElement.toggleClass("dropup", selectOffsetTop > selectOffsetBot && menuHeight - menuExtras < menu.height());
-                    }
-                    if (that.$newElement.hasClass("dropup")) {
-                        menuHeight = selectOffsetTop - menuExtras;
-                    }
-                    if (lisVis.length + lisVis.find("dt").length > 3) {
-                        minHeight = liHeight * 3 + menuExtras - 2;
-                    } else {
-                        minHeight = 0;
-                    }
-                    menu.css({
-                        "max-height": menuHeight + "px",
-                        overflow: "hidden",
-                        "min-height": minHeight + headerHeight + searchHeight + actionsHeight + "px"
-                    });
-                    menuInner.css({
-                        "max-height": menuHeight - headerHeight - searchHeight - actionsHeight - menuPadding + "px",
-                        "overflow-y": "auto",
-                        "min-height": Math.max(minHeight - menuPadding, 0) + "px"
-                    });
-                };
-                getSize();
-                this.$searchbox.off("input.getSize propertychange.getSize").on("input.getSize propertychange.getSize", getSize);
-                $(window).off("resize.getSize").on("resize.getSize", getSize);
-                $(window).off("scroll.getSize").on("scroll.getSize", getSize);
-            } else if (this.options.size && this.options.size != "auto" && menu.find("li" + notDisabled).length > this.options.size) {
-                var optIndex = menu.find("li" + notDisabled + " > *").filter(":not(.div-contain)").slice(0, this.options.size).last().parent().index();
-                var divLength = menu.find("li").slice(0, optIndex + 1).find(".div-contain").length;
-                menuHeight = liHeight * this.options.size + divLength * divHeight + menuPadding;
-                if (that.options.dropupAuto) {
-                    this.$newElement.toggleClass("dropup", selectOffsetTop > selectOffsetBot && menuHeight < menu.height());
-                }
-                menu.css({
-                    "max-height": menuHeight + headerHeight + searchHeight + actionsHeight + "px",
-                    overflow: "hidden"
-                });
-                menuInner.css({
-                    "max-height": menuHeight - menuPadding + "px",
-                    "overflow-y": "auto"
-                });
-            }
-        },
-        setWidth: function() {
-            if (this.options.width == "auto") {
-                this.$menu.css("min-width", "0");
-                // Get correct width if element hidden
-                var selectClone = this.$newElement.clone().appendTo("body");
-                var ulWidth = selectClone.find("> .dropdown-menu").css("width");
-                var btnWidth = selectClone.css("width", "auto").find("> button").css("width");
-                selectClone.remove();
-                // Set width to whatever's larger, button title or longest option
-                this.$newElement.css("width", Math.max(parseInt(ulWidth), parseInt(btnWidth)) + "px");
-            } else if (this.options.width == "fit") {
-                // Remove inline min-width so width can be changed from 'auto'
-                this.$menu.css("min-width", "");
-                this.$newElement.css("width", "").addClass("fit-width");
-            } else if (this.options.width) {
-                // Remove inline min-width so width can be changed from 'auto'
-                this.$menu.css("min-width", "");
-                this.$newElement.css("width", this.options.width);
-            } else {
-                // Remove inline min-width/width so width can be changed
-                this.$menu.css("min-width", "");
-                this.$newElement.css("width", "");
-            }
-            // Remove fit-width class if width is changed programmatically
-            if (this.$newElement.hasClass("fit-width") && this.options.width !== "fit") {
-                this.$newElement.removeClass("fit-width");
-            }
-        },
-        selectPosition: function() {
-            var that = this, drop = "<div />", $drop = $(drop), pos, actualHeight, getPlacement = function($element) {
-                $drop.addClass($element.attr("class").replace(/form-control/gi, "")).toggleClass("dropup", $element.hasClass("dropup"));
-                pos = $element.offset();
-                actualHeight = $element.hasClass("dropup") ? 0 : $element[0].offsetHeight;
-                $drop.css({
-                    top: pos.top + actualHeight,
-                    left: pos.left,
-                    width: $element[0].offsetWidth,
-                    position: "absolute"
-                });
-            };
-            this.$newElement.on("click", function() {
-                if (that.isDisabled()) {
-                    return;
-                }
-                getPlacement($(this));
-                $drop.appendTo(that.options.container);
-                $drop.toggleClass("open", !$(this).hasClass("open"));
-                $drop.append(that.$menu);
-            });
-            $(window).resize(function() {
-                getPlacement(that.$newElement);
-            });
-            $(window).on("scroll", function() {
-                getPlacement(that.$newElement);
-            });
-            $("html").on("click", function(e) {
-                if ($(e.target).closest(that.$newElement).length < 1) {
-                    $drop.removeClass("open");
-                }
-            });
-        },
-        mobile: function() {
-            this.$element.addClass("mobile-device").appendTo(this.$newElement);
-            if (this.options.container) this.$menu.hide();
-        },
-        refresh: function() {
-            this.$lis = null;
-            this.reloadLi();
-            this.render();
-            this.setWidth();
-            this.setStyle();
-            this.checkDisabled();
-            this.liHeight();
-        },
-        update: function() {
-            this.reloadLi();
-            this.setWidth();
-            this.setStyle();
-            this.checkDisabled();
-            this.liHeight();
-        },
-        setSelected: function(index, selected) {
-            if (this.$lis == null) this.$lis = this.$menu.find("li");
-            $(this.$lis[index]).toggleClass("selected", selected);
-        },
-        setDisabled: function(index, disabled) {
-            if (this.$lis == null) this.$lis = this.$menu.find("li");
-            if (disabled) {
-                $(this.$lis[index]).addClass("disabled").find("a").attr("href", "#").attr("tabindex", -1);
-            } else {
-                $(this.$lis[index]).removeClass("disabled").find("a").removeAttr("href").attr("tabindex", 0);
-            }
-        },
-        isDisabled: function() {
-            return this.$element.is(":disabled");
-        },
-        checkDisabled: function() {
-            var that = this;
-            if (this.isDisabled()) {
-                this.$button.addClass("disabled").attr("tabindex", -1);
-            } else {
-                if (this.$button.hasClass("disabled")) {
-                    this.$button.removeClass("disabled");
-                }
-                if (this.$button.attr("tabindex") == -1) {
-                    if (!this.$element.data("tabindex")) this.$button.removeAttr("tabindex");
-                }
-            }
-            this.$button.click(function() {
-                return !that.isDisabled();
-            });
-        },
-        tabIndex: function() {
-            if (this.$element.is("[tabindex]")) {
-                this.$element.data("tabindex", this.$element.attr("tabindex"));
-                this.$button.attr("tabindex", this.$element.data("tabindex"));
-            }
-        },
-        clickListener: function() {
-            var that = this;
-            $("body").on("touchstart.dropdown", ".dropdown-menu", function(e) {
-                e.stopPropagation();
-            });
-            this.$newElement.on("click", function() {
-                that.setSize();
-                if (!that.options.liveSearch && !that.multiple) {
-                    setTimeout(function() {
-                        that.$menu.find(".selected a").focus();
-                    }, 10);
-                }
-            });
-            this.$menu.on("click", "li a", function(e) {
-                var clickedIndex = $(this).parent().index(), prevValue = that.$element.val(), prevIndex = that.$element.prop("selectedIndex");
-                //Dont close on multi choice menu
-                if (that.multiple) {
-                    e.stopPropagation();
-                }
-                e.preventDefault();
-                //Dont run if we have been disabled
-                if (!that.isDisabled() && !$(this).parent().hasClass("disabled")) {
-                    var $options = that.$element.find("option"), $option = $options.eq(clickedIndex), state = $option.prop("selected"), $optgroup = $option.parent("optgroup"), maxOptions = that.options.maxOptions, maxOptionsGrp = $optgroup.data("maxOptions") || false;
-                    //Deselect all others if not multi select box
-                    if (!that.multiple) {
-                        $options.prop("selected", false);
-                        $option.prop("selected", true);
-                        that.$menu.find(".selected").removeClass("selected");
-                        that.setSelected(clickedIndex, true);
-                    } else {
-                        $option.prop("selected", !state);
-                        that.setSelected(clickedIndex, !state);
-                        if (maxOptions !== false || maxOptionsGrp !== false) {
-                            var maxReached = maxOptions < $options.filter(":selected").length, maxReachedGrp = maxOptionsGrp < $optgroup.find("option:selected").length, maxOptionsArr = that.options.maxOptionsText, maxTxt = maxOptionsArr[0].replace("{n}", maxOptions), maxTxtGrp = maxOptionsArr[1].replace("{n}", maxOptionsGrp), $notify = $('<div class="notify"></div>');
-                            if (maxOptions && maxReached || maxOptionsGrp && maxReachedGrp) {
-                                // If {var} is set in array, replace it
-                                if (maxOptionsArr[2]) {
-                                    maxTxt = maxTxt.replace("{var}", maxOptionsArr[2][maxOptions > 1 ? 0 : 1]);
-                                    maxTxtGrp = maxTxtGrp.replace("{var}", maxOptionsArr[2][maxOptionsGrp > 1 ? 0 : 1]);
-                                }
-                                $option.prop("selected", false);
-                                that.$menu.append($notify);
-                                if (maxOptions && maxReached) {
-                                    $notify.append($("<div>" + maxTxt + "</div>"));
-                                    that.$element.trigger("maxReached.bs.select");
-                                }
-                                if (maxOptionsGrp && maxReachedGrp) {
-                                    $notify.append($("<div>" + maxTxtGrp + "</div>"));
-                                    that.$element.trigger("maxReachedGrp.bs.select");
-                                }
-                                setTimeout(function() {
-                                    that.setSelected(clickedIndex, false);
-                                }, 10);
-                                $notify.delay(750).fadeOut(300, function() {
-                                    $(this).remove();
-                                });
-                            }
-                        }
-                    }
-                    if (!that.multiple) {
-                        that.$button.focus();
-                    } else if (that.options.liveSearch) {
-                        that.$searchbox.focus();
-                    }
-                    // Trigger select 'change'
-                    if (prevValue != that.$element.val() && that.multiple || prevIndex != that.$element.prop("selectedIndex") && !that.multiple) {
-                        that.$element.change();
-                    }
-                }
-            });
-            this.$menu.on("click", "li.disabled a, li dt, li .div-contain, .popover-title, .popover-title :not(.close)", function(e) {
-                if (e.target == this) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!that.options.liveSearch) {
-                        that.$button.focus();
-                    } else {
-                        that.$searchbox.focus();
-                    }
-                }
-            });
-            this.$menu.on("click", ".popover-title .close", function() {
-                that.$button.focus();
-            });
-            this.$searchbox.on("click", function(e) {
-                e.stopPropagation();
-            });
-            this.$menu.on("click", ".actions-btn", function(e) {
-                if (that.options.liveSearch) {
-                    that.$searchbox.focus();
-                } else {
-                    that.$button.focus();
-                }
-                e.preventDefault();
-                e.stopPropagation();
-                if ($(this).is(".bs-select-all")) {
-                    that.selectAll();
-                } else {
-                    that.deselectAll();
-                }
-                that.$element.change();
-            });
-            this.$element.change(function() {
-                that.render(false);
-            });
-        },
-        liveSearchListener: function() {
-            var that = this, no_results = $('<li class="no-results"></li>');
-            this.$newElement.on("click.dropdown.data-api", function() {
-                that.$menu.find(".active").removeClass("active");
-                if (!!that.$searchbox.val()) {
-                    that.$searchbox.val("");
-                    that.$lis.not(".is-hidden").removeClass("hide");
-                    if (!!no_results.parent().length) no_results.remove();
-                }
-                if (!that.multiple) that.$menu.find(".selected").addClass("active");
-                setTimeout(function() {
-                    that.$searchbox.focus();
-                }, 10);
-            });
-            this.$searchbox.on("input propertychange", function() {
-                if (that.$searchbox.val()) {
-                    that.$lis.not(".is-hidden").removeClass("hide").find("a").not(":icontains(" + that.$searchbox.val() + ")").parent().addClass("hide");
-                    if (!that.$menu.find("li").filter(":visible:not(.no-results)").length) {
-                        if (!!no_results.parent().length) no_results.remove();
-                        no_results.html(that.options.noneResultsText + ' "' + that.$searchbox.val() + '"').show();
-                        that.$menu.find("li").last().after(no_results);
-                    } else if (!!no_results.parent().length) {
-                        no_results.remove();
-                    }
-                } else {
-                    that.$lis.not(".is-hidden").removeClass("hide");
-                    if (!!no_results.parent().length) no_results.remove();
-                }
-                that.$menu.find("li.active").removeClass("active");
-                that.$menu.find("li").filter(":visible:not(.divider)").eq(0).addClass("active").find("a").focus();
-                $(this).focus();
-            });
-            this.$menu.on("mouseenter", "a", function(e) {
-                that.$menu.find(".active").removeClass("active");
-                $(e.currentTarget).parent().not(".disabled").addClass("active");
-            });
-            this.$menu.on("mouseleave", "a", function() {
-                that.$menu.find(".active").removeClass("active");
-            });
-        },
-        val: function(value) {
-            if (value !== undefined) {
-                this.$element.val(value);
-                this.$element.change();
-                return this.$element;
-            } else {
-                return this.$element.val();
-            }
-        },
-        selectAll: function() {
-            if (this.$lis == null) this.$lis = this.$menu.find("li");
-            this.$element.find("option:enabled").prop("selected", true);
-            $(this.$lis).filter(":not(.disabled)").addClass("selected");
-            this.render(false);
-        },
-        deselectAll: function() {
-            if (this.$lis == null) this.$lis = this.$menu.find("li");
-            this.$element.find("option:enabled").prop("selected", false);
-            $(this.$lis).filter(":not(.disabled)").removeClass("selected");
-            this.render(false);
-        },
-        keydown: function(e) {
-            var $this, $items, $parent, index, next, first, last, prev, nextPrev, that, prevIndex, isActive, keyCodeMap = {
-                32: " ",
-                48: "0",
-                49: "1",
-                50: "2",
-                51: "3",
-                52: "4",
-                53: "5",
-                54: "6",
-                55: "7",
-                56: "8",
-                57: "9",
-                59: ";",
-                65: "a",
-                66: "b",
-                67: "c",
-                68: "d",
-                69: "e",
-                70: "f",
-                71: "g",
-                72: "h",
-                73: "i",
-                74: "j",
-                75: "k",
-                76: "l",
-                77: "m",
-                78: "n",
-                79: "o",
-                80: "p",
-                81: "q",
-                82: "r",
-                83: "s",
-                84: "t",
-                85: "u",
-                86: "v",
-                87: "w",
-                88: "x",
-                89: "y",
-                90: "z",
-                96: "0",
-                97: "1",
-                98: "2",
-                99: "3",
-                100: "4",
-                101: "5",
-                102: "6",
-                103: "7",
-                104: "8",
-                105: "9"
-            };
-            $this = $(this);
-            $parent = $this.parent();
-            if ($this.is("input")) $parent = $this.parent().parent();
-            that = $parent.data("this");
-            if (that.options.liveSearch) $parent = $this.parent().parent();
-            if (that.options.container) $parent = that.$menu;
-            $items = $("[role=menu] li:not(.divider) a", $parent);
-            isActive = that.$menu.parent().hasClass("open");
-            if (!isActive && /([0-9]|[A-z])/.test(String.fromCharCode(e.keyCode))) {
-                if (!that.options.container) {
-                    that.setSize();
-                    that.$menu.parent().addClass("open");
-                    isActive = that.$menu.parent().hasClass("open");
-                } else {
-                    that.$newElement.trigger("click");
-                }
-                that.$searchbox.focus();
-            }
-            if (that.options.liveSearch) {
-                if (/(^9$|27)/.test(e.keyCode) && isActive && that.$menu.find(".active").length === 0) {
-                    e.preventDefault();
-                    that.$menu.parent().removeClass("open");
-                    that.$button.focus();
-                }
-                $items = $("[role=menu] li:not(.divider):visible", $parent);
-                if (!$this.val() && !/(38|40)/.test(e.keyCode)) {
-                    if ($items.filter(".active").length === 0) {
-                        $items = that.$newElement.find("li").filter(":icontains(" + keyCodeMap[e.keyCode] + ")");
-                    }
-                }
-            }
-            if (!$items.length) return;
-            if (/(38|40)/.test(e.keyCode)) {
-                index = $items.index($items.filter(":focus"));
-                first = $items.parent(":not(.disabled):visible").first().index();
-                last = $items.parent(":not(.disabled):visible").last().index();
-                next = $items.eq(index).parent().nextAll(":not(.disabled):visible").eq(0).index();
-                prev = $items.eq(index).parent().prevAll(":not(.disabled):visible").eq(0).index();
-                nextPrev = $items.eq(next).parent().prevAll(":not(.disabled):visible").eq(0).index();
-                if (that.options.liveSearch) {
-                    $items.each(function(i) {
-                        if ($(this).is(":not(.disabled)")) {
-                            $(this).data("index", i);
-                        }
-                    });
-                    index = $items.index($items.filter(".active"));
-                    first = $items.filter(":not(.disabled):visible").first().data("index");
-                    last = $items.filter(":not(.disabled):visible").last().data("index");
-                    next = $items.eq(index).nextAll(":not(.disabled):visible").eq(0).data("index");
-                    prev = $items.eq(index).prevAll(":not(.disabled):visible").eq(0).data("index");
-                    nextPrev = $items.eq(next).prevAll(":not(.disabled):visible").eq(0).data("index");
-                }
-                prevIndex = $this.data("prevIndex");
-                if (e.keyCode == 38) {
-                    if (that.options.liveSearch) index -= 1;
-                    if (index != nextPrev && index > prev) index = prev;
-                    if (index < first) index = first;
-                    if (index == prevIndex) index = last;
-                }
-                if (e.keyCode == 40) {
-                    if (that.options.liveSearch) index += 1;
-                    if (index == -1) index = 0;
-                    if (index != nextPrev && index < next) index = next;
-                    if (index > last) index = last;
-                    if (index == prevIndex) index = first;
-                }
-                $this.data("prevIndex", index);
-                if (!that.options.liveSearch) {
-                    $items.eq(index).focus();
-                } else {
-                    e.preventDefault();
-                    if (!$this.is(".dropdown-toggle")) {
-                        $items.removeClass("active");
-                        $items.eq(index).addClass("active").find("a").focus();
-                        $this.focus();
-                    }
-                }
-            } else if (!$this.is("input")) {
-                var keyIndex = [], count, prevKey;
-                $items.each(function() {
-                    if ($(this).parent().is(":not(.disabled)")) {
-                        if ($.trim($(this).text().toLowerCase()).substring(0, 1) == keyCodeMap[e.keyCode]) {
-                            keyIndex.push($(this).parent().index());
-                        }
-                    }
-                });
-                count = $(document).data("keycount");
-                count++;
-                $(document).data("keycount", count);
-                prevKey = $.trim($(":focus").text().toLowerCase()).substring(0, 1);
-                if (prevKey != keyCodeMap[e.keyCode]) {
-                    count = 1;
-                    $(document).data("keycount", count);
-                } else if (count >= keyIndex.length) {
-                    $(document).data("keycount", 0);
-                    if (count > keyIndex.length) count = 1;
-                }
-                $items.eq(keyIndex[count - 1]).focus();
-            }
-            // Select focused option if "Enter", "Spacebar", "Tab" are pressed inside the menu.
-            if (/(13|32|^9$)/.test(e.keyCode) && isActive) {
-                if (!/(32)/.test(e.keyCode)) e.preventDefault();
-                if (!that.options.liveSearch) {
-                    $(":focus").click();
-                } else if (!/(32)/.test(e.keyCode)) {
-                    that.$menu.find(".active a").click();
-                    $this.focus();
-                }
-                $(document).data("keycount", 0);
-            }
-            if (/(^9$|27)/.test(e.keyCode) && isActive && (that.multiple || that.options.liveSearch) || /(27)/.test(e.keyCode) && !isActive) {
-                that.$menu.parent().removeClass("open");
-                that.$button.focus();
-            }
-        },
-        hide: function() {
-            this.$newElement.hide();
-        },
-        show: function() {
-            this.$newElement.show();
-        },
-        destroy: function() {
-            this.$newElement.remove();
-            this.$element.remove();
-        }
-    };
-    $.fn.selectpicker = function(option, event) {
-        //get the args of the outer function..
-        var args = arguments;
-        var value;
-        var chain = this.each(function() {
-            if ($(this).is("select")) {
-                var $this = $(this), data = $this.data("selectpicker"), options = typeof option == "object" && option;
-                if (!data) {
-                    $this.data("selectpicker", data = new Selectpicker(this, options, event));
-                } else if (options) {
-                    for (var i in options) {
-                        data.options[i] = options[i];
-                    }
-                }
-                if (typeof option == "string") {
-                    //Copy the value of option, as once we shift the arguments
-                    //it also shifts the value of option.
-                    var property = option;
-                    if (data[property] instanceof Function) {
-                        [].shift.apply(args);
-                        value = data[property].apply(data, args);
-                    } else {
-                        value = data.options[property];
-                    }
-                }
-            }
-        });
-        if (value !== undefined) {
-            return value;
-        } else {
-            return chain;
-        }
-    };
-    $.fn.selectpicker.defaults = {
-        style: "btn-default",
-        size: "auto",
-        title: null,
-        selectedTextFormat: "values",
-        noneSelectedText: "Nothing selected",
-        noneResultsText: "No results match",
-        countSelectedText: "{0} of {1} selected",
-        maxOptionsText: [ "Limit reached ({n} {var} max)", "Group limit reached ({n} {var} max)", [ "items", "item" ] ],
-        width: false,
-        container: false,
-        hideDisabled: false,
-        showSubtext: false,
-        showIcon: true,
-        showContent: true,
-        dropupAuto: true,
-        header: false,
-        liveSearch: false,
-        actionsBox: false,
-        multipleSeparator: ", ",
-        iconBase: "glyphicon",
-        tickIcon: "glyphicon-ok",
-        maxOptions: false
-    };
-    $(document).data("keycount", 0).on("keydown", ".bootstrap-select [data-toggle=dropdown], .bootstrap-select [role=menu], .bootstrap-select-searchbox input", Selectpicker.prototype.keydown).on("focusin.modal", ".bootstrap-select [data-toggle=dropdown], .bootstrap-select [role=menu], .bootstrap-select-searchbox input", function(e) {
-        e.stopPropagation();
-    });
-}(window.jQuery);
-
-define("torabot/main/0.1.0/typeahead.jquery-debug", [], function(require, exports, module) {
-    /*!
- * typeahead.js 0.10.2
- * https://github.com/twitter/typeahead.js
- * Copyright 2013-2014 Twitter, Inc. and other contributors; Licensed MIT
- */
-    (function($) {
-        var _ = {
-            isMsie: function() {
-                return /(msie|trident)/i.test(navigator.userAgent) ? navigator.userAgent.match(/(msie |rv:)(\d+(.\d+)?)/i)[2] : false;
-            },
-            isBlankString: function(str) {
-                return !str || /^\s*$/.test(str);
-            },
-            escapeRegExChars: function(str) {
-                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-            },
-            isString: function(obj) {
-                return typeof obj === "string";
-            },
-            isNumber: function(obj) {
-                return typeof obj === "number";
-            },
-            isArray: $.isArray,
-            isFunction: $.isFunction,
-            isObject: $.isPlainObject,
-            isUndefined: function(obj) {
-                return typeof obj === "undefined";
-            },
-            bind: $.proxy,
-            each: function(collection, cb) {
-                $.each(collection, reverseArgs);
-                function reverseArgs(index, value) {
-                    return cb(value, index);
-                }
-            },
-            map: $.map,
-            filter: $.grep,
-            every: function(obj, test) {
-                var result = true;
-                if (!obj) {
-                    return result;
-                }
-                $.each(obj, function(key, val) {
-                    if (!(result = test.call(null, val, key, obj))) {
-                        return false;
-                    }
-                });
-                return !!result;
-            },
-            some: function(obj, test) {
-                var result = false;
-                if (!obj) {
-                    return result;
-                }
-                $.each(obj, function(key, val) {
-                    if (result = test.call(null, val, key, obj)) {
-                        return false;
-                    }
-                });
-                return !!result;
-            },
-            mixin: $.extend,
-            getUniqueId: function() {
-                var counter = 0;
-                return function() {
-                    return counter++;
-                };
-            }(),
-            templatify: function templatify(obj) {
-                return $.isFunction(obj) ? obj : template;
-                function template() {
-                    return String(obj);
-                }
-            },
-            defer: function(fn) {
-                setTimeout(fn, 0);
-            },
-            debounce: function(func, wait, immediate) {
-                var timeout, result;
-                return function() {
-                    var context = this, args = arguments, later, callNow;
-                    later = function() {
-                        timeout = null;
-                        if (!immediate) {
-                            result = func.apply(context, args);
-                        }
-                    };
-                    callNow = immediate && !timeout;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                    if (callNow) {
-                        result = func.apply(context, args);
-                    }
-                    return result;
-                };
-            },
-            throttle: function(func, wait) {
-                var context, args, timeout, result, previous, later;
-                previous = 0;
-                later = function() {
-                    previous = new Date();
-                    timeout = null;
-                    result = func.apply(context, args);
-                };
-                return function() {
-                    var now = new Date(), remaining = wait - (now - previous);
-                    context = this;
-                    args = arguments;
-                    if (remaining <= 0) {
-                        clearTimeout(timeout);
-                        timeout = null;
-                        previous = now;
-                        result = func.apply(context, args);
-                    } else if (!timeout) {
-                        timeout = setTimeout(later, remaining);
-                    }
-                    return result;
-                };
-            },
-            noop: function() {}
-        };
-        var html = {
-            wrapper: '<span class="twitter-typeahead"></span>',
-            dropdown: '<span class="tt-dropdown-menu"></span>',
-            dataset: '<div class="tt-dataset-%CLASS%"></div>',
-            suggestions: '<span class="tt-suggestions"></span>',
-            suggestion: '<div class="tt-suggestion"></div>'
-        };
-        var css = {
-            wrapper: {
-                position: "relative",
-                display: "inline-block"
-            },
-            hint: {
-                position: "absolute",
-                top: "0",
-                left: "0",
-                borderColor: "transparent",
-                boxShadow: "none"
-            },
-            input: {
-                position: "relative",
-                verticalAlign: "top",
-                backgroundColor: "transparent"
-            },
-            inputWithNoHint: {
-                position: "relative",
-                verticalAlign: "top"
-            },
-            dropdown: {
-                position: "absolute",
-                top: "100%",
-                left: "0",
-                zIndex: "100",
-                display: "none"
-            },
-            suggestions: {
-                display: "block"
-            },
-            suggestion: {
-                whiteSpace: "nowrap",
-                cursor: "pointer"
-            },
-            suggestionChild: {
-                whiteSpace: "normal"
-            },
-            ltr: {
-                left: "0",
-                right: "auto"
-            },
-            rtl: {
-                left: "auto",
-                right: " 0"
-            }
-        };
-        if (_.isMsie()) {
-            _.mixin(css.input, {
-                backgroundImage: "url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7)"
-            });
-        }
-        if (_.isMsie() && _.isMsie() <= 7) {
-            _.mixin(css.input, {
-                marginTop: "-1px"
-            });
-        }
-        var EventBus = function() {
-            var namespace = "typeahead:";
-            function EventBus(o) {
-                if (!o || !o.el) {
-                    $.error("EventBus initialized without el");
-                }
-                this.$el = $(o.el);
-            }
-            _.mixin(EventBus.prototype, {
-                trigger: function(type) {
-                    var args = [].slice.call(arguments, 1);
-                    this.$el.trigger(namespace + type, args);
-                }
-            });
-            return EventBus;
-        }();
-        var EventEmitter = function() {
-            var splitter = /\s+/, nextTick = getNextTick();
-            return {
-                onSync: onSync,
-                onAsync: onAsync,
-                off: off,
-                trigger: trigger
-            };
-            function on(method, types, cb, context) {
-                var type;
-                if (!cb) {
-                    return this;
-                }
-                types = types.split(splitter);
-                cb = context ? bindContext(cb, context) : cb;
-                this._callbacks = this._callbacks || {};
-                while (type = types.shift()) {
-                    this._callbacks[type] = this._callbacks[type] || {
-                        sync: [],
-                        async: []
-                    };
-                    this._callbacks[type][method].push(cb);
-                }
-                return this;
-            }
-            function onAsync(types, cb, context) {
-                return on.call(this, "async", types, cb, context);
-            }
-            function onSync(types, cb, context) {
-                return on.call(this, "sync", types, cb, context);
-            }
-            function off(types) {
-                var type;
-                if (!this._callbacks) {
-                    return this;
-                }
-                types = types.split(splitter);
-                while (type = types.shift()) {
-                    delete this._callbacks[type];
-                }
-                return this;
-            }
-            function trigger(types) {
-                var type, callbacks, args, syncFlush, asyncFlush;
-                if (!this._callbacks) {
-                    return this;
-                }
-                types = types.split(splitter);
-                args = [].slice.call(arguments, 1);
-                while ((type = types.shift()) && (callbacks = this._callbacks[type])) {
-                    syncFlush = getFlush(callbacks.sync, this, [ type ].concat(args));
-                    asyncFlush = getFlush(callbacks.async, this, [ type ].concat(args));
-                    syncFlush() && nextTick(asyncFlush);
-                }
-                return this;
-            }
-            function getFlush(callbacks, context, args) {
-                return flush;
-                function flush() {
-                    var cancelled;
-                    for (var i = 0; !cancelled && i < callbacks.length; i += 1) {
-                        cancelled = callbacks[i].apply(context, args) === false;
-                    }
-                    return !cancelled;
-                }
-            }
-            function getNextTick() {
-                var nextTickFn;
-                if (window.setImmediate) {
-                    nextTickFn = function nextTickSetImmediate(fn) {
-                        setImmediate(function() {
-                            fn();
-                        });
-                    };
-                } else {
-                    nextTickFn = function nextTickSetTimeout(fn) {
-                        setTimeout(function() {
-                            fn();
-                        }, 0);
-                    };
-                }
-                return nextTickFn;
-            }
-            function bindContext(fn, context) {
-                return fn.bind ? fn.bind(context) : function() {
-                    fn.apply(context, [].slice.call(arguments, 0));
-                };
-            }
-        }();
-        var highlight = function(doc) {
-            var defaults = {
-                node: null,
-                pattern: null,
-                tagName: "strong",
-                className: null,
-                wordsOnly: false,
-                caseSensitive: false
-            };
-            return function hightlight(o) {
-                var regex;
-                o = _.mixin({}, defaults, o);
-                if (!o.node || !o.pattern) {
-                    return;
-                }
-                o.pattern = _.isArray(o.pattern) ? o.pattern : [ o.pattern ];
-                regex = getRegex(o.pattern, o.caseSensitive, o.wordsOnly);
-                traverse(o.node, hightlightTextNode);
-                function hightlightTextNode(textNode) {
-                    var match, patternNode;
-                    if (match = regex.exec(textNode.data)) {
-                        wrapperNode = doc.createElement(o.tagName);
-                        o.className && (wrapperNode.className = o.className);
-                        patternNode = textNode.splitText(match.index);
-                        patternNode.splitText(match[0].length);
-                        wrapperNode.appendChild(patternNode.cloneNode(true));
-                        textNode.parentNode.replaceChild(wrapperNode, patternNode);
-                    }
-                    return !!match;
-                }
-                function traverse(el, hightlightTextNode) {
-                    var childNode, TEXT_NODE_TYPE = 3;
-                    for (var i = 0; i < el.childNodes.length; i++) {
-                        childNode = el.childNodes[i];
-                        if (childNode.nodeType === TEXT_NODE_TYPE) {
-                            i += hightlightTextNode(childNode) ? 1 : 0;
-                        } else {
-                            traverse(childNode, hightlightTextNode);
-                        }
-                    }
-                }
-            };
-            function getRegex(patterns, caseSensitive, wordsOnly) {
-                var escapedPatterns = [], regexStr;
-                for (var i = 0; i < patterns.length; i++) {
-                    escapedPatterns.push(_.escapeRegExChars(patterns[i]));
-                }
-                regexStr = wordsOnly ? "\\b(" + escapedPatterns.join("|") + ")\\b" : "(" + escapedPatterns.join("|") + ")";
-                return caseSensitive ? new RegExp(regexStr) : new RegExp(regexStr, "i");
-            }
-        }(window.document);
-        var Input = function() {
-            var specialKeyCodeMap;
-            specialKeyCodeMap = {
-                9: "tab",
-                27: "esc",
-                37: "left",
-                39: "right",
-                13: "enter",
-                38: "up",
-                40: "down"
-            };
-            function Input(o) {
-                var that = this, onBlur, onFocus, onKeydown, onInput;
-                o = o || {};
-                if (!o.input) {
-                    $.error("input is missing");
-                }
-                onBlur = _.bind(this._onBlur, this);
-                onFocus = _.bind(this._onFocus, this);
-                onKeydown = _.bind(this._onKeydown, this);
-                onInput = _.bind(this._onInput, this);
-                this.$hint = $(o.hint);
-                this.$input = $(o.input).on("blur.tt", onBlur).on("focus.tt", onFocus).on("keydown.tt", onKeydown);
-                if (this.$hint.length === 0) {
-                    this.setHint = this.getHint = this.clearHint = this.clearHintIfInvalid = _.noop;
-                }
-                if (!_.isMsie()) {
-                    this.$input.on("input.tt", onInput);
-                } else {
-                    this.$input.on("keydown.tt keypress.tt cut.tt paste.tt", function($e) {
-                        if (specialKeyCodeMap[$e.which || $e.keyCode]) {
-                            return;
-                        }
-                        _.defer(_.bind(that._onInput, that, $e));
-                    });
-                }
-                this.query = this.$input.val();
-                this.$overflowHelper = buildOverflowHelper(this.$input);
-            }
-            Input.normalizeQuery = function(str) {
-                return (str || "").replace(/^\s*/g, "").replace(/\s{2,}/g, " ");
-            };
-            _.mixin(Input.prototype, EventEmitter, {
-                _onBlur: function onBlur() {
-                    this.resetInputValue();
-                    this.trigger("blurred");
-                },
-                _onFocus: function onFocus() {
-                    this.trigger("focused");
-                },
-                _onKeydown: function onKeydown($e) {
-                    var keyName = specialKeyCodeMap[$e.which || $e.keyCode];
-                    this._managePreventDefault(keyName, $e);
-                    if (keyName && this._shouldTrigger(keyName, $e)) {
-                        this.trigger(keyName + "Keyed", $e);
-                    }
-                },
-                _onInput: function onInput() {
-                    this._checkInputValue();
-                },
-                _managePreventDefault: function managePreventDefault(keyName, $e) {
-                    var preventDefault, hintValue, inputValue;
-                    switch (keyName) {
-                      case "tab":
-                        hintValue = this.getHint();
-                        inputValue = this.getInputValue();
-                        preventDefault = hintValue && hintValue !== inputValue && !withModifier($e);
-                        break;
-
-                      case "up":
-                      case "down":
-                        preventDefault = !withModifier($e);
-                        break;
-
-                      default:
-                        preventDefault = false;
-                    }
-                    preventDefault && $e.preventDefault();
-                },
-                _shouldTrigger: function shouldTrigger(keyName, $e) {
-                    var trigger;
-                    switch (keyName) {
-                      case "tab":
-                        trigger = !withModifier($e);
-                        break;
-
-                      default:
-                        trigger = true;
-                    }
-                    return trigger;
-                },
-                _checkInputValue: function checkInputValue() {
-                    var inputValue, areEquivalent, hasDifferentWhitespace;
-                    inputValue = this.getInputValue();
-                    areEquivalent = areQueriesEquivalent(inputValue, this.query);
-                    hasDifferentWhitespace = areEquivalent ? this.query.length !== inputValue.length : false;
-                    if (!areEquivalent) {
-                        this.trigger("queryChanged", this.query = inputValue);
-                    } else if (hasDifferentWhitespace) {
-                        this.trigger("whitespaceChanged", this.query);
-                    }
-                },
-                focus: function focus() {
-                    this.$input.focus();
-                },
-                blur: function blur() {
-                    this.$input.blur();
-                },
-                getQuery: function getQuery() {
-                    return this.query;
-                },
-                setQuery: function setQuery(query) {
-                    this.query = query;
-                },
-                getInputValue: function getInputValue() {
-                    return this.$input.val();
-                },
-                setInputValue: function setInputValue(value, silent) {
-                    this.$input.val(value);
-                    silent ? this.clearHint() : this._checkInputValue();
-                },
-                resetInputValue: function resetInputValue() {
-                    this.setInputValue(this.query, true);
-                },
-                getHint: function getHint() {
-                    return this.$hint.val();
-                },
-                setHint: function setHint(value) {
-                    this.$hint.val(value);
-                },
-                clearHint: function clearHint() {
-                    this.setHint("");
-                },
-                clearHintIfInvalid: function clearHintIfInvalid() {
-                    var val, hint, valIsPrefixOfHint, isValid;
-                    val = this.getInputValue();
-                    hint = this.getHint();
-                    valIsPrefixOfHint = val !== hint && hint.indexOf(val) === 0;
-                    isValid = val !== "" && valIsPrefixOfHint && !this.hasOverflow();
-                    !isValid && this.clearHint();
-                },
-                getLanguageDirection: function getLanguageDirection() {
-                    return (this.$input.css("direction") || "ltr").toLowerCase();
-                },
-                hasOverflow: function hasOverflow() {
-                    var constraint = this.$input.width() - 2;
-                    this.$overflowHelper.text(this.getInputValue());
-                    return this.$overflowHelper.width() >= constraint;
-                },
-                isCursorAtEnd: function() {
-                    var valueLength, selectionStart, range;
-                    valueLength = this.$input.val().length;
-                    selectionStart = this.$input[0].selectionStart;
-                    if (_.isNumber(selectionStart)) {
-                        return selectionStart === valueLength;
-                    } else if (document.selection) {
-                        range = document.selection.createRange();
-                        range.moveStart("character", -valueLength);
-                        return valueLength === range.text.length;
-                    }
-                    return true;
-                },
-                destroy: function destroy() {
-                    this.$hint.off(".tt");
-                    this.$input.off(".tt");
-                    this.$hint = this.$input = this.$overflowHelper = null;
-                }
-            });
-            return Input;
-            function buildOverflowHelper($input) {
-                return $('<pre aria-hidden="true"></pre>').css({
-                    position: "absolute",
-                    visibility: "hidden",
-                    whiteSpace: "pre",
-                    fontFamily: $input.css("font-family"),
-                    fontSize: $input.css("font-size"),
-                    fontStyle: $input.css("font-style"),
-                    fontVariant: $input.css("font-variant"),
-                    fontWeight: $input.css("font-weight"),
-                    wordSpacing: $input.css("word-spacing"),
-                    letterSpacing: $input.css("letter-spacing"),
-                    textIndent: $input.css("text-indent"),
-                    textRendering: $input.css("text-rendering"),
-                    textTransform: $input.css("text-transform")
-                }).insertAfter($input);
-            }
-            function areQueriesEquivalent(a, b) {
-                return Input.normalizeQuery(a) === Input.normalizeQuery(b);
-            }
-            function withModifier($e) {
-                return $e.altKey || $e.ctrlKey || $e.metaKey || $e.shiftKey;
-            }
-        }();
-        var Dataset = function() {
-            var datasetKey = "ttDataset", valueKey = "ttValue", datumKey = "ttDatum";
-            function Dataset(o) {
-                o = o || {};
-                o.templates = o.templates || {};
-                if (!o.source) {
-                    $.error("missing source");
-                }
-                if (o.name && !isValidName(o.name)) {
-                    $.error("invalid dataset name: " + o.name);
-                }
-                this.query = null;
-                this.highlight = !!o.highlight;
-                this.name = o.name || _.getUniqueId();
-                this.source = o.source;
-                this.displayFn = getDisplayFn(o.display || o.displayKey);
-                this.templates = getTemplates(o.templates, this.displayFn);
-                this.$el = $(html.dataset.replace("%CLASS%", this.name));
-            }
-            Dataset.extractDatasetName = function extractDatasetName(el) {
-                return $(el).data(datasetKey);
-            };
-            Dataset.extractValue = function extractDatum(el) {
-                return $(el).data(valueKey);
-            };
-            Dataset.extractDatum = function extractDatum(el) {
-                return $(el).data(datumKey);
-            };
-            _.mixin(Dataset.prototype, EventEmitter, {
-                _render: function render(query, suggestions) {
-                    if (!this.$el) {
-                        return;
-                    }
-                    var that = this, hasSuggestions;
-                    this.$el.empty();
-                    hasSuggestions = suggestions && suggestions.length;
-                    if (!hasSuggestions && this.templates.empty) {
-                        this.$el.html(getEmptyHtml()).prepend(that.templates.header ? getHeaderHtml() : null).append(that.templates.footer ? getFooterHtml() : null);
-                    } else if (hasSuggestions) {
-                        this.$el.html(getSuggestionsHtml()).prepend(that.templates.header ? getHeaderHtml() : null).append(that.templates.footer ? getFooterHtml() : null);
-                    }
-                    this.trigger("rendered");
-                    function getEmptyHtml() {
-                        return that.templates.empty({
-                            query: query,
-                            isEmpty: true
-                        });
-                    }
-                    function getSuggestionsHtml() {
-                        var $suggestions, nodes;
-                        $suggestions = $(html.suggestions).css(css.suggestions);
-                        nodes = _.map(suggestions, getSuggestionNode);
-                        $suggestions.append.apply($suggestions, nodes);
-                        that.highlight && highlight({
-                            node: $suggestions[0],
-                            pattern: query
-                        });
-                        return $suggestions;
-                        function getSuggestionNode(suggestion) {
-                            var $el;
-                            $el = $(html.suggestion).append(that.templates.suggestion(suggestion)).data(datasetKey, that.name).data(valueKey, that.displayFn(suggestion)).data(datumKey, suggestion);
-                            $el.children().each(function() {
-                                $(this).css(css.suggestionChild);
-                            });
-                            return $el;
-                        }
-                    }
-                    function getHeaderHtml() {
-                        return that.templates.header({
-                            query: query,
-                            isEmpty: !hasSuggestions
-                        });
-                    }
-                    function getFooterHtml() {
-                        return that.templates.footer({
-                            query: query,
-                            isEmpty: !hasSuggestions
-                        });
-                    }
-                },
-                getRoot: function getRoot() {
-                    return this.$el;
-                },
-                update: function update(query) {
-                    var that = this;
-                    this.query = query;
-                    this.canceled = false;
-                    this.source(query, render);
-                    function render(suggestions) {
-                        if (!that.canceled && query === that.query) {
-                            that._render(query, suggestions);
-                        }
-                    }
-                },
-                cancel: function cancel() {
-                    this.canceled = true;
-                },
-                clear: function clear() {
-                    this.cancel();
-                    this.$el.empty();
-                    this.trigger("rendered");
-                },
-                isEmpty: function isEmpty() {
-                    return this.$el.is(":empty");
-                },
-                destroy: function destroy() {
-                    this.$el = null;
-                }
-            });
-            return Dataset;
-            function getDisplayFn(display) {
-                display = display || "value";
-                return _.isFunction(display) ? display : displayFn;
-                function displayFn(obj) {
-                    return obj[display];
-                }
-            }
-            function getTemplates(templates, displayFn) {
-                return {
-                    empty: templates.empty && _.templatify(templates.empty),
-                    header: templates.header && _.templatify(templates.header),
-                    footer: templates.footer && _.templatify(templates.footer),
-                    suggestion: templates.suggestion || suggestionTemplate
-                };
-                function suggestionTemplate(context) {
-                    return "<p>" + displayFn(context) + "</p>";
-                }
-            }
-            function isValidName(str) {
-                return /^[_a-zA-Z0-9-]+$/.test(str);
-            }
-        }();
-        var Dropdown = function() {
-            function Dropdown(o) {
-                var that = this, onSuggestionClick, onSuggestionMouseEnter, onSuggestionMouseLeave;
-                o = o || {};
-                if (!o.menu) {
-                    $.error("menu is required");
-                }
-                this.isOpen = false;
-                this.isEmpty = true;
-                this.datasets = _.map(o.datasets, initializeDataset);
-                onSuggestionClick = _.bind(this._onSuggestionClick, this);
-                onSuggestionMouseEnter = _.bind(this._onSuggestionMouseEnter, this);
-                onSuggestionMouseLeave = _.bind(this._onSuggestionMouseLeave, this);
-                this.$menu = $(o.menu).on("click.tt", ".tt-suggestion", onSuggestionClick).on("mouseenter.tt", ".tt-suggestion", onSuggestionMouseEnter).on("mouseleave.tt", ".tt-suggestion", onSuggestionMouseLeave);
-                _.each(this.datasets, function(dataset) {
-                    that.$menu.append(dataset.getRoot());
-                    dataset.onSync("rendered", that._onRendered, that);
-                });
-            }
-            _.mixin(Dropdown.prototype, EventEmitter, {
-                _onSuggestionClick: function onSuggestionClick($e) {
-                    this.trigger("suggestionClicked", $($e.currentTarget));
-                },
-                _onSuggestionMouseEnter: function onSuggestionMouseEnter($e) {
-                    this._removeCursor();
-                    this._setCursor($($e.currentTarget), true);
-                },
-                _onSuggestionMouseLeave: function onSuggestionMouseLeave() {
-                    this._removeCursor();
-                },
-                _onRendered: function onRendered() {
-                    this.isEmpty = _.every(this.datasets, isDatasetEmpty);
-                    this.isEmpty ? this._hide() : this.isOpen && this._show();
-                    this.trigger("datasetRendered");
-                    function isDatasetEmpty(dataset) {
-                        return dataset.isEmpty();
-                    }
-                },
-                _hide: function() {
-                    this.$menu.hide();
-                },
-                _show: function() {
-                    this.$menu.css("display", "block");
-                },
-                _getSuggestions: function getSuggestions() {
-                    return this.$menu.find(".tt-suggestion");
-                },
-                _getCursor: function getCursor() {
-                    return this.$menu.find(".tt-cursor").first();
-                },
-                _setCursor: function setCursor($el, silent) {
-                    $el.first().addClass("tt-cursor");
-                    !silent && this.trigger("cursorMoved");
-                },
-                _removeCursor: function removeCursor() {
-                    this._getCursor().removeClass("tt-cursor");
-                },
-                _moveCursor: function moveCursor(increment) {
-                    var $suggestions, $oldCursor, newCursorIndex, $newCursor;
-                    if (!this.isOpen) {
-                        return;
-                    }
-                    $oldCursor = this._getCursor();
-                    $suggestions = this._getSuggestions();
-                    this._removeCursor();
-                    newCursorIndex = $suggestions.index($oldCursor) + increment;
-                    newCursorIndex = (newCursorIndex + 1) % ($suggestions.length + 1) - 1;
-                    if (newCursorIndex === -1) {
-                        this.trigger("cursorRemoved");
-                        return;
-                    } else if (newCursorIndex < -1) {
-                        newCursorIndex = $suggestions.length - 1;
-                    }
-                    this._setCursor($newCursor = $suggestions.eq(newCursorIndex));
-                    this._ensureVisible($newCursor);
-                },
-                _ensureVisible: function ensureVisible($el) {
-                    var elTop, elBottom, menuScrollTop, menuHeight;
-                    elTop = $el.position().top;
-                    elBottom = elTop + $el.outerHeight(true);
-                    menuScrollTop = this.$menu.scrollTop();
-                    menuHeight = this.$menu.height() + parseInt(this.$menu.css("paddingTop"), 10) + parseInt(this.$menu.css("paddingBottom"), 10);
-                    if (elTop < 0) {
-                        this.$menu.scrollTop(menuScrollTop + elTop);
-                    } else if (menuHeight < elBottom) {
-                        this.$menu.scrollTop(menuScrollTop + (elBottom - menuHeight));
-                    }
-                },
-                close: function close() {
-                    if (this.isOpen) {
-                        this.isOpen = false;
-                        this._removeCursor();
-                        this._hide();
-                        this.trigger("closed");
-                    }
-                },
-                open: function open() {
-                    if (!this.isOpen) {
-                        this.isOpen = true;
-                        !this.isEmpty && this._show();
-                        this.trigger("opened");
-                    }
-                },
-                setLanguageDirection: function setLanguageDirection(dir) {
-                    this.$menu.css(dir === "ltr" ? css.ltr : css.rtl);
-                },
-                moveCursorUp: function moveCursorUp() {
-                    this._moveCursor(-1);
-                },
-                moveCursorDown: function moveCursorDown() {
-                    this._moveCursor(+1);
-                },
-                getDatumForSuggestion: function getDatumForSuggestion($el) {
-                    var datum = null;
-                    if ($el.length) {
-                        datum = {
-                            raw: Dataset.extractDatum($el),
-                            value: Dataset.extractValue($el),
-                            datasetName: Dataset.extractDatasetName($el)
-                        };
-                    }
-                    return datum;
-                },
-                getDatumForCursor: function getDatumForCursor() {
-                    return this.getDatumForSuggestion(this._getCursor().first());
-                },
-                getDatumForTopSuggestion: function getDatumForTopSuggestion() {
-                    return this.getDatumForSuggestion(this._getSuggestions().first());
-                },
-                update: function update(query) {
-                    _.each(this.datasets, updateDataset);
-                    function updateDataset(dataset) {
-                        dataset.update(query);
-                    }
-                },
-                empty: function empty() {
-                    _.each(this.datasets, clearDataset);
-                    this.isEmpty = true;
-                    function clearDataset(dataset) {
-                        dataset.clear();
-                    }
-                },
-                isVisible: function isVisible() {
-                    return this.isOpen && !this.isEmpty;
-                },
-                destroy: function destroy() {
-                    this.$menu.off(".tt");
-                    this.$menu = null;
-                    _.each(this.datasets, destroyDataset);
-                    function destroyDataset(dataset) {
-                        dataset.destroy();
-                    }
-                }
-            });
-            return Dropdown;
-            function initializeDataset(oDataset) {
-                return new Dataset(oDataset);
-            }
-        }();
-        var Typeahead = function() {
-            var attrsKey = "ttAttrs";
-            function Typeahead(o) {
-                var $menu, $input, $hint;
-                o = o || {};
-                if (!o.input) {
-                    $.error("missing input");
-                }
-                this.isActivated = false;
-                this.autoselect = !!o.autoselect;
-                this.minLength = _.isNumber(o.minLength) ? o.minLength : 1;
-                this.$node = buildDomStructure(o.input, o.withHint);
-                $menu = this.$node.find(".tt-dropdown-menu");
-                $input = this.$node.find(".tt-input");
-                $hint = this.$node.find(".tt-hint");
-                $input.on("blur.tt", function($e) {
-                    var active, isActive, hasActive;
-                    active = document.activeElement;
-                    isActive = $menu.is(active);
-                    hasActive = $menu.has(active).length > 0;
-                    if (_.isMsie() && (isActive || hasActive)) {
-                        $e.preventDefault();
-                        $e.stopImmediatePropagation();
-                        _.defer(function() {
-                            $input.focus();
-                        });
-                    }
-                });
-                $menu.on("mousedown.tt", function($e) {
-                    $e.preventDefault();
-                });
-                this.eventBus = o.eventBus || new EventBus({
-                    el: $input
-                });
-                this.dropdown = new Dropdown({
-                    menu: $menu,
-                    datasets: o.datasets
-                }).onSync("suggestionClicked", this._onSuggestionClicked, this).onSync("cursorMoved", this._onCursorMoved, this).onSync("cursorRemoved", this._onCursorRemoved, this).onSync("opened", this._onOpened, this).onSync("closed", this._onClosed, this).onAsync("datasetRendered", this._onDatasetRendered, this);
-                this.input = new Input({
-                    input: $input,
-                    hint: $hint
-                }).onSync("focused", this._onFocused, this).onSync("blurred", this._onBlurred, this).onSync("enterKeyed", this._onEnterKeyed, this).onSync("tabKeyed", this._onTabKeyed, this).onSync("escKeyed", this._onEscKeyed, this).onSync("upKeyed", this._onUpKeyed, this).onSync("downKeyed", this._onDownKeyed, this).onSync("leftKeyed", this._onLeftKeyed, this).onSync("rightKeyed", this._onRightKeyed, this).onSync("queryChanged", this._onQueryChanged, this).onSync("whitespaceChanged", this._onWhitespaceChanged, this);
-                this._setLanguageDirection();
-            }
-            _.mixin(Typeahead.prototype, {
-                _onSuggestionClicked: function onSuggestionClicked(type, $el) {
-                    var datum;
-                    if (datum = this.dropdown.getDatumForSuggestion($el)) {
-                        this._select(datum);
-                    }
-                },
-                _onCursorMoved: function onCursorMoved() {
-                    var datum = this.dropdown.getDatumForCursor();
-                    this.input.setInputValue(datum.value, true);
-                    this.eventBus.trigger("cursorchanged", datum.raw, datum.datasetName);
-                },
-                _onCursorRemoved: function onCursorRemoved() {
-                    this.input.resetInputValue();
-                    this._updateHint();
-                },
-                _onDatasetRendered: function onDatasetRendered() {
-                    this._updateHint();
-                },
-                _onOpened: function onOpened() {
-                    this._updateHint();
-                    this.eventBus.trigger("opened");
-                },
-                _onClosed: function onClosed() {
-                    this.input.clearHint();
-                    this.eventBus.trigger("closed");
-                },
-                _onFocused: function onFocused() {
-                    this.isActivated = true;
-                    this.dropdown.open();
-                },
-                _onBlurred: function onBlurred() {
-                    this.isActivated = false;
-                    this.dropdown.empty();
-                    this.dropdown.close();
-                },
-                _onEnterKeyed: function onEnterKeyed(type, $e) {
-                    var cursorDatum, topSuggestionDatum;
-                    cursorDatum = this.dropdown.getDatumForCursor();
-                    topSuggestionDatum = this.dropdown.getDatumForTopSuggestion();
-                    if (cursorDatum) {
-                        this._select(cursorDatum);
-                        $e.preventDefault();
-                    } else if (this.autoselect && topSuggestionDatum) {
-                        this._select(topSuggestionDatum);
-                        $e.preventDefault();
-                    }
-                },
-                _onTabKeyed: function onTabKeyed(type, $e) {
-                    var datum;
-                    if (datum = this.dropdown.getDatumForCursor()) {
-                        this._select(datum);
-                        $e.preventDefault();
-                    } else {
-                        this._autocomplete(true);
-                    }
-                },
-                _onEscKeyed: function onEscKeyed() {
-                    this.dropdown.close();
-                    this.input.resetInputValue();
-                },
-                _onUpKeyed: function onUpKeyed() {
-                    var query = this.input.getQuery();
-                    this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorUp();
-                    this.dropdown.open();
-                },
-                _onDownKeyed: function onDownKeyed() {
-                    var query = this.input.getQuery();
-                    this.dropdown.isEmpty && query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.moveCursorDown();
-                    this.dropdown.open();
-                },
-                _onLeftKeyed: function onLeftKeyed() {
-                    this.dir === "rtl" && this._autocomplete();
-                },
-                _onRightKeyed: function onRightKeyed() {
-                    this.dir === "ltr" && this._autocomplete();
-                },
-                _onQueryChanged: function onQueryChanged(e, query) {
-                    this.input.clearHintIfInvalid();
-                    query.length >= this.minLength ? this.dropdown.update(query) : this.dropdown.empty();
-                    this.dropdown.open();
-                    this._setLanguageDirection();
-                },
-                _onWhitespaceChanged: function onWhitespaceChanged() {
-                    this._updateHint();
-                    this.dropdown.open();
-                },
-                _setLanguageDirection: function setLanguageDirection() {
-                    var dir;
-                    if (this.dir !== (dir = this.input.getLanguageDirection())) {
-                        this.dir = dir;
-                        this.$node.css("direction", dir);
-                        this.dropdown.setLanguageDirection(dir);
-                    }
-                },
-                _updateHint: function updateHint() {
-                    var datum, val, query, escapedQuery, frontMatchRegEx, match;
-                    datum = this.dropdown.getDatumForTopSuggestion();
-                    if (datum && this.dropdown.isVisible() && !this.input.hasOverflow()) {
-                        val = this.input.getInputValue();
-                        query = Input.normalizeQuery(val);
-                        escapedQuery = _.escapeRegExChars(query);
-                        frontMatchRegEx = new RegExp("^(?:" + escapedQuery + ")(.+$)", "i");
-                        match = frontMatchRegEx.exec(datum.value);
-                        match ? this.input.setHint(val + match[1]) : this.input.clearHint();
-                    } else {
-                        this.input.clearHint();
-                    }
-                },
-                _autocomplete: function autocomplete(laxCursor) {
-                    var hint, query, isCursorAtEnd, datum;
-                    hint = this.input.getHint();
-                    query = this.input.getQuery();
-                    isCursorAtEnd = laxCursor || this.input.isCursorAtEnd();
-                    if (hint && query !== hint && isCursorAtEnd) {
-                        datum = this.dropdown.getDatumForTopSuggestion();
-                        datum && this.input.setInputValue(datum.value);
-                        this.eventBus.trigger("autocompleted", datum.raw, datum.datasetName);
-                    }
-                },
-                _select: function select(datum) {
-                    this.input.setQuery(datum.value);
-                    this.input.setInputValue(datum.value, true);
-                    this._setLanguageDirection();
-                    this.eventBus.trigger("selected", datum.raw, datum.datasetName);
-                    this.dropdown.close();
-                    _.defer(_.bind(this.dropdown.empty, this.dropdown));
-                },
-                open: function open() {
-                    this.dropdown.open();
-                },
-                close: function close() {
-                    this.dropdown.close();
-                },
-                setVal: function setVal(val) {
-                    if (this.isActivated) {
-                        this.input.setInputValue(val);
-                    } else {
-                        this.input.setQuery(val);
-                        this.input.setInputValue(val, true);
-                    }
-                    this._setLanguageDirection();
-                },
-                getVal: function getVal() {
-                    return this.input.getQuery();
-                },
-                destroy: function destroy() {
-                    this.input.destroy();
-                    this.dropdown.destroy();
-                    destroyDomStructure(this.$node);
-                    this.$node = null;
-                }
-            });
-            return Typeahead;
-            function buildDomStructure(input, withHint) {
-                var $input, $wrapper, $dropdown, $hint;
-                $input = $(input);
-                $wrapper = $(html.wrapper).css(css.wrapper);
-                $dropdown = $(html.dropdown).css(css.dropdown);
-                $hint = $input.clone().css(css.hint).css(getBackgroundStyles($input));
-                $hint.val("").removeData().addClass("tt-hint").removeAttr("id name placeholder").prop("disabled", true).attr({
-                    autocomplete: "off",
-                    spellcheck: "false"
-                });
-                $input.data(attrsKey, {
-                    dir: $input.attr("dir"),
-                    autocomplete: $input.attr("autocomplete"),
-                    spellcheck: $input.attr("spellcheck"),
-                    style: $input.attr("style")
-                });
-                $input.addClass("tt-input").attr({
-                    autocomplete: "off",
-                    spellcheck: false
-                }).css(withHint ? css.input : css.inputWithNoHint);
-                try {
-                    !$input.attr("dir") && $input.attr("dir", "auto");
-                } catch (e) {}
-                return $input.wrap($wrapper).parent().prepend(withHint ? $hint : null).append($dropdown);
-            }
-            function getBackgroundStyles($el) {
-                return {
-                    backgroundAttachment: $el.css("background-attachment"),
-                    backgroundClip: $el.css("background-clip"),
-                    backgroundColor: $el.css("background-color"),
-                    backgroundImage: $el.css("background-image"),
-                    backgroundOrigin: $el.css("background-origin"),
-                    backgroundPosition: $el.css("background-position"),
-                    backgroundRepeat: $el.css("background-repeat"),
-                    backgroundSize: $el.css("background-size")
-                };
-            }
-            function destroyDomStructure($node) {
-                var $input = $node.find(".tt-input");
-                _.each($input.data(attrsKey), function(val, key) {
-                    _.isUndefined(val) ? $input.removeAttr(key) : $input.attr(key, val);
-                });
-                $input.detach().removeData(attrsKey).removeClass("tt-input").insertAfter($node);
-                $node.remove();
-            }
-        }();
-        (function() {
-            var old, typeaheadKey, methods;
-            old = $.fn.typeahead;
-            typeaheadKey = "ttTypeahead";
-            methods = {
-                initialize: function initialize(o, datasets) {
-                    datasets = _.isArray(datasets) ? datasets : [].slice.call(arguments, 1);
-                    o = o || {};
-                    return this.each(attach);
-                    function attach() {
-                        var $input = $(this), eventBus, typeahead;
-                        _.each(datasets, function(d) {
-                            d.highlight = !!o.highlight;
-                        });
-                        typeahead = new Typeahead({
-                            input: $input,
-                            eventBus: eventBus = new EventBus({
-                                el: $input
-                            }),
-                            withHint: _.isUndefined(o.hint) ? true : !!o.hint,
-                            minLength: o.minLength,
-                            autoselect: o.autoselect,
-                            datasets: datasets
-                        });
-                        $input.data(typeaheadKey, typeahead);
-                    }
-                },
-                open: function open() {
-                    return this.each(openTypeahead);
-                    function openTypeahead() {
-                        var $input = $(this), typeahead;
-                        if (typeahead = $input.data(typeaheadKey)) {
-                            typeahead.open();
-                        }
-                    }
-                },
-                close: function close() {
-                    return this.each(closeTypeahead);
-                    function closeTypeahead() {
-                        var $input = $(this), typeahead;
-                        if (typeahead = $input.data(typeaheadKey)) {
-                            typeahead.close();
-                        }
-                    }
-                },
-                val: function val(newVal) {
-                    return !arguments.length ? getVal(this.first()) : this.each(setVal);
-                    function setVal() {
-                        var $input = $(this), typeahead;
-                        if (typeahead = $input.data(typeaheadKey)) {
-                            typeahead.setVal(newVal);
-                        }
-                    }
-                    function getVal($input) {
-                        var typeahead, query;
-                        if (typeahead = $input.data(typeaheadKey)) {
-                            query = typeahead.getVal();
-                        }
-                        return query;
-                    }
-                },
-                destroy: function destroy() {
-                    return this.each(unattach);
-                    function unattach() {
-                        var $input = $(this), typeahead;
-                        if (typeahead = $input.data(typeaheadKey)) {
-                            typeahead.destroy();
-                            $input.removeData(typeaheadKey);
-                        }
-                    }
-                }
-            };
-            $.fn.typeahead = function(method) {
-                if (methods[method]) {
-                    return methods[method].apply(this, [].slice.call(arguments, 1));
-                } else {
-                    return methods.initialize.apply(this, arguments);
-                }
-            };
-            $.fn.typeahead.noConflict = function noConflict() {
-                $.fn.typeahead = old;
-                return this;
-            };
-        })();
-    })(window.jQuery);
 });

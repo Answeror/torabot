@@ -402,6 +402,15 @@ def completion_options(kind):
     return jsonify(dict(result=mod(kind).completion_options))
 
 
+@bp.route('/call/<kind>')
+def call(kind):
+    if request.method == 'GET':
+        return jsonify(dict(result=mod(kind).get(
+            json.loads(request.args['arg'])
+        )))
+    raise Exception('only support get now')
+
+
 @bp.context_processor
 def inject_locals():
     return dict(

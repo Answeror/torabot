@@ -77,6 +77,7 @@ define(function(require, exports, module){
             return self.completion.activate();
         },
         deactivate: function(){
+            console.log('yandere deactivate')
             return self.completion.deactivate();
         }
     };

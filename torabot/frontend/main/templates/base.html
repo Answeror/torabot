@@ -30,6 +30,7 @@
                     m.init({
                         mods: [
                             {% for m in mods if m.frontend_need_init %}
+                            {% if not loop.first %},{% endif %}
                             {
                                 name: '{{ m.name }}{% if debug %}-debug{% endif %}',
                                 options: {{ m.frontend_options|tojson|safe }}

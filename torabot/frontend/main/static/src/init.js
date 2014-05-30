@@ -2,6 +2,7 @@ define(function(require, exports, module){
     require('seajs-style');
     require('./ut');
     require('./bulletin');
+    require('./completion');
     require('./moment');
     require('./pnotify.custom.min');
     require('./switch');
