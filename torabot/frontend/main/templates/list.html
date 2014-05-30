@@ -2,6 +2,7 @@
 {% block foot %}
     {{ super() }}
     <script>
+        {% if not snapshot and is_user %}
         $(function(){
             seajs.use('torabot/main/0.1.0/search-result{% if debug %}-debug{% endif %}', function(m){
                 m.init({
@@ -13,6 +14,7 @@
                 });
             });
         });
+        {% endif %}
     </script>
 {% endblock %}
 {% block navbar %}
