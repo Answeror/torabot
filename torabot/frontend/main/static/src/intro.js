@@ -69,7 +69,7 @@ define(function(require, exports, module){
                 }).onbeforechange(function(e){
                     var $e = $(e);
                     if ($e.hasClass('intro-query')) {
-                        $e.prop('value', '东方');
+                        $e.find('input[name="q"]').prop('value', '东方');
                     }
                 }).onexit(exit).oncomplete(function(){
                     restore();

@@ -63,7 +63,7 @@ define("torabot/main/0.1.0/intro-debug", [ "./init-debug", "seajs/seajs-style/1.
                 }).onbeforechange(function(e) {
                     var $e = $(e);
                     if ($e.hasClass("intro-query")) {
-                        $e.prop("value", "东方");
+                        $e.find('input[name="q"]').prop("value", "东方");
                     }
                 }).onexit(exit).oncomplete(function() {
                     restore();
