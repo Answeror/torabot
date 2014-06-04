@@ -175,7 +175,8 @@ CREATE TABLE query (
     text text NOT NULL,
     result json DEFAULT '{}'::json NOT NULL,
     ctime timestamp without time zone DEFAULT timezone('utc'::text, now()),
-    mtime timestamp without time zone DEFAULT timezone('utc'::text, now())
+    mtime timestamp without time zone DEFAULT timezone('utc'::text, now()),
+    next_sync_time timestamp without time zone
 );
 
 
@@ -624,6 +625,13 @@ CREATE INDEX idx_query_ctime ON query USING btree (ctime);
 --
 
 CREATE INDEX idx_query_kind_text ON query USING btree (kind, text);
+
+
+--
+-- Name: idx_query_next_sync_time; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+--
+
+CREATE INDEX idx_query_next_sync_time ON query USING btree (next_sync_time);
 
 
 --

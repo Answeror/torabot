@@ -1,11 +1,15 @@
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from ..ut.connection import ccontext
 from ..db import (
     get_or_add_query_bi_kind_and_text,
     add_one_query_changes,
     set_query_result,
     touch_query_bi_id,
+    set_next_sync_time,
+    is_query_active_bi_id,
 )
+from .local import get_current_conf
 from .mod import mod
 
 
@@ -22,6 +26,14 @@ def sync(kind, text, timeout, **kargs):
                 mod(kind).changes(query.result, result)
             )
             set_query_result(conn, query.id, result)
+        if is_query_active_bi_id(conn, query.id):
+            set_next_sync_time(conn, query.id, next_sync_time(query))
+        else:
+            set_next_sync_time(conn, query.id, None)
+
+
+def next_sync_time(query):
+    return datetime.utcnow() + timedelta(seconds=get_current_conf()['TORABOT_DEFAULT_SYNC_INTERVAL'])
 
 
 @contextmanager

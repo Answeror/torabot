@@ -5,6 +5,7 @@ from ..db import (
     get_query_bi_kind_and_text,
     has_query_bi_kind_and_text,
     get_query_mtime_bi_kind_and_text,
+    set_next_sync_time_bi_kind_and_text,
 )
 from .sync import sync
 from .local import get_current_conf
@@ -34,11 +35,14 @@ def interval():
 
 
 def query(conn, kind, text, timeout):
-    dosync = lambda: sync(kind, text, timeout, conn=conn)
     if not has(conn, kind, text):
         log.info('query {} of {} dosn\'t exist', text, kind)
-        dosync()
+        sync(kind, text, timeout, conn=conn)
     elif expired(conn, kind, text):
         log.info('query {} of {} expired', text, kind)
-        dosync()
+        mark_need_sync(conn, kind, text)
     return get_query_bi_kind_and_text(conn, kind, text)
+
+
+def mark_need_sync(conn, kind, text):
+    set_next_sync_time_bi_kind_and_text(conn, kind, text, datetime.utcnow())

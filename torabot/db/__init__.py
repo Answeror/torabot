@@ -50,6 +50,10 @@ from .query import (
     get_active_query_count,
     get_query_count,
     set_query_field_bi_id,
+    set_next_sync_time,
+    set_next_sync_time_bi_kind_and_text,
+    get_need_sync_queries,
+    is_query_active_bi_id,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -119,4 +123,8 @@ __all__ = [
     get_user_detail_bi_email_id.__name__,
     get_email_watch_states.__name__,
     get_user_detail_bi_openid.__name__,
+    set_next_sync_time.__name__,
+    set_next_sync_time_bi_kind_and_text.__name__,
+    get_need_sync_queries.__name__,
+    is_query_active_bi_id.__name__,
 ]

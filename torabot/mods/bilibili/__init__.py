@@ -47,6 +47,8 @@ class Bilibili(
         if not old:
             yield bunchr(kind='sp_new', sp=new.sp)
             return
+        if not new or not new.sp:
+            return
         if new.sp.lastupdate != old.sp.lastupdate:
             yield bunchr(kind='sp_update', sp=new.sp)
 
@@ -62,6 +64,7 @@ class Bilibili(
         for sp in get_bangumi():
             if sp.title == title:
                 return bunchr(kind='sp', sp=sp)
+        return bunchr(kind='sp', sp=None)
 
     def _user_changes(self, old, new):
         oldmap = {post.uri: post for post in getattr(old, 'posts', [])}

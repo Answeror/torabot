@@ -53,6 +53,40 @@ def has_query_bi_kind_and_text(conn, kind, text):
     ).fetchone() is not None
 
 
+def get_need_sync_queries(conn, offset=None, limit=None):
+    result = conn.execute(sql('\n'.join([
+        '''
+        select * from query as q0
+        where exists (
+            select 1 from watch as w0
+            where w0.query_id = q0.id and q0.next_sync_time is null
+        ) or q0.next_sync_time <= (now() at time zone 'utc')
+        order by q0.id
+        ''',
+        '' if offset is None else 'offset :offset',
+        '' if limit is None else 'limit :limit'
+    ])), **dict(offset=offset, limit=limit))
+    return [mq(**row) for row in result.fetchall()]
+
+
+def set_next_sync_time(conn, id, time):
+    conn.execute(sql(
+        '''
+        update query set next_sync_time = :time
+        where id = :id
+        '''
+    ), id=id, time=time)
+
+
+def set_next_sync_time_bi_kind_and_text(conn, kind, text, time):
+    conn.execute(sql(
+        '''
+        update query set next_sync_time = :time
+        where kind = :kind and text = :text
+        '''
+    ), kind=kind, text=text, time=time)
+
+
 def get_active_queries(conn, offset=None, limit=None):
     result = conn.execute(sql('\n'.join([
         '''
@@ -136,6 +170,15 @@ def get_query_bi_id(conn, id):
         id=id
     ).fetchone()
     return None if ret is None else mq(**ret)
+
+
+def is_query_active_bi_id(conn, id):
+    return conn.execute(sql(
+        '''
+        select 1 from watch as w0
+        where w0.query_id = :id
+        '''
+    ), id=id).fetchone() is not None
 
 
 @error_guard

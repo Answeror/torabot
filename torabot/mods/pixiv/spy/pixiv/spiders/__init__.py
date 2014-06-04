@@ -28,6 +28,7 @@ SEARCH_USER_URL = 'http://www.pixiv.net/search_user.php'
 class Pixiv(RedisSpider):
 
     name = 'pixiv'
+    handle_httpstatus_list = [404]
 
     def __init__(self, max_arts, phpsessid, life=60, *args, **kargs):
         super(Pixiv, self).__init__(*args, life=life, **kargs)
@@ -95,6 +96,8 @@ class Pixiv(RedisSpider):
 
     def parse_ranking_uri(self, response):
         query = response.meta['query']
+        if response.status == 404:
+            return failed(query, '404')
         try:
             pages = response.meta['pages']
             d = json.loads(response.body_as_unicode())
@@ -135,6 +138,8 @@ class Pixiv(RedisSpider):
 
     def parse_user_illustrations_uri(self, response):
         query = response.meta['query']
+        if response.status == 404:
+            return failed(query, '404')
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % uri)
 
@@ -161,6 +166,8 @@ class Pixiv(RedisSpider):
 
     def parse_username(self, response):
         query = response.meta['query']
+        if response.status == 404:
+            return failed(query, '404')
         sel = Selector(response)
         try:
             items = list(sel.xpath('//li[@class="user-recommendation-item"]'))
@@ -186,6 +193,8 @@ class Pixiv(RedisSpider):
 
     def parse_username_recommendations(self, response):
         query = response.meta['query']
+        if response.status == 404:
+            return failed(query, '404')
         sel = Selector(response)
         try:
             return SearchUserPage(

@@ -17,7 +17,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULE = {
     'sync': {
         'task': 'torabot.celery.sync_all',
-        'schedule': crontab(minute='*/15'),  # sync every 15 minutes
+        'schedule': crontab(minute='*/5'),  # check sync every 5 minutes
     },
     'notice': {
         'task': 'torabot.celery.notice_all',
@@ -36,11 +36,10 @@ TORABOT_CONNECTION_STRING = (
 )
 TORABOT_SYNC_THREADS = 32
 TORABOT_EMAIL_HEAD = 'torabot notice'
-TORABOT_SPY_TIMEOUT = 15
+TORABOT_SPY_TIMEOUT = 30
 TORABOT_SPY_SLAVES = 1
 TORABOT_NOTICE_ROOM = 16
 TORABOT_PAGE_ROOM = 16
-TORABOT_QUERY_EXPIRE = 15 * 60
 TORABOT_BUBBLE_LOG = True
 TORABOT_DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'data')
 TORABOT_EXAMPLE_USER_ID = 1
@@ -50,6 +49,8 @@ TORABOT_EMAIL_PORT = 587
 TORABOT_REST_WATCH_HIGHLIGHT_THRESHOLD = 4
 TORABOT_DEFAULT_MAXWATCH = 42
 TORABOT_TELL_ADMIN_NEW_USER = False
+TORABOT_DEFAULT_SYNC_INTERVAL = 15 * 60  # integer, seconds
+TORABOT_QUERY_EXPIRE = TORABOT_DEFAULT_SYNC_INTERVAL
 
 # mod
 TORABOT_DEFAULT_MOD = 'tora'

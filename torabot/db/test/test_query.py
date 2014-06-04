@@ -1,9 +1,16 @@
 from nose.tools import assert_equal, assert_is_not_none, assert_greater
+from datetime import datetime, timedelta
 from . import g
 from ..notice import get_notices_bi_user_id
 from ..user import add_user, add_email_bi_user_id, activate_email_bi_id
 from ..watch import watch
-from ..query import add_query, get_sorted_active_queries
+from ..query import (
+    add_query,
+    get_sorted_active_queries,
+    get_need_sync_queries,
+    set_next_sync_time,
+    is_query_active_bi_id,
+)
 from ..change import add_one_query_changes
 
 
@@ -117,4 +124,21 @@ def test_get_sorted_active_queries():
         watch(g.connection, user_id=user_id, query_id=query_ids[0])
         assert_greater(len(query_ids), 1)
         assert_equal(len(get_sorted_active_queries(g.connection)), 1)
+        trans.rollback()
+
+
+def test_get_need_sync_queries():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_ids = fake_add_queries(g.connection)
+        assert_greater(len(query_ids), 1)
+        assert_equal(len(get_need_sync_queries(g.connection)), 0)
+        assert not is_query_active_bi_id(g.connection, query_ids[0])
+        watch(g.connection, user_id=user_id, query_id=query_ids[0])
+        assert is_query_active_bi_id(g.connection, query_ids[0])
+        assert_equal(len(get_need_sync_queries(g.connection)), 1)
+        set_next_sync_time(g.connection, id=query_ids[1], time=datetime.utcnow() + timedelta(days=1))
+        assert_equal(len(get_need_sync_queries(g.connection)), 1)
+        set_next_sync_time(g.connection, id=query_ids[1], time=datetime.utcnow() - timedelta(days=1))
+        assert_equal(len(get_need_sync_queries(g.connection)), 2)
         trans.rollback()
