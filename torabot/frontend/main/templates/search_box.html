@@ -1,5 +1,5 @@
 <form name=search class='navbar-left search-form' role=search method=GET>
-    <div class="input-group" style="width: 400px;">
+    <div class="input-group">
         <span class="intro-step input-group-btn">
             <button name=help type=button class='intro-help btn btn-default' title='帮助'>?</button>
         </span>
@@ -17,11 +17,11 @@
                 {% endfor %}
             </select>
         </span>
-        <span class='intro-query input-group-btn'>
-            <input type="text" class=form-control name=q value='{{ query_text }}'>
+        <span class='intro-query input-group-btn query-wrap'>
+            <input disabled type="text" class='form-control query-text' name=q value='{{ query_text }}'>
         </span>
         <span name=buttons class="input-group-btn">
-            <button name=search type="submit" class='intro-search btn btn-default' title='搜索'>
+            <button disabled name=search type="submit" class='search-btn intro-search btn btn-default' title='搜索'>
                 <span class='glyphicon glyphicon-search'></span>
             </button>
             <button name=advanced type=button class="intro-advanced-search btn btn-default" title='高级搜索'>

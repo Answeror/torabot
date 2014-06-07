@@ -12,21 +12,21 @@ define(function(require, exports, module){
         init_main: function(){
             self.$form = $('form[name="search"]');
             self.$q = self.$form.find('input[name="q"]');
+            self.$query_wrap = self.$form.find('.query-wrap');
+            self.$mods = self.$form.find('select[name="kind"]');
 
             self.init_select();
 
-            var $mods = self.$form.find('select[name="kind"]');
             self.$form.find('button[name="help"]').click(function(e) {
                 e.preventDefault();
-                $(location).attr('href', '/help/' + $mods.find('option:selected').val());
+                $(location).attr('href', '/help/' + self.$mods.find('option:selected').val());
             });
             var $search = self.$form.find('button[name="search"]');
             $search.click(function(e) {
                 e.preventDefault();
-                var $selected = $mods.find('option:selected');
-                var kind = $selected.val();
+                var kind = self.$selected().val();
                 var text = self.$q.val();
-                if (!text && !$selected.data('allow-empty-query')) {
+                if (!text && !self.$selected().data('allow-empty-query')) {
                     new PNotify({
                         text: '查询不能为空',
                         type: 'error',
@@ -39,33 +39,57 @@ define(function(require, exports, module){
             var $advanced = self.$form.find('button[name="advanced"]');
             $advanced.click(function(e) {
                 e.preventDefault();
-                $(location).attr('href', '/search/advanced/' + $mods.find('option:selected').val());
+                $(location).attr('href', '/search/advanced/' + self.$selected().val());
             });
             var $buttons = self.$form.find('span[name="buttons"]');
             var on_change_mod = function() {
                 var $selected = $(this).find('option:selected');
                 $advanced.prop('disabled', !$selected.data('has-advanced-search'));
-                self.$q.prop('disabled', !$selected.data('has-normal-search'));
-                $search.prop('disabled', !$selected.data('has-normal-search'));
+                var $d = $.Deferred();
                 if ($selected.data('has-normal-search')) {
-                    self.$q.prop('placeholder', $selected.data('normal-search-prompt'));
+                    self.$q
+                        .prop('placeholder', $selected.data('normal-search-prompt'))
+                        .prop('disabled', false)
+                        .animate({'margin-left': '0'}, {
+                            done: function(){
+                                self.$query_wrap.css('overflow', 'inherit');
+                                $d.resolve();
+                            }
+                        });
+                    $search.prop('disabled', false).show();
                 } else {
-                    self.$q.prop('placeholder', '请使用高级搜索');
+                    self.$query_wrap.css('overflow', 'hidden');
+                    self.$q
+                        .prop('placeholder', '请使用高级搜索')
+                        .prop('disabled', true)
+                        .animate({'margin-left': '-194px'}, {
+                            done: $d.resolve
+                        });
+                    $search.prop('disabled', true).hide();
                 }
-                if (self.previous_mod) {
-                    require.async(self.previous_mod, function(m){
-                        m.deactivate();
-                    });
-                }
-                var current_mod = self.get_mod_path($selected.val());
-                if (current_mod) {
-                    require.async(current_mod, function(m){
-                        m.activate();
-                    });
-                }
-                self.previous_mod = current_mod;
+                self.deactivate_previous_mod();
+                $d.done(self.activate_current_mod);
             };
-            $mods.ready(on_change_mod).change(on_change_mod);
+            self.$mods.ready(on_change_mod).change(on_change_mod);
+        },
+        $selected: function(){
+            return self.$mods.find('option:selected');
+        },
+        activate_current_mod: function(){
+            var current_mod = self.get_mod_path(self.$selected().val());
+            if (current_mod) {
+                require.async(current_mod, function(m){
+                    m.activate();
+                });
+            }
+            self.previous_mod = current_mod;
+        },
+        deactivate_previous_mod: function() {
+            if (self.previous_mod) {
+                require.async(self.previous_mod, function(m){
+                    m.deactivate();
+                });
+            }
         },
         get_mod_path: function(selected){
             for (var i = 0; i < self.options.mods.length; ++i) {

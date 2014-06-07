@@ -23,12 +23,15 @@
             <a class=navbar-brand href='/'><strong>torabot</strong></a>
         </div>
         <div class="collapse navbar-collapse">
-            <div class=navbar-right>
+            <div class=navbar-left>
                 {% block search_box_left %}{% endblock %}
                 <div class='navbar-form navbar-left'>
                     {% include "search_box.html" %}
                 </div>
                 {% block search_box_right %}{% endblock %}
+            </div>
+            <div class=navbar-right>
+                {% block user_menu_left %}{% endblock %}
                 {% if not is_user %}
                 <form id=login-form class=navbar-left action='{{ url_for("main.login") }}' method=post>
                     <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>

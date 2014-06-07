@@ -161,6 +161,31 @@ span.w {
     border-radius: 0 !important;
 }
 
+.torabot .navbar .watch-wrap {
+    margin-right: 10px;
+}
+
+.torabot .search-form {
+    width: 425px;
+}
+
+.torabot .search-form > .input-group {
+    max-width: 0;
+}
+
+.torabot .search-form .query-text {
+    width: 194px;
+    margin-left: -194px;
+}
+
+.torabot .search-form .query-wrap {
+    overflow: hidden;
+}
+
+.torabot .search-form .search-btn {
+    display: none;
+}
+
 .torabot .search-form .tt-dropdown-menu {
     min-width: 194px !important;
     max-width: 272px !important;

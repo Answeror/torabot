@@ -1,29 +1,31 @@
 {% extends 'nav.html' %}
-{% block search_box_left %}
-    {% if is_user and is_user_activated %}
-    {% set main_watching = states[0].watching %}
-    {% set color = "danger" if main_watching else "primary" %}
-    <form id=watch-form action='{{ url_for("main.unwatch" if main_watching else "main.watch") }}' method=post class='navbar-form navbar-left' role="form">
-        <div class="form-group">
-            <input type=hidden name=user_id value='{{ current_user_id }}'>
-            <input type=hidden name=email_id value='{{ states[0].id }}'>
-            <input type=hidden name=query_id value='{{ query.id }}'>
-        </div>
-        <div class="btn-group">
-            <button type="submit" class="intro-watch btn btn-{{ color }} {{ "unwatch" if main_watching else "watch" }}">{{ "退订" if main_watching else "订阅" }}</button>
-            <button type="button" class="btn btn-{{ color }} dropdown-toggle" data-toggle="dropdown">
-                <span class="caret"></span>
-                <span class="sr-only">toggle dropdown</span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                {% for state in states %}
-                {% if not loop.first %}<li class=divider></li>{% endif %}
-                <li><div class=email-switch><span name=label>{{ state.label if state.label else state.text }}</span><div class='switch-wrap pull-right'><input name=switch-{{ state.id }} data-email-id={{ state.id }} type=checkbox data-size=small class=switch{% if state.watching %} checked{% endif %}></div><div class=clearfix></div></div></li>
-                {% endfor %}
-            </ul>
-        </div>
-    </form>
-    {% else %}
-    <button class='intro-watch navbar-btn navbar-left btn btn-primary' disabled>订阅</button>
-    {% endif %}
+{% block user_menu_left %}
+    <div class='watch-wrap navbar-left'>
+        {% if is_user and is_user_activated %}
+        {% set main_watching = states[0].watching %}
+        {% set color = "danger" if main_watching else "primary" %}
+        <form id=watch-form action='{{ url_for("main.unwatch" if main_watching else "main.watch") }}' method=post class='navbar-form navbar-left' role="form">
+            <div class="form-group">
+                <input type=hidden name=user_id value='{{ current_user_id }}'>
+                <input type=hidden name=email_id value='{{ states[0].id }}'>
+                <input type=hidden name=query_id value='{{ query.id }}'>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="intro-watch btn btn-{{ color }} {{ "unwatch" if main_watching else "watch" }}">{{ "退订" if main_watching else "订阅" }}</button>
+                <button type="button" class="btn btn-{{ color }} dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                    <span class="sr-only">toggle dropdown</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    {% for state in states %}
+                    {% if not loop.first %}<li class=divider></li>{% endif %}
+                    <li><div class=email-switch><span name=label>{{ state.label if state.label else state.text }}</span><div class='switch-wrap pull-right'><input name=switch-{{ state.id }} data-email-id={{ state.id }} type=checkbox data-size=small class=switch{% if state.watching %} checked{% endif %}></div><div class=clearfix></div></div></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </form>
+        {% else %}
+        <button class='intro-watch navbar-btn navbar-left btn btn-primary' disabled>订阅</button>
+        {% endif %}
+    </div>
 {% endblock %}
