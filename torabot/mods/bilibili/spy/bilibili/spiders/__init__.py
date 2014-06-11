@@ -20,6 +20,7 @@ from ..items import (
     SearchResult,
     SearchResultPost,
     Recommendation,
+    QueryResult,
 )
 
 
@@ -36,6 +37,7 @@ class Bilibili(RedisSpider):
             'bangumi': self.make_bangumi_requests,
             'user': self.make_user_requests,
             'username': self.make_username_requests,
+            'query': self.make_query_requests,
         }[query['method']](query):
             yield req
 
@@ -43,6 +45,14 @@ class Bilibili(RedisSpider):
         yield Request(
             make_username_search_uri(query['username']),
             callback=self.parse_username_prepare,
+            meta=dict(query=query),
+            dont_filter=True,
+        )
+
+    def make_query_requests(self, query):
+        yield Request(
+            make_query_uri(query['query']),
+            callback=self.parse_query,
             meta=dict(query=query),
             dont_filter=True,
         )
@@ -82,6 +92,18 @@ class Bilibili(RedisSpider):
                 user_uri=response.url,
                 query=query,
                 posts=[make_post(sub) for sub in sel.xpath('//div[@class="main_list"]/ul/li')]
+            )
+        except Exception as e:
+            return failed(query, str(e))
+
+    def parse_query(self, response):
+        query = response.meta['query']
+        try:
+            sel = Selector(response)
+            return QueryResult(
+                uri=response.url,
+                query=query,
+                posts=[make_search_post(sub) for sub in sel.xpath('//ul[@class="result"]/li')]
             )
         except Exception as e:
             return failed(query, str(e))
@@ -147,14 +169,20 @@ class SearchResultPostLoader(ItemLoader):
 
 def make_search_post(sel):
     loader = SearchResultPostLoader(selector=sel)
-    loader.add_xpath('title', './/div[@class="t"]/text()')
-    loader.add_xpath('upper', './/a[@class="upper"]/text()')
-    loader.add_xpath('kind', './/div[@class="t"]/span/text()')
-    loader.add_xpath('date', './/i[@class="date"]/text()')
-    loader.add_xpath('intro', './/i[@class="intro"]/text()')
-    loader.add_xpath('uri', './/a[@class="title"]/@href')
+    loader.add_xpath('title', 'string(.//div[@class="t"])')
+    loader.add_xpath('upper', 'string(.//a[@class="upper"])')
+    loader.add_xpath('kind', 'string(.//div[@class="t"]/span)')
+    loader.add_xpath('date', 'string(.//i[@class="date"])')
+    loader.add_xpath('intro', 'string(.//i[@class="intro"])')
+    # mylist don't have title a, use first a instead
+    # loader.add_xpath('uri', './/a[@class="title"]/@href')
+    loader.add_xpath('uri', './/a/@href')
     loader.add_xpath('user_uri', './/a[@class="upper"]/@href')
-    return loader.load_item()
+    loader.add_xpath('cover', './/a[@class="title"]//img/@src')
+    post = loader.load_item()
+    if post.get('title', '') and post['title'].startswith(post.get('kind', '')):
+        post['title'] = post['title'][len(post.get('kind', '')):]
+    return post
 
 
 class PostLoader(ItemLoader):
@@ -170,16 +198,21 @@ class PostLoader(ItemLoader):
 
 def make_post(sel):
     loader = PostLoader(selector=sel)
-    loader.add_xpath('title', './/a[@class="title"]/text()')
+    loader.add_xpath('title', 'string(.//a[@class="title"])')
     loader.add_xpath('uri', './/a[@class="title"]/@href')
     loader.add_xpath('cover', './/img/@src')
-    loader.add_xpath('kind', './/a[@class="l"]/text()')
-    loader.add_xpath('ctime', './/div[@class="c"]/text()')
-    loader.add_xpath('desc', './/div[@class="q"]/text()')
+    loader.add_xpath('kind', 'string(.//a[@class="l"])')
+    loader.add_xpath('ctime', 'string(.//div[@class="c"])')
+    loader.add_xpath('desc', 'string(.//div[@class="q"])')
     return loader.load_item()
 
 
 def make_username_search_uri(username):
+    return make_query_uri(u'@author %s' % username)
+
+
+def make_query_uri(query):
     return 'http://www.bilibili.tv/search?' + urlencode({
-        'keyword': (u'@author %s' % username).encode('utf-8')
+        'keyword': query.encode('utf-8'),
+        'orderby': 'senddate',
     })

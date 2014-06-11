@@ -1,0 +1,21 @@
+<table class=table>
+    <thead>
+        <tr>
+            <td class=col-sm-2>类型</td>
+            <td class=col-sm-2>UP主</td>
+            <td class=col-sm-6>名称</td>
+            <td class=col-sm-2>投稿时间</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for post in query.result.posts %}
+        <tr>
+            <td>{{ post.kind }}</td>
+            <td><a href='{{ post.user_uri }}' target=_blank>{{ post.upper }}</a></td>
+            <td><a href='{{ post.uri }}' target=_blank>{{ post.title }}</a></td>
+            <td>{{ post.date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p>以上是全部搜索结果中的{{ len(query.result.posts) }}个, 完整列表参见<a href='{{ query.result.uri }}' target=_blank>这里</a>.</p>

@@ -11,7 +11,7 @@
         {% for post in query.result.posts %}
         <tr>
             <td>{{ post.kind }}</td>
-            <td><a href='{{ post.uri }}'>{{ post.title }}</a></td>
+            <td><a href='{{ post.uri }}' target=_blank>{{ post.title }}</a></td>
             <td>{{ post.ctime }}</td>
         </tr>
         {% endfor %}

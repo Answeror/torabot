@@ -61,3 +61,14 @@ def test_spy_username():
         }), 60)
         assert_equal(len(d.posts), 0)
         assert_greater(len(d.recommendations), 0)
+
+
+@need_scrapyd
+def test_spy_query():
+    app = make()
+    with app.app_context():
+        d = mod(name).spy(json.dumps({
+            'method': 'query',
+            'query': '东方'
+        }), 60)
+        assert_greater(len(d.posts), 0)

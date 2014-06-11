@@ -38,6 +38,7 @@ class Bilibili(
             'sp': self._sp_changes,
             'user': self._user_changes,
             'username': self._user_changes,
+            'query': self._query_changes,
         }[query_method_from_result(new)](old, new)
 
     def _bangumi_changes(self, old, new):
@@ -67,6 +68,12 @@ class Bilibili(
         return bunchr(kind='sp', sp=None)
 
     def _user_changes(self, old, new):
+        return self._post_changes('user_new_post', old, new)
+
+    def _query_changes(self, old, new):
+        return self._post_changes('query_new_post', old, new)
+
+    def _post_changes(self, kind_prefix, old, new):
         oldmap = {post.uri: post for post in getattr(old, 'posts', [])}
         for post in new.posts:
             if post.uri not in oldmap:

@@ -39,6 +39,13 @@ class Post(Item):
     desc = Field()
 
 
+class QueryResult(Item):
+
+    uri = Field()
+    query = Field()
+    posts = Field()
+
+
 class SearchResult(Item):
 
     query = Field()
@@ -55,6 +62,7 @@ class SearchResultPost(Item):
     intro = Field()
     uri = Field()
     user_uri = Field()
+    cover = Field()
 
 
 class Recommendation(Item):
