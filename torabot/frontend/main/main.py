@@ -1,3 +1,4 @@
+import os
 from hashlib import md5
 from functools import wraps
 from nose.tools import assert_in
@@ -34,6 +35,7 @@ from . import bp
 from .. import auth
 from ..response import make_ok_response, make_response
 from ..bulletin import get_bulletin_text, get_bulletin_type
+from ...core.redis import redis
 
 
 log = Logger(__name__)
@@ -418,3 +420,20 @@ def inject_locals():
         bulletin_type=get_bulletin_type(),
         bulletin_id=md5((get_bulletin_text() or '').encode('utf-8')).hexdigest()
     )
+
+
+@bp.url_defaults
+def add_hash_for_static_files(endpoint, values):
+    if not endpoint or endpoint.split('.')[-1] != 'static':
+        return
+    filename = values['filename']
+    redis_key = 'torabot:temp:static:' + filename
+    values['v'] = redis.get(redis_key)
+    if values['v']:
+        return
+    filepath = os.path.join(bp.static_folder, filename)
+    if os.path.isfile(filepath):
+        with open(filepath, 'rb') as static_file:
+            filehash = md5(static_file.read()).hexdigest()
+            values['v'] = filehash
+            redis.set(redis_key, filehash)

@@ -1,0 +1,35 @@
+\documentclass[tikz]{standalone}
+\usetikzlibrary{calc}
+\begin{document}
+\begin{tikzpicture}
+
+    \pgfmathsetmacro\gr{(1+sqrt(5))/2}
+    \pgfmathsetmacro\u{3}
+    \pgfmathsetmacro\rao{\u*\gr*\gr}
+    \pgfmathsetmacro\rbo{\u*\gr}
+    \pgfmathsetmacro\rco{\u}
+    \pgfmathsetmacro\a{\rco/2}
+    \newcommand{\makeb}[1]{#1/2}
+    \pgfmathsetmacro\PI{3.1415926}
+    \pgfmathsetmacro\area{\PI*\a*\makeb{\a}}
+    \pgfmathsetmacro\rai{sqrt(pow(\rao,2)-4*pow(\gr,4)*\area/\PI)}
+    \pgfmathsetmacro\rbi{sqrt(pow(\rbo,2)-4*pow(\gr,2)*\area/\PI)}
+    \newcommand{\px}[2]{#2*(1+sin(#1))}
+    \newcommand{\py}[2]{\makeb{#2}*cos(#1)*(1+sin(#1))}
+    \newcommand{\rpx}[2]{cos(-45)*\px{#1}{#2}+sin(-45)*\py{#1}{#2}}
+    \newcommand{\rpy}[2]{-sin(-45)*\px{#1}{#2}+cos(-45)*\py{#1}{#2}}
+    \newcommand{\cc}[2]{
+        \draw[fill=black]
+        ($(c1) + (0:#2)$) arc (0:90:#2)
+        --
+        ($(c1) + (90:#1)$) arc (90:0:#1)
+        -- cycle;
+    }
+
+    \coordinate (c1) at (0, 0);
+    \cc{\rai}{\rao}
+    \cc{\rbi}{\rbo}
+    \fill [black,domain=0:360] plot[smooth] ({\rpx{\x}{\rco/2}}, {\rpy{\x}{\rco/2}});
+
+\end{tikzpicture} 
+\end{document}
