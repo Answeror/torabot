@@ -3,7 +3,7 @@
 {% set suffix = "(之一, 如果有人<a target=_blank href='https://github.com/Answeror/torabot'>参与</a>本项目的话)" %}
 <ol class=faq>
     <li id=faq-watch-limit>
-        <p><strong>为什么我只能订阅{% if is_user %}{{ current_user.maxwatch }}{% else %}config['TORABOT_DEFAULT_MAXWATCH']{% endif %}个条目?</strong></p>
+    <p><strong>为什么我只能订阅{% if is_user %}{{ current_user.maxwatch }}{% else %}{{ config['TORABOT_DEFAULT_MAXWATCH'] }}{% endif %}个条目?</strong></p>
         <p>每一条订阅都需要消耗更新姬的脑容量. 为了公平起见, 我们不希望更新姬被<a target=_blank href='http://zh.moegirl.org/%E5%85%AC%E8%BD%A6#.E5.85.AC.E8.BD.A6.E7.A7.81.E6.9C.89.E5.8C.96'>公车私有化</a>. 如果您欲求不满, 请<a target=_blank href='mailto:torabot+expand@aip.io'>邮件联系更新姬</a>.</a></p>
     </li>
     <li id=faq-only-google-login>
