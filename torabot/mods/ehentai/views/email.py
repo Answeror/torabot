@@ -1,6 +1,10 @@
-from flask import render_template
 import requests
+from jinja2 import Environment, PackageLoader
 from ....ut.bunch import Bunch
+from .. import name
+
+
+env = Environment(loader=PackageLoader('torabot.mods.' + name, 'templates'))
 
 
 def format_notice_body(notice):
@@ -10,7 +14,7 @@ def format_notice_body(notice):
 
 
 def format_new_post_notice(notice):
-    return render_template('ehentai/notice/new_post.txt', notice=notice)
+    return env.get_template('ehentai/notice/new_post.txt').render(notice=notice)
 
 
 def notice_attachments(notice):
