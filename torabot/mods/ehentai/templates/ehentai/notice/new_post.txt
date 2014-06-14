@@ -1,10 +1,8 @@
 主人, 您在 e-hentai 订阅的 {{ notice.change.query[notice.change.query.method] }} 更新了!
 
----
-
-类型: {{ notice.change.post.category }}
 标题: {{ notice.change.post.title }}
 链接: {{ notice.change.post.uri }}
+类型: {{ notice.change.post.category }}
 评分: {{ notice.change.post.rating }}
 上传: {{ notice.change.post.uploader }}
 种子: {{ notice.change.post.get('torrent_uri', '无') }}
