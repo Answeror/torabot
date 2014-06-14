@@ -8,6 +8,7 @@ jsonpickle==0.7.1
 lxml==3.3.3
 pyOpenSSL==0.14
 pycparser==2.10
+pytz==2014.4
 queuelib==1.1.1
 redis==2.9.1
 scrapy-redis==0.5.2

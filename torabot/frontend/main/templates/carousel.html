@@ -83,6 +83,8 @@
                         <iframe frameborder=0 src='{{ url_for("main.example_search", kind="danbooru", q="http://danbooru.donmai.us/posts?tags=rating%3As") }}'></iframe>
                         {% elif mod.name == 'feed' %}
                         <iframe frameborder=0 src='{{ url_for("main.example_search", kind="feed", q="https://yande.re/post/atom?tags=rating:s") }}'></iframe>
+                        {% elif mod.name == 'ehentai' %}
+                        <iframe frameborder=0 src='{{ url_for("main.example_search", kind="ehentai", q="language:chinese") }}'></iframe>
                         {% else %}
                         <iframe frameborder=0 src='{{ url_for("main.example_advanced_search", kind=mod.name) }}'></iframe>
                         {% endif %}

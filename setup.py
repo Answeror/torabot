@@ -15,6 +15,7 @@ setup(
             'yandere = torabot.mods.yandere:Yandere',
             'danbooru = torabot.mods.danbooru:Danbooru',
             'feed = torabot.mods.feed:Feed',
+            'ehentai = torabot.mods.ehentai:Ehentai',
         ]
     },
 )

@@ -1,0 +1,8 @@
+<ul>
+    <li>直接订阅网址: <a href='{{ url_for("main.search", kind="ehentai", q="http://g.e-hentai.org/?f_search=language%3Achinese") }}'>http://g.e-hentai.org/?f_search=language%3Achinese</a></li>
+    <li>按关键字搜索: <a href='{{ url_for("main.search", kind="ehentai", q="touhou") }}'>touhou</a></li>
+    <li>按语言搜索: <a href='{{ url_for("main.search", kind="ehentai", q="language:chinese") }}'>language:chinese</a></li>
+    <li>按上传者搜索: <a href='{{ url_for("main.search", kind="ehentai", q="uploader:cechinese") }}'>uploader:cechinese</a></li>
+    <li>如需按类型搜索请使用<a href='{{ url_for("main.advanced_search", kind="ehentai") }}'>高级搜索</a>.</li>
+    <li>本站搜索方法与<a href='http://g.e-hentai.org/' target=_blank>e-hentai</a>官方搜索方法一致, 更多搜索方法请自行去<a href='http://g.e-hentai.org/' target=_blank>e-hentai</a>探索.</li>
+</ul>

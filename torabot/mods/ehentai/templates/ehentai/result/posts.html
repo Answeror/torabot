@@ -1,0 +1,33 @@
+<table class='table table-condensed table-striped fixed-table'>
+    <thead>
+        <tr>
+            <td class=col-sm-1>类型</td>
+            <td class=col-sm-2>上传时间</td>
+            <td class=col-sm-6>标题</td>
+            <td class=col-sm-1>评分</td>
+            <td class=col-sm-2>上传用户</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for post in query.result.posts %}
+    <tr class='ehentai-post' data-content='<img src="{{ post.cover_uri }}" alt="{{ post.title }}">'>
+        <td><span class='label label-primary'>{{ post.category }}</span></td>
+        <td>{{ momentjs(post.ctime).fromnow() }}</td>
+        <td>{% if 'torrent_uri' in post %}<a href='{{ post.torrent_uri }}' target=_blank><span class='glyphicon glyphicon-download'></span><span class=w-1em></span></a>{% endif %}<a href="{{ post.uri }}" target=_blank title='{{ post.title }}'>{{ post.title }}</a></td>
+        <td>{{ post.rating }}</td>
+        <td><a href='{{ url_for("main.search", kind="ehentai", q="uploader:" + post.uploader) }}' title='{{ post.uploader }}'>{{ post.uploader }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<p>以上是全部搜索结果中的{{ len(query.result.posts) }}个, 完整列表参见<a href='{{ query.result.uri }}' target=_blank>这里</a>.</p>
+<script>
+$(function(){
+    $('.ehentai-post').popover({
+        'html': true,
+        'placement': 'auto bottom',
+        'trigger': 'hover',
+        'container': 'body'
+    });
+});
+</script>

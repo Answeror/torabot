@@ -22,3 +22,9 @@ def check_format_notice_body_not_none(name, view, notice):
     app = make()
     with app.app_context():
         assert_is_not_none(mod(name).format_notice_body(view, notice))
+
+
+def check_format_notice_body_not_empty(name, view, notice):
+    app = make()
+    with app.app_context():
+        assert mod(name).format_notice_body(view, notice)
