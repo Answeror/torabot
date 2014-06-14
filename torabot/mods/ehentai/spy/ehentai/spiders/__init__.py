@@ -81,7 +81,8 @@ class PostLoader(ItemLoader):
                 yield s
             else:
                 parts = s.split('~')
-                if len(parts) == 4 and parts[0] == 'init':
+                # title may contain ~
+                if len(parts) >= 4 and parts[0] == 'init':
                     yield 'http://%s/%s' % (parts[1], parts[2])
 
     def rating_in(self, values):

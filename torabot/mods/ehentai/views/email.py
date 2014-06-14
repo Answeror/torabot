@@ -14,6 +14,8 @@ def format_new_post_notice(notice):
 
 
 def notice_attachments(notice):
+    if not notice.change.post.get('cover_uri', ''):
+        return []
     r = requests.get(
         notice.change.post.cover_uri,
         headers=dict(referer='http://g.e-hentai.org/')
