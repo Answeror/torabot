@@ -12,6 +12,7 @@ class Mod(object, metaclass=abc.ABCMeta):
     frontend_need_init = False
     frontend_options = {}
     completion_options = {}
+    public = True
 
     def __init__(self, conf={}):
         self.conf = conf
@@ -63,3 +64,7 @@ class Mod(object, metaclass=abc.ABCMeta):
 
     def get(self, arg):
         return {}
+
+    @property
+    def carousel(self):
+        pass

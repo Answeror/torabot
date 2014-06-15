@@ -24,6 +24,11 @@ class Yyets(
     description = '电影/电视剧订阅(来自人人影视)'
     normal_search_prompt = '订阅地址'
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_search", kind=name, q="http://www.yyets.com/rss/feed/?area=%E7%BE%8E%E5%9B%BD")
+
     def view(self, name):
         from .views import web, email
         return {

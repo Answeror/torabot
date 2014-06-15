@@ -29,7 +29,6 @@ from ...core.user import (
     add_email as core_add_email,
     activate_email as core_activate_email,
 )
-from ...cache import cache
 from ..errors import AuthError
 from . import bp
 from .. import auth
@@ -265,14 +264,15 @@ def update_email(user_id):
     return redirect(url_for('.notice_conf'))
 
 
-@cache.memoize(timeout=600)
 def _advanced_search(kind, values, snapshot):
-    return render_template(
-        'advanced_search.html',
-        query_kind=kind,
-        content=mod(kind).format_advanced_search('web', **values),
-        snapshot=snapshot,
-    )
+    if mod(kind).public or is_user:
+        return render_template(
+            'advanced_search.html',
+            query_kind=kind,
+            content=mod(kind).format_advanced_search('web', **values),
+            snapshot=snapshot,
+        )
+    return redirect(url_for(".index"))
 
 
 @bp.route('/search/advanced/<kind>', methods=['GET'])
@@ -390,13 +390,15 @@ def faq():
     return render_template('faq.html')
 
 
-@bp.route('/help/<name>')
-def help(name):
-    return render_template(
-        'help.html',
-        query_kind=name,
-        content=mod(name).format_help_page()
-    )
+@bp.route('/help/<kind>')
+def help(kind):
+    if mod(kind).public or is_user:
+        return render_template(
+            'help.html',
+            query_kind=kind,
+            content=mod(kind).format_help_page()
+        )
+    return redirect(url_for(".index"))
 
 
 @bp.route('/completion-options/<kind>')

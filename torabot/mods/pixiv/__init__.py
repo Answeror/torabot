@@ -23,6 +23,11 @@ class Pixiv(
     description = '订阅喜欢的画师和各种榜单(日榜, 月榜, R18等...), 邮件通知里包含新作的缩略图.'
     normal_search_prompt = '画师主页/名字/id'
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_search", kind=name, method="ranking", mode="daily", limit=10)
+
     def view(self, name):
         from .views import web, email
         return {

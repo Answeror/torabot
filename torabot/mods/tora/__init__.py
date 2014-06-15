@@ -24,6 +24,11 @@ class Tora(Mod):
     description = '订阅虎穴查询, 新货上架或可预约时第一时间收到邮件通知, 用来抢本子.'
     normal_search_prompt = '关键字或商品链接'
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_search", kind=name, q="tony")
+
     def view(self, name):
         from .views import web, email
         return {

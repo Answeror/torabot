@@ -22,6 +22,11 @@ class Feed(
     description = 'RSS/Atom订阅'
     normal_search_prompt = 'feed uri'
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_search", kind=name, q="https://yande.re/post/atom?tags=rating:s")
+
     def view(self, name):
         from .views import web, email
         return {

@@ -26,6 +26,11 @@ class Yandere(
     referer = 'https://yande.re/'
     frontend_need_init = True
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_search", kind=name, q="https://yande.re/post?tags=rating%3As")
+
     @staticmethod
     def tags(post):
         return post.tags

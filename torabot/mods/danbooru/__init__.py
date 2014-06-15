@@ -27,6 +27,11 @@ class Danbooru(
     referer = 'http://danbooru.donmai.us/'
     frontend_need_init = True
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_search", kind=name, q="http://danbooru.donmai.us/posts?tags=rating%3As")
+
     @staticmethod
     def tags(post):
         return post.tag_string

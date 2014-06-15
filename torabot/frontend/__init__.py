@@ -74,7 +74,7 @@ def inject_locals():
         momentjs=momentjs,
         mod=mod,
         default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
-        mods=mods(),
+        mods=[m for m in mods() if m.public or is_user],
         is_user=is_user,
         is_admin=is_admin,
         current_user_id=current_user_id,

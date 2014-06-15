@@ -20,6 +20,11 @@ class Bilibili(
     has_normal_search = False
     description = '订阅新番和up主, 更新时会收到邮件通知.'
 
+    @property
+    def carousel(self):
+        from flask import url_for
+        return url_for("main.example_advanced_search", kind=name)
+
     def view(self, name):
         from .views import web, email
         return {
