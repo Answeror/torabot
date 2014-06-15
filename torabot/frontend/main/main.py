@@ -312,6 +312,12 @@ def example_search(kind):
 
 
 def _search(kind, snapshot):
+    if mod(kind).public or is_user:
+        return __search(kind, snapshot)
+    return redirect(url_for(".index"))
+
+
+def __search(kind, snapshot):
     text = get_standard_query()
     log.info('search: %r' % text)
     with appccontext(commit=True) as conn:
