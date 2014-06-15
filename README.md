@@ -1,6 +1,8 @@
 # Torabot
 
-[Torabot](http://torabot.com)是一个二次元(已经混入了一些三次元的异端 bgm38)事件的(邮件)通知工具(框架). 目前实现了4个模块(mod):
+![logo](http://torabot.com/main/static/images/torabot.png "logo")
+
+[Torabot](http://torabot.com)是一个二次元(已经混入了一些三次元的异端 bgm38)事件的(邮件)通知工具(框架). 目前实现了8个模块(mod):
 
 1. Pixiv榜单订阅, 画师订阅. 邮件里附带缩略图.
 2. Bilibili新番订阅.
@@ -8,6 +10,8 @@
 4. 人人影视RSS订阅(作为撰写模块的tutorial).
 5. [yande.re](https://yande.re)订阅(二次元高清图站).
 6. [danbooru](http://danbooru.donmai.us/)订阅(海量二次元图站).
+7. [e-hentai](http://g.e-hentai.org)订阅(绅士图站).
+8. RSS/Atom订阅(可以用来订阅ktxp的种子, Github的通知等等).
 
 Torabot旨在提供一个可扩展的通知更新框架(虽然最初目的并不是这个...), 可以用于服务终端用户, 或为其它内容聚合服务提供一个独立的通知更新接口(计划中).
 
