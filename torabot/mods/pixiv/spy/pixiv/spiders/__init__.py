@@ -92,6 +92,7 @@ class Pixiv(RedisSpider):
             SEARCH_USER_URL + '?' + urlencode({
                 's_mode': 's_usr',
                 'nick_mf': 1,
+                'i': 0,
                 'nick': query['username'].encode('utf-8'),
             }),
             headers=self._make_headers(),
@@ -198,14 +199,17 @@ class Pixiv(RedisSpider):
             return failed(query, '404')
         sel = Selector(response)
         try:
-            items = list(sel.xpath('//li[@class="user-recommendation-item"]'))
-            if items:
-                user_id = items[0].xpath('.//a[@class="title"]/@href').extract()[0].split('=')[-1]
-                check_user_id(user_id)
-                return self._make_user_illustrations_uri_request(
-                    USER_ILLUSTRATIONS_URL_TEMPLATE % user_id,
-                    query
-                )
+            if not sel.xpath('//div[@class="_no-item"]'):
+                items = list(sel.xpath('//li[@class="user-recommendation-item"]'))
+                if len(items) == 0:
+                    return failed(query, 'inconsist username search result', response=response)
+                if len(items) == 1:
+                    user_id = items[0].xpath('.//a[@class="title"]/@href').extract()[0].split('=')[-1]
+                    check_user_id(user_id)
+                    return self._make_user_illustrations_uri_request(
+                        USER_ILLUSTRATIONS_URL_TEMPLATE % user_id,
+                        query
+                    )
             return Request(
                 SEARCH_USER_URL + '?' + urlencode({
                     's_mode': 's_usr',

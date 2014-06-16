@@ -72,4 +72,4 @@ def format_advanced_search(**kargs):
 
 
 def format_help_page():
-    return render_template('pixiv/help.html')
+    return render_template('pixiv/help.html', kind=name)

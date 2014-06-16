@@ -59,11 +59,11 @@ def test_spy_ranking_limit():
 def test_spy_username():
     app = make()
     with app.app_context():
-        d = mod(name).spy('ASK', 60)
+        d = mod(name).spy('saberiii', 60)
         assert_not_in('recommendations', d)
         assert_greater(len(d.arts), 0)
         assert_greater(d.total, 0)
-        d = mod(name).spy('ASK K', 60)
+        d = mod(name).spy('ASK', 60)
         assert_equal(len(d.arts), 0)
         assert_equal(d.total, 0)
         assert_greater(len(d.recommendations), 0)
