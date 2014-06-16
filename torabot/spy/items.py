@@ -12,3 +12,4 @@ class Result(Item):
     ok = Field()
     query = Field()
     message = Field()
+    expected = Field()

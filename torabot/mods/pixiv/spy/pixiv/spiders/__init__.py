@@ -6,6 +6,9 @@
 
 import re
 import json
+import inspect
+import traceback
+from hashlib import md5
 from itertools import chain
 from urlparse import urljoin, urlparse, parse_qs
 from urllib import urlencode
@@ -13,7 +16,7 @@ from scrapy import log
 from scrapy.selector import Selector
 from scrapy.http import Request
 from torabot.spy.spiders.redis import RedisSpider
-from torabot.spy.items import Result
+from torabot.spy.error import failed
 from ..items import Art, Page, SearchUserPage, Recommendation, RecommendationImage
 
 
@@ -23,6 +26,25 @@ USER_URL = 'http://www.pixiv.net/member.php'
 USER_ILLUSTRATIONS_URL_TEMPLATE = USER_ILLUSTRATIONS_URL + '?id=%s'
 RANKING_URL = 'http://www.pixiv.net/ranking.php'
 SEARCH_USER_URL = 'http://www.pixiv.net/search_user.php'
+BUSY_BODY_MD5_LIST = {
+    'ebf87808253b9892ef15bdfdbd1b7203',
+}
+
+
+def checkbusy(f):
+    check = lambda response: md5(response.body).hexdigest() in BUSY_BODY_MD5_LIST
+    make = lambda response: failed(response.meta['query'], 'pixiv busy', expected=True)
+    if inspect.isgeneratorfunction(f):
+        def inner(self, response):
+            if check(response):
+                yield make()
+                return
+            for ret in f(self, response):
+                yield ret
+    else:
+        def inner(self, response):
+            return make() if check(response) else f(self, response)
+    return inner
 
 
 class Pixiv(RedisSpider):
@@ -110,8 +132,8 @@ class Pixiv(RedisSpider):
                     total=len(arts),
                     arts=arts,
                 )
-        except Exception as e:
-            return failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)
 
     def make_user_uri_requests(self, query):
         d = parse_qs(urlparse(query['uri']).query)
@@ -136,10 +158,11 @@ class Pixiv(RedisSpider):
             dont_filter=True,
         )
 
+    @checkbusy
     def parse_user_illustrations_uri(self, response):
         query = response.meta['query']
         if response.status == 404:
-            return failed(query, '404')
+            return failed(query, '404', expected=True)
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % uri)
 
@@ -155,15 +178,20 @@ class Pixiv(RedisSpider):
 
         sel = Selector(response)
         try:
+            total = int(sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0])
+            arts = list(gen(sel))
+            if not arts and total > 0:
+                return failed(query, 'data inconsist', response=response)
             return Page(
                 query=query,
                 uri=uri,
-                total=int(sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0]),
-                arts=list(gen(sel)),
+                total=total,
+                arts=arts,
             )
-        except Exception as e:
-            return failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)
 
+    @checkbusy
     def parse_username(self, response):
         query = response.meta['query']
         if response.status == 404:
@@ -188,9 +216,10 @@ class Pixiv(RedisSpider):
                 meta=dict(query=query),
                 dont_filter=True,
             )
-        except Exception as e:
-            return failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)
 
+    @checkbusy
     def parse_username_recommendations(self, response):
         query = response.meta['query']
         if response.status == 404:
@@ -204,8 +233,8 @@ class Pixiv(RedisSpider):
                 arts=[],
                 recommendations=list(gen_recommendations(sel))
             )
-        except Exception as e:
-            return failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)
 
 
 def gen_recommendations(sel):
@@ -234,11 +263,6 @@ def gen_recommendation_images(images):
 
 def check_user_id(id):
     assert re.match(r'^\d+$', id)
-
-
-def failed(query, message):
-    log.msg('parse failed: %s' % message, level=log.ERROR)
-    return Result(ok=False, query=query, message=message)
 
 
 def make_ranking_json_uri(query, page):

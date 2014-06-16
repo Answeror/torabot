@@ -6,6 +6,7 @@ from redis_lock import Lock
 from ..ut.bunch import bunchr
 from ..core.local import get_current_conf
 from ..spy.query import hash as hash_query
+from .errors import ExpectedError
 
 
 log = Logger(__name__)
@@ -73,6 +74,8 @@ def spy(kind, query, timeout, slaves, options={}):
         if r.get('ok', True):
             return bunchr(r)
         message = r.get('message', 'no error message')
+        if r.get('expected', False):
+            raise ExpectedError(message)
         raise Exception('spy %s for %s failed: %s' % (kind, query, message))
 
     raise SpyTimeoutError()

@@ -11,10 +11,20 @@ from ..db import (
 )
 from .local import get_current_conf
 from .mod import mod
+from ..mods.errors import ExpectedError
+from logbook import Logger
+
+
+log = Logger(__name__)
 
 
 def sync(kind, text, timeout, **kargs):
-    result = mod(kind).spy(text, timeout)
+    try:
+        result = mod(kind).spy(text, timeout)
+    except ExpectedError as e:
+        log.debug(str(e))
+        return
+
     with context(**kargs) as conn:
         query = get_or_add_query_bi_kind_and_text(conn, kind, text)
         if query.result == result:
