@@ -2,6 +2,6 @@
     <li>订阅用户ID: <a href='{{ url_for("main.search", kind=kind, q="457541") }}'>457541</a>
     <li>订阅按用户首页: <a href='{{ url_for("main.search", kind=kind, q="http://www.pixiv.net/member.php?id=457541") }}'>http://www.pixiv.net/member.php?id=457541</a>
     <li>订阅按用户作品页: <a href='{{ url_for("main.search", kind=kind, q="http://www.pixiv.net/member_illust.php?id=457541") }}'>http://www.pixiv.net/member_illust.php?id=457541</a>
-    <li>订阅用户名(<span class=text-danger'>十分不建议这么做, 因为画师经常会改名字, 而且可能存在同名</span>): <a href='{{ url_for("main.search", kind=kind, q="saberiii") }}'>saberiii</a>
+    <li>订阅用户名(<span class=text-warning'>十分不建议这么做, 因为画师经常会改名字, 而且可能存在同名</span>): <a href='{{ url_for("main.search", kind=kind, q="saberiii") }}'>saberiii</a>
     <li>订阅榜单请使用<a href='{{ url_for("main.advanced_search", kind=kind, method="ranking") }}'>高级搜索</a>.</li>
 </ul>
