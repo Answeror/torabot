@@ -60,6 +60,8 @@ def users(page):
                 conn,
                 offset=page * page_room(),
                 limit=page_room(),
+                order_by='id',
+                desc=True,
             ),
             total=db.get_user_count(conn),
             page=page,

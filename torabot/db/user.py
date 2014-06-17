@@ -62,14 +62,32 @@ def get_users(conn, offset=None, limit=None):
     return [bunchr(**row) for row in result.fetchall()]
 
 
+def ignore_none(f):
+    def inner(arg):
+        if arg is not None:
+            return f(arg)
+    return inner
+
+
+def check_order_field(name):
+    assert_in(name, [
+        'id',
+        'name',
+        'email',
+        'ctime',
+    ])
+
+
 @error_guard
-def get_users_detail(conn, offset=None, limit=None):
+def get_users_detail(conn, offset=None, limit=None, order_by=None, desc=False):
+    ignore_none(check_order_field)(order_by)
     result = conn.execute(sql('\n'.join([
         '''
         select u0.*, (select count(1) from watch as w0 where w0.user_id = u0.id) watch_count
         from "user" as u0
-        order by u0.id
         ''',
+        '' if order_by is None else 'order by u0.%s' % order_by,
+        '' if order_by is None or not desc else 'desc',
         '' if offset is None else 'offset :offset',
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))
