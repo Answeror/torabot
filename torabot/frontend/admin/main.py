@@ -41,6 +41,8 @@ def queries(page):
                 conn,
                 offset=page * page_room(),
                 limit=page_room(),
+                order_by='id',
+                desc=True,
             ),
             total=db.get_query_count(conn),
             page=page,
@@ -80,6 +82,8 @@ def active_queries(page):
             conn,
             offset=page * room,
             limit=room,
+            order_by='id',
+            desc=True,
         )
         total = db.get_active_query_count(conn)
     return render_template(

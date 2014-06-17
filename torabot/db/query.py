@@ -1,3 +1,4 @@
+from nose.tools import assert_in
 from sqlalchemy.sql import text as sql
 from psycopg2.extras import Json
 from datetime import datetime
@@ -5,6 +6,7 @@ import jsonpickle
 import json
 from ..ut.bunch import bunchr
 from .error import error_guard
+from .ut import ignore_none
 
 
 def add_query(conn, kind, text, result={}):
@@ -87,7 +89,8 @@ def set_next_sync_time_bi_kind_and_text(conn, kind, text, time):
     ), kind=kind, text=text, time=time)
 
 
-def get_active_queries(conn, offset=None, limit=None):
+def get_active_queries(conn, offset=None, limit=None, order_by=None, desc=False):
+    ignore_none(check_order_field)(order_by)
     result = conn.execute(sql('\n'.join([
         '''
         select * from query as q0
@@ -95,8 +98,9 @@ def get_active_queries(conn, offset=None, limit=None):
             select 1 from watch as w0
             where w0.query_id = q0.id
         )
-        order by q0.id
         ''',
+        '' if order_by is None else 'order by q0.%s' % order_by,
+        '' if order_by is None or not desc else 'desc',
         '' if offset is None else 'offset :offset',
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))
@@ -148,12 +152,21 @@ def get_query_mtime_bi_kind_and_text(conn, kind, text):
     return None if ret is None else ret[0]
 
 
-def get_queries(conn, offset=None, limit=None):
+def check_order_field(name):
+    assert_in(name, [
+        'id',
+        'ctime',
+    ])
+
+
+def get_queries(conn, offset=None, limit=None, order_by=None, desc=False):
+    ignore_none(check_order_field)(order_by)
     result = conn.execute(sql('\n'.join([
         '''
         select * from query as q0
-        order by q0.id
         ''',
+        '' if order_by is None else 'order by q0.%s' % order_by,
+        '' if order_by is None or not desc else 'desc',
         '' if offset is None else 'offset :offset',
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))

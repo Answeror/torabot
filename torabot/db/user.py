@@ -3,6 +3,7 @@ from sqlalchemy.sql import text as sql
 from email.utils import parseaddr
 from ..ut.bunch import bunchr
 from .error import error_guard, InvalidEmailError
+from .ut import ignore_none
 
 
 @error_guard
@@ -60,13 +61,6 @@ def get_users(conn, offset=None, limit=None):
         '' if limit is None else 'limit :limit'
     ])), **dict(offset=offset, limit=limit))
     return [bunchr(**row) for row in result.fetchall()]
-
-
-def ignore_none(f):
-    def inner(arg):
-        if arg is not None:
-            return f(arg)
-    return inner
 
 
 def check_order_field(name):
