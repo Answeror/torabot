@@ -3,12 +3,6 @@
 {% block head %}
     {{ super() }}
     <style>
-        .query-table { table-layout:fixed; }
-        .query-table td {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
         .query-field { cursor: pointer; }
     </style>
 {% endblock %}
@@ -23,27 +17,27 @@
     </script>
 {% endblock %}
 {% block content %}
-    <table class='query-table table table-hover'>
+    <table class='query-table table table-hover fixed-table'>
         <thead>
             <tr>
-                <td class=col-sm-1>编号</td>
-                <td class=col-sm-1>类型</td>
-                <td class=col-sm-4>内容</td>
-                <td class=col-sm-4>结果</td>
-                <td class=col-sm-1>创建时间</td>
-                <td class=col-sm-1>修改时间</td>
+                <td class='hidden-xs col-sm-1'>编号</td>
+                <td class='col-xs-2 col-sm-1'>类型</td>
+                <td class='col-xs-4 col-sm-4'>内容</td>
+                <td class='hidden-xs col-sm-4'>结果</td>
+                <td class='col-xs-3 col-sm-1'>创建时间</td>
+                <td class='col-xs-3 col-sm-1'>修改时间</td>
             </tr>
         </thead>
         <tbody>
             {% for q in queries %}
             <tr>
                 {% set placement = '' if not loop.first else ' data-placement=bottom' %}
-                <td class=col-sm-1>{{ q.id }}</td>
-                <td class=col-sm-2><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".query", id=q.id, field="kind") }}'>{{ q.kind }}</a></td>
-                <td class='query-field col-sm-4' data-uri='{{ url_for(".query", id=q.id, field="text") }}'>{{ q.text }}</td>
-                <td class='query-field col-sm-4' data-uri='{{ url_for(".query", id=q.id, field="result") }}'>{{ q.result }}</td>
-                <td class=col-sm-1>{{ momentjs(q.ctime).fromnow() }}</td>
-                <td class=col-sm-1>{{ momentjs(q.mtime).fromnow() }}</td>
+                <td class=hidden-xs>{{ q.id }}</td>
+                <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".query", id=q.id, field="kind") }}'>{{ q.kind }}</a></td>
+                <td class=query-field data-uri='{{ url_for(".query", id=q.id, field="text") }}'>{{ q.text }}</td>
+                <td class='hidden-xs query-field' data-uri='{{ url_for(".query", id=q.id, field="result") }}'>{{ q.result }}</td>
+                <td>{{ momentjs(q.ctime).fromnow() }}</td>
+                <td>{{ momentjs(q.mtime).fromnow() }}</td>
             </tr>
             {% endfor %}
         </tbody>

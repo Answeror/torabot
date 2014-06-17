@@ -16,25 +16,25 @@
     <table class='user-table table table-hover'>
         <thead>
             <tr>
-                <td class=col-sm-1>编号</td>
-                <td class=col-sm-2>昵称</td>
-                <td class=col-sm-3>email</td>
-                <td class=col-sm-3>openid</td>
-                <td class=col-sm-1>订阅数</td>
-                <td class=col-sm-1>订阅上限</td>
-                <td class=col-sm-1>创建时间</td>
+                <td class='hidden-xs col-sm-1'>编号</td>
+                <td class='col-xs-3 col-sm-2'>昵称</td>
+                <td class='col-xs-4 col-sm-3'>email</td>
+                <td class='hidden-xs col-sm-3'>openid</td>
+                <td class='col-xs-2 col-sm-1'>订阅数</td>
+                <td class='hidden-xs col-sm-1'>订阅上限</td>
+                <td class='col-xs-3 col-sm-1'>创建时间</td>
             </tr>
         </thead>
         <tbody>
             {% for user in users %}
             <tr>
                 {% set placement = '' if not loop.first else ' data-placement=bottom' %}
-                <td>{{ user.id }}</td>
+                <td class=hidden-xs>{{ user.id }}</td>
                 <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="name") }}'>{{ user.name }}</a></td>
                 <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="email") }}'>{{ user.email }}</a></td>
-                <td><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="openid") }}'>{{ user.openid }}</a></td>
+                <td class=hidden-xs><a{{ placement }} href=# class=editable-field data-kind=text data-uri='{{ url_for(".user", id=user.id, field="openid") }}'>{{ user.openid }}</a></td>
                 <td>{{ user.watch_count }}</td>
-                <td><a{{ placement }} href=# class=editable-field data-kind=int data-uri='{{ url_for(".user", id=user.id, field="maxwatch") }}'>{{ user.maxwatch }}</a></td>
+                <td class=hidden-xs><a{{ placement }} href=# class=editable-field data-kind=int data-uri='{{ url_for(".user", id=user.id, field="maxwatch") }}'>{{ user.maxwatch }}</a></td>
                 <td>{{ momentjs(user.ctime).fromnow() }}</td>
             </tr>
             {% endfor %}
