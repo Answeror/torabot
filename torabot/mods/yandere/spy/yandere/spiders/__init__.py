@@ -5,6 +5,7 @@
 
 import json
 from torabot.mods.booru.spiders import Booru
+from torabot.spy.error import failed
 from scrapy.http import Request
 from ..items import Tags
 
@@ -42,5 +43,7 @@ class Yandere(Booru):
                 query=query,
                 content=json.loads(response.body_as_unicode())
             )
+        except ValueError as e:
+            return failed(query, 'yande.re busy', expected=True)
         except Exception as e:
             return self.failed(query, str(e))
