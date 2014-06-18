@@ -320,28 +320,32 @@ def _search(kind, snapshot):
 def __search(kind, snapshot):
     text = get_standard_query()
     log.info('search: %r' % text)
-    with appccontext(commit=True) as conn:
-        q = query(
-            conn=conn,
-            kind=kind,
-            text=text,
-            timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
-        )
-        options = dict(
-            query=q,
-            content=mod(q.kind).format_query_result('web', q)
-        )
-        if is_user:
-            options['watching'] = db.watching(
-                conn,
-                user_id=current_user_id._get_current_object(),
-                query_id=q.id
+    try:
+        with appccontext(commit=True) as conn:
+            q = query(
+                conn=conn,
+                kind=kind,
+                text=text,
+                timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
             )
-            options['states'] = db.get_email_watch_states(
-                conn,
-                user_id=current_user_id._get_current_object(),
-                query_id=q.id
+            options = dict(
+                query=q,
+                content=mod(q.kind).format_query_result('web', q)
             )
+            if is_user:
+                options['watching'] = db.watching(
+                    conn,
+                    user_id=current_user_id._get_current_object(),
+                    query_id=q.id
+                )
+                options['states'] = db.get_email_watch_states(
+                    conn,
+                    user_id=current_user_id._get_current_object(),
+                    query_id=q.id
+                )
+    except:
+        log.debug('search %r failed' % text)
+        raise
     return render_template('list.html', snapshot=snapshot, **options)
 
 
