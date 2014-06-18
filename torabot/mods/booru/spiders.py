@@ -4,6 +4,7 @@ from scrapy import log
 from scrapy.http import Request
 from torabot.spy.spiders.redis import RedisSpider
 from torabot.spy.items import Result
+from torabot.spy.error import failed
 from .items import Posts
 
 
@@ -63,6 +64,8 @@ class Booru(RedisSpider):
                 uri=uri,
                 posts=json.loads(response.body_as_unicode())
             )
+        except ValueError as e:
+            return failed(query, 'yande.re busy', expected=True)
         except Exception as e:
             return self.failed(query, str(e))
 
