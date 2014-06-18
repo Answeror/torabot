@@ -37,5 +37,5 @@ def thumbnail_proxy():
             'date',
             'expires',
             'last-modified',
-        ]
+        ] if key in r.headers
     }
