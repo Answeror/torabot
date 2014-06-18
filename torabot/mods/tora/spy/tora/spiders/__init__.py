@@ -5,14 +5,15 @@
 # your spiders.
 
 import json
+import traceback
 from collections import OrderedDict
 from urlparse import urljoin
 from urllib import urlencode
 from scrapy.selector import Selector
 from scrapy.http import Request
 from scrapy import log
-from torabot.spy.items import Result
 from torabot.spy.spiders.redis import RedisSpider
+from torabot.spy.error import failed
 from ..items import Art, Page
 
 
@@ -94,8 +95,7 @@ class Tora(RedisSpider):
                 status=status_in_art(sel),
             )
         except:
-            log.msg('parse failed', level=log.ERROR)
-            return Result(ok=False, query=uri)
+            return failed(uri, traceback.format_exc(), response=response)
 
         if 'page' not in response.meta:
             return Page(
@@ -143,8 +143,7 @@ class Tora(RedisSpider):
                 req.meta['ranks'] = ranks
                 yield req
         except:
-            log.msg('parse failed', level=log.ERROR)
-            yield Result(ok=False, query=query)
+            yield failed(query, traceback.format_exc(), response=response)
 
     def parse_list(self, response):
         query = response.meta['query']
@@ -180,8 +179,7 @@ class Tora(RedisSpider):
                 arts=list(gen(trs))
             )
         except:
-            log.msg('parse failed', level=log.ERROR)
-            return Result(ok=False, query=query)
+            return failed(query, traceback.format_exc(), response=response)
 
 
 def status_in_art(sel):
