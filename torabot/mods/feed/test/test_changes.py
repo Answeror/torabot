@@ -3,7 +3,7 @@ from .... import make
 from ....ut.bunch import bunchr
 from ....core.mod import mod
 from .. import name
-from .const import URI_QUERY_RESULT
+from .const import URI_QUERY_RESULT, PIXIV_RSS_SEARCH_RESULT
 
 
 def check_changes(old, new, n):
@@ -29,3 +29,7 @@ def test_feed_new_change():
         bunchr(URI_QUERY_RESULT),
         1
     )
+
+
+def test_pixiv_rss_no_change():
+    yield check_changes, bunchr(PIXIV_RSS_SEARCH_RESULT), bunchr(PIXIV_RSS_SEARCH_RESULT), 0
