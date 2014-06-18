@@ -82,3 +82,7 @@ class Danbooru(
         if new.query.method == 'tags':
             return
         yield from super(Danbooru, self).changes(old, new)
+
+    def sync_on_expire(self, query):
+        from ..booru.query import parse
+        return parse(query.text).method != 'tags'

@@ -68,3 +68,16 @@ class Mod(object, metaclass=abc.ABCMeta):
     @property
     def carousel(self):
         pass
+
+    def expired(self, query):
+        from datetime import datetime, timedelta
+        return query.mtime + timedelta(seconds=self.life(query)) < datetime.utcnow()
+
+    def life(self, query):
+        from nose.tools import assert_equal
+        t = self.conf.get('TORABOT_QUERY_EXPIRE', 0)
+        assert_equal(int(t), t)
+        return int(t)
+
+    def sync_on_expire(self, query):
+        return True

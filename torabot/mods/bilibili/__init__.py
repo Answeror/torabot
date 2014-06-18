@@ -84,6 +84,10 @@ class Bilibili(
             if post.uri not in oldmap:
                 yield bunchr(kind='user_new_post', post=post)
 
+    def sync_on_expire(self, query):
+        from ..booru.query import parse
+        return parse(query.text).method != 'bangumi'
+
 
 def query_method_from_result(result):
     if 'kind' in result:

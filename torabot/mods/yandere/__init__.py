@@ -75,3 +75,7 @@ class Yandere(
         if new.query.method == 'tags':
             return
         yield from super(Yandere, self).changes(old, new)
+
+    def sync_on_expire(self, query):
+        from ..booru.query import parse
+        return parse(query.text).method != 'tags'
