@@ -2,6 +2,11 @@
 
 python setup.py develop
 for i in `find torabot/mods/ -exec test -d {}/spy \; -print`; do
+    nosetests $i/spy
+    if [ $? -ne 0 ]; then
+        echo "unittest failed"
+        exit 1
+    fi
     pushd $i/spy > /dev/null
     scrapyd-deploy
     popd > /dev/null

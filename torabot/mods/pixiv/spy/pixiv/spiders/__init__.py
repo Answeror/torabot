@@ -167,20 +167,10 @@ class Pixiv(RedisSpider):
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % uri)
 
-        def gen(sel):
-            author = sel.xpath('//h1[@class="user"]/text()').extract()[0]
-            for a in sel.xpath('//a[@class="work"]')[:self.max_arts]:
-                yield Art(
-                    title=a.xpath('h1/@title').extract()[0],
-                    author=author,
-                    uri=urljoin(BASE_URL, a.xpath('@href').extract()[0]),
-                    thumbnail_uri=a.xpath('img/@src').extract()[0],
-                )
-
         sel = Selector(response)
         try:
             total = int(sel.xpath('//*[@id="wrapper"]/div[1]/div[1]/div/span/text()').re(r'\d+')[0])
-            arts = list(gen(sel))
+            arts = list(parse_user_arts(sel))[:self.max_arts]
             if not arts and total > 0:
                 return failed(query, 'data inconsist', response=response)
             return Page(
@@ -278,3 +268,15 @@ def make_ranking_json_uri(query, page):
 
 def make_ranking_uri(query):
     return 'http://www.pixiv.net/ranking.php?mode=%(mode)s' % query
+
+
+def parse_user_arts(sel):
+    author = sel.xpath('//h1[@class="user"]/text()').extract()[0]
+    # http://stackoverflow.com/a/9133579
+    for a in sel.xpath('//a[contains(concat(" ", normalize-space(@class), " "), " work ")]'):
+        yield Art(
+            title=a.xpath('h1/@title').extract()[0],
+            author=author,
+            uri=urljoin(BASE_URL, a.xpath('@href').extract()[0]),
+            thumbnail_uri=a.xpath('img/@src').extract()[0],
+        )
