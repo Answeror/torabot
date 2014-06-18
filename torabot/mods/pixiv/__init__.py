@@ -24,6 +24,24 @@ class Pixiv(
     normal_search_prompt = '画师主页/id'
 
     @property
+    def empty_query_tests(self):
+        return [
+            lambda q: not q,
+            self._test_empty_standard_query
+        ]
+
+    def _test_empty_standard_query(self, query):
+        from .query import parse
+        q = parse(query)
+        field = {
+            'user_id': 'user_id',
+            'user_uri': 'uri',
+            'user_illustrations_uri': 'uri',
+            'username': 'username',
+        }.get(q['method'])
+        return field and not q[field]
+
+    @property
     def carousel(self):
         from flask import url_for
         return url_for("main.example_search", kind=name, method="ranking", mode="daily", limit=10)

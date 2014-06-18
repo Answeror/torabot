@@ -67,3 +67,35 @@ def test_spy_username():
         assert_equal(len(d.arts), 0)
         assert_equal(d.total, 0)
         assert_greater(len(d.recommendations), 0)
+
+
+@need_scrapyd
+def check_spy_empty_query(query):
+    app = make()
+    with app.app_context():
+        d = mod(name).spy(query, 60)
+        assert_equal(len(d.arts), 0)
+        assert_equal(d.total, 0)
+
+
+def test_spy_empty_query():
+    for query in [
+        json.dumps(dict(
+            method='user_id',
+            user_id=''
+        )),
+        json.dumps(dict(
+            method='user_uri',
+            uri=''
+        )),
+        json.dumps(dict(
+            method='user_illustrations_uri',
+            uri=''
+        )),
+        json.dumps(dict(
+            method='username',
+            username=''
+        )),
+        '',
+    ]:
+        yield check_spy_empty_query, query

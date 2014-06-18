@@ -1,7 +1,6 @@
-import abc
 import json
 from flask import Blueprint
-from ..ut.bunch import Bunch
+from ..ut.bunch import bunchr
 from ..core.kanji import translate
 
 
@@ -71,13 +70,16 @@ class ViewMixin(object):
 class NoEmptyQueryMixin(object):
 
     def spy(self, query, timeout):
-        if not query:
-            return Bunch(
-                query=query,
-                uri='',
-                total=0,
-                arts=[],
-            )
+        for test in getattr(self, 'empty_query_tests', [
+            lambda query: not query
+        ]):
+            if test(query):
+                return bunchr(
+                    query=query,
+                    uri='',
+                    total=0,
+                    arts=[],
+                )
         return super(NoEmptyQueryMixin, self).spy(query, timeout)
 
 
