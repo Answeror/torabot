@@ -85,6 +85,8 @@ class Tora(RedisSpider):
 
     def parse_art(self, response):
         uri = response.meta['uri']
+        if busy(response.body_as_unicode()):
+            return failed(uri, 'tora busy', expected=True)
         sel = Selector(response)
         try:
             art = Art(
@@ -113,6 +115,9 @@ class Tora(RedisSpider):
 
     def parse_complex_list(self, response):
         query = response.meta['query']
+        if busy(response.body_as_unicode()):
+            yield failed(query, 'tora busy', expected=True)
+            return
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % query, level=log.INFO)
 
@@ -147,6 +152,8 @@ class Tora(RedisSpider):
 
     def parse_list(self, response):
         query = response.meta['query']
+        if busy(response.body_as_unicode()):
+            return failed(query, 'tora busy', expected=True)
         uri = response.meta['uri']
         log.msg(u'got response of query %s' % query, level=log.INFO)
 
@@ -222,8 +229,8 @@ def makesimpleuri(query, start):
     ]))
 
 
-def good(response):
-    return u'大変混み合っています' not in response.body_as_unicode()
+def busy(content):
+    return u'大変混み合っています' in content
 
 
 def page_complete(page):
