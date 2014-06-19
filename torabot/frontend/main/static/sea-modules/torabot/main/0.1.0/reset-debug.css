@@ -1,0 +1,160 @@
+/*! define reset-debug.css */
+/**
+ * html5doctor.com Reset Stylesheet v1.6.1 (http://html5doctor.com/html-5-reset-stylesheet/)
+ * Richard Clark (http://richclarkdesign.com)
+ * http://cssreset.com
+ */
+.torabot .norm {
+  /* change colours to suit your needs */
+  /* change colours to suit your needs */
+  /* change border colour to suit your needs */
+}
+.torabot .norm html,
+.torabot .norm body,
+.torabot .norm div,
+.torabot .norm span,
+.torabot .norm object,
+.torabot .norm iframe,
+.torabot .norm h1,
+.torabot .norm h2,
+.torabot .norm h3,
+.torabot .norm h4,
+.torabot .norm h5,
+.torabot .norm h6,
+.torabot .norm p,
+.torabot .norm blockquote,
+.torabot .norm pre,
+.torabot .norm abbr,
+.torabot .norm address,
+.torabot .norm cite,
+.torabot .norm code,
+.torabot .norm del,
+.torabot .norm dfn,
+.torabot .norm em,
+.torabot .norm img,
+.torabot .norm ins,
+.torabot .norm kbd,
+.torabot .norm q,
+.torabot .norm samp,
+.torabot .norm small,
+.torabot .norm strong,
+.torabot .norm sub,
+.torabot .norm sup,
+.torabot .norm var,
+.torabot .norm b,
+.torabot .norm i,
+.torabot .norm dl,
+.torabot .norm dt,
+.torabot .norm dd,
+.torabot .norm ol,
+.torabot .norm ul,
+.torabot .norm li,
+.torabot .norm fieldset,
+.torabot .norm form,
+.torabot .norm label,
+.torabot .norm legend,
+.torabot .norm table,
+.torabot .norm caption,
+.torabot .norm tbody,
+.torabot .norm tfoot,
+.torabot .norm thead,
+.torabot .norm tr,
+.torabot .norm th,
+.torabot .norm td,
+.torabot .norm article,
+.torabot .norm aside,
+.torabot .norm canvas,
+.torabot .norm details,
+.torabot .norm figcaption,
+.torabot .norm figure,
+.torabot .norm footer,
+.torabot .norm header,
+.torabot .norm hgroup,
+.torabot .norm menu,
+.torabot .norm nav,
+.torabot .norm section,
+.torabot .norm summary,
+.torabot .norm time,
+.torabot .norm mark,
+.torabot .norm audio,
+.torabot .norm video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+.torabot .norm body {
+  line-height: 1;
+}
+.torabot .norm article,
+.torabot .norm aside,
+.torabot .norm details,
+.torabot .norm figcaption,
+.torabot .norm figure,
+.torabot .norm footer,
+.torabot .norm header,
+.torabot .norm hgroup,
+.torabot .norm menu,
+.torabot .norm nav,
+.torabot .norm section {
+  display: block;
+}
+.torabot .norm nav ul {
+  list-style: none;
+}
+.torabot .norm blockquote,
+.torabot .norm q {
+  quotes: none;
+}
+.torabot .norm blockquote:before,
+.torabot .norm blockquote:after,
+.torabot .norm q:before,
+.torabot .norm q:after {
+  content: '';
+  content: none;
+}
+.torabot .norm a {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+.torabot .norm ins {
+  background-color: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+.torabot .norm mark {
+  background-color: #ff9;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+.torabot .norm del {
+  text-decoration: line-through;
+}
+.torabot .norm abbr[title],
+.torabot .norm dfn[title] {
+  border-bottom: 1px dotted;
+  cursor: help;
+}
+.torabot .norm table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.torabot .norm hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #cccccc;
+  margin: 1em 0;
+  padding: 0;
+}
+.torabot .norm input,
+.torabot .norm select {
+  vertical-align: middle;
+}

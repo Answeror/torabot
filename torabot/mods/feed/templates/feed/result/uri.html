@@ -6,11 +6,23 @@
 </style>
 <div class=panel-group id=accordion>
     {% for entry in query.result.data.entries %}
-    <div class="panel panel-default">
+    <div class="panel panel-info">
         <div class="panel-heading">
-            <h4 class="panel-title">
-                <a data-toggle="collapse" data-parent="#accordion" href='#feed-entry-{{ loop.index0 }}'><span class=ddd>{{ entry.title }}</span></a>
-            </h4>
+            <div class=row>
+                <div class=col-xs-9>
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordion" href='#feed-entry-{{ loop.index0 }}'><span class=ddd>{{ entry.title }}</span></a>
+                    </h4>
+                </div>
+                {% if 'updated_parsed' in entry %}
+                    {% set time = entry.updated_parsed %}
+                {% else %}
+                    {% if 'published_parsed' in entry %}
+                        {% set time = entry.published_parsed %}
+                    {% endif %}
+                {% endif %}
+                <div class='col-xs-3 text-right'>{% if time %}{{ momentjs(time).fromnow() }}{% endif %}</div>
+            </div>
         </div>
         <div id='feed-entry-{{ loop.index0 }}' class="panel-collapse collapse">
             <div class=panel-body>

@@ -4,11 +4,13 @@
     {% if not entry.best_content_empty %}
     <hr>
     <div class=body>
-        {% if entry.is_html %}
-        {{ entry.best_content.value|safe }}
-        {% else %}
-        <pre>{{ entry.best_content.value }}</pre>
-        {% endif %}
+        <div class='well norm'>
+            {% if entry.is_html %}
+            {{ entry.best_content.value|safe }}
+            {% else %}
+            <pre>{{ entry.best_content.value }}</pre>
+            {% endif %}
+        </div>
     </div>
     {% endif %}
 </div>
