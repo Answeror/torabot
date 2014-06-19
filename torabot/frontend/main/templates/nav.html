@@ -36,7 +36,7 @@
                 <form id=login-form class=navbar-left action='{{ url_for("main.login") }}' method=post>
                     <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
                 </form>
-                <input type=submit class='btn btn-success navbar-btn navbar-left' onclick='$("#login-form").submit()' value='登录'>
+                <input type=submit class='btn btn-success navbar-btn navbar-left' onclick='$("#login-form").submit()' value='登录/注册'>
                 {% else %}
                 <ul class='nav navbar-nav navbar-left'>
                     <li>
