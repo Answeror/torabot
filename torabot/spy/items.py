@@ -13,3 +13,9 @@ class Result(Item):
     query = Field()
     message = Field()
     expected = Field()
+
+
+class Wrap(Item):
+
+    result = Field()
+    ctime = Field()

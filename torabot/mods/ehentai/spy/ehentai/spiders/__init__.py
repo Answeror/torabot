@@ -13,6 +13,7 @@ from scrapy.contrib.loader.processor import Identity, TakeFirst
 from torabot.spy.spiders.redis import RedisSpider
 from torabot.spy.spiders.mixins import RequestMethodMixin
 from torabot.spy.error import failed
+from torabot.ut.time import TIME_FORMAT
 from ..items import Page, Post
 from ..rating import parse_rating
 
@@ -72,7 +73,7 @@ class PostLoader(ItemLoader):
                 .strptime(s.strip(), '%Y-%m-%d %H:%M')
                 .replace(tzinfo=pytz.timezone('America/Anguilla'))  # UTC -4
                 .astimezone(pytz.utc)
-                .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                .strftime(TIME_FORMAT)
             )
 
     def cover_uri_in(self, values):

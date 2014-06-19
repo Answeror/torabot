@@ -33,7 +33,7 @@ def test_send_notice():
             query_id=query_id,
             email_id=email_id
         )
-        sync('tora', '东方', 0, conn=g.connection)
+        sync('tora', '东方', 60, conn=g.connection, sync_interval=300)
         notices = db.get_pending_notices(g.connection)
         assert_greater(len(notices), 0)
         for notice in notices:

@@ -18,7 +18,7 @@ from logbook import Logger
 log = Logger(__name__)
 
 
-def sync(kind, text, timeout, **kargs):
+def sync(kind, text, timeout, sync_interval=None, **kargs):
     try:
         result = mod(kind).spy(text, timeout)
     except ExpectedError as e:
@@ -37,13 +37,16 @@ def sync(kind, text, timeout, **kargs):
             )
             set_query_result(conn, query.id, result)
         if is_query_active_bi_id(conn, query.id):
-            set_next_sync_time(conn, query.id, next_sync_time(query))
+            set_next_sync_time(conn, query.id, next_sync_time(query, sync_interval))
         else:
             set_next_sync_time(conn, query.id, None)
 
 
-def next_sync_time(query):
-    return datetime.utcnow() + timedelta(seconds=get_current_conf()['TORABOT_DEFAULT_SYNC_INTERVAL'])
+def next_sync_time(query, sync_interval):
+    return datetime.utcnow() + timedelta(seconds=(
+        sync_interval if sync_interval is not None
+        else get_current_conf()['TORABOT_DEFAULT_SYNC_INTERVAL']
+    ))
 
 
 @contextmanager

@@ -2,8 +2,10 @@ from logbook import Logger
 from redis import Redis
 import json
 import requests
+from datetime import datetime, timedelta
 from redis_lock import Lock
 from ..ut.bunch import bunchr
+from ..ut.time import TIME_FORMAT
 from ..core.local import get_current_conf
 from ..spy.query import hash as hash_query
 from .errors import ExpectedError
@@ -65,12 +67,18 @@ def spy(kind, query, timeout, slaves, options={}):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))
-    resp = redis.blpop(
-        'torabot:spy:%s:%s:items' % (kind, hash_query(query)),
-        timeout=timeout
-    )
-    if resp:
+    while True:
+        resp = redis.blpop(
+            'torabot:spy:%s:%s:items' % (kind, hash_query(query)),
+            timeout=timeout
+        )
+        if not resp:
+            break
+
         r = json.loads(resp[1].decode('utf-8'))
+        if datetime.strptime(r['ctime'], TIME_FORMAT) + timedelta(seconds=int(timeout)) < datetime.utcnow():
+            continue
+        r = r['result']
         if r.get('ok', True):
             return bunchr(r)
         message = r.get('message', 'no error message')
@@ -78,4 +86,4 @@ def spy(kind, query, timeout, slaves, options={}):
             raise ExpectedError(message)
         raise Exception('spy %s for %s failed: %s' % (kind, query, message))
 
-    raise SpyTimeoutError()
+    raise SpyTimeoutError('spy %s for %s timeout')
