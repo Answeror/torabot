@@ -123,7 +123,8 @@ class Entry(Wrap):
         import html2text as _html2text
         import html.parser as _html_parser
         try:
-            return _html2text.html2text(html=html, baseurl=baseurl)
+            h = _html2text.HTML2Text(baseurl=baseurl, bodywidth=0)
+            return h.handle(html)
         except _html_parser.HTMLParseError:
             if default is not None:
                 return default

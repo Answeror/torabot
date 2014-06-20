@@ -13,9 +13,9 @@
 {% if 'author' in entry -%}
 作者: {{ entry.formatted_author }}
 {%- endif %}
-{% if entry.best_content_text -%}
-
-{% if entry.is_html %} (下面是原始内容的纯文本版本){% endif %}
-
+{% if entry.best_content_text %}
+{%- if entry.is_html %}
+(下面是原始内容的纯文本版本)
+{% endif %}
 {{ entry.best_content_text }}
 {%- endif %}
