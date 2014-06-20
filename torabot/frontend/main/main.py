@@ -29,7 +29,7 @@ from ...core.user import (
     add_email as core_add_email,
     activate_email as core_activate_email,
 )
-from ..errors import AuthError
+from ..errors import AuthError, BusyError
 from . import bp
 from .. import auth
 from ..response import make_ok_response, make_response
@@ -331,6 +331,8 @@ def __search(kind, snapshot):
             text=text,
             timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
         )
+        if q is None:
+            raise BusyError()
         options = dict(
             query=q,
             content=mod(q.kind).format_query_result('web', q)

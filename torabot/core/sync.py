@@ -23,7 +23,7 @@ def sync(kind, text, timeout, sync_interval=None, **kargs):
         result = mod(kind).spy(text, timeout)
     except (ExpectedError, SpyTimeoutError) as e:
         log.debug(str(e))
-        return
+        return False
 
     with context(**kargs) as conn:
         query = get_or_add_query_bi_kind_and_text(conn, kind, text)
@@ -40,6 +40,8 @@ def sync(kind, text, timeout, sync_interval=None, **kargs):
             set_next_sync_time(conn, query.id, next_sync_time(query, sync_interval))
         else:
             set_next_sync_time(conn, query.id, None)
+
+    return True
 
 
 def next_sync_time(query, sync_interval):
