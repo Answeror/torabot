@@ -3,6 +3,10 @@ from ...ut.bunch import Bunch
 from ...core.kanji import translate
 from ..base import Mod
 from flask import Blueprint
+from ..mixins import (
+    IdentityGuessNameMixin,
+    make_field_guess_name_mixin
+)
 
 
 name = 'tora'
@@ -15,7 +19,11 @@ bp = Blueprint(
 )
 
 
-class Tora(Mod):
+class Tora(
+    make_field_guess_name_mixin('nam', 'act', 'com', 'itc'),
+    IdentityGuessNameMixin,
+    Mod
+):
 
     name = name
     display_name = '虎穴'

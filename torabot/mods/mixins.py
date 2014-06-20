@@ -121,3 +121,33 @@ class Jinja2Mixin(object):
             value = Environment(loader=PackageLoader('torabot.mods.' + self.name, 'templates'))
             setattr(self, name, value)
         return value
+
+
+class IdentityGuessNameMixin(object):
+
+    def guess_name(self, query):
+        return query.text
+
+
+def make_field_guess_name_mixin(field, *args):
+    if isinstance(field, str):
+        fields = [field]
+    else:
+        fields = field
+    fields.extend(args)
+
+    class FieldGuessNameMixin(object):
+
+        def guess_name(self, query):
+            try:
+                d = json.loads(query.text)
+                if isinstance(d, dict):
+                    for name in fields:
+                        value = d.get(name, None)
+                        if value:
+                            return value
+            except:
+                pass
+            return super(FieldGuessNameMixin, self).guess_name(query)
+
+    return FieldGuessNameMixin

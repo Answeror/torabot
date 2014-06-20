@@ -3,7 +3,9 @@ from ..base import Mod
 from ..mixins import (
     ViewMixin,
     NoEmptyQueryMixin,
-    make_blueprint_mixin
+    make_blueprint_mixin,
+    IdentityGuessNameMixin,
+    make_field_guess_name_mixin
 )
 from logbook import Logger
 
@@ -16,6 +18,8 @@ class Yyets(
     ViewMixin,
     NoEmptyQueryMixin,
     make_blueprint_mixin(__name__),
+    make_field_guess_name_mixin('uri'),
+    IdentityGuessNameMixin,
     Mod
 ):
     name = name

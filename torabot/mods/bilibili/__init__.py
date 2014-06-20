@@ -1,7 +1,13 @@
 from nose.tools import assert_equal
 from ...ut.bunch import bunchr
 from ..base import Mod
-from ..mixins import ViewMixin, NoEmptyQueryMixin, make_blueprint_mixin
+from ..mixins import (
+    ViewMixin,
+    NoEmptyQueryMixin,
+    make_blueprint_mixin,
+    IdentityGuessNameMixin,
+    make_field_guess_name_mixin
+)
 
 
 name = 'bilibili'
@@ -11,6 +17,8 @@ class Bilibili(
     ViewMixin,
     NoEmptyQueryMixin,
     make_blueprint_mixin(__name__),
+    make_field_guess_name_mixin('title', 'user_id', 'username', 'query'),
+    IdentityGuessNameMixin,
     Mod
 ):
 

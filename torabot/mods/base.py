@@ -91,3 +91,6 @@ class Mod(object, metaclass=abc.ABCMeta):
 
     def sync_on_expire(self, query):
         return True
+
+    def guess_name(self, query):
+        pass

@@ -1,5 +1,5 @@
 import os
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_in
 from ...ut.bunch import Bunch
 from ..email import pack, guess_extension
 
@@ -20,4 +20,4 @@ def test_pack():
 
 def test_guess_extension():
     assert_equal(guess_extension('image/png'), '.png')
-    assert_equal(guess_extension('image/jpeg'), '.jpeg')
+    assert_in(guess_extension('image/jpeg'), ['.jpg', '.jpeg'])

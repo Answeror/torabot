@@ -5,6 +5,8 @@ from ..mixins import (
     NoEmptyQueryMixin,
     make_blueprint_mixin,
     Jinja2Mixin,
+    IdentityGuessNameMixin,
+    make_field_guess_name_mixin
 )
 
 
@@ -16,6 +18,8 @@ class Feed(
     NoEmptyQueryMixin,
     make_blueprint_mixin(__name__),
     Jinja2Mixin,
+    make_field_guess_name_mixin('uri'),
+    IdentityGuessNameMixin,
     Mod
 ):
     name = name

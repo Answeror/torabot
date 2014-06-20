@@ -35,5 +35,7 @@
     <p>本查询最近一次更新时间为: {{ momentjs(query.mtime).fromnow() }}</p>
     <hr>
     {{ content | safe }}
-    {% include 'name_watch_dialog.html' %}
+    {% if not snapshot %}
+        {% include 'name_watch_dialog.html' %}
+    {% endif %}
 {% endblock %}

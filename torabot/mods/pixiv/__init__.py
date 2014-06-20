@@ -3,7 +3,9 @@ from ..base import Mod
 from ..mixins import (
     ViewMixin,
     NoEmptyQueryMixin,
-    make_blueprint_mixin
+    make_blueprint_mixin,
+    IdentityGuessNameMixin,
+    make_field_guess_name_mixin
 )
 
 
@@ -14,6 +16,8 @@ class Pixiv(
     ViewMixin,
     NoEmptyQueryMixin,
     make_blueprint_mixin(__name__),
+    make_field_guess_name_mixin('mode', 'user_id', 'uri', 'username'),
+    IdentityGuessNameMixin,
     Mod
 ):
 

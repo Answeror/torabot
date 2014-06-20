@@ -2,7 +2,9 @@ from urllib.parse import urljoin
 from ..base import Mod
 from ..mixins import (
     ViewMixin,
-    make_blueprint_mixin
+    make_blueprint_mixin,
+    IdentityGuessNameMixin,
+    make_field_guess_name_mixin
 )
 from ..booru.mixins import BooruMixin
 
@@ -14,6 +16,8 @@ class Danbooru(
     ViewMixin,
     BooruMixin,
     make_blueprint_mixin(__name__),
+    make_field_guess_name_mixin('uri', 'query'),
+    IdentityGuessNameMixin,
     Mod
 ):
     name = name
