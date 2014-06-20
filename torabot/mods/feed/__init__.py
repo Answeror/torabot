@@ -3,7 +3,8 @@ from ..base import Mod
 from ..mixins import (
     ViewMixin,
     NoEmptyQueryMixin,
-    make_blueprint_mixin
+    make_blueprint_mixin,
+    Jinja2Mixin,
 )
 
 
@@ -14,6 +15,7 @@ class Feed(
     ViewMixin,
     NoEmptyQueryMixin,
     make_blueprint_mixin(__name__),
+    Jinja2Mixin,
     Mod
 ):
     name = name
@@ -45,9 +47,28 @@ class Feed(
         seen = {self._entry_id(entry): entry for entry in old.get('data', {}).get('entries', [])}
         for i, entry in enumerate(new.get('data', {}).get('entries', [])):
             if self._entry_id(entry) not in seen:
-                yield bunchr(kind='feed.new', entry=entry, data=new, index=i)
+                yield bunchr(kind='feed.new', query=new.query, entry=entry, data=new, index=i)
 
     def spy(self, query, timeout):
         from .query import parse, regular
         query = parse(query)
         return super(Feed, self).spy(regular(query), timeout)
+
+    def format_notice_status(self, view, notice):
+        from .types import Notice
+        return super(Feed, self).format_notice_status(view, Notice(notice))
+
+    def format_notice_body(self, view, notice):
+        from .types import Notice
+        return super(Feed, self).format_notice_body(view, Notice(notice))
+
+    def format_query_result(self, view, query):
+        from .types import Query
+        return super(Feed, self).format_query_result(view, Query(query))
+
+    def notice_attachments(self, view, notice):
+        f = getattr(self.view(view), 'notice_attachments', None)
+        if f is None:
+            from .types import Notice
+            return super(Feed, self).notice_attachments(view, Notice(notice))
+        return f(notice)

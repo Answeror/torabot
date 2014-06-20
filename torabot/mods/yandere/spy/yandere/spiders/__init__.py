@@ -4,6 +4,7 @@
 # your spiders.
 
 import json
+import traceback
 from torabot.mods.booru.spiders import Booru
 from torabot.spy.error import failed
 from scrapy.http import Request
@@ -43,7 +44,7 @@ class Yandere(Booru):
                 query=query,
                 content=json.loads(response.body_as_unicode())
             )
-        except ValueError as e:
+        except ValueError:
             return failed(query, 'yande.re busy', expected=True)
-        except Exception as e:
-            return self.failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)

@@ -30,10 +30,12 @@
             </div>
             <table class='table table-condensed'>
                 <tbody>
+                    {% if 'link' in entry %}
                     <tr>
                         <td class='col-sm-2 text-right'><strong>链接</strong></td>
                         <td class=col-sm-10><a href='{{ entry.link }}' target=_blank>{{ entry.link }}</a></td>
                     </tr>
+                    {% endif %}
                     {% if 'published_parsed' in entry %}
                     <tr>
                         <td class='col-sm-2 text-right'><strong>发布时间</strong></td>

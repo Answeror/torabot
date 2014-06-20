@@ -4,6 +4,7 @@
 # your spiders.
 
 import pytz
+import traceback
 from datetime import datetime
 from urllib import urlencode
 from scrapy.http import Request
@@ -56,8 +57,8 @@ class Ehentai(RequestMethodMixin, RedisSpider):
                     '//table[@class="itg"]/tr[starts-with(@class, "gtr")]'
                 )]
             )
-        except Exception as e:
-            return failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)
 
 
 class PostLoader(ItemLoader):

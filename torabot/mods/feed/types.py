@@ -9,6 +9,9 @@ class Wrap(object):
     def __getattr__(self, name):
         return getattr(self.impl, name)
 
+    def __contains__(self, value):
+        return value in self.impl
+
 
 class Feed(Wrap):
 
@@ -98,5 +101,48 @@ class Entry(Wrap):
             setattr(self, name, value)
         return value
 
-    def __contains__(self, value):
-        return value in self.impl
+    def _make_best_content_text(self):
+        return self._html2text(
+            self.best_content.value,
+            default=self.get('link', '')
+        ) if self.is_html else self.best_content.value
+
+    @property
+    def best_content_text(self):
+        name = '_best_content_text'
+        value = getattr(self, name, None)
+        if value is None:
+            value = self._make_best_content_text()
+            setattr(self, name, value)
+        return value
+
+    def _html2text(self, html, baseurl='', default=None):
+        import html2text as _html2text
+        import html.parser as _html_parser
+        try:
+            return _html2text.html2text(html=html, baseurl=baseurl)
+        except _html_parser.HTMLParseError:
+            if default is not None:
+                return default
+            raise
+
+
+class Notice(Wrap):
+
+    @property
+    def change(self):
+        return Change(self.impl.change)
+
+
+class Query(Wrap):
+
+    @property
+    def result(self):
+        return Result(self.impl.result)
+
+
+class Result(Wrap):
+
+    @property
+    def data(self):
+        return Feed(self.impl.data)

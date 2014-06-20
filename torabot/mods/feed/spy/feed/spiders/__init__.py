@@ -5,12 +5,12 @@
 
 
 import json
+import traceback
 import jsonpickle
 import feedparser
-from scrapy import log
 from scrapy.http import Request
 from torabot.spy.spiders.redis import RedisSpider
-from torabot.spy.items import Result
+from torabot.spy.error import failed
 from ..items import Feed
 
 
@@ -44,14 +44,9 @@ class FeedSpider(RedisSpider):
                 query=query,
                 data=to_dict(response.body_as_unicode())
             )
-        except Exception as e:
-            return failed(query, str(e))
+        except:
+            return failed(query, traceback.format_exc(), response=response)
 
 
 def to_dict(s):
     return json.loads(jsonpickle.encode(feedparser.parse(s)))
-
-
-def failed(query, message):
-    log.msg('parse failed: %s' % message, level=log.ERROR)
-    return Result(ok=False, query=query, message=message)

@@ -2,8 +2,18 @@ import abc
 from .spy import spy
 
 
+class InstanceField(object):
+
+    def __get__(self, obj, cls):
+        if cls is None:
+            cls = type(obj)
+        from ..core.mod import mod
+        return mod(cls.name)
+
+
 class Mod(object, metaclass=abc.ABCMeta):
 
+    instance = InstanceField()
     has_advanced_search = False
     has_normal_search = True
     normal_search_prompt = ''

@@ -1,7 +1,5 @@
 from flask import render_template
-from ....ut.bunch import bunchr
 from ..query import parse as parse_query
-from ..types import Feed
 
 
 def format_query_result(query):
@@ -11,8 +9,6 @@ def format_query_result(query):
 
 
 def format_uri_result(query):
-    query = bunchr(**query)
-    query.result.data = Feed(query.result.data)
     return render_template('feed/result/uri.html', query=query)
 
 

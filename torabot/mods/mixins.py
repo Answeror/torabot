@@ -108,3 +108,16 @@ def translate_recursive(d):
     if isinstance(d, list):
         return [translate_recursive(e) for e in d]
     return translate(d)
+
+
+class Jinja2Mixin(object):
+
+    @property
+    def jinja2_env(self):
+        name = '_jinja2_env'
+        value = getattr(self, name, None)
+        if value is None:
+            from jinja2 import Environment, PackageLoader
+            value = Environment(loader=PackageLoader('torabot.mods.' + self.name, 'templates'))
+            setattr(self, name, value)
+        return value
