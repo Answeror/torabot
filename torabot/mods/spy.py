@@ -86,4 +86,4 @@ def spy(kind, query, timeout, slaves, options={}):
             raise ExpectedError(message)
         raise Exception('spy %s for %s failed: %s' % (kind, query, message))
 
-    raise SpyTimeoutError('spy %s for %s timeout')
+    raise SpyTimeoutError('spy %s for %s timeout' % (kind, query))
