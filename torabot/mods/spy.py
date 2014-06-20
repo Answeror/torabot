@@ -1,5 +1,4 @@
 from logbook import Logger
-from redis import Redis
 import json
 import requests
 from datetime import datetime, timedelta
@@ -8,15 +7,11 @@ from ..ut.bunch import bunchr
 from ..ut.time import TIME_FORMAT
 from ..core.local import get_current_conf
 from ..spy.query import hash as hash_query
-from .errors import ExpectedError
+from .errors import ExpectedError, SpyTimeoutError
+from ..core.redis import redis
 
 
 log = Logger(__name__)
-redis = Redis()
-
-
-class SpyTimeoutError(Exception):
-    pass
 
 
 def lives(kind):

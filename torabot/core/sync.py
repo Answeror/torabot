@@ -11,7 +11,7 @@ from ..db import (
 )
 from .local import get_current_conf
 from .mod import mod
-from ..mods.errors import ExpectedError
+from ..mods.errors import ExpectedError, SpyTimeoutError
 from logbook import Logger
 
 
@@ -21,7 +21,7 @@ log = Logger(__name__)
 def sync(kind, text, timeout, sync_interval=None, **kargs):
     try:
         result = mod(kind).spy(text, timeout)
-    except ExpectedError as e:
+    except (ExpectedError, SpyTimeoutError) as e:
         log.debug(str(e))
         return
 
