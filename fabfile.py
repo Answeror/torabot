@@ -27,6 +27,7 @@ def gunicorn():
     # run('redis-cli flushall')
     run('redis-cli keys "torabot:temp:*" | xargs redis-cli del')
     run('redis-cli keys "torabot:spy:*" | xargs redis-cli del')
+    run('redis-cli keys "celery-task-meta-*" | xargs redis-cli del')
     with cd('/www/torabot/repo'):
         run('git pull')
         with prefix('pyenv shell 2.7.6'):
