@@ -1,4 +1,7 @@
 from email.utils import formataddr
+from datetime import datetime
+import time
+from ...ut.time import TIME_DISPLAY_FORMAT
 
 
 class Wrap(object):
@@ -126,6 +129,22 @@ class Entry(Wrap):
                 return default
             raise
 
+    @property
+    def published_parsed(self):
+        return time_to_datetime(self.impl.published_parsed)
+
+    @property
+    def published_parsed_display(self):
+        return self.published_parsed.strftime(TIME_DISPLAY_FORMAT)
+
+    @property
+    def updated_parsed(self):
+        return time_to_datetime(self.impl.updated_parsed)
+
+    @property
+    def updated_parsed_display(self):
+        return self.updated_parsed.strftime(TIME_DISPLAY_FORMAT)
+
 
 class Notice(Wrap):
 
@@ -146,3 +165,7 @@ class Result(Wrap):
     @property
     def data(self):
         return Feed(self.impl.data)
+
+
+def time_to_datetime(t):
+    return datetime.fromtimestamp(time.mktime(tuple(t)))

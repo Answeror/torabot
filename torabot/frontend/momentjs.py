@@ -13,6 +13,8 @@ class Momentjs(object):
             self.timestamp = datetime.strptime(timestamp, ISO)
         elif isinstance(timestamp, time.struct_time):
             self.timestamp = time_to_datetime(timestamp)
+        elif isinstance(timestamp, list):
+            self.timestamp = time_to_datetime(tuple(timestamp))
         else:
             assert isinstance(timestamp, datetime), type(timestamp)
             self.timestamp = timestamp

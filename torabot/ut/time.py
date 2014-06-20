@@ -2,6 +2,7 @@ from datetime import datetime
 
 
 TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+TIME_DISPLAY_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 def tokyo_to_utc(dt):
