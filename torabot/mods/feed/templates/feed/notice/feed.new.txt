@@ -1,21 +1,26 @@
+{%- set entry = notice.change.entry -%}
 主人, 您使用 {{ mod.display_name }} 模块订阅的 {{ notice.change.query.uri if 'query' in notice.change else 'feed' }} 有新条目了!
 
-{%- set entry = notice.change.entry %}
-{% if 'link' in entry -%}
+{% if 'title' in entry -%}
+标题: {{ entry.title }}
+{% endif %}
+{%- if 'link' in entry -%}
 链接: {{ entry.link }}
-{%- endif %}
-{% if 'published_parsed' in entry -%}
+{% endif %}
+{%- if 'published_parsed' in entry -%}
 发布: {{ entry.published_parsed_display }}
-{%- endif %}
-{% if 'updated_parsed' in entry -%}
+{% endif %}
+{%- if 'updated_parsed' in entry -%}
 更新: {{ entry.updated_parsed_display }}
-{%- endif %}
-{% if 'author' in entry -%}
+{% endif %}
+{%- if 'author' in entry -%}
 作者: {{ entry.formatted_author }}
 {%- endif %}
-{% if entry.best_content_text %}
+{%- if entry.best_content_text %}
 {%- if entry.is_html %}
+
 (下面是原始内容的纯文本版本)
-{% endif %}
+{%- endif %}
+
 {{ entry.best_content_text }}
 {%- endif %}

@@ -51,7 +51,7 @@ class Feed(
         seen = {self._entry_id(entry): entry for entry in old.get('data', {}).get('entries', [])}
         for i, entry in enumerate(new.get('data', {}).get('entries', [])):
             if self._entry_id(entry) not in seen:
-                yield bunchr(kind='feed.new', query=new.query, entry=entry, data=new, index=i)
+                yield bunchr(kind='feed.new', query=new.query, entry=entry)
 
     def spy(self, query, timeout):
         from .query import parse, regular
