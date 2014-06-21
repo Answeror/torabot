@@ -1,3 +1,6 @@
+import textwrap
+
+
 URI_QUERY_RESULT = {
     "uri": "https://yande.re/post/atom",
     "data": {
@@ -2336,3 +2339,123 @@ PIXIV_RSS_SEARCH_RESULT = {
         "uri": "http://rakuen.thec.me/PixivRss/r18g-20"
     }
 }
+
+FEED_NOTICE = {
+    "change": {
+        "entry": {
+            "author": "Jimmy",
+            "author_detail": {
+                "name": "Jimmy"
+            },
+            "authors": [
+                {}
+            ],
+            "comments": "http://www.hexieshe.com/646273/#comments",
+            "guidislink": False,
+            "id": "http://www.hexieshe.com/?p=646273",
+            "link": "http://www.hexieshe.com/646273/",
+            "links": [
+                {
+                    "href": "http://www.hexieshe.com/646273/",
+                    "rel": "alternate",
+                    "type": "text/html"
+                }
+            ],
+            "published": "Sat, 21 Jun 2014 03:15:40 +0000",
+            "published_parsed": [
+                2014,
+                6,
+                21,
+                3,
+                15,
+                40,
+                5,
+                172,
+                0
+            ],
+            "slash_comments": "0",
+            "summary": "<p style=\"text-align: center;\"><a href=\"http://www.bababian.com/phoinfo/7FCAE33411F0977C8422BE753311D45FDT\" target=\"_blank\"><img alt=\"\u521d\u00b7\u6d51 \u6b7b\u5e93\u6c34 \u5236\u670d \u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217\" border=\"0\" class=\"alignnone\" height=\"500\" src=\"http://photo2.bababian.com/usr895226/upload7/20140620/s1vxdUC37WCylHo7kFjPLvcJh+DU9ZerWkeyIa+YlDn1VpmWyciBj0w==.jpg\" title=\"\u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217\u7b2c\u4e00\u5f39-\u6c34\u4e2d\u7684\u300a\u521d\u00b7\u6d51\u300b\" width=\"500\" /></a></p>\n<p style=\"text-align: left;\">\u53ef\u80fd\u662f\u6e29\u5ea6\u5347\u9ad8\u4e86\uff0c\u5927\u5bb6\u5c31\u5f00\u59cb\u8e81\u52a8\u4e86\uff0c\u7a81\u7136\u4e00\u4e0b\u5b50\u8fd9\u8fb9\u5c31\u591a\u4e86\u597d\u591a\u6444\u5f71\u5e08\u7ed9\u7684\u6b7b\u5e93\u6c34\u5957\u56fe\uff0c\u6240\u4ee5\u6211\u4e5f\u5c31\u5e72\u8106\u6765\u4e00\u4e2a\u7ed9\u8fd9\u5957\u56fe\u6765\u4e00\u4e2a\u7cfb\u5217\u540d\u201c\u6b7b\u5e93\u6c34\u840c\u840c\u54d2\u201d\u3002\u7b2c\u4e00\u5f39\u7684\u6444\u5f71\u5e08@<a href=\"http://weibo.com/hdhe\" target=\"_blank\">\u79be\u53e3\u79be\u53e3</a>\uff0c\u51fa\u955c:\u82b1\u82b1@<a href=\"http://weibo.com/u/2281897485\" target=\"_blank\">\u773c\u775b\u8fdb\u4e86\u6d6e\u8e81</a>\uff0c\u53bb\u5e74\u79be\u53e3\u79be\u53e3\u4e5f\u4e3a\u548c\u90aa\u793e\u63d0\u4f9b\u4e86\u4e24\u5957\u7684\u6b7b\u5e93\u6c34\u5957\u56fe\uff0c\u79be\u53e3\u79be\u53e3\u7684\u56fe\u7247\u6709\u4e00\u4e2a\u7279\u70b9\u5c31\u662f\u59b9\u5b50\u9732\u8138\u7684\u5f88\u5c11\uff0c\u8fd9\u6837\u5176\u5b9e\u633a\u597d\u7684\uff0c\u8ba9\u201c\u6b7b\u5e93\u6c34\u201d\u771f\u6b63\u7684\u6210\u4e3a\u4e86\u56fe\u7247\u7684\u4e3b\u89d2\uff0c\u800c\u4e0d\u4f1a\u56e0\u4e3a\u59b9\u5b50\u592a\u840c\u800c\u55a7\u5bbe\u593a\u4e3b\u3002</p>",
+            "summary_detail": {
+                "base": "",
+                "language": None,
+                "type": "text/html",
+                "value": "<p style=\"text-align: center;\"><a href=\"http://www.bababian.com/phoinfo/7FCAE33411F0977C8422BE753311D45FDT\" target=\"_blank\"><img alt=\"\u521d\u00b7\u6d51 \u6b7b\u5e93\u6c34 \u5236\u670d \u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217\" border=\"0\" class=\"alignnone\" height=\"500\" src=\"http://photo2.bababian.com/usr895226/upload7/20140620/s1vxdUC37WCylHo7kFjPLvcJh+DU9ZerWkeyIa+YlDn1VpmWyciBj0w==.jpg\" title=\"\u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217\u7b2c\u4e00\u5f39-\u6c34\u4e2d\u7684\u300a\u521d\u00b7\u6d51\u300b\" width=\"500\" /></a></p>\n<p style=\"text-align: left;\">\u53ef\u80fd\u662f\u6e29\u5ea6\u5347\u9ad8\u4e86\uff0c\u5927\u5bb6\u5c31\u5f00\u59cb\u8e81\u52a8\u4e86\uff0c\u7a81\u7136\u4e00\u4e0b\u5b50\u8fd9\u8fb9\u5c31\u591a\u4e86\u597d\u591a\u6444\u5f71\u5e08\u7ed9\u7684\u6b7b\u5e93\u6c34\u5957\u56fe\uff0c\u6240\u4ee5\u6211\u4e5f\u5c31\u5e72\u8106\u6765\u4e00\u4e2a\u7ed9\u8fd9\u5957\u56fe\u6765\u4e00\u4e2a\u7cfb\u5217\u540d\u201c\u6b7b\u5e93\u6c34\u840c\u840c\u54d2\u201d\u3002\u7b2c\u4e00\u5f39\u7684\u6444\u5f71\u5e08@<a href=\"http://weibo.com/hdhe\" target=\"_blank\">\u79be\u53e3\u79be\u53e3</a>\uff0c\u51fa\u955c:\u82b1\u82b1@<a href=\"http://weibo.com/u/2281897485\" target=\"_blank\">\u773c\u775b\u8fdb\u4e86\u6d6e\u8e81</a>\uff0c\u53bb\u5e74\u79be\u53e3\u79be\u53e3\u4e5f\u4e3a\u548c\u90aa\u793e\u63d0\u4f9b\u4e86\u4e24\u5957\u7684\u6b7b\u5e93\u6c34\u5957\u56fe\uff0c\u79be\u53e3\u79be\u53e3\u7684\u56fe\u7247\u6709\u4e00\u4e2a\u7279\u70b9\u5c31\u662f\u59b9\u5b50\u9732\u8138\u7684\u5f88\u5c11\uff0c\u8fd9\u6837\u5176\u5b9e\u633a\u597d\u7684\uff0c\u8ba9\u201c\u6b7b\u5e93\u6c34\u201d\u771f\u6b63\u7684\u6210\u4e3a\u4e86\u56fe\u7247\u7684\u4e3b\u89d2\uff0c\u800c\u4e0d\u4f1a\u56e0\u4e3a\u59b9\u5b50\u592a\u840c\u800c\u55a7\u5bbe\u593a\u4e3b\u3002</p>"
+            },
+            "tags": [
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u5b85\u8150\u6587\u5316"
+                },
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u6444\u5f71\u5199\u771f"
+                },
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u5236\u670d"
+                },
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u6b7b\u5e93\u6c34"
+                },
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u6c34\u4e2d\u6444\u5f71"
+                },
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u840c\u59b9\u5b50"
+                },
+                {
+                    "label": None,
+                    "scheme": None,
+                    "term": "\u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217"
+                }
+            ],
+            "title": "\u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217\u7b2c\u4e00\u5f39-\u6c34\u4e2d\u7684\u300a\u521d\u00b7\u6d51\u300b",
+            "title_detail": {
+                "base": "",
+                "language": None,
+                "type": "text/plain",
+                "value": "\u8dea\u8214\u6b7b\u5e93\u6c34\u7cfb\u5217\u7b2c\u4e00\u5f39-\u6c34\u4e2d\u7684\u300a\u521d\u00b7\u6d51\u300b"
+            },
+            "wfw_commentrss": "http://www.hexieshe.com/646273/feed/"
+        },
+        "index": 0,
+        "kind": "feed.new",
+        "query": {
+            "method": "uri",
+            "uri": "http://www.hexieshe.com/feed/"
+        }
+    },
+    "ctime": "Sat, 21 Jun 2014 03:26:35 GMT",
+    "email": "answeror@gmail.com",
+    "id": 4961,
+    "kind": "feed",
+    "status": "sent",
+    "user_id": 1
+}
+
+
+FEED_NOTICE_EMAIL = textwrap.dedent(
+    '''\
+    主人, 您使用 feed 模块订阅的 http://www.hexieshe.com/feed/ 有新条目了!
+
+    标题: 跪舔死库水系列第一弹-水中的《初·浑》
+    链接: http://www.hexieshe.com/646273/
+    发布: 2014-06-21 03:15:40
+    作者: Jimmy
+
+    (下面是原始内容的纯文本版本)
+
+    ![初·浑 死库水 制服 跪舔死库水系列](http://photo2.bababian.com/usr895226/upload7/20140620/s1vxdUC37WCylHo7kFjPLvcJh+DU9ZerWkeyIa+YlDn1VpmWyciBj0w==.jpg)
+
+    可能是温度升高了，大家就开始躁动了，突然一下子这边就多了好多摄影师给的死库水套图，所以我也就干脆来一个给这套图来一个系列名“死库水萌萌哒”。第一弹的摄影师@[禾口禾口](http://weibo.com/hdhe)，出镜:花花@[眼睛进了浮躁](http://weibo.com/u/2281897485)，去年禾口禾口也为和邪社提供了两套的死库水套图，禾口禾口的图片有一个特点就是妹子露脸的很少，这样其实挺好的，让“死库水”真正的成为了图片的主角，而不会因为妹子太萌而喧宾夺主。
+    '''
+)
