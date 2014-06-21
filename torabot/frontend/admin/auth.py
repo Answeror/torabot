@@ -13,3 +13,6 @@ def require_admin(f):
         return f(*args, **kargs)
 
     return inner
+
+
+admin_required = require_admin

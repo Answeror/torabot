@@ -31,10 +31,9 @@ class App(Flask):
 
     def _init_parts(self):
         from . import frontend
-        from . import api
         from .core import mod
 
-        for part in [frontend, api, mod]:
+        for part in [frontend, mod]:
             part.make(self)
 
     @property

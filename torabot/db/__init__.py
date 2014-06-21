@@ -8,6 +8,7 @@ from .user import (
     get_user_count,
     set_user_field_bi_id,
     has_user_bi_openid,
+    has_user_bi_id,
     get_users_detail,
     get_user_name_bi_openid,
     activate_user_bi_id,
@@ -127,4 +128,5 @@ __all__ = [
     set_next_sync_time_bi_kind_and_text.__name__,
     get_need_sync_queries.__name__,
     is_query_active_bi_id.__name__,
+    has_user_bi_id.__name__,
 ]

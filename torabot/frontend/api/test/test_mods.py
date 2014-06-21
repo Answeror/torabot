@@ -1,6 +1,6 @@
 import json
 from nose.tools import assert_greater
-from ... import make
+from .... import make
 
 
 def test_mods():

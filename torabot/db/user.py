@@ -192,6 +192,14 @@ def has_user_bi_openid(conn, openid):
 
 
 @error_guard
+def has_user_bi_id(conn, id):
+    return conn.execute(
+        sql('select 1 from "user" where id = :id'),
+        id=id
+    ).fetchone() is not None
+
+
+@error_guard
 def activate_user_bi_id(conn, id):
     conn.execute(sql('update "user" set activated = TRUE where id = :id'), id=id)
 
