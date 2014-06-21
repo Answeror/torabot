@@ -123,7 +123,10 @@ class Pixiv(RedisSpider):
             return failed(query, '404')
         try:
             pages = response.meta['pages']
-            d = json.loads(response.body_as_unicode())
+            try:
+                d = json.loads(response.body_as_unicode())
+            except ValueError:
+                return failed(query, 'pixiv busy', expected=True)
             pages[response.meta['page']] = [] if 'error' in d else d['contents']
             if None not in pages:
                 arts = list(chain(*pages))
