@@ -62,5 +62,10 @@ def mods():
     return mod.values
 
 
+def frontend_mods():
+    from ..mods.base import Frontend
+    return [m for m in mod.values if isinstance(m, Frontend)]
+
+
 def make(app):
     mod.init_app(app)

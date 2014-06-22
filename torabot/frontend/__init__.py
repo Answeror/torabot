@@ -55,7 +55,7 @@ def simple_error_guard(e, text, status_code):
 
 
 def inject_locals():
-    from ..core.mod import mod, mods
+    from ..core.mod import mod, frontend_mods
     from ..core.local import (
         is_user,
         is_admin,
@@ -75,7 +75,7 @@ def inject_locals():
         momentjs=momentjs,
         mod=mod,
         default_mod=current_app.config['TORABOT_DEFAULT_MOD'],
-        mods=[m for m in mods() if m.public or is_user],
+        mods=[m for m in frontend_mods() if m.public or is_user],
         is_user=is_user,
         is_admin=is_admin,
         current_user_id=current_user_id,
