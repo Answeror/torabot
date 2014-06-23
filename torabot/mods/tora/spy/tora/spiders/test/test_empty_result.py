@@ -9,6 +9,7 @@ def test_empty_result():
     '''CLASSIC MILK+PEACE and ALIEN'''
     for name in [
         'classic-milk-peace-and-alien.html',
+        'empty-advanced-search.html',
     ]:
         yield check_empty_result, name
 

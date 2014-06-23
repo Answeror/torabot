@@ -208,6 +208,7 @@ def empty(content):
     for s in [
         u'該当する商品が見つかりませんでした。',
         u'同時に指定できる検索キーワードは最大３件までです。',
+        u'検索キーワードを入れて下さい。',
     ]:
         if s in content:
             return True
