@@ -1,12 +1,15 @@
 from ..base import Core
-from ..mixins import IdentityGuessNameMixin
+from ..mixins import (
+    ScrapyMixin,
+    NoChangeMixin,
+    PostgreSQLBackend,
+)
 
 
 class Gist(
-    IdentityGuessNameMixin,
+    ScrapyMixin,
+    NoChangeMixin,
+    PostgreSQLBackend,
     Core
 ):
     name = 'gist'
-
-    def changes(self, old, new):
-        pass

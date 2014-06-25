@@ -1,5 +1,5 @@
 import abc
-from .spy import spy
+from .mixins import ScrapyMixin, PostgreSQLBackend
 
 
 class InstanceField(object):
@@ -24,17 +24,16 @@ class Core(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def search(self, text, timeout, **kargs):
+        pass
+
+    @abc.abstractmethod
     def changes(self, old, new):
         pass
 
+    @abc.abstractmethod
     def spy(self, query, timeout, options={}):
-        return spy(
-            self.name,
-            query,
-            timeout=timeout,
-            slaves=self.conf.get('TORABOT_SPY_SLAVES', 1),
-            options=options,
-        )
+        pass
 
     def expired(self, query):
         from datetime import datetime, timedelta
@@ -50,7 +49,7 @@ class Core(object, metaclass=abc.ABCMeta):
         return True
 
 
-class Frontend(Core):
+class Frontend(ScrapyMixin, PostgreSQLBackend, Core):
     '''mod with frontend'''
 
     has_advanced_search = False

@@ -17,6 +17,7 @@ setup(
             'feed = torabot.mods.feed:Feed',
             'ehentai = torabot.mods.ehentai:Ehentai',
             'gist = torabot.mods.gist:Gist',
+            'onereq = torabot.mods.onereq:Onereq',
         ]
     },
 )

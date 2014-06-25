@@ -21,6 +21,14 @@ def has(conn, kind, text):
 
 
 def query(conn, kind, text, timeout):
+    return mod(kind).search(text=text, timeout=timeout, conn=conn)
+
+
+def search_from_redis(kind, text, timeout):
+    pass
+
+
+def search_from_db(conn, kind, text, timeout):
     '''return None means first sync failed'''
     if not has(conn, kind, text):
         log.info('query {} of {} dosn\'t exist', text, kind)
