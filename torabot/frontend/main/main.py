@@ -313,7 +313,7 @@ def example_search(kind):
 
 def _search(kind, snapshot):
     try:
-        if mod(kind).public or is_user:
+        if mod(kind).public or is_user or current_app.config['TORABOT_DEBUG']:
             return __search(kind, snapshot)
     except:
         log.debug('search %s for %r failed' % (kind, get_standard_query()))

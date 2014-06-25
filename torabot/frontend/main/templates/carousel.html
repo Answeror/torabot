@@ -33,9 +33,8 @@
         position: relative;
         overflow: hidden;
     }
-    .carousel .snapshot iframe {
+    .carousel .snapshot img {
         width: 100%;
-        height: 100%;
         border-radius: 11px;
     }
     .carousel .snapshot::before {
@@ -72,7 +71,7 @@
                 <div class=snapshot-wrap>
                     <div class=snapshot>
                         {% if mod.carousel %}
-                        <iframe frameborder=0 src='{{ mod.carousel|safe }}'></iframe>
+                        <img src='{{ url_for(".static", filename="images/%s.jpg" % mod.name) }}'>
                         {% endif %}
                     </div>
                     <div class=carousel-caption>
