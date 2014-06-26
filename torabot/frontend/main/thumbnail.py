@@ -2,8 +2,7 @@ import json
 import base64
 from flask import request, abort
 from logbook import Logger
-from ...core.backends.postgresql import PostgreSQL
-from ...core.connection import autoccontext
+from ...core.backends.redis import Redis
 from ...core.mod import mod
 from . import bp
 
@@ -12,18 +11,17 @@ log = Logger(__name__)
 
 
 def _thumbnail_proxy(uri, referer):
-    with autoccontext() as conn:
-        return mod('onereq').search(
-            json.dumps({
-                'uri': uri,
-                'headers': {
-                    'referer': referer
-                }
-            }),
-            timeout=10,
-            sync_on_expire=False,
-            backend=PostgreSQL(conn=conn)
-        )
+    return mod('onereq').search(
+        json.dumps({
+            'uri': uri,
+            'headers': {
+                'referer': referer
+            }
+        }),
+        timeout=10,
+        sync_on_expire=False,
+        backend=Redis()
+    )
 
 
 @bp.route('/thumb', methods=['GET'])

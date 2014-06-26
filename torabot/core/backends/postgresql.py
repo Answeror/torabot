@@ -1,7 +1,8 @@
 from ... import db
+from .base import Backend
 
 
-class PostgreSQL(object):
+class PostgreSQL(Backend):
 
     def __init__(self, conn):
         self.conn = conn
