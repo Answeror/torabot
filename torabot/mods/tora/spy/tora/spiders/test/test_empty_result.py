@@ -10,6 +10,7 @@ def test_empty_result():
     for name in [
         'classic-milk-peace-and-alien.html',
         'empty-advanced-search.html',
+        'wrong-keyword.html',
     ]:
         yield check_empty_result, name
 

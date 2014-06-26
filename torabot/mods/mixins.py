@@ -169,11 +169,4 @@ class ScrapyMixin(object):
 class NoChangeMixin(object):
 
     def changes(self, old, new):
-        pass
-
-
-class PostgreSQLBackend(object):
-
-    def search(self, text, timeout, **kargs):
-        from ..core.query import search_from_db
-        return search_from_db(kind=self.name, text=text, timeout=timeout, **kargs)
+        return []

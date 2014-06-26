@@ -55,17 +55,14 @@ class Yandere(
     @property
     def completion_options(self):
         import json
-        from ...core.connection import autoccontext
         from ...core.local import get_current_conf
-        from ...core.query import query
-        with autoccontext(commit=True) as conn:
-            q = query(
-                conn=conn,
-                kind=name,
-                text=json.dumps(dict(method='tags')),
-                timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
-            )
-        return q.result.content
+        from ..query import query
+        q = query(
+            kind=name,
+            text=json.dumps(dict(method='tags')),
+            timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
+        )
+        return q.content
 
     def spy(self, query, timeout):
         from ..booru.query import parse, regular

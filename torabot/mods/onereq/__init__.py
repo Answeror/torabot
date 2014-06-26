@@ -2,7 +2,6 @@ from ..base import Core
 from ..mixins import (
     ScrapyMixin,
     NoChangeMixin,
-    PostgreSQLBackend,
 )
 from .query import parse, regular
 
@@ -10,7 +9,6 @@ from .query import parse, regular
 class Onereq(
     ScrapyMixin,
     NoChangeMixin,
-    PostgreSQLBackend,
     Core
 ):
     name = 'onereq'

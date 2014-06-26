@@ -1,16 +1,17 @@
 import json
 from ..ut.bunch import bunchr
+from ..core.backends.postgresql import PostgreSQL
 
 
-def query(kind, query, timeout):
+def query(kind, text, timeout, make_backend=PostgreSQL):
     from ..core.connection import autoccontext
     from ..core.query import query as search
     with autoccontext(commit=True) as conn:
         q = search(
-            conn=conn,
             kind=kind,
-            text=query,
-            timeout=timeout
+            text=text,
+            timeout=timeout,
+            backend=make_backend(conn=conn)
         )
     return q.result
 

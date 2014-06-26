@@ -15,6 +15,7 @@ from flask import (
 from flask.views import MethodView
 from logbook import Logger
 from ... import db
+from ...core.backends.postgresql import PostgreSQL
 from ...core.query import query
 from ...core.notice import (
     get_notices_bi_user_id,
@@ -326,10 +327,10 @@ def __search(kind, snapshot):
     log.info('search: %r' % text)
     with appccontext(commit=True) as conn:
         q = query(
-            conn=conn,
             kind=kind,
             text=text,
             timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
+            backend=PostgreSQL(conn=conn),
         )
         if q is None:
             raise BusyError()

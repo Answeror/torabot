@@ -1,10 +1,6 @@
+from functools import partial
 from datetime import datetime
 from logbook import Logger
-from ..db import (
-    get_query_bi_kind_and_text,
-    has_query_bi_kind_and_text,
-    set_next_sync_time_bi_kind_and_text,
-)
 from .sync import sync
 from .mod import mod
 
@@ -12,43 +8,60 @@ from .mod import mod
 log = Logger(__name__)
 
 
-def from_remote(conn, kind, text):
-    return get_query_bi_kind_and_text(conn, kind, text)
+def has(backend, kind, text):
+    return backend.has_query_bi_kind_and_text(kind, text)
 
 
-def has(conn, kind, text):
-    return has_query_bi_kind_and_text(conn, kind, text)
+def query(backend, kind, text, timeout):
+    return mod(kind).search(text=text, timeout=timeout, backend=backend)
 
 
-def query(conn, kind, text, timeout):
-    return mod(kind).search(text=text, timeout=timeout, conn=conn)
-
-
-def search_from_redis(kind, text, timeout):
-    pass
-
-
-def search_from_db(conn, kind, text, timeout):
+def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):
     '''return None means first sync failed'''
-    if not has(conn, kind, text):
+    sync_options = {key: kargs[key] for key in kargs if key in [
+        'good',
+        'sync_interval'
+    ]}
+    _sync = partial(
+        sync,
+        kind=kind,
+        text=text,
+        timeout=timeout,
+        backend=backend,
+        **sync_options
+    )
+    get_query = partial(
+        backend.get_query_bi_kind_and_text,
+        kind=kind,
+        text=text
+    )
+    if not has(backend, kind, text):
         log.info('query {} of {} dosn\'t exist', text, kind)
-        if sync(kind, text, timeout, conn=conn):
-            query = get_query_bi_kind_and_text(conn, kind, text)
+        if _sync():
+            query = get_query()
         else:
             query = None
     else:
-        query = get_query_bi_kind_and_text(conn, kind, text)
+        query = get_query()
         if mod(query.kind).expired(query):
             log.debug('query {} of {} expired', text, kind)
-            if mod(query.kind).sync_on_expire(query):
-                if not sync(kind, text, timeout, conn=conn):
-                    log.debug('sync {} of {} timeout or meet expected error', text, kind)
-                query = get_query_bi_kind_and_text(conn, kind, text)
+            if (
+                mod(query.kind).sync_on_expire(query) if sync_on_expire is None
+                else sync_on_expire
+            ):
+                if _sync():
+                    query = get_query()
+                else:
+                    log.debug(
+                        'sync {} of {} timeout or meet expected error',
+                        text,
+                        kind
+                    )
             else:
-                mark_need_sync(conn, kind, text)
+                mark_need_sync(backend, kind, text)
     return query
 
 
-def mark_need_sync(conn, kind, text):
+def mark_need_sync(backend, kind, text):
     log.debug('mark query {} of {} need sync', text, kind)
-    set_next_sync_time_bi_kind_and_text(conn, kind, text, datetime.utcnow())
+    backend.set_next_sync_time_bi_kind_and_text(kind, text, datetime.utcnow())

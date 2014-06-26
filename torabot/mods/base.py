@@ -1,5 +1,5 @@
 import abc
-from .mixins import ScrapyMixin, PostgreSQLBackend
+from .mixins import ScrapyMixin
 
 
 class InstanceField(object):
@@ -23,9 +23,15 @@ class Core(object, metaclass=abc.ABCMeta):
     def name(self):
         pass
 
-    @abc.abstractmethod
-    def search(self, text, timeout, **kargs):
-        pass
+    def search(self, text, timeout, backend, **kargs):
+        from ..core.query import _search
+        return _search(
+            kind=self.name,
+            text=text,
+            timeout=timeout,
+            backend=backend,
+            **kargs
+        )
 
     @abc.abstractmethod
     def changes(self, old, new):
@@ -49,7 +55,7 @@ class Core(object, metaclass=abc.ABCMeta):
         return True
 
 
-class Frontend(ScrapyMixin, PostgreSQLBackend, Core):
+class Frontend(ScrapyMixin, Core):
     '''mod with frontend'''
 
     has_advanced_search = False

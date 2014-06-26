@@ -55,17 +55,14 @@ class Danbooru(
 
     def get_completion(self, arg):
         import json
-        from ...core.connection import autoccontext
         from ...core.local import get_current_conf
-        from ...core.query import query
-        with autoccontext(commit=True) as conn:
-            q = query(
-                conn=conn,
-                kind=name,
-                text=json.dumps(dict(method='tags', query=arg['query'])),
-                timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
-            )
-        return q.result.content
+        from ..query import query
+        q = query(
+            kind=name,
+            text=json.dumps(dict(method='tags', query=arg['query'])),
+            timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
+        )
+        return q.content
 
     @property
     def frontend_options(self):

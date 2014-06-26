@@ -1,41 +1,48 @@
+import json
+import base64
 from flask import request, abort
-import requests
 from logbook import Logger
+from ...core.backends.postgresql import PostgreSQL
+from ...core.connection import autoccontext
+from ...core.mod import mod
 from . import bp
-from ...cache import cache
 
 
 log = Logger(__name__)
 
 
-@cache.memoize(timeout=600)
 def _thumbnail_proxy(uri, referer):
-    return requests.get(
-        uri,
-        headers={
-            'referer': referer
-        }
-    )
-
-
-@bp.route('/thumbnail-proxy', methods=['GET'])
-def thumbnail_proxy():
-    log.info('uri: {}', request.args['uri'])
-    log.info('referer: {}', request.args['referer'])
-    r = _thumbnail_proxy(request.args['uri'], request.args['referer'])
-    if not r.ok:
-        cache.delete_memoized(
-            '_thumbnail_proxy',
-            request.args['uri'],
-            request.args['referer']
+    with autoccontext() as conn:
+        return mod('onereq').search(
+            json.dumps({
+                'uri': uri,
+                'headers': {
+                    'referer': referer
+                }
+            }),
+            timeout=10,
+            sync_on_expire=False,
+            backend=PostgreSQL(conn=conn)
         )
+
+
+@bp.route('/thumb', methods=['GET'])
+def thumbnail_proxy():
+    log.debug(
+        'thumbnail (uri, referer): ({}, {})',
+        request.args['uri'],
+        request.args['referer']
+    )
+    q = _thumbnail_proxy(request.args['uri'], request.args['referer'])
+    if not q:
         abort(404)
-    return r.content, 200, {
+    r = q.result
+    return base64.b64decode(r.body), 200, {
         key: r.headers[key] for key in [
-            'content-length',
-            'content-type',
-            'date',
-            'expires',
-            'last-modified',
+            'Content-Length',
+            'Content-Type',
+            'Date',
+            'Expires',
+            'Last-Modified',
         ] if key in r.headers
     }

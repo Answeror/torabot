@@ -3,6 +3,7 @@ from unittest.mock import patch
 from ... import db
 from ..sync import sync
 from ..notice import send_notice
+from ..backends.postgresql import PostgreSQL
 from . import g
 
 
@@ -33,7 +34,13 @@ def test_send_notice():
             query_id=query_id,
             email_id=email_id
         )
-        sync('tora', '东方', 60, conn=g.connection, sync_interval=300)
+        sync(
+            kind='tora',
+            text='东方',
+            timeout=60,
+            sync_interval=300,
+            backend=PostgreSQL(conn=g.connection)
+        )
         notices = db.get_pending_notices(g.connection)
         assert_greater(len(notices), 0)
         for notice in notices:
