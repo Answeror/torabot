@@ -49,7 +49,7 @@ class Redis(Backend):
         redis.set(id, pickle.dumps(q))
 
     def add_one_query_changes(self, id, changes):
-        if changes:
+        if list(changes):
             assert False, 'not implemented'
 
     def set_query_result(self, id, result):
@@ -66,7 +66,7 @@ class Redis(Backend):
             (time - datetime.utcnow()).seconds
         )
         if not ret:
-            raise Exception('set next sync time of %s for %s failed' % (kind, text))
+            raise Exception('set next sync time of %s failed' % id)
 
 
 def encode(kind, text):

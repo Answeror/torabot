@@ -12,8 +12,8 @@ def has(backend, kind, text):
     return backend.has_query_bi_kind_and_text(kind, text)
 
 
-def query(backend, kind, text, timeout):
-    return mod(kind).search(text=text, timeout=timeout, backend=backend)
+def query(backend, kind, text, timeout, **kargs):
+    return mod(kind).search(text=text, timeout=timeout, backend=backend, **kargs)
 
 
 def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):

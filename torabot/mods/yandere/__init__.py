@@ -55,12 +55,15 @@ class Yandere(
     @property
     def completion_options(self):
         import json
+        from ...core.backends.redis import Redis
         from ...core.local import get_current_conf
         from ..query import query
         q = query(
             kind=name,
             text=json.dumps(dict(method='tags')),
             timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
+            sync_on_expire=False,
+            make_backend=lambda conn: Redis()
         )
         return q.content
 

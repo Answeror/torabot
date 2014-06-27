@@ -55,12 +55,15 @@ class Danbooru(
 
     def get_completion(self, arg):
         import json
+        from ...core.backends.redis import Redis
         from ...core.local import get_current_conf
         from ..query import query
         q = query(
             kind=name,
             text=json.dumps(dict(method='tags', query=arg['query'])),
             timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
+            sync_on_expire=False,
+            make_backend=lambda conn: Redis()
         )
         return q.content
 

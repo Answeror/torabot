@@ -3,7 +3,7 @@ from ..ut.bunch import bunchr
 from ..core.backends.postgresql import PostgreSQL
 
 
-def query(kind, text, timeout, make_backend=PostgreSQL):
+def query(kind, text, timeout, make_backend=PostgreSQL, **kargs):
     from ..core.connection import autoccontext
     from ..core.query import query as search
     with autoccontext(commit=True) as conn:
@@ -11,7 +11,8 @@ def query(kind, text, timeout, make_backend=PostgreSQL):
             kind=kind,
             text=text,
             timeout=timeout,
-            backend=make_backend(conn=conn)
+            backend=make_backend(conn=conn),
+            **kargs
         )
     return q.result
 
