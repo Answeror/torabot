@@ -12,7 +12,7 @@ log = Logger(__name__)
 
 
 def _sync(engine, kind, text, timeout):
-    with autoccontext(engine=engine) as conn:
+    with autoccontext(engine=engine, commit=True) as conn:
         sync(
             kind=kind,
             text=text,
