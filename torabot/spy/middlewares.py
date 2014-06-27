@@ -3,6 +3,7 @@
 
 import random
 from scrapy.contrib.downloadermiddleware.useragent import UserAgentMiddleware
+from scrapy.conf import settings
 
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
@@ -52,3 +53,12 @@ class RotateUserAgentMiddleware(UserAgentMiddleware):
         ua = self._user_agent(spider)
         if ua:
             request.headers.setdefault('User-Agent', ua)
+
+
+class ProxyMiddleware(object):
+
+    def process_request(self, request, spider):
+        if 'proxy' not in request.meta:
+            proxy = getattr(spider, 'proxy', settings.get('PROXY'))
+            if proxy:
+                request.meta['proxy'] = proxy

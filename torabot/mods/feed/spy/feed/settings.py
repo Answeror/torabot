@@ -19,6 +19,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': None,
     'torabot.spy.middlewares.RotateUserAgentMiddleware': 400,
+    'torabot.spy.middlewares.ProxyMiddleware': 410,
 }
 
 USER_AGENT = ''
