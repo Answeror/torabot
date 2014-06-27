@@ -1,34 +1,36 @@
 from contextlib import contextmanager
+from sqlalchemy.orm import sessionmaker
 
 
 @contextmanager
 def ccontext(commit=False, **kargs):
     if 'engine' in kargs:
-        conn = kargs['engine'].connect()
+        bind = kargs['engine']
         del kargs['engine']
     elif 'connection' in kargs:
-        conn = kargs['connection']
+        bind = kargs['connection']
         del kargs['connection']
     elif 'config' in kargs:
         from sqlalchemy import create_engine
-        conn = create_engine(kargs['config']['TORABOT_CONNECTION_STRING']).connect()
+        bind = create_engine(kargs['config']['TORABOT_CONNECTION_STRING'])
         del kargs['config']
     elif 'make' in kargs:
-        conn = kargs['make']()
+        bind = kargs['make']()
         del kargs['make']
     else:
         assert False, 'must provide engine, connection or config'
 
     try:
-        trans = conn.begin()
-        yield conn
+        Session = sessionmaker(bind=bind)
+        session = Session()
+        yield ConnectionProxy(session)
         if commit:
-            trans.commit()
+            session.commit()
     except:
-        trans.rollback()
+        session.rollback()
         raise
     finally:
-        conn.close()
+        session.close()
 
 
 @contextmanager
@@ -36,3 +38,12 @@ def appccontext(commit=False, **kargs):
     from .engine import appengine
     with ccontext(commit=commit, engine=appengine(), **kargs) as conn:
         yield conn
+
+
+class ConnectionProxy(object):
+
+    def __init__(self, session):
+        self.session = session
+
+    def execute(self, *args, **kargs):
+        return self.session.connection().execute(*args, **kargs)
