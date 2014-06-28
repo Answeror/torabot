@@ -1,1 +1,4 @@
-<p>在搜索框中键入RSS/Atom地址, 例如: https://yande.re/post/atom?tags=rating:s</p>
+<ul>
+    <li>在搜索框中键入RSS/Atom地址, 例如: <a href='{{ url_for("main.search", kind="feed", q="https://yande.re/post/atom?tags=rating:s") }}'>https://yande.re/post/atom?tags=rating:s</a></li>
+    <li>若搜索失败, 可以尝试使用: <a href='{{ url_for("main.search", kind="feed", q="http://pipes.yahoo.com/pipes/pipe.run?_id=gH84AH3M2xGUtbMFdbq02Q&_render=rss&rssUrl=https://yande.re/post/atom?tags=rating:s") }}'>http://pipes.yahoo.com/pipes/pipe.run?_id=gH84AH3M2xGUtbMFdbq02Q&_render=rss&rssUrl=您想订阅的RSS地址</a></li>
+</ul>
