@@ -7,7 +7,7 @@ from ..core.redis import redis
 def failed(query, message, response=None, expected=False):
     lines = [message]
     if response:
-        key = u'torabot:temp:mods:pixiv:response:%s:body' % md5(response.body).hexdigest()
+        key = u'torabot:temp:response:%s:body' % md5(response.body).hexdigest()
         redis.set(key, response.body)
         lines.append('response headers: {}'.format(response.headers))
         lines.append('response body dumped to ' + key)
