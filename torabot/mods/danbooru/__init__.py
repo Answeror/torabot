@@ -65,6 +65,8 @@ class Danbooru(
             sync_on_expire=False,
             make_backend=lambda conn: Redis()
         )
+        if not q:
+            raise Exception('get completion of danbooru failed')
         return q.content
 
     @property
