@@ -39,14 +39,16 @@ class FeedSpider(RedisSpider):
     def parse_uri(self, response):
         query = response.meta['query']
         try:
+            feed = feedparser.parse(response.body_as_unicode())
+            if feed.bozo:
+                return failed(query, 'ill formed xml on line {}: {}'.format(
+                    feed.bozo_exception.getLineNumber(),
+                    feed.bozo_exception.getMessage()
+                ), response=response)
             return Feed(
                 uri=response.url,
                 query=query,
-                data=to_dict(response.body_as_unicode())
+                data=json.loads(jsonpickle.encode(feed))
             )
         except:
             return failed(query, traceback.format_exc(), response=response)
-
-
-def to_dict(s):
-    return json.loads(jsonpickle.encode(feedparser.parse(s)))

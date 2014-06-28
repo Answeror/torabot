@@ -40,17 +40,11 @@ class Feed(
             'email': email
         }[name]
 
-    def _entry_id(self, entry):
-        for field in ['id', 'link']:
-            ret = getattr(entry, field, None)
-            if ret is not None:
-                return ret
-        raise Exception('no id field found in entry: {}'.format(entry))
-
     def changes(self, old, new):
-        seen = {self._entry_id(entry): entry for entry in old.get('data', {}).get('entries', [])}
+        from .ut import entry_id
+        seen = {entry_id(entry): entry for entry in old.get('data', {}).get('entries', [])}
         for i, entry in enumerate(new.get('data', {}).get('entries', [])):
-            if self._entry_id(entry) not in seen:
+            if entry_id(entry) not in seen:
                 yield bunchr(kind='feed.new', query=new.query, entry=entry)
 
     def spy(self, query, timeout):
