@@ -10,5 +10,5 @@ class Env(Base):
     def read(self, name):
         for f in self.d['files']:
             if f['name'] == name:
-                return base64.decode(f.content)
+                return base64.b64decode(f.content)
         raise Exception('no file named %s' % name)

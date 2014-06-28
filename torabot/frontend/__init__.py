@@ -25,6 +25,8 @@ def make(app):
     admin.make(app)
     from . import api
     api.make(app)
+    from . import m
+    m.make(app)
 
     app.context_processor(inject_locals)
     register_error_handlers(app)
