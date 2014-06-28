@@ -2,20 +2,26 @@ import json
 import base64
 import jsonpickle
 from flask import current_app, abort
+from logbook import Logger
 from ...core.backends.redis import Redis
 from ...core.make.task import Task
 from ...core.mod import mod
 from . import bp
 
 
+log = Logger(__name__)
+
+
 @bp.route('/gist/<id>', methods=['GET'])
 def gist(id):
+    log.debug('gist %s search start' % id)
     q = mod('gist').search(
         text=json.dumps(dict(method='id', id=id)),
         timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
         sync_on_expire=True,
         backend=Redis()
     )
+    log.debug('gist %s search done' % id)
     if not q:
         abort(503)
 
