@@ -4,6 +4,7 @@
 # your spiders.
 
 import json
+import base64
 import traceback
 from scrapy.http import Request
 from torabot.spy.spiders.redis import RedisSpider
@@ -61,7 +62,7 @@ class GistSpider(RequestMethodMixin, RedisSpider):
         try:
             gist['files'].append(File(
                 name=response.meta['name'],
-                content=response.body_as_unicode()
+                content=base64.b64encode(response.body)
             ))
             if len(gist['files']) == len(gist['meta']['files']):
                 return gist
