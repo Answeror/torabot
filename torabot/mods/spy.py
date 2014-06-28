@@ -22,7 +22,7 @@ def lives(kind):
 
 
 def prepare(kind, query, timeout, slaves, options):
-    with Lock(redis, 'torabot:core:spy:prepare'):
+    with Lock(redis, 'torabot:temp:spy_prepare'):
         while lives(kind) < slaves:
             log.info(
                 'not enough {} slaves ({} < {}), start one',
