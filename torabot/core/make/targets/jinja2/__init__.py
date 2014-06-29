@@ -12,9 +12,7 @@ class Target(Base):
             'templates'
         ))
         self.jinja2_env.filters['tojson'] = jsonpickle.encode
-        self.jinja2_env.globals['read_json'] = self.read_json
 
-    @Base.preprocessed
     def __call__(self, template, kargs):
         return self.get_template_content(template).render(**kargs)
 
@@ -23,7 +21,4 @@ class Target(Base):
             return self.jinja2_env.from_string(name_or_content)
         assert isinstance(name_or_content, dict), 'unknown type: {}'.format(type(name_or_content))
         name = name_or_content['name']
-        try:
-            return self.jinja2_env.get_template(name)
-        except:
-            return self.jinja2_env.from_string(self.read_text(name))
+        return self.jinja2_env.get_template(name)

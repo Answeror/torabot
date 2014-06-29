@@ -1,57 +1,52 @@
-import base64
-import jsonpickle
+import importlib
 from uuid import uuid4
+from nose.tools import assert_is_instance
 
 
 class Base(object):
 
-    @property
-    def name(self):
-        key = '_name'
-        value = getattr(self, key, None)
-        if value is None:
-            value = str(uuid4())
-            setattr(self, key, value)
-        return value
-
-    def __init__(self, env=None):
-        self.env = env
-
-    def read(self, name):
-        return self.env.read(name)
-
-    def read_text(self, name):
-        return self.read(name).decode('utf-8')
-
-    def read_json(self, name):
-        return jsonpickle.decode(self.read_text(name))
-
-    def _read(self, name, type):
-        return {
-            'blob': self.read,
-            'text': self.read_text,
-            'json': self.read_json,
-        }[type](name)
-
-    def preprocess(self, value):
-        if isinstance(value, dict):
-            value = {key: self.preprocess(value[key]) for key in value}
-            if '@type' in value:
-                if value['@type'] == 'call':
-                    return {
-                        "json_decode": jsonpickle.decode,
-                        "base64_decode": lambda s, encoding='utf-8': base64.b64decode(s).decode(encoding),
-                    }[value['name']](*value.get('args', []), **value.get('kargs', {}))
-                else:
-                    return self._read(value['name'], value['@type'])
-        return value
-
     @classmethod
-    def preprocessed(cls, f):
-        def inner(self, *args, **kargs):
-            return f(
-                self,
-                *[self.preprocess(a) for a in args],
-                **{key: self.preprocess(kargs[key]) for key in kargs}
-            )
-        return inner
+    def run(cls, env, conf):
+        none = object()
+        if isinstance(conf, dict):
+            conf = {key: cls.run(env, conf[key]) for key in conf}
+
+            use = conf.get('&', none)
+            if use is not none:
+                del conf['&']
+                conf.update({
+                    '@': 'use',
+                    'args': [use]
+                })
+
+            item = conf.get('[]', none)
+            if item is not none:
+                del conf['[]']
+                conf.update({
+                    '@': 'item',
+                    {
+                        list: 'args',
+                        dict: 'kargs'
+                    }[type(item)]: item
+                })
+
+            kind = conf.get('@', none)
+            if kind is not none:
+                if '.' in kind:
+                    raise Exception('unknown target type: %s' % kind)
+                lib = importlib.import_module('..' + kind, __name__)
+                target = lib.Target(env=env, name=conf.get('name'))
+                args = conf.get('args', [])
+                assert_is_instance(args, list)
+                kargs = conf.get('kargs', {})
+                assert_is_instance(kargs, dict)
+                result = target(*args, **kargs)
+                env.result[target.name] = result
+                return result
+        elif isinstance(conf, list):
+            return [cls.run(env, item) for item in conf]
+        return conf
+
+    def __init__(self, env, name=None):
+        self.env = env
+        self.name = str(uuid4()) if name is None else name

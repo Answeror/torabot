@@ -6,6 +6,7 @@ from .base import Base
 class Env(Base):
 
     def __init__(self, d, root):
+        super(Env, self).__init__()
         self.d = d
         self.root = root
 

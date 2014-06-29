@@ -5,9 +5,8 @@ from .base import Base
 
 class Target(Base):
 
-    @Base.preprocessed
     def __call__(self, request, set_cookie):
-        assert isinstance(set_cookie, str) or isinstance(set_cookie, list), str(type(set_cookie))
+        assert isinstance(set_cookie, str) or isinstance(set_cookie, list), str(set_cookie)
         jar = request.get('cookies', requests.cookies.RequestsCookieJar())
         headers = request.get('headers', {})
         cookie = headers.get('Cookie')

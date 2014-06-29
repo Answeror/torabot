@@ -1,10 +1,12 @@
 import json
 import base64
+import jinja2
 import jsonpickle
 from flask import current_app, abort, request
 from logbook import Logger
 from ...core.backends.redis import Redis
-from ...core.make.task import Task
+from ...core.make.targets import Target
+from ...core.make.envs.dict import Env
 from ...core.mod import mod
 from . import bp
 
@@ -28,18 +30,14 @@ def gist(id):
     files = q.result.files
     for f in files:
         if f['name'] == 'torabot.json':
-            targets = jsonpickle.decode(
+            conf = jsonpickle.decode(jinja2.Template(
                 base64.b64decode(f['content']).decode('utf-8')
-            )['targets']
+            ).render(**{key: request.args[key] for key in request.args}))
             break
     else:
-        targets = None
+        conf = None
 
-    if not targets:
+    if not conf:
         abort(404)
 
-    task = Task.from_string(jsonpickle.encode({
-        'targets': targets,
-        'files': files
-    }), kargs={key: request.args[key] for key in request.args})
-    return task()
+    return Target.run(Env(files), conf)

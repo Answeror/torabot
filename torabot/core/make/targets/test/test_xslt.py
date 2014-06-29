@@ -28,9 +28,6 @@ def check_xslt(html, xslt):
     target = XsltTarget(env)
     feed = feedparser.parse(target(
         html=read(html),
-        xslt={
-            '@type': 'text',
-            'name': xslt
-        }
+        xslt=read(xslt)
     ).encode('utf-8'))
     assert_greater(len(feed.entries), 0)

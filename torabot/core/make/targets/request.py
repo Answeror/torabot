@@ -21,7 +21,6 @@ class Target(Base):
             'payload': request.get('payload'),
         }
 
-    @Base.preprocessed
     def __call__(self, request, timeout=10, sync_on_expire=False):
         query = mod('onereq').search(
             text=jsonpickle.encode(self.prepare(request)),

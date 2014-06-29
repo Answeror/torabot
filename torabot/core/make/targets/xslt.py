@@ -18,7 +18,6 @@ def get_text_and_parser(kargs):
 
 class Target(Base):
 
-    @Base.preprocessed
     def __call__(self, xslt, **kargs):
         text, parser = get_text_and_parser(kargs)
         html = ET.XML(text.encode('utf-8'), parser)

@@ -1,0 +1,57 @@
+{
+    "@": "all",
+    "args": [
+        {
+            "@": "echo",
+            "name": "first",
+            "args": [{"foo": {"bar": [0]}}]
+        },
+        {
+            "@": "echo",
+            "name": "second",
+            "args": [
+                {
+                    "@": "item",
+                    "args": [
+                        {
+                            "@": "use",
+                            "args": ["first"]
+                        },
+                        "foo"
+                    ]
+                }
+            ]
+        },
+        {
+            "@": "echo",
+            "name": "third",
+            "args": [
+                {
+                    "@": "item",
+                    "args": [
+                        {
+                            "@": "use",
+                            "args": ["second"]
+                        },
+                        "bar"
+                    ]
+                }
+            ]
+        },
+        {
+            "@": "echo",
+            "args": [
+                {
+                    "@": "item",
+                    "args": [
+                        {
+                            "@": "use",
+                            "args": ["third"]
+                        },
+                        0
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "@": "xslt",
+    "kargs": {
+        "html": {
+            "@": "base64_decode",
+            "args": [
+                {
+                    "[]": [
+                        {
+                            "@": "request",
+                            "name": "source",
+                            "args": [
+                                {"uri": "http://bgm.tv{{ path }}"}
+                            ]
+                        },
+                        "body"
+                    ]
+                }
+            ]
+        },
+        "xslt": {
+            "@": "jinja2",
+            "name": "xslt",
+            "kargs": {
+                "template": {
+                    "@": "read",
+                    "kargs": {
+                        "name": "bgm_comments.xslt",
+                        "type": "text"
+                    }
+                },
+                "kargs": {
+                    "id": "bgm.tv{{ path }}"
+                }
+            }
+        }
+    }
+}

@@ -5,6 +5,7 @@ from .base import Base
 class Env(Base):
 
     def __init__(self, root):
+        super(Env, self).__init__()
         self.root = root
 
     def read(self, name):

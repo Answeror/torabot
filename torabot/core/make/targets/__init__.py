@@ -1,5 +1,5 @@
-__all__ = [
-    'request',
-    'set_cookie',
-    'jinja2',
-]
+from .base import Base as Target
+assert Target
+
+
+__all__ = ['Target']
