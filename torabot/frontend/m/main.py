@@ -1,7 +1,7 @@
 import json
 import base64
 import jsonpickle
-from flask import current_app, abort
+from flask import current_app, abort, request
 from logbook import Logger
 from ...core.backends.redis import Redis
 from ...core.make.task import Task
@@ -41,5 +41,5 @@ def gist(id):
     task = Task.from_string(jsonpickle.encode({
         'targets': targets,
         'files': files
-    }))
+    }), kargs={key: request.args[key] for key in request.args})
     return task()

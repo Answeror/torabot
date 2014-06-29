@@ -10,6 +10,16 @@
             }
         },
         {
+            "name": "xslt",
+            "type": "jinja2",
+            "input": {
+                "template": "{{ target['@files'].read_text('bgm_comments.xslt') }}",
+                "kargs": {
+                    "id": "bgm.tv{{ path }}"
+                }
+            }
+        },
+        {
             "name": "transform",
             "type": "xslt",
             "input": {
@@ -18,7 +28,7 @@
                     "name": "base64_decode",
                     "args": ["{{ target.source.body }}"]
                 },
-                "xslt": "{{ target['@files'].read_text('bgm_comments.xslt') }}"
+                "xslt": "{{ target.xslt }}"
             }
         }
     ],
