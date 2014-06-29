@@ -1,5 +1,4 @@
 import os
-import jsonpickle
 from nose.tools import assert_equal
 from ...envs.fs import Env
 from ..request import Target as RequestTarget
@@ -15,10 +14,10 @@ def test_request():
         'set_cookie': SetCookieTarget(env=env),
         'request': RequestTarget(env=env)
     }
-    request = jsonpickle.encode({
+    request = {
         'uri': 'http://httpbin.org/cookies',
         'headers': {'Cookie': 'bar=1'}
-    })
+    }
     prepared = targets['request'].prepare(request=request)
     assert_equal(prepared['headers']['Cookie'], 'bar=1')
     request = targets['set_cookie'](request, set_cookie='foo=bar')

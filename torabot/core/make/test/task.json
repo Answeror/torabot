@@ -4,21 +4,21 @@
             "name": "first",
             "type": "echo",
             "input": {
-                "text": "{\"foo\": {\"bar\": [0]}}"
+                "json": {"foo": {"bar": [0]}}
             }
         },
         {
             "name": "second",
             "type": "echo",
             "input": {
-                "text": "{{ target.first.foo }}"
+                "json": "{{ target.first.foo }}"
             }
         },
         {
             "name": "third",
             "type": "echo",
             "input": {
-                "text": "{{ target.second.bar[0] }}"
+                "json": "{{ target.second.bar[0] }}"
             }
         }
     ],

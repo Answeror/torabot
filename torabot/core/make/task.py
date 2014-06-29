@@ -1,7 +1,8 @@
-import jinja2
 import jsonpickle
 import importlib
 from uuid import uuid4
+from nose.tools import assert_in
+from .targets.jinja2 import Target as Jinja2Target
 from .envs.dict import Env as DictEnv
 
 
@@ -16,15 +17,16 @@ class Task(object):
     @classmethod
     def from_string(cls, text, make_env=DictEnv):
         get = {}
-        text = jinja2.Template(text).render(target=Mock(get))
+        text = Jinja2Target()(template=text, kargs={'target': Mock(get)})
         d = jsonpickle.decode(text)
         env = make_env(d)
         return cls(env, get, d['targets'])
 
     def __call__(self):
+        self.result["@files"] = self.make_target("files", self.env)()
         for conf in self.target_confs:
             self.fill(conf)
-            target = self.make_target(conf['type'], self.env, conf.get('options'))
+            target = self.make_target(conf['type'], self.env)
             self.result[conf['name']] = target(**conf.get('input'))
         else:
             return self.result[conf['name']]
@@ -47,20 +49,29 @@ class Task(object):
 
 class Mock(object):
 
-    def __init__(self, get, parent=None, field=None):
+    def __init__(self, get, parent=None, field=None, args=None, kargs=None):
         self.get = get
         self.id = str(uuid4())
         self.parent = parent
         self.field = field
-        self.get[self.id] = self
+        self.args = args
+        self.kargs = kargs
+        self.get[self.id] = self.extract
 
-    def __call__(self, d):
+    def extract(self, d):
         if not self.parent:
             return d
         d = self.parent.get[self.parent.id](d)
-        if isinstance(d, str):
-            d = jsonpickle.decode(d)
-        return d[self.field]
+        if self.field is not None:
+            assert_in(self.field, d)
+            try:
+                return d[self.field]
+            except Exception as e:
+                raise Exception('field access failed: ({}, {})'.format(d, self.field)) from e
+        return d(*self.args, **self.kargs)
+
+    def __call__(self, *args, **kargs):
+        return Mock(self.get, parent=self, args=args, kargs=kargs)
 
     def __getattr__(self, key):
         return Mock(self.get, parent=self, field=key)

@@ -8,8 +8,6 @@ from .base import Base
 class Target(Base):
 
     def prepare(self, request):
-        if not isinstance(request, dict):
-            request = jsonpickle.decode(request)
         prepared = requests.Request(
             url=request['uri'],
             method=request.get('method', 'GET'),
@@ -23,13 +21,14 @@ class Target(Base):
             'payload': request.get('payload'),
         }
 
-    def __call__(self, request):
+    @Base.preprocessed
+    def __call__(self, request, timeout=10, sync_on_expire=False):
         query = mod('onereq').search(
             text=jsonpickle.encode(self.prepare(request)),
-            timeout=self.options.get('timeout', 10),
-            sync_on_expire=self.options.get('sync_on_expire', False),
+            timeout=timeout,
+            sync_on_expire=sync_on_expire,
             backend=Redis()
         )
         if query is None:
             raise Exception('request %s failed' % self.name)
-        return jsonpickle.encode(query.result)
+        return query.result

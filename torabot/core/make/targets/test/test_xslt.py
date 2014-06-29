@@ -1,5 +1,4 @@
 import os
-from nose.tools import assert_equal
 from ...envs.fs import Env
 from ..xslt import Target as XsltTarget
 
@@ -14,7 +13,11 @@ def read(name):
 
 def test_request():
     env = Env(root=CURRENT_PATH)
-    target = XsltTarget(env, {
-        'xslt': 'bgm.xslt'
-    })
-    target(text=read('bgm.html'), type='html')
+    target = XsltTarget(env)
+    assert target(
+        html=read('bgm.html'),
+        xslt={
+            '@type': 'text',
+            'name': 'bgm.xslt'
+        }
+    )
