@@ -1,0 +1,11 @@
+{
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Encoding": "gzip,deflate,sdch",
+    "Accept-Language": "en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4,zh-TW;q=0.2,ja;q=0.2",
+    "Cache-Control": "max-age=0",
+    "Connection": "keep-alive",
+    "Cookie": "chii_auth={{ chii_auth }}; chii_cookietime=2592000",
+    "Host": "bgm.tv",
+    "Referer": "http://bgm.tv/",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36"
+}

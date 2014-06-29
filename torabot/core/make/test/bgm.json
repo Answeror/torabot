@@ -1,12 +1,26 @@
 {
     "targets": [
         {
+            "name": "headers",
+            "type": "jinja2",
+            "input": {
+                "template": "{{ target['@files'].read_text('headers.json') }}",
+                "kargs": {
+                    "chii_auth": "{{ chii_auth }}"
+                }
+            }
+        },
+        {
             "name": "update_cookie",
             "type": "request",
             "input": {
                 "request": {
                     "uri": "http://bgm.tv",
-                    "headers": "{{ target['@files'].read_json('headers.json') }}"
+                    "headers": {
+                        "@type": "call",
+                        "name": "json_decode",
+                        "args": ["{{ target.headers }}"]
+                    }
                 }
             }
         },
@@ -16,7 +30,11 @@
             "input": {
                 "request": {
                     "uri": "http://bgm.tv/pm",
-                    "headers": "{{ target['@files'].read_json('headers.json') }}"
+                    "headers": {
+                        "@type": "call",
+                        "name": "json_decode",
+                        "args": ["{{ target.headers }}"]
+                    }
                 },
                 "set_cookie": "{{ target.update_cookie.headers['Set-Cookie'] }}"
             }

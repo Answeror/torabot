@@ -24,7 +24,8 @@ def test_bgm_task():
     with app.app_context():
         task = Task.from_string(
             read('bgm.json'),
-            make_env=lambda d: DictWithFsEnv(d, CURRENT_PATH)
+            make_env=lambda d: DictWithFsEnv(d, CURRENT_PATH),
+            kargs={'chii_auth': read('chii_auth').strip()}
         )
         result = task()
         feed = feedparser.parse(result)

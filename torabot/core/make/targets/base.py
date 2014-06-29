@@ -33,8 +33,15 @@ class Base(object):
         }[type](name)
 
     def preprocess(self, value):
-        if isinstance(value, dict) and '@type' in value:
-            return self._read(value['name'], value['@type'])
+        if isinstance(value, dict):
+            value = {key: self.preprocess(value[key]) for key in value}
+            if '@type' in value:
+                if value['@type'] == 'call':
+                    return {
+                        "json_decode": jsonpickle.decode,
+                    }[value['name']](*value.get('args', []), **value.get('kargs', {}))
+                else:
+                    return self._read(value['name'], value['@type'])
         return value
 
     @classmethod

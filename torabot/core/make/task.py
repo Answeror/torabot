@@ -15,9 +15,12 @@ class Task(object):
         self.result = {}
 
     @classmethod
-    def from_string(cls, text, make_env=DictEnv):
+    def from_string(cls, text, make_env=DictEnv, kargs={}):
         get = {}
-        text = Jinja2Target()(template=text, kargs={'target': Mock(get)})
+        options = {'target': Mock(get)}
+        assert 'target' not in kargs
+        options.update(kargs)
+        text = Jinja2Target()(template=text, kargs=options)
         d = jsonpickle.decode(text)
         env = make_env(d)
         return cls(env, get, d['targets'])
@@ -32,10 +35,10 @@ class Task(object):
             return self.result[conf['name']]
 
     def fill(self, conf):
-        if not isinstance(conf, dict):
+        if not isinstance(conf, dict) and not isinstance(conf, list):
             return
 
-        for key in list(conf):
+        for key in list(conf) if isinstance(conf, dict) else range(len(conf)):
             if isinstance(conf[key], str):
                 if conf[key] in self.get:
                     conf[key] = self.get[conf[key]](self.result)
