@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<!-- saved from url=(0031)http://bgm.tv/group/topic/32268 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>Torabot: 二次元事件(包括pixiv画师和榜单更新)的通知工具(框架) ver 0.4.0</title>
+<meta name="keywords" content="Torabot: 二次元事件(包括pixiv画师和榜单更新)的通知工具(框架) ver 0.4.0,ACG,anime,comic,game,music,动漫,音乐,游戏,动画,漫画,番组,bangumi,chii,chobits">
+<meta name="description" content="Torabot: 二次元事件(包括pixiv画师和榜单更新)的通知工具(框架) ver 0.4.0">
+<link rel="search" type="application/opensearchdescription+xml" href="http://bgm.tv/static/xml/opensearch_bgm.xml" title="Bangumi 番组计划">
+<link rel="shortcut icon" href="http://bgm.tv/img/favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon-precomposed" href="http://bgm.tv/img/ico/ico_ios.png">
+
+<!--[if lte IE 6]>
+<script src="/js/pngfixed.js" type="text/javascript"></script>
+<script>
+  DD_belatedPNG.fix('.png_bg,img,#wrapper');
+</script>
+<![endif]-->
+
+<link rel="stylesheet" type="text/css" href="./bgm_comments_files/g=css">
+<link rel="stylesheet" type="text/css" href="./bgm_comments_files/g=css_editor"><script type="text/javascript" async="" src="./bgm_comments_files/ga.js"></script><script type="text/javascript">var SHOW_ROBOT = '0',CHOBITS_UID = 102581, SITE_URL = 'http://bgm.tv';</script>
+<style id="clearly_highlighting_css" type="text/css">/* selection */ html.clearly_highlighting_enabled ::-moz-selection { background: rgba(246, 238, 150, 0.99); } html.clearly_highlighting_enabled ::selection { background: rgba(246, 238, 150, 0.99); } /* cursor */ html.clearly_highlighting_enabled {    /* cursor and hot-spot position -- requires a default cursor, after the URL one */    cursor: url("chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/clearly/images/highlight--cursor.png") 14 16, text; } /* highlight tag */ em.clearly_highlight_element {    font-style: inherit !important; font-weight: inherit !important;    background-image: url("chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/clearly/images/highlight--yellow.png");    background-repeat: repeat-x; background-position: top left; background-size: 100% 100%; } /* the delete-buttons are positioned relative to this */ em.clearly_highlight_element.clearly_highlight_first { position: relative; } /* delete buttons */ em.clearly_highlight_element a.clearly_highlight_delete_element {    display: none; cursor: pointer;    padding: 0; margin: 0; line-height: 0;    position: absolute; width: 34px; height: 34px; left: -17px; top: -17px;    background-image: url("chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/clearly/images/highlight--delete-sprite.png"); background-repeat: no-repeat; background-position: 0px 0px; } em.clearly_highlight_element a.clearly_highlight_delete_element:hover { background-position: -34px 0px; } /* retina */ @media (min--moz-device-pixel-ratio: 2), (-webkit-min-device-pixel-ratio: 2), (min-device-pixel-ratio: 2) {    em.clearly_highlight_element { background-image: url("chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/clearly/images/highlight--yellow@2x.png"); }    em.clearly_highlight_element a.clearly_highlight_delete_element { background-image: url("chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/clearly/images/highlight--delete-sprite@2x.png"); background-size: 68px 34px; } } </style><link rel="stylesheet" type="text/css" href="chrome-extension://emomcngdjdddggdcnaamiaembciankch/acgindex_link.css"><style>[touch-action="none"]{ -ms-touch-action: none; touch-action: none; }[touch-action="pan-x"]{ -ms-touch-action: pan-x; touch-action: pan-x; }[touch-action="pan-y"]{ -ms-touch-action: pan-y; touch-action: pan-y; }[touch-action="scroll"],[touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"]{ -ms-touch-action: pan-x pan-y; touch-action: pan-x pan-y; }</style></head>
+<body class="bangumi bangumiNeue">
+<div id="wrapperNeue" class="wrapperNeue">
+<div id="headerNeue2">
+    <div class="headerNeueInner clearit">
+         <div class="bg musume_1"></div>
+    <a href="http://bgm.tv/" class="logo">Bangumi 番组计划</a>
+        
+    
+<div id="navNeue2">
+<div id="menuNeue">
+<ul id="navMenuNeue" class="clearit">
+<li><a href="http://bgm.tv/anime" class="top chl anime"><span>动画</span></a>
+    			<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/anime/chart" class="nav">排行榜</a></li>
+<li><a href="http://bgm.tv/calendar" class="nav">每日放送</a></li>
+<li><a href="http://bgm.tv/anime/tag" class="nav">动画标签</a></li>
+<li><a href="http://bgm.tv/anime/browser" class="nav">分类浏览</a></li>
+<li><a href="http://bgm.tv/anime/blog" class="nav">动画日志</a></li>
+<li><div class="sep">我看</div></li>
+<li><a href="http://bgm.tv/anime/list/answeror/do" class="nav">在看</a></li>
+<li><a href="http://bgm.tv/anime/list/answeror/wish" class="nav">想看</a></li>
+<li><a href="http://bgm.tv/anime/list/answeror/collect" class="nav">看过</a></li>
+<li><a href="http://bgm.tv/anime/list/answeror/on_hold" class="nav">搁置</a></li>
+<li><a href="http://bgm.tv/anime/list/answeror/dropped" class="nav">抛弃</a></li>
+</ul>
+</li>
+<li><a href="http://bgm.tv/book" class="top chl"><span>书籍</span></a>
+<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/book/chart" class="nav">排行榜</a></li>
+<li><a href="http://bgm.tv/book/tag" class="nav">图书标签</a></li>
+<li><a href="http://bgm.tv/book/browser" class="nav">分类浏览</a></li>
+<li><a href="http://bgm.tv/book/blog" class="nav">图书日志</a></li>
+<li><div class="sep">我读</div></li>
+<li><a href="http://bgm.tv/book/list/answeror/do" class="nav">在读</a></li>
+<li><a href="http://bgm.tv/book/list/answeror/wish" class="nav">想读</a></li>
+<li><a href="http://bgm.tv/book/list/answeror/collect" class="nav">读过</a></li>
+<li><a href="http://bgm.tv/book/list/answeror/on_hold" class="nav">搁置</a></li>
+<li><a href="http://bgm.tv/book/list/answeror/dropped" class="nav">抛弃</a></li>
+</ul>
+</li>
+<li><a href="http://bgm.tv/music" class="top chl"><span>音乐</span></a>
+<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/music/chart" class="nav">排行榜</a></li>
+<li><a href="http://bgm.tv/music/tag" class="nav">音乐标签</a></li>
+<li><a href="http://bgm.tv/music/browser" class="nav">浏览全部</a></li>
+<li><a href="http://bgm.tv/music/blog" class="nav">音乐日志</a></li>
+<li><div class="sep">我听</div></li>
+<li><a href="http://bgm.tv/music/list/answeror/do" class="nav">在听</a></li>
+<li><a href="http://bgm.tv/music/list/answeror/wish" class="nav">想听</a></li>
+<li><a href="http://bgm.tv/music/list/answeror/collect" class="nav">听过</a></li>
+<li><a href="http://bgm.tv/music/list/answeror/on_hold" class="nav">搁置</a></li>
+<li><a href="http://bgm.tv/music/list/answeror/dropped" class="nav">抛弃</a></li>
+</ul>
+</li>
+<li><a href="http://bgm.tv/game" class="top chl"><span>游戏</span></a>
+<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/game/chart" class="nav">排行榜</a></li>
+<li><a href="http://bgm.tv/game/tag" class="nav">游戏标签</a></li>
+<li><a href="http://bgm.tv/game/browser" class="nav">平台浏览</a></li>
+<li><a href="http://bgm.tv/game/blog" class="nav">游戏日志</a></li>
+<li><div class="sep">我玩</div></li>
+<li><a href="http://bgm.tv/game/list/answeror/do" class="nav">在玩</a></li>
+<li><a href="http://bgm.tv/game/list/answeror/wish" class="nav">想玩</a></li>
+<li><a href="http://bgm.tv/game/list/answeror/collect" class="nav">玩过</a></li>
+<li><a href="http://bgm.tv/game/list/answeror/on_hold" class="nav">搁置</a></li>
+<li><a href="http://bgm.tv/game/list/answeror/dropped" class="nav">抛弃</a></li>
+</ul>
+</li>
+<li><a href="http://bgm.tv/real" class="top chl real"><span>三次元</span></a>
+<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/real/chart" class="nav">排行榜</a></li>
+<li><a href="http://bgm.tv/real/tag" class="nav">三次元标签</a></li>
+<li><a href="http://bgm.tv/real/blog" class="nav">三次元日志</a></li>
+<li><a href="http://bgm.tv/real/browser/platform/jp" class="nav">日剧</a></li>
+<li><a href="http://bgm.tv/real/browser/platform/en" class="nav">欧美剧</a></li>
+<li><div class="sep">我看</div></li>
+<li><a href="http://bgm.tv/real/list/answeror/do" class="nav">在看</a></li>
+<li><a href="http://bgm.tv/real/list/answeror/wish" class="nav">想看</a></li>
+<li><a href="http://bgm.tv/real/list/answeror/collect" class="nav">看过</a></li>
+<li><a href="http://bgm.tv/real/list/answeror/on_hold" class="nav">搁置</a></li>
+<li><a href="http://bgm.tv/real/list/answeror/dropped" class="nav">抛弃</a></li>
+</ul>
+</li>
+            <li><a href="http://bgm.tv/mono" class="top"><span>人物</span></a>
+<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/character" class="nav">虚构人物</a></li>
+<li><a href="http://bgm.tv/person" class="nav">现实人物</a></li>
+<li><div class="sep">我</div></li>
+<li><a href="http://bgm.tv/mono/update" class="nav">关注人物更新</a></li>
+<li><a href="http://bgm.tv/user/answeror/mono/character" class="nav">收藏的角色</a></li>
+<li><a href="http://bgm.tv/user/answeror/mono/person" class="nav">收藏的人物</a></li>				
+	
+</ul>
+</li>
+<li><a href="http://bgm.tv/rakuen" class="top_lite"><span>超展开</span></a></li>
+<li><a href="http://bgm.tv/group" class="focus"><span>小组</span></a>
+<div class="clear"></div>
+<ul class="clearit">
+<li><a href="http://bgm.tv/group/discover" class="nav">随便看看</a></li>
+<li><a href="http://bgm.tv/group/all" class="nav">所有小组</a></li>
+<li><div class="sep">我</div></li>
+<li><a href="http://bgm.tv/group/my_topic" class="nav">发表的话题</a></li>
+<li><a href="http://bgm.tv/group/my_reply" class="nav">回复的话题</a></li>
+<li><a href="http://bgm.tv/group/mine" class="nav">参加的小组</a></li>
+</ul>
+</li>
+<li><a href="javascript:void(0);" class="top"><span>探索</span></a>
+<div class="clear"></div>
+<ul class="explore clearit">
+
+<li class="single"><a href="http://bgm.tv/timeline">时空管理局</a></li>		
+                <li class="group">
+<span><a href="http://bgm.tv/blog">日志</a><a href="http://bgm.tv/index">目录</a><a href="http://bgm.tv/wiki">维基人</a></span>
+</li>				
+<li class="group"><span><a href="http://bgm.tv/magi">MAGI 问答</a><a href="http://bgm.tv/dollars">Dollars</a></span></li>				
+                <li class="group">
+<span class="root">客户端</span>
+<span><a href="http://bgm.tv/onair">onAir</a><a href="http://bgm.tv/group/topic/5155">Mobile</a></span>
+</li>				
+</ul>
+</li>
+<li class="doujin"><a href="http://doujin.bgm.tv/">天窗联盟</a></li>
+</ul>	
+</div>
+</div>
+        
+    <div class="idBadgerNeue">
+<a class="avatar" href="http://bgm.tv/user/answeror"><span class="avatarNeue avatarSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+	
+<ul id="badgeUserPanel">
+    	<li><a href="http://bgm.tv/user/answeror">时光机</a></li>                    
+        <li><a href="http://bgm.tv/user/answeror/blog">日志</a></li>
+        <li><a href="http://bgm.tv/user/answeror/mono">人物</a></li>
+        <li><a href="http://bgm.tv/user/answeror/index">目录</a></li>
+        <li><a href="http://bgm.tv/user/answeror/timeline">时间胶囊</a></li>
+        <li><a href="http://bgm.tv/user/answeror/groups">小组</a></li>
+        <li><a href="http://bgm.tv/user/answeror/friends">好友</a></li>
+        <li class="row"><a href="http://doujin.bgm.tv/user/answeror">天窗专页</a></li>
+        <li class="row"><a href="http://bgm.tv/pm">短信</a> | <a href="http://bgm.tv/settings">设置</a> | <a href="http://bgm.tv/logout/0279f697">登出</a></li>
+    </ul>	
+    </div><div id="headerSearch">
+        <form action="http://bgm.tv/subject_search" method="post">
+    <div class="inner">
+<select name="cat" id="siteSearchSelect">
+<option value="all">全部</option>
+<option value="2">动画</option>
+<option value="1">书籍</option>
+<option value="4">游戏</option>
+<option value="3">音乐</option>
+<option value="6">三次元</option>
+<option value="person">人物</option>			
+</select>
+<input id="search_text" name="search_text" class="textfield" type="text">
+        <input type="submit" name="submit" value="搜索" class="search">        			
+    </div>
+</form>
+    </div>      
+    </div>
+</div>
+
+<div id="main" class="png_bg">
+<div class="columns clearit">
+    <div id="columnInSubjectA" class="column">
+        <div id="pageHeader">
+        <h1><span><a href="http://bgm.tv/group/pixiv" class="avatar"><img src="./bgm_comments_files/84.jpg" class="avatar ll">pixiv</a> » <a href="http://bgm.tv/group/pixiv/forum">讨论</a></span><br>Torabot: 二次元事件(包括pixiv画师和榜单更新)的通知工具(框架) ver 0.4.0</h1>        </div>
+    	<hr class="board">
+    <script type="text/javascript">
+    var totHistory = '45',playback = '658783,658795,658796,658801,658802,658804,658805,658972,659050,659054,659176,659847,659859,659866,660011,660017,660024,660032,660066,660237,660266,660408,660418,670147,670155,670161,670170,670172,670243,670260,670588,670601,670608,670611,670658,670962,670973,670974,670975,670986,671054,671070,671111,672804,672805';
+    var COLLAPSE_REPLIES = true;
+</script>
+<div id="post_658783" class="postTopic light_odd clearit">
+<div class="re_info"><small>#1 - 2014-5-3 11:24 / <a href="javascript:void(0);" onclick="eraseGrpTopic(32268,&#39;0279f697&#39;)">del</a> / <a href="http://bgm.tv/group/topic/32268/edit">edit</a></small></div>
+<a href="http://bgm.tv/user/answeror" class="avatar"><span class="avatarNeue avatarSize48 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+<div class="inner">
+    	<strong><a href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>  <span class="tip_j">(我坏掉了)</span>    	<div class="topic_content">
+    		<a href="http://torabot.com/" target="_blank" rel="nofollow external" class="l">Torabot</a>是一个二次元(已经混入了一些三次元的异端<img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)">)事件的(邮件)通知工具(框架). 目前实现了8个模块:<br>
+<br>
+1. Pixiv榜单订阅, 画师订阅. 邮件里附带缩略图.<br>
+2. Bilibili新番订阅.<br>
+3. 虎穴同人本上架/预售通知. 可以用来抢本子.<br>
+4. 人人影视RSS订阅(作为撰写模块的tutorial).<br>
+5. yande.re订阅(二次元高清图站).<br>
+6. danbooru订阅(海量二次元图站).<br>
+7. e-hentai订阅(绅士图站).<br>
+8. RSS/Atom订阅(可以用来订阅ktxp的种子, Github的通知等等).<br>
+<br>
+Torabot旨在提供一个可扩展的通知更新框架(虽然最初目的并不是这个...), 可以用于服务终端用户, 或为其它内容聚合服务提供一个独立的通知更新接口(计划中).<br>
+<br>
+源码在 <a href="https://github.com/Answeror/torabot" target="_blank" rel="nofollow external" class="l">https://github.com/Answeror/torabot</a><br>
+<br>
+--- 我是更新分割线 ---<br>
+<br>
+更多技术讨论参见这里: <a href="http://www.v2ex.com/t/110788" target="_blank" rel="nofollow external" class="l">http://www.v2ex.com/t/110788</a><br>
+<br>
+<span style="font-weight:bold;">ver 0.2.2</span>: 加入了1分钟<span style="color: red;">交互式教程</span>; 改进了登录提示和登出按钮位置.<br>
+<span style="font-weight:bold;">ver 0.3.0</span>: 加入了多邮箱支持. 5月10日上午发布的版本里, 新用户无法注册, 现已修复(2014-05-11 00:21).<br>
+<span style="font-weight:bold;">ver 0.3.3</span>: 域名换成了 torabot.com 原来的 torabot.aip.io 仍然可用<br>
+<span style="font-weight:bold;">ver 0.3.4</span>: 加入了yande.re模块.<br>
+<span style="font-weight:bold;">ver 0.3.5</span>: 加入了danbooru模块.<br>
+<span style="font-weight:bold;">ver 0.4.0</span>: 加入e-hentai订阅; 加入feed订阅; 修正email附件文件名乱码; booru类站点搜索框自动补全.    	</div>
+</div>
+</div>
+
+<div id="sliderContainer" class="clearit sticky" style="width: 708px;">
+<div id="slider" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><a class="ui-slider-handle ui-state-default ui-corner-all" href="http://bgm.tv/group/topic/32268#" style="left: 100%;"></a></div>
+</div>
+
+<div id="comment_list" class="commentList borderNeue">
+<div id="post_658795" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_658795" class="floor-anchor">#2</a> - 2014-5-3 12:31</small></div>
+<a href="http://bgm.tv/user/ruocaled" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/00/28/2813.jpg?r=1402003736&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/ruocaled" class="l post_author_658795">若卡</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658795,0,102581,2813,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(VIP 8 年费用户)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">域名看起来好值钱 <img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"></div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_658795">
+        		        			<div id="post_658801" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_658801" class="floor-anchor">#2-1</a> - 2014-5-3 13:07 
+    			         / <a id="erase_658801" href="http://bgm.tv/erase/group/reply/658801?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/658801/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="658801" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658795,658801,2813,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">哎? 我当初给它的定义是 AIP Instrumentality Project Is Opensource. 这个域名有什么别的含义吗?</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_658804" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_658804" class="floor-anchor">#2-2</a> - 2014-5-3 13:11 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/ruocaled" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/00/28/2813.jpg?r=1402003736&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="658804" href="http://bgm.tv/user/ruocaled" class="l">若卡</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658795,658804,2813,2813,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 哎? 我当初给它的定义是 AIP Instrumentality Project Is Opensource. 这个域名有什么别的含义吗?</q></div>唉，眼滑看成api了……不过.io本身就很贵了，三位字母随便组合都有意义，还是很值钱！</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_658796" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_658796" class="floor-anchor">#3</a> - 2014-5-3 12:33</small></div>
+<a href="http://bgm.tv/user/thec" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/03/18/31820.jpg?r=1335757127&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/thec" class="l post_author_658796">久远寺千歳</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658796,0,102581,31820,0)" class="tip_i icons_cmt">回复</a> </span>
+    	
+    	<div class="reply_content">
+    		<div class="message">好棒！<img src="./bgm_comments_files/67.gif" smileid="106" alt="(bgm90)"></div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_658796">
+        		        			<div id="post_658805" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_658805" class="floor-anchor">#3-1</a> - 2014-5-3 13:11 
+    			         / <a id="erase_658805" href="http://bgm.tv/erase/group/reply/658805?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/658805/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="658805" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658796,658805,31820,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">谢谢 <img src="./bgm_comments_files/47.gif" smileid="86" alt="(bgm70)"></div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_658802" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_658802" class="floor-anchor">#4</a> - 2014-5-3 13:08</small></div>
+<a href="http://bgm.tv/user/linfcstmr" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/01/28/12819.jpg?r=1373747238&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/linfcstmr" class="l post_author_658802">linfcstmr</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658802,0,102581,12819,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(妹(服务器)控)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">因为scrapy和fabric不支持Python3, 本站需要两个Python环境: Python 3.3.4+(前端和后台任务), Python 2.7.6(scrapy, fabric)........</div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_658802">
+        		        			<div id="post_659050" class="sub_reply_bg  clearit sub_reply_collapse" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_659050" class="floor-anchor">#4-1</a> - 2014-5-4 01:01 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/halfelf" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/11/21/112191.jpg?r=1400494428&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="659050" href="http://bgm.tv/user/halfelf" class="l">halfelf</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658802,659050,12819,112191,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">两个版本蛋碎+1</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_659054" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_659054" class="floor-anchor">#4-2</a> - 2014-5-4 01:52 
+    			         / <a id="erase_659054" href="http://bgm.tv/erase/group/reply/659054?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/659054/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="659054" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658802,659054,12819,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">halfelf</span> 说: 两个版本蛋碎+1</q></div>这的确是个... 艰难的决定 <img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"></div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_658972" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_658972" class="floor-anchor">#5</a> - 2014-5-4 00:01</small></div>
+<a href="http://bgm.tv/user/calfn" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/01/42/14268.jpg&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/calfn" class="l post_author_658972">柳胜薰CALFN-触触穆斯妹</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658972,0,102581,14268,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(｡&gt;‿‿&lt;｡)ゲソ~❤)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">火钳</div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_658972">
+        		        			<div id="post_671070" class="sub_reply_bg  clearit sub_reply_collapse" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_671070" class="floor-anchor">#5-1</a> - 2014-6-22 13:15 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/zh369ao" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/01/17/11720.jpg?r=1375058885&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="671070" href="http://bgm.tv/user/zh369ao" class="l">zz</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,658972,671070,14268,11720,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">+1</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_659176" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_659176" class="floor-anchor">#6</a> - 2014-5-4 14:58</small></div>
+<a href="http://bgm.tv/user/ayanamirei0330" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/01/54/15476.jpg?r=1327207746&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/ayanamirei0330" class="l post_author_659176">冰枫の幻化</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,659176,0,102581,15476,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(腹黑傲娇又糟糕)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">看起来好厉害，关注一下</div>
+    		
+    		    	</div>
+</div>
+</div>
+<div id="post_659847" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_659847" class="floor-anchor">#7</a> - 2014-5-5 22:56</small></div>
+<a href="http://bgm.tv/user/henryhobby" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/14/79/147900.jpg?r=1373811442&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/henryhobby" class="l post_author_659847">Hobby</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,659847,0,102581,147900,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(勇敢的骚年啊快起床找JJ~(≧▽≦)/~)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">作为用window小白，只能呵呵了，楼主加油……</div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_659847">
+        		        			<div id="post_659859" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_659859" class="floor-anchor">#7-1</a> - 2014-5-5 23:29 
+    			         / <a id="erase_659859" href="http://bgm.tv/erase/group/reply/659859?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/659859/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="659859" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,659847,659859,147900,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">这是个网站呀, 只要有浏览器就能使用. 做开发才需要linux环境.</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_659866" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_659866" class="floor-anchor">#8</a> - 2014-5-6 00:03</small></div>
+<a href="http://bgm.tv/user/8369" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/00/83/8369.jpg?r=1391992335&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/8369" class="l post_author_659866">苏培正</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,659866,0,102581,8369,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(君醒我未醒，我醒君已训.)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">好厉害。<br>
+不过这边登不上谷歌账号。</div>
+    		
+    		    	</div>
+</div>
+</div>
+<div id="post_660011" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_660011" class="floor-anchor">#9</a> - 2014-5-6 15:44</small></div>
+<a href="http://bgm.tv/user/85082" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/08/50/85082.jpg?r=1382020714&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/85082" class="l post_author_660011">心心    累孓不爱</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660011,0,102581,85082,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(09)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">授权的时候没授权成功，以上，不过感觉好高大上啊</div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_660011">
+        		        			<div id="post_660017" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660017" class="floor-anchor">#9-1</a> - 2014-5-6 16:33 
+    			         / <a id="erase_660017" href="http://bgm.tv/erase/group/reply/660017?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/660017/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660017" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660011,660017,85082,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">能截个图或者把页面给出的错误信息发给我吗? 谢谢!</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_660024" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660024" class="floor-anchor">#9-2</a> - 2014-5-6 17:01 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/85082" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/08/50/85082.jpg?r=1382020714&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660024" href="http://bgm.tv/user/85082" class="l">心心    累孓不爱</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660011,660024,85082,85082,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 能截个图或者把页面给出的错误信息发给我吗? 谢谢!</q></div><img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)">实际上是网络问题，一台电视，两个手机，外加一个电脑，共同运用一条网络，于是，网络迟缓，嗯，授权网页刚弹出来就变成叉叉了<img src="./bgm_comments_files/06.gif" smileid="45" alt="(bgm29)"><img src="./bgm_comments_files/06.gif" smileid="45" alt="(bgm29)"><img src="./bgm_comments_files/06.gif" smileid="45" alt="(bgm29)"><img src="./bgm_comments_files/06.gif" smileid="45" alt="(bgm29)"><img src="./bgm_comments_files/06.gif" smileid="45" alt="(bgm29)"></div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_660032" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_660032" class="floor-anchor">#10</a> - 2014-5-6 17:37</small></div>
+<a href="http://bgm.tv/user/ourfather" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/05/29/52963.jpg?r=1315584915&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/ourfather" class="l post_author_660032">Ourfather</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660032,0,102581,52963,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(绝赞逃亡中)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">要用谷歌账号啊......好麻烦.....<br>
+这东西的定位是啥......脑补了下b站新番资讯<br>
+“哔哔哔，你订阅的7月番《月刊少女野崎君》将会在2014.7.4（星期五）播出”<br>
+“哔哔哔，你订阅的第⑨届东方m-1漫才将会在.......“<br>
+“哔哔哔，你订阅的恋恋的心跳大冒险（最终话）将会......”<br>
+“哔哔哔，你关注的画师noconol......”<br>
+“哔哔哔，你的本子到了”<br>
+<span style="background-color:#555;color:#555;border:1px solid #555;">这已经不是新番了吧<img src="./bgm_comments_files/-" smileid="\&quot;54\&quot;" alt="\&quot;(bgm38)\&quot;"></span></div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_660032">
+        		        			<div id="post_660066" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660066" class="floor-anchor">#10-1</a> - 2014-5-6 18:19 
+    			         / <a id="erase_660066" href="http://bgm.tv/erase/group/reply/660066?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/660066/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660066" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660032,660066,52963,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><img src="./bgm_comments_files/2014-05-06-181436_739x536.png" class="code" alt=""><br>
+<br>
+我今天收到的通知是这个样子的(这是网页版, 每条还对应一个邮件通知, pixiv相关的通知有缩略图).</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_660237" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660237" class="floor-anchor">#10-2</a> - 2014-5-6 22:54 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/ourfather" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/05/29/52963.jpg?r=1315584915&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660237" href="http://bgm.tv/user/ourfather" class="l">Ourfather</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660032,660237,52963,52963,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: <br>
+<br>
+我今天收到的通知是这个样子的(这是网页版, 每条还对应一个邮件通知, pixiv相关的通知有缩略图).</q></div>诶诶，好像不错的样子......不同站的能稍微分开来就好了（或者说可以自主分类）</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_660266" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660266" class="floor-anchor">#10-3</a> - 2014-5-7 00:14 
+    			         / <a id="erase_660266" href="http://bgm.tv/erase/group/reply/660266?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/660266/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660266" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660032,660266,52963,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">Ourfather</span> 说: 诶诶，好像不错的样子......不同站的能稍微分开来就好了（或者说可以自主分类）</q></div>这个通知页面几乎没用... 本来通知就是为了避免用户主动来刷网站... 这个站主要还是用来做邮件提醒的. 自主分类是什么意思?</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_660408" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660408" class="floor-anchor">#10-4</a> - 2014-5-7 14:49 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/ourfather" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/05/29/52963.jpg?r=1315584915&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660408" href="http://bgm.tv/user/ourfather" class="l">Ourfather</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660032,660408,52963,52963,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 这个通知页面几乎没用... 本来通知就是为了避免用户主动来刷网站... 这个站主要还是用来做邮件提醒的. 自主分类是什么意思?</q></div>我语死早......就是说用户可以将“通知”分类到不同的栏目（也可以自己增减栏目，起名等等），<br>
+1.只收b站某些视频的更新<br>
+2.只收p站画师更新<br>
+3.超级期待的某奥运番更新<br>
+4.xxxx的更新<br>
+好吧其实我什么都不懂</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_660418" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_660418" class="floor-anchor">#10-5</a> - 2014-5-7 15:46 
+    			         / <a id="erase_660418" href="http://bgm.tv/erase/group/reply/660418?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/660418/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="660418" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,660032,660418,52963,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">Ourfather</span> 说: 我语死早......就是说用户可以将“通知”分类到不同的栏目（也可以自己增减栏目，起名等等），<br>
+1.只收b站某些视频的更新<br>
+2.只收p站画师更新<br>
+3.超级期待的某奥运番更新<br>
+4.xxxx的更新<br>
+好吧其...</q></div>是我的tutorial做得太烂了吗... <img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"><br>
+2已经实现了, b站视屏现在支持某个新番和某个up主的订阅.</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_670147" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_670147" class="floor-anchor">#11</a> - 2014-6-17 20:48</small></div>
+<a href="http://bgm.tv/user/11896" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/01/18/11896.jpg&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/11896" class="l post_author_670147">节操丧失怎么办</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670147,0,102581,11896,0)" class="tip_i icons_cmt">回复</a> </span>
+    	
+    	<div class="reply_content">
+    		<div class="message">能否鼠标点击某个搜索条目后弹出tool tip而不是转到对应页面？新帐号批量订阅的时候可能会比较麻烦。</div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_670147">
+        		        			<div id="post_670155" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670155" class="floor-anchor">#11-1</a> - 2014-6-17 21:47 
+    			         / <a id="erase_670155" href="http://bgm.tv/erase/group/reply/670155?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670155/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670155" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670147,670155,11896,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">"鼠标点击某个搜索条目"是指bilibili的新番订阅吗?</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670170" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670170" class="floor-anchor">#11-2</a> - 2014-6-18 00:05 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/11896" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/01/18/11896.jpg&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670170" href="http://bgm.tv/user/11896" class="l">节操丧失怎么办</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670147,670170,11896,11896,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: "鼠标点击某个搜索条目"是指bilibili的新番订阅吗?</q></div>对</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_670161" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_670161" class="floor-anchor">#12</a> - 2014-6-17 22:33</small></div>
+<a href="http://bgm.tv/user/26866" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/02/68/26866.jpg?r=1402303465&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/26866" class="l post_author_670161">絕望月火</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670161,0,102581,26866,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(还未过毕业礼，不算失业)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">加入e-hentai订阅<img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"><br>
+"鬼月有新本子了,该撸了"这样的意思吗<img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"></div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_670161">
+        		        			<div id="post_670172" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670172" class="floor-anchor">#12-1</a> - 2014-6-18 01:02 
+    			         / <a id="erase_670172" href="http://bgm.tv/erase/group/reply/670172?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670172/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670172" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670161,670172,26866,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">是的呢, 话说我自己还在虎穴上订阅了鬼月, 很想买她的新作 :)</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_670243" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_670243" class="floor-anchor">#13</a> - 2014-6-18 15:10</small></div>
+<a href="http://bgm.tv/user/ildc" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/10/99/109914.jpg?r=1402537007&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/ildc" class="l post_author_670243">MADAO</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,0,102581,109914,0)" class="tip_i icons_cmt">回复</a> </span>
+    	
+    	<div class="reply_content">
+    		<div class="message">难道不需要分享点规则方便懒人？<img src="./bgm_comments_files/01.gif" smileid="40" alt="(bgm24)"></div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_670243">
+        		        			<div id="post_670260" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670260" class="floor-anchor">#13-1</a> - 2014-6-18 16:20 
+    			         / <a id="erase_670260" href="http://bgm.tv/erase/group/reply/670260?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670260/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670260" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670260,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">比如这样的? <a href="http://torabot.com/search/ehentai?q=language:chinese%20artist:kizuki%20aruchu" target="_blank" rel="nofollow external" class="l">http://torabot.com/search/ehenta ... ist:kizuki%20aruchu</a></div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670588" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670588" class="floor-anchor">#13-2</a> - 2014-6-20 12:37 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/ildc" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/99/109914.jpg?r=1402537007&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670588" href="http://bgm.tv/user/ildc" class="l">MADAO</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670588,109914,109914,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 比如这样的? http://torabot.com/search/ehenta ... ist:kizuki%20aruchu</q></div>你们有多萌鬼月啊卧槽<br>
+给源加个过滤器在推送这想法还是不错的。。虽然我想到了半死不活的pipes<br>
+还有cdn真的加速了么加速了么加速了么</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670601" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670601" class="floor-anchor">#13-3</a> - 2014-6-20 14:51 
+    			         / <a id="erase_670601" href="http://bgm.tv/erase/group/reply/670601?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670601/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670601" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670601,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">MADAO</span> 说: 你们有多萌鬼月啊卧槽<br>
+给源加个过滤器在推送这想法还是不错的。。虽然我想到了半死不活的pipes<br>
+还有cdn真的加速了么加速了么加速了么</q></div>之前是没有cdn的, 但是上周日(ehentai订阅发布的第二天)服务器ip被墙了. 虽然后来实验发现被墙的原因很可能是服务器上的openvpn, 但是总有点不放心.<br>
+观望一阵子, 如果这个cdn地址没被墙的话就去掉cdn.</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670608" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670608" class="floor-anchor">#13-4</a> - 2014-6-20 15:08 
+    			         / <a id="erase_670608" href="http://bgm.tv/erase/group/reply/670608?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670608/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670608" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670608,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">MADAO</span> 说: 你们有多萌鬼月啊卧槽<br>
+给源加个过滤器在推送这想法还是不错的。。虽然我想到了半死不活的pipes<br>
+还有cdn真的加速了么加速了么加速了么</q></div>我out了... 完全不知道还有pipes这种东西. 突然有种重新造轮子的感觉 <img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"><br>
+这个sources页面, 满满的既视感...&nbsp;&nbsp;<a href="http://pipes.yahoo.com/pipes/docs?doc=sources" target="_blank" rel="nofollow external" class="l">http://pipes.yahoo.com/pipes/docs?doc=sources</a><br>
+热情减退了怎么办 <img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"></div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670611" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670611" class="floor-anchor">#13-5</a> - 2014-6-20 15:23 
+    			         / <a id="erase_670611" href="http://bgm.tv/erase/group/reply/670611?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670611/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670611" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670611,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">MADAO</span> 说: 你们有多萌鬼月啊卧槽<br>
+给源加个过滤器在推送这想法还是不错的。。虽然我想到了半死不活的pipes<br>
+还有cdn真的加速了么加速了么加速了么</q></div>随便搜了下, 发现36kr的一篇文章: <a href="http://www.36kr.com/p/149863.html" target="_blank" rel="nofollow external" class="l">http://www.36kr.com/p/149863.html</a><br>
+总结起来就是pipes过于geek了.<br>
+嗯, 我想torabot可能会更加着力于提供source, 比如一些pipes难以应对的复杂情况(多页面, cookies, request rate limit), 而不是聚合.</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670658" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670658" class="floor-anchor">#13-6</a> - 2014-6-20 19:19 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/ildc" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/99/109914.jpg?r=1402537007&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670658" href="http://bgm.tv/user/ildc" class="l">MADAO</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670658,109914,109914,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 我out了... 完全不知道还有pipes这种东西. 突然有种重新造轮子的感觉 <br>
+这个sources页面, 满满的既视感...&nbsp;&nbsp;http://pipes.yahoo.com/pi...</q></div>卧槽热情减退岂不是咱的错<br>
+不要啊咱不要当这个罪人的说(╯‵□′)╯︵┻━┻<br>
+pipes真心不大好用尤其是现在很多网站都屏蔽雅虎的爬虫了况且这玩意都多少年木有过更新了→_→ <br>
+现在能用的也就是xpath来烧全文或者适配下木有feed的站点至于效果咱只能说一个字不是太好还要自己手动<br>
+现在输出全文基本都是这个<a href="http://fullrss.net/" target="_blank" rel="nofollow external" class="l">http://fullrss.net/</a>简单粗暴咱绝对不会说fc2上的画像分享站效果简直不能再赞<br>
+最后说好的本体是推送呢强行推送呢强行推送呢<br>
+咱看好你哦da☆ze</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670962" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670962" class="floor-anchor">#13-7</a> - 2014-6-22 00:47 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/59903" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/05/99/59903.jpg?r=1402684779&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670962" href="http://bgm.tv/user/59903" class="l">Jamella</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670962,109914,59903,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">yahoo的爬虫被屏蔽是硬伤啊....<img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)">遇到那些不提供rss的只能用feed43了，但和fullrss一样更新过慢，而且feed43也不能输出全文。无全文输出的rss在greader/new+上能用readability代替，pc端嘛就无所谓了...<img src="./bgm_comments_files/16.gif" smileid="55" alt="(bgm39)"></div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670973" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670973" class="floor-anchor">#13-8</a> - 2014-6-22 01:35 
+    			         / <a id="erase_670973" href="http://bgm.tv/erase/group/reply/670973?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670973/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670973" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670973,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">Jamella</span> 说: yahoo的爬虫被屏蔽是硬伤啊....遇到那些不提供rss的只能用feed43了，但和fullrss一样更新过慢，而且feed43也不能输出全文。无全文输出的rss在greader/new+上能用re...</q></div>oh no... 我怎么尽在重造轮子 <img src="./bgm_comments_files/15.gif" smileid="54" alt="(bgm38)"><br>
+之前没听说过feed43, 于是开了这个issue: <a href="https://github.com/Answeror/torabot/issues/23" target="_blank" rel="nofollow external" class="l">https://github.com/Answeror/torabot/issues/23</a><br>
+现在正在努力实现中, 计划支持全文输出.<br>
+这个计划说白了就是用xslt和json将scrapy变成可配置的, json用来控制页面抓取和依赖关系, xslt用来解析页面. 然后输出RSS/Atom feed(其实可以输出任意格式的东西), 再用torabot的feed mod来订阅(从而保证更新速度).<br>
+第一个要实现的就是bangumi的私信和帖子评论的订阅... 老是要自己主动来查看真是太麻烦了...</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670974" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670974" class="floor-anchor">#13-9</a> - 2014-6-22 01:40 
+    			         / <a id="erase_670974" href="http://bgm.tv/erase/group/reply/670974?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/670974/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670974" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670974,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">Jamella</span> 说: yahoo的爬虫被屏蔽是硬伤啊....遇到那些不提供rss的只能用feed43了，但和fullrss一样更新过慢，而且feed43也不能输出全文。无全文输出的rss在greader/new+上能用re...</q></div>至于爬虫屏蔽的问题. 我打算在底下加个tor.</div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_670975" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_670975" class="floor-anchor">#13-10</a> - 2014-6-22 01:55 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/59903" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/05/99/59903.jpg?r=1402684779&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="670975" href="http://bgm.tv/user/59903" class="l">Jamella</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,670975,109914,59903,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 至于爬虫屏蔽的问题. 我打算在底下加个tor.</q></div>加油！吾渣有心无力啊<img src="./bgm_comments_files/25.gif" smileid="64" alt="(bgm48)"></div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_672804" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_672804" class="floor-anchor">#13-11</a> - 2014-6-29 04:19 
+    			         / <a id="erase_672804" href="http://bgm.tv/erase/group/reply/672804?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/672804/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="672804" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,672804,109914,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">Jamella</span> 说: 加油！吾渣有心无力啊</q></div>私信订阅搞定了: <a href="http://bgm.tv/group/topic/33051" target="_blank" rel="nofollow external" class="l">http://bgm.tv/group/topic/33051</a></div>
+    			    </div>
+    			</div>
+    		    		        			<div id="post_672805" class="sub_reply_bg  clearit reply_highlight" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_672805" class="floor-anchor">#13-12</a> - 2014-6-29 04:36 
+    			            				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/59903" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/05/99/59903.jpg?r=1402684779&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="672805" href="http://bgm.tv/user/59903" class="l">Jamella</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670243,672805,109914,59903,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content"><div class="quote"><q><span style="font-weight:bold;">answeror</span> 说: 私信订阅搞定了: http://bgm.tv/group/topic/33051</q></div>赞～！</div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_670986" class="light_even row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_670986" class="floor-anchor">#14</a> - 2014-6-22 03:48</small></div>
+<a href="http://bgm.tv/user/grubstreet" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/06/61/66129.jpg?r=1354175227&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/grubstreet" class="l post_author_670986">小寒</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670986,0,102581,66129,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(好好活下去)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">目前只订阅了四五个源，突然想到能不能提供 daily/weekly digest……<br>
+要是每一个更新都单独发一封邮件的话即便不多也能够逼死强迫症的……</div>
+    		
+    		        		<div class="topic_sub_reply" id="topic_reply_670986">
+        		        			<div id="post_671054" class="sub_reply_bg  clearit" style="display: block;">
+    			    <div class="re_info">
+                        <small><a href="http://bgm.tv/group/topic/32268#post_671054" class="floor-anchor">#14-1</a> - 2014-6-22 12:24 
+    			         / <a id="erase_671054" href="http://bgm.tv/erase/group/reply/671054?gh=0279f697" class="erase_post">del</a> / <a href="http://bgm.tv/group/reply/671054/edit">edit</a>    				    </small>
+    				</div>
+    			    <a href="http://bgm.tv/user/answeror" class="avatar">
+    			    <span class="avatarNeue avatarReSize32 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/s/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>
+    				<div class="inner">
+        				<strong class="userName"><a id="671054" href="http://bgm.tv/user/answeror" class="l">answeror</a></strong>
+        				<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,670986,671054,66129,102581,1)" class="tip_i icons_cmt">回复</a>        			    <div class="cmt_sub_content">我订阅了64个... 你可能需要根据邮件的数量把查询条件调整得严格一点.<br>
+这个需求有人提过了, 你可以watch这个issue来跟踪开发进度: <a href="https://github.com/Answeror/torabot/issues/16" target="_blank" rel="nofollow external" class="l">https://github.com/Answeror/torabot/issues/16</a></div>
+    			    </div>
+    			</div>
+    		    		</div>
+    		    	</div>
+</div>
+</div>
+<div id="post_671111" class="light_odd row_reply clearit" style="display: block;">
+    <div class="re_info"><small><a href="http://bgm.tv/group/topic/32268#post_671111" class="floor-anchor">#15</a> - 2014-6-22 16:33</small></div>
+<a href="http://bgm.tv/user/mars" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/00/47/4768.jpg?r=1395386100&#39;)"></span></a>
+<div class="inner">
+    	<span class="userInfo"><strong><a href="http://bgm.tv/user/mars" class="l post_author_671111">粘土火星</a></strong>
+    	<a href="javascript:void(0);" onclick="subReply(&#39;group&#39;,32268,671111,0,102581,4768,0)" class="tip_i icons_cmt">回复</a>  <span class="tip_j">(Save you from anything)</span></span>
+    	
+    	<div class="reply_content">
+    		<div class="message">马一下。。</div>
+    		
+    		    	</div>
+</div>
+</div>
+</div>
+            <div id="reply_wrapper">
+                    <a name="new"></a>
+<div id="new_comment" class="light_odd">
+            <form id="ReplyForm" name="new_comment" method="post" action="http://bgm.tv/group/topic/32268/new_reply">
+            <input type="hidden" name="formhash" value="0279f697">
+            <input type="hidden" name="lastview" value="1404022438">
+            
+            <a href="http://bgm.tv/user/answeror" class="avatar"><span class="avatarNeue avatarReSize40 ll" style="background-image:url(&#39;http://lain.bgm.tv/pic/user/m/000/10/25/102581.jpg?r=1350202439&#39;)"></span></a>            
+            
+            <div class="inner">
+    			<h2 class="reply_title"><span class="reply_author"><a href="http://bgm.tv/user/answeror" class="l">answeror</a></span> / 添加新回复</h2>
+    			<span class="tip">
+    			<div class="replyTextarea">
+    			<textarea name="content" id="content" cols="45" rows="6" class="reply newReply" onkeydown="seditor_ctlent(event,&#39;ReplyForm&#39;);"></textarea>  			    
+    			</div>
+    			<div id="submitBtnO"><input class="inputBtn" value="加上去" name="submit" type="submit"> <span class="tip">&nbsp;&nbsp;使用 Ctrl+Enter 或 Alt+S 快速提交 | <a href="http://bgm.tv/help/bbcode" class="l" target="_blank">BBCode指南</a></span></div>
+    			</span>
+            </div>
+</form>
+</div>
+                </div>
+    	
+    </div>
+    <div id="columnInSubjectB" class="column">
+    	<div class="menu_inner">
+    	<a href="http://bgm.tv/group/pixiv" class="l">/ 返回pixiv小组</a><br>
+    	<a href="http://bgm.tv/group/pixiv/new_topic" class="l">/ 发表新主题</a>    	</div>
+    	
+    <div class="SidePanelMini clearit" style="margin:0; padding:5px; border-color:#EEE;">
+    <a href="http://126.am/qEyKD4" target="_blank">
+        <div class="port ll" style="background:url(&#39;http://pic.yupoo.com/fotomag/BQsF8ix2/99kYD.png&#39;) 50% 50%; background-size:60px 60px; width:45px;height:45px;"></div>
+    </a>
+    <div style="line-height:150%;margin-left:50px;">
+    <strong><a href="http://126.am/qEyKD4" class="l" target="_blank"> 课程表 · ClassTable</a></strong><br>
+    <span class="tip">多课表x每日提醒x考试倒数，新学期超便捷 app</span><br>
+    <small class="grey">来自 <a href="http://clover.ly/?utm_source=Bangumi&utm_medium=banner&utm_campaign=Bangumi" target="_blank" class="tip_j">Clover</a></small>
+    </div>
+</div>    </div>
+</div><div id="footer">
+<ul id="footerLinks" class="clearit">
+<li class="first">
+    <dl>
+        <dt>关于我们</dt>
+        <dd><a href="http://bgm.tv/about">关于我们</a></dd>
+        <dd><a href="http://bgm.tv/about/guideline">社区指导原则</a></dd><dd>
+        </dd><dd><a href="http://bgm.tv/about/copyright">版权声明</a></dd><dd>		
+        </dd><dd><a href="http://bgm.tv/about/link2us">链接我们</a></dd><dd>
+    </dd></dl>
+</li>
+<li>
+    <dl>
+    <dt>获取帮助</dt>
+        <dd><a href="http://bgm.tv/help/bbcode">BBCode</a></dd>
+        <dd><a href="http://bgm.tv/group/forum">站务论坛</a></dd>
+        <dd><a href="http://bgm.tv/group/issues">BUG追踪</a></dd>
+        <dd><a href="http://bgm.tv/group/doujin">天窗站务</a></dd>		
+    </dl>
+</li>
+<li>
+<dl>
+    <dt>特别推荐</dt>
+        <dd><a href="http://bgm.tv/onair">onAir 客户端</a></dd>
+        <dd><a href="http://bgm.tv/tokei">etokei 绘时计</a></dd>
+        <dd><a href="http://bgm.tv/award/2013">年鉴 2013</a> | <a href="http://bgm.tv/award/2012">12</a> | <a href="http://bgm.tv/award/2011">11</a> | <a href="http://bgm.tv/award/2010">10</a></dd>
+        <dd><a href="http://bgm.tv/group/wiki">番組WIKI計画</a></dd>
+    </dl>
+</li>
+<li class="last">
+    <dl>
+    <dt>更多</dt>
+        <dd><a href="http://bgm.tv/index">目录</a></dd>
+        <dd><a href="http://bgm.tv/wiki">维基人</a></dd>
+        <dd><a href="http://bgm.tv/magi">MAGI 问答</a></dd>	
+        <dd><a href="http://bgm.tv/goodies">周边</a></dd>
+        <dd><a href="http://bgm.tv/dollars">Dollars</a></dd>	
+    </dl>
+</li>
+</ul>
+
+<small class="grey">© 2008-2013 Bangumi (a.k.a.Chobits), some rights reserved</small>
+</div>
+</div></div>
+<div class="homeBg"></div>
+<div id="dock">
+    <div class="content png_bg">
+        <p class="inner">
+                <a href="http://bgm.tv/user/answeror">answeror</a>&nbsp; <img src="./bgm_comments_files/dock_line.gif" align="absmiddle" height="17" width="2"> <a href="http://bgm.tv/pm">短信</a> | <a href="http://bgm.tv/settings">设置</a> | <a href="http://bgm.tv/logout/0279f697" target="_self">登出</a>         <img src="./bgm_comments_files/dock_line.gif" align="absmiddle" height="17" width="2">&nbsp;<a href="javascript:void(0);" id="showrobot">隐藏春菜 ▼</a>
+        </p>
+    </div>
+    <div class="border png_bg"></div>
+</div>
+
+<div id="robot">
+<div id="ukagaka_shell">
+<div class="ui_10 shell_1">
+<div id="ukagaka_voice"></div>
+<div id="robot_balloon" class="ukagaka_balloon_pink">
+<div class="tools"><a href="javascript:void(0);" id="ukagaka_menu"><img src="./bgm_comments_files/menu.gif"></a></div>    <div class="inner">
+<div id="robot_speech" class="speech">
+『为了正义而战』嘴巴上这么说着、终究、是为了自己所理想的人类群像…是这样吧。</div>
+<div id="robot_speech_js" class="speech">
+        
+</div>
+</div>
+<div class="ukagaka_balloon_pink_bottom"></div>	
+</div>
+</div>
+</div>
+</div>
+<script src="./bgm_comments_files/g=js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-4049707-6']);
+    _gaq.push(['_setDomainName', 'none']);
+    _gaq.push(['_setAllowLinker', true]);
+    _gaq.push(['_trackPageview']);
+    
+    (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+
+
+<script type="text/javascript">chiiLib.topic_history.init();</script>
+<script src="./bgm_comments_files/g=editor" type="text/javascript"></script><script id="hiddenlpsubmitdiv" style="display: none;"></script><script>try{for(var lastpass_iter=0; lastpass_iter < document.forms.length; lastpass_iter++){ var lastpass_f = document.forms[lastpass_iter]; if(typeof(lastpass_f.lpsubmitorig2)=="undefined"){ lastpass_f.lpsubmitorig2 = lastpass_f.submit; lastpass_f.submit = function(){ var form=this; var customEvent = document.createEvent("Event"); customEvent.initEvent("lpCustomEvent", true, true); var d = document.getElementById("hiddenlpsubmitdiv"); if (d) {for(var i = 0; i < document.forms.length; i++){ if(document.forms[i]==form){ d.innerText=i; } } d.dispatchEvent(customEvent); }form.lpsubmitorig2(); } } }}catch(e){}</script></body></html>

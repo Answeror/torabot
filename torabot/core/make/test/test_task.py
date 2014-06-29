@@ -19,13 +19,27 @@ def test_toy_task():
     assert_equal(task(), 0)
 
 
-def test_bgm_task():
+def test_bgm_pm_task():
     app = make()
     with app.app_context():
         task = Task.from_string(
-            read('bgm.json'),
+            read('bgm_pm.json'),
             make_env=lambda d: DictWithFsEnv(d, CURRENT_PATH),
             kargs={'chii_auth': read('chii_auth').strip()}
+        )
+        result = task()
+        feed = feedparser.parse(result)
+        assert not feed.bozo
+        assert_greater(len(feed.entries), 0)
+
+
+def test_bgm_comments_task():
+    app = make()
+    with app.app_context():
+        task = Task.from_string(
+            read('bgm_comments.json'),
+            make_env=lambda d: DictWithFsEnv(d, CURRENT_PATH),
+            kargs={'path': '/group/topic/32268'}
         )
         result = task()
         feed = feedparser.parse(result)

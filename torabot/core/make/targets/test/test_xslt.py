@@ -1,4 +1,6 @@
 import os
+import feedparser
+from nose.tools import assert_greater
 from ...envs.fs import Env
 from ..xslt import Target as XsltTarget
 
@@ -11,13 +13,24 @@ def read(name):
         return f.read().decode('utf-8')
 
 
-def test_request():
+def test_xslt():
+    for html, xslt in [
+        ('bgm_pm.html', 'bgm_pm.xslt'),
+        ('bgm_blog_51939.html', 'bgm_comments.xslt'),
+        ('bgm_group_topic_32268.html', 'bgm_comments.xslt'),
+        ('bgm_subject_topic_4369.html', 'bgm_comments.xslt'),
+    ]:
+        yield check_xslt, html, xslt
+
+
+def check_xslt(html, xslt):
     env = Env(root=CURRENT_PATH)
     target = XsltTarget(env)
-    assert target(
-        html=read('bgm.html'),
+    feed = feedparser.parse(target(
+        html=read(html),
         xslt={
             '@type': 'text',
-            'name': 'bgm.xslt'
+            'name': xslt
         }
-    )
+    ).encode('utf-8'))
+    assert_greater(len(feed.entries), 0)

@@ -1,3 +1,4 @@
+import base64
 import jsonpickle
 from uuid import uuid4
 
@@ -39,6 +40,7 @@ class Base(object):
                 if value['@type'] == 'call':
                     return {
                         "json_decode": jsonpickle.decode,
+                        "base64_decode": lambda s, encoding='utf-8': base64.b64decode(s).decode(encoding),
                     }[value['name']](*value.get('args', []), **value.get('kargs', {}))
                 else:
                     return self._read(value['name'], value['@type'])

@@ -58,14 +58,14 @@
             "type": "xslt",
             "input": {
                 "html": "{{ target.decode }}",
-                "xslt": "{{ target['@files'].read_text('bgm.xslt') }}"
+                "xslt": "{{ target['@files'].read_text('bgm_pm.xslt') }}"
             }
         }
     ],
     "files": [
         {
-            "name": "bgm.xslt",
-            "path": "../targets/test/bgm.xslt"
+            "name": "bgm_pm.xslt",
+            "path": "../targets/test/bgm_pm.xslt"
         },
         {
             "name": "headers.json",
