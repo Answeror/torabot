@@ -7,15 +7,15 @@ class RedisPubMixin(object):
         try:
             from flask import Flask
             if isinstance(self, Flask):
-                return super(RedisPubMixin, self).config[name]
-        except:
+                return self.config[name]
+        except ImportError:
             pass
 
         try:
             from celery import Celery
             if isinstance(self, Celery):
-                return super(RedisPubMixin, self).conf[name]
-        except:
+                return self.conf[name]
+        except ImportError:
             pass
 
         assert False
