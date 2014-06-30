@@ -3,32 +3,22 @@ from uuid import uuid4
 from nose.tools import assert_is_instance
 
 
+none = object()
+
+
 class Base(object):
 
     @classmethod
     def run(cls, env, conf):
-        none = object()
         if isinstance(conf, dict):
             conf = {key: cls.run(env, conf[key]) for key in conf}
 
-            use = conf.get('&', none)
-            if use is not none:
-                del conf['&']
-                conf.update({
-                    '@': 'use',
-                    'args': [use]
-                })
-
-            item = conf.get('[]', none)
-            if item is not none:
-                del conf['[]']
-                conf.update({
-                    '@': 'item',
-                    {
-                        list: 'args',
-                        dict: 'kargs'
-                    }[type(item)]: item
-                })
+            for symbol, kind, unary in [
+                ('&', 'use', True),
+                ('[]', 'item', False),
+                ('<', 'read', False),
+            ]:
+                parse_shortcut(conf, symbol, kind, unary)
 
             kind = conf.get('@', none)
             if kind is not none:
@@ -38,6 +28,9 @@ class Base(object):
                 target = lib.Target(env=env, name=conf.get('name'))
                 args = conf.get('args', [])
                 assert_is_instance(args, list)
+                arg = conf.get('arg', none)
+                if arg is not none:
+                    args = [arg] + args
                 kargs = conf.get('kargs', {})
                 assert_is_instance(kargs, dict)
                 result = target(*args, **kargs)
@@ -50,3 +43,16 @@ class Base(object):
     def __init__(self, env, name=None):
         self.env = env
         self.name = str(uuid4()) if name is None else name
+
+
+def parse_shortcut(conf, symbol, kind, unary):
+    item = conf.get(symbol, none)
+    if item is not none:
+        del conf[symbol]
+        conf.update({
+            '@': kind,
+            'arg' if unary else {
+                list: 'args',
+                dict: 'kargs'
+            }[type(item)]: item
+        })
