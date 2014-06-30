@@ -1,7 +1,19 @@
 from celery import Celery
+from functools import wraps
+from .app_mixins import RedisPubMixin
 
 
-app = Celery('torabot')
+class App(RedisPubMixin, Celery):
+
+    def torabot_task(self, f):
+        @wraps(f)
+        def inner(*args, **kargs):
+            with self.redispub.threadbound():
+                return f(*args, **kargs)
+        return self.task(inner)
+
+
+app = App('torabot')
 
 try:
     import toraconf
@@ -11,25 +23,25 @@ except:
     app.config_from_object('torabot.conf')
 
 
-@app.task
+@app.torabot_task
 def sync_all():
     from torabot import tasks
     tasks.sync_all(app.conf)
 
 
-@app.task
+@app.torabot_task
 def notice_all():
     from torabot import tasks
     tasks.notice_all(app.conf)
 
 
-@app.task
+@app.torabot_task
 def log_to_file():
     from torabot import tasks
     tasks.log_to_file()
 
 
-@app.task
+@app.torabot_task
 def tell_admin_safe(*args, **kargs):
     from torabot import tasks
     return tasks.tell_admin_safe(*args, **kargs)

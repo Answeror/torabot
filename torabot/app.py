@@ -1,8 +1,8 @@
 from flask import Flask
-from .core.log import RedisPub
+from .app_mixins import RedisPubMixin
 
 
-class App(Flask):
+class App(RedisPubMixin, Flask):
 
     def __init__(self, *args, **kargs):
         super(App, self).__init__(
@@ -35,14 +35,6 @@ class App(Flask):
 
         for part in [frontend, mod]:
             part.make(self)
-
-    @property
-    def redispub(self):
-        if not hasattr(self, '_redispub'):
-            self._redispub = RedisPub(
-                bubble=self.config['TORABOT_BUBBLE_LOG']
-            )
-        return self._redispub
 
     def __call__(self, *args, **kargs):
         with self.redispub.threadbound():
