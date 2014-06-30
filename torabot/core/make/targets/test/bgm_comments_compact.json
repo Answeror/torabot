@@ -3,17 +3,15 @@
         "html": {
             "@base64_decode": {
                 "[]": [
-                    {"@request": {"request": {"uri": "http://bgm.tv{{ path }}"}}},
+                    {"@request": "http://bgm.tv{{ path }}"},
                     "body"
                 ]
             }
         },
         "xslt": {
             "@jinja2": {
-                "template": {"<": {"name": "bgm_comments.xslt", "type": "text"}},
-                "kargs": {
-                    "id": "bgm.tv{{ path }}"
-                }
+                "template": {"text<": "bgm_comments.xslt"},
+                "kargs": {"id": "bgm.tv{{ path }}"}
             }
         }
     }

@@ -19,6 +19,7 @@ class Base(object):
                 ('&', 'use'),
                 ('[]', 'item'),
                 ('<', 'read'),
+                ('text<', 'read_text'),
             ] + [('@' + kind, kind) for kind in target_types()]:
                 parse_shortcut(conf, symbol, kind)
 

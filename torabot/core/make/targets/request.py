@@ -24,6 +24,8 @@ class Target(Base):
         }
 
     def __call__(self, request, timeout=10, sync_on_expire=False):
+        if isuri(request):
+            request = {'uri': request}
         query = mod('onereq').search(
             text=jsonpickle.encode(self.prepare(request)),
             timeout=timeout,
@@ -33,3 +35,7 @@ class Target(Base):
         if query is None:
             raise Exception('request %s failed' % self.name)
         return query.result
+
+
+def isuri(request):
+    return isinstance(request, str)
