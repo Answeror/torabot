@@ -1,4 +1,5 @@
 import json
+from functools import partial
 from ..ut.bunch import bunchr
 from ..core.backends.postgresql import PostgreSQL
 
@@ -47,3 +48,9 @@ def try_parse(query, candidates):
 
 def try_regular(query, candidates):
     return json.dumps(try_parse(query, candidates), sort_keys=True)
+
+
+def make_parse_and_regular(candidates):
+    parse = partial(try_parse, candidates=candidates)
+    regular = partial(try_regular, candidates=candidates)
+    return parse, regular

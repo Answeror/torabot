@@ -1,11 +1,9 @@
-import json
 from urllib.parse import quote
 from flask import render_template
 from logbook import Logger
 from copy import deepcopy
-from ..query import get_bangumi, standard_query
+from ..query import get_bangumi, parse
 from .. import name, bp
-from ....ut.bunch import bunchr
 
 
 log = Logger(__name__)
@@ -18,7 +16,7 @@ def bilibili_site_verification(hash):
 
 def format_query_result(query):
     query = deepcopy(query)
-    query.result.query = bunchr(json.loads(standard_query(query.text)[0]))
+    query.result.query = parse(query.text)
     return render_template('bilibili/result/%s.html' % query.result.query.method, query=query)
 
 

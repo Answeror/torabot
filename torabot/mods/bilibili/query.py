@@ -1,7 +1,7 @@
 import json
-from nose.tools import assert_in
+from ...ut.bunch import bunchr
 from ...core.local import get_current_conf
-from ..query import query
+from ..query import query, parse_json, parse_dict, make_parse_and_regular
 from . import name
 
 
@@ -13,11 +13,13 @@ def get_bangumi():
     ).content
 
 
-def standard_query(query):
-    try:
-        d = json.loads(query)
-    except:
-        d = dict(method='sp', title=query)
-        query = json.dumps(d)
-    assert_in('method', d)
-    return query, d
+def parse_title(query):
+    if isinstance(query, str):
+        return bunchr(method='sp', title=query)
+
+
+parse, regular = make_parse_and_regular([
+    parse_dict,
+    parse_json,
+    parse_title,
+])

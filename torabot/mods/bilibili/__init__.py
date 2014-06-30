@@ -67,11 +67,11 @@ class Bilibili(
             yield bunchr(kind='sp_update', sp=new.sp)
 
     def spy(self, query, timeout):
-        from .query import standard_query
-        query, d = standard_query(query)
-        if d.get('method') == 'sp':
-            return self._spy_sp(d['title'])
-        return super(Bilibili, self).spy(query, timeout)
+        from .query import parse, regular
+        query = parse(query)
+        if query.get('method') == 'sp':
+            return self._spy_sp(query['title'])
+        return super(Bilibili, self).spy(regular(query), timeout)
 
     def _spy_sp(self, title):
         from .query import get_bangumi
@@ -93,7 +93,7 @@ class Bilibili(
                 yield bunchr(kind='user_new_post', post=post)
 
     def sync_on_expire(self, query):
-        from ..booru.query import parse
+        from .query import parse
         return parse(query.text).method != 'bangumi'
 
 

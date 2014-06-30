@@ -1,11 +1,11 @@
 import json
 from nose.tools import assert_equal
-from ..query import standard_query
+from ..query import parse, regular
 
 
 def test_standard_query():
     def gen(query, d_true):
-        query, d = standard_query(query)
+        query, d = regular(query), parse(query)
         assert_equal(json.loads(query), d)
         assert_equal(d, d_true)
 
