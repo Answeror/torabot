@@ -1,27 +1,16 @@
 {
-    "@": "xslt",
-    "kargs": {
+    "@xslt": {
         "html": {
-            "@": "base64_decode",
-            "arg": {
+            "@base64_decode": {
                 "[]": [
-                    {
-                        "@": "request",
-                        "arg": {"uri": "http://bgm.tv{{ path }}"}
-                    },
+                    {"@request": {"request": {"uri": "http://bgm.tv{{ path }}"}}},
                     "body"
                 ]
             }
         },
         "xslt": {
-            "@": "jinja2",
-            "kargs": {
-                "template": {
-                    "<": {
-                        "name": "bgm_comments.xslt",
-                        "type": "text"
-                    }
-                },
+            "@jinja2": {
+                "template": {"<": {"name": "bgm_comments.xslt", "type": "text"}},
                 "kargs": {
                     "id": "bgm.tv{{ path }}"
                 }

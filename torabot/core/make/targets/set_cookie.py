@@ -5,6 +5,8 @@ from .base import Base
 
 class Target(Base):
 
+    unary = False
+
     def __call__(self, request, set_cookie):
         assert isinstance(set_cookie, str) or isinstance(set_cookie, list), str(set_cookie)
         jar = request.get('cookies', requests.cookies.RequestsCookieJar())

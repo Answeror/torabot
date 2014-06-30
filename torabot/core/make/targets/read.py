@@ -4,6 +4,8 @@ from .base import Base
 
 class Target(Base):
 
+    unary = False
+
     def __call__(self, name, type):
         return {
             'blob': self.read,

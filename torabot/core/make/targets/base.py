@@ -1,3 +1,5 @@
+import os
+import pkgutil
 import importlib
 from uuid import uuid4
 from nose.tools import assert_is_instance
@@ -13,19 +15,18 @@ class Base(object):
         if isinstance(conf, dict):
             conf = {key: cls.run(env, conf[key]) for key in conf}
 
-            for symbol, kind, unary in [
-                ('&', 'use', True),
-                ('[]', 'item', False),
-                ('<', 'read', False),
-            ]:
-                parse_shortcut(conf, symbol, kind, unary)
+            for symbol, kind in [
+                ('&', 'use'),
+                ('[]', 'item'),
+                ('<', 'read'),
+            ] + [('@' + kind, kind) for kind in target_types()]:
+                parse_shortcut(conf, symbol, kind)
 
             kind = conf.get('@', none)
             if kind is not none:
                 if '.' in kind:
                     raise Exception('unknown target type: %s' % kind)
-                lib = importlib.import_module('..' + kind, __name__)
-                target = lib.Target(env=env, name=conf.get('name'))
+                target = targetcls(kind)(env=env, name=conf.get('name'))
                 args = conf.get('args', [])
                 assert_is_instance(args, list)
                 arg = conf.get('arg', none)
@@ -45,14 +46,27 @@ class Base(object):
         self.name = str(uuid4()) if name is None else name
 
 
-def parse_shortcut(conf, symbol, kind, unary):
+def parse_shortcut(conf, symbol, kind):
     item = conf.get(symbol, none)
     if item is not none:
         del conf[symbol]
         conf.update({
             '@': kind,
-            'arg' if unary else {
+            'arg' if targetcls(kind).unary else {
                 list: 'args',
                 dict: 'kargs'
-            }[type(item)]: item
+            }.get(type(item), 'arg'): item
         })
+
+
+def targetcls(name):
+    lib = importlib.import_module('..' + name, __name__)
+    return lib.Target
+
+
+def target_types():
+    root = os.path.dirname(__file__)
+    return [
+        name for _, name, _ in pkgutil.iter_modules([root])
+        if name not in ('base', 'test')
+    ]

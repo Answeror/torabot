@@ -5,6 +5,8 @@ from ..base import Base
 
 class Target(Base):
 
+    unary = False
+
     def __init__(self, *args, **kargs):
         super(Target, self).__init__(*args, **kargs)
         self.jinja2_env = Environment(loader=PackageLoader(

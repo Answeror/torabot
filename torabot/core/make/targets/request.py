@@ -7,6 +7,8 @@ from .base import Base
 
 class Target(Base):
 
+    unary = False
+
     def prepare(self, request):
         prepared = requests.Request(
             url=request['uri'],
