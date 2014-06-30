@@ -3,26 +3,27 @@ from .core.log import RedisPub
 
 class RedisPubMixin(object):
 
-    @property
-    def config(self):
+    def get_conf(self, name):
         try:
             from flask import Flask
             if isinstance(self, Flask):
-                return super(RedisPubMixin, self).config
+                return super(RedisPubMixin, self).config[name]
         except:
             pass
 
         try:
             from celery import Celery
             if isinstance(self, Celery):
-                return super(RedisPubMixin, self).conf
+                return super(RedisPubMixin, self).conf[name]
         except:
             pass
+
+        assert False
 
     @property
     def redispub(self):
         if not hasattr(self, '_redispub'):
             self._redispub = RedisPub(
-                bubble=self.config['TORABOT_BUBBLE_LOG']
+                bubble=self.get_conf('TORABOT_BUBBLE_LOG')
             )
         return self._redispub
