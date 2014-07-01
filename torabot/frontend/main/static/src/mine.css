@@ -207,3 +207,7 @@ span.w {
     display: inline-block !important;
     max-width: 100%;
 }
+
+.torabot .page > footer {
+    margin-top: 30px;
+}

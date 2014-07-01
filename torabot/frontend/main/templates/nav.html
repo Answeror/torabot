@@ -48,11 +48,11 @@
 
                                 {% if is_admin %}
                                 <li class="divider"></li>
-                                <li class=dropdown-header>网站管理</li>
+                                <li class=dropdown-header><strong>网站管理</strong></li>
                                 <li{% if request.path.startswith('/admin/dashboard') %} class=active{% endif %}><a href='{{ url_for("admin.dashboard") }}'>dashboard</a></li>
                                 <li{% if request.path.startswith('/admin/bulletin') %} class=active{% endif %}><a href='{{ url_for("admin.bulletin") }}'>公告版</a></li>
                                 <li class=divider></li>
-                                <li class=dropdown-header>数据库管理</li>
+                                <li class=dropdown-header><strong>数据库管理</strong></li>
                                 <li{% if request.path.startswith('/admin/users') %} class=active{% endif %}><a href='{{ url_for("admin.users") }}'>用户</a></li>
                                 <li{% if request.path == '/admin/queries' %} class=active{% endif %}><a href='{{ url_for("admin.queries") }}'>查询</a></li>
                                 <li{% if request.path == '/admin/queries/active' %} class=active{% endif %}><a href='{{ url_for("admin.active_queries") }}'>活跃查询</a></li>

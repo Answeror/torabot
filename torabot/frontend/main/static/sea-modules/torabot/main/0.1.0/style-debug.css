@@ -278,6 +278,10 @@ span.w {
     display: inline-block !important;
     max-width: 100%;
 }
+
+.torabot .page > footer {
+    margin-top: 30px;
+}
 /*! endblock torabot/main/0.1.0/mine-debug.css */
 
 /*! block torabot/main/0.1.0/reset-debug.css */
