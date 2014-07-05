@@ -1,4 +1,3 @@
-import requests
 from ....ut.bunch import Bunch
 
 
@@ -41,12 +40,41 @@ class EmailView(object):
         }[notice.change.kind](notice)
 
     def new_post_notice_attachments(self, notice):
-        r = requests.get(
+        r = download(
             self.preview_url(notice.change.post),
-            headers=dict(referer=self.referer)
+            self.referer
         )
+        import base64
         return [Bunch(
             name=self.tags(notice.change.post),
-            mime=r.headers['content-type'],
-            data=r.content,
+            mime=stringify(r.headers['Content-Type']),
+            data=base64.b64decode(r.body),
         )]
+
+
+def stringify(s):
+    if isinstance(s, str):
+        return s
+    if isinstance(s, list):
+        return s[0]
+    raise Exception('cannot stringify {}'.format(s))
+
+
+def download(uri, referer):
+    import json
+    from ....core.mod import mod
+    from ....core.backends.redis import Redis
+    q = mod('onereq').search(
+        json.dumps({
+            'uri': uri,
+            'headers': {
+                'referer': referer
+            }
+        }),
+        timeout=30,
+        sync_on_expire=False,
+        backend=Redis()
+    )
+    if not q:
+        raise Exception('download %s failed' % uri)
+    return q.result

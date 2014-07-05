@@ -63,7 +63,7 @@ class Bilibili(
             return
         if not new or not new.sp:
             return
-        if new.sp.lastupdate != old.sp.lastupdate:
+        if (new.sp.bgmcount, new.sp.lastupdate) != (old.sp.bgmcount, old.sp.lastupdate):
             yield bunchr(kind='sp_update', sp=new.sp)
 
     def spy(self, query, timeout):
