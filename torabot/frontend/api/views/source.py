@@ -4,18 +4,19 @@ import jinja2
 import jsonpickle
 from flask import current_app, abort, request
 from logbook import Logger
-from ...core.backends.redis import Redis
-from ...core.make.targets import Target
-from ...core.make.envs.dict import Env
-from ...core.mod import mod
-from . import bp
+from ....core.backends.redis import Redis
+from ....core.make.targets import Target
+from ....core.make.envs.dict import Env
+from ....core.mod import mod
+from .. import bp
 
 
 log = Logger(__name__)
 
 
-@bp.route('/gist/<id>', methods=['GET'])
-def gist(id):
+@bp.route('/<id>', methods=['GET'], defaults={'format': 'txt'})
+@bp.route('/<id>.<format>', methods=['GET'])
+def gist(id, format):
     log.debug('gist %s search start' % id)
     q = mod('gist').search(
         text=json.dumps(dict(method='id', id=id)),
