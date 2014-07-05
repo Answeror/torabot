@@ -47,9 +47,17 @@ class EmailView(object):
         import base64
         return [Bunch(
             name=self.tags(notice.change.post),
-            mime=r.headers['Content-Type'],
+            mime=stringify(r.headers['Content-Type']),
             data=base64.b64decode(r.body),
         )]
+
+
+def stringify(s):
+    if isinstance(s, str):
+        return s
+    if isinstance(s, list):
+        return s[0]
+    raise Exception('cannot stringify {}'.format(s))
 
 
 def download(uri, referer):
