@@ -2,7 +2,8 @@ import json
 import base64
 import jinja2
 import jsonpickle
-from flask import current_app, abort, request
+from nose.tools import assert_in
+from flask import current_app, abort, request, jsonify
 from logbook import Logger
 from ....core.backends.redis import Redis
 from ....core.make.targets import Target
@@ -14,10 +15,24 @@ from .. import bp
 log = Logger(__name__)
 
 
-@bp.route('/<id>', methods=['GET'], defaults={'format': 'txt'})
-@bp.route('/<id>.<format>', methods=['GET'])
+MIME = {
+    'txt': 'text/plain',
+    'json': 'application/json',
+    'xml': 'text/xml',
+    'atom': 'application/atom+xml',
+    'rss': 'application/rss+xml',
+    'html': 'text/html',
+}
+
+
+@bp.route('/source/<id>', methods=['GET'], defaults={'format': 'txt'})
+@bp.route('/source/<id>.<format>', methods=['GET'])
 def gist(id, format):
     log.debug('gist %s search start' % id)
+
+    if format not in MIME:
+        return jsonify({"message": "invalid format"}), 400
+
     q = mod('gist').search(
         text=json.dumps(dict(method='id', id=id)),
         timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
@@ -41,4 +56,7 @@ def gist(id, format):
     if not conf:
         abort(404)
 
-    return Target.run(Env(files), conf)
+    assert_in(format, MIME)
+    return Target.run(Env(files), conf), 200, {
+        'content-type': MIME[format]
+    }

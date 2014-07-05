@@ -11,7 +11,7 @@ for _, name, _ in pkgutil.iter_modules([os.path.join(
     os.path.dirname(__file__),
     'views'
 )]):
-    importlib.import_module('..views.' + name, __name__)
+    importlib.import_module('.views.' + name, __name__)
 
 
 def make(app):
