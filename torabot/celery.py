@@ -47,5 +47,13 @@ def tell_admin_safe(*args, **kargs):
     return tasks.tell_admin_safe(*args, **kargs)
 
 
+@app.torabot_task
+def make_source(files, conf):
+    from .core.make.envs.dict import Env
+    from .core.make.targets import Target
+    from .ut.bunch import bunchr
+    return Target.run(Env(bunchr(files)), conf)
+
+
 if __name__ == '__main__':
     app.start()

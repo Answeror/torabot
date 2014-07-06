@@ -6,9 +6,8 @@ from nose.tools import assert_in
 from flask import current_app, abort, request, jsonify
 from logbook import Logger
 from ....core.backends.redis import Redis
-from ....core.make.targets import Target
-from ....core.make.envs.dict import Env
 from ....core.mod import mod
+from .... import celery
 from .. import bp
 
 
@@ -57,6 +56,10 @@ def gist(id, format):
         abort(404)
 
     assert_in(format, MIME)
-    return Target.run(Env(files), conf), 200, {
+    return celery.make_source.apply_async(
+        args=[files, conf],
+        time_limit=30,
+        soft_time_limit=25
+    ).get(), 200, {
         'content-type': MIME[format]
     }
