@@ -1,4 +1,5 @@
 import jsonpickle
+from datetime import datetime
 from jinja2 import Environment, PackageLoader
 from ..base import Base
 
@@ -14,6 +15,7 @@ class Target(Base):
             'templates'
         ))
         self.jinja2_env.filters['tojson'] = jsonpickle.encode
+        self.jinja2_env.globals['datetime'] = datetime
 
     def __call__(self, template, kargs):
         return self.get_template_content(template).render(**kargs)
