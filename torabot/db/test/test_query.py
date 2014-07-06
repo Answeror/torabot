@@ -1,7 +1,7 @@
 from nose.tools import assert_equal, assert_is_not_none, assert_greater
 from datetime import datetime, timedelta
 from . import g
-from ..notice import get_notices_bi_user_id
+from ..notice import get_notices_bi_user_id, count_recent_notice_bi_user_id
 from ..user import add_user, add_email_bi_user_id, activate_email_bi_id
 from ..watch import watch
 from ..query import (
@@ -141,4 +141,23 @@ def test_get_need_sync_queries():
         assert_equal(len(get_need_sync_queries(g.connection)), 1)
         set_next_sync_time(g.connection, id=query_ids[1], time=datetime.utcnow() - timedelta(days=1))
         assert_equal(len(get_need_sync_queries(g.connection)), 2)
+        trans.rollback()
+
+
+def test_count_recent_notice():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        assert_equal(count_recent_notice_bi_user_id(
+            g.connection,
+            user_id,
+            timedelta(days=1)
+        ), 1)
+        assert_equal(count_recent_notice_bi_user_id(
+            g.connection,
+            user_id,
+            timedelta(days=0)
+        ), 0)
         trans.rollback()

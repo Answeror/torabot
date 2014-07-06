@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.sql import text as sql
 import jsonpickle
 import json
@@ -103,3 +104,12 @@ def mark_notice_sent(conn, id):
         status='sent',
         id=id
     )
+
+
+def count_recent_notice_bi_user_id(conn, user_id, interval):
+    return conn.execute(sql(
+        '''
+        select count(1) from notice
+        where user_id = :user_id and ctime >= :begin
+        '''
+    ), user_id=user_id, begin=datetime.utcnow() - interval).fetchone()[0]

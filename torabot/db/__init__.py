@@ -63,6 +63,7 @@ from .notice import (
     get_pending_notice_count_bi_user_id,
     get_pending_notices,
     mark_notice_sent,
+    count_recent_notice_bi_user_id,
 )
 from .change import add_one_query_changes
 from . import error
@@ -129,4 +130,5 @@ __all__ = [
     get_need_sync_queries.__name__,
     is_query_active_bi_id.__name__,
     has_user_bi_id.__name__,
+    count_recent_notice_bi_user_id.__name__,
 ]
