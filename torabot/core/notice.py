@@ -46,6 +46,8 @@ def send_notices_email(conf, target, notices):
             % (len(notices), limit)
         ]
         notices = notices[:limit]
+    else:
+        append_bodies = []
     send_email(
         conf['TORABOT_EMAIL_USERNAME'],
         conf['TORABOT_EMAIL_PASSWORD'],
