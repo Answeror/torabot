@@ -59,6 +59,7 @@ def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):
                     )
             else:
                 mark_need_sync(backend, kind, text)
+    assert query is None or query.result
     return query
 
 

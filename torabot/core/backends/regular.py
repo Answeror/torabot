@@ -16,39 +16,46 @@ class Regular(Backend):
             return None
         root_kind, root_text = self._get_root_kind_and_text(kind, text)
         root_query = self.impl.get_query_bi_kind_and_text(root_kind, root_text)
+        return self._try_fill_with_root(query, root_query)
+
+    def _try_fill_with_root(self, query, root):
         return (
-            self._fill_with_root(query, root_query)
-            if root_query is not None and (query.mtime < root_query.mtime or not query.result)
+            self._fill_with_root(query, root)
+            if self._expired(query, root)
             else query
         )
 
-    def _ensure_query_exists(self, kind, text):
-        self.get_or_add_query_bi_kind_and_text(kind, text)
+    def _expired(self, query, root):
+        return self._good(root) and (query.mtime < root.mtime or not query.result)
+
+    def _good(self, query):
+        return query is not None and query.result
 
     def set_next_sync_time_bi_kind_and_text(self, kind, text, time):
-        kind, text = self._get_root_kind_and_text(kind, text)
-        self._ensure_query_exists(kind, text)
         return self.impl.set_next_sync_time_bi_kind_and_text(kind, text, time)
 
     def get_or_add_query_bi_kind_and_text(self, kind, text):
         root_kind, root_text = self._get_root_kind_and_text(kind, text)
-        self.impl.get_or_add_query_bi_kind_and_text(root_kind, root_text)
-        return self.impl.get_or_add_query_bi_kind_and_text(kind, text)
+        root_query = self.impl.get_or_add_query_bi_kind_and_text(root_kind, root_text)
+        query = self.impl.get_or_add_query_bi_kind_and_text(kind, text)
+        return self._try_fill_with_root(query, root_query)
 
     def touch_query_bi_id(self, id):
-        return self.impl.touch_query_bi_id(self._get_root_id(id))
+        return self.impl.touch_query_bi_id(id)
 
     def add_one_query_changes(self, id, changes):
         return self.impl.add_one_query_changes(id, changes)
 
     def set_query_result(self, id, result):
-        return self.impl.set_query_result(self._get_root_id(id), result)
+        self.impl.set_query_result(id, result)
+        root = self._get_or_add_root_query(id)
+        return self.impl.set_query_result(root.id, result)
 
     def is_query_active_bi_id(self, id):
         return self.impl.is_query_active_bi_id(id)
 
     def set_next_sync_time(self, id, time):
-        return self.impl.set_next_sync_time(self._get_root_id(id), time)
+        return self.impl.set_next_sync_time(id, time)
 
     def get_query_bi_id(self, id):
         query = self.impl.get_query_bi_id(id)
@@ -58,21 +65,14 @@ class Regular(Backend):
         if (kind, text) == (query.kind, query.text):
             return query
         root_query = self.impl.get_query_bi_kind_and_text(kind, text)
-        return (
-            self._fill_with_root(query, root_query)
-            if root_query is not None
-            else query
-        )
+        return self._try_fill_with_root(query, root_query)
 
-    def _get_root_query(self, id):
+    def _get_or_add_root_query(self, id):
         query = self.impl.get_query_bi_id(id)
         kind, text = self._get_root_kind_and_text(query.kind, query.text)
         if (kind, text) == (query.kind, query.text):
             return query
         return self.impl.get_or_add_query_bi_kind_and_text(kind, text)
-
-    def _get_root_id(self, id):
-        return self._get_root_query(id).id
 
     def _get_root_kind_and_text(self, kind, text):
         from ..query import regular
