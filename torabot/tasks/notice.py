@@ -52,4 +52,4 @@ def notice_one_user(user_id, notices, engine, conf):
 
 
 def need_accumulate(recent, conf):
-    return round(max(1, recent - conf['TORABOT_RECENT_NOTICE_THRESHOLD']) ** 0.5)
+    return max(1, round(recent / conf['TORABOT_DESIRE_RECENT_NOTICE_COUNT']))
