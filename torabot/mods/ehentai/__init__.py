@@ -47,3 +47,7 @@ class Ehentai(
     def spy(self, query, timeout):
         from .query import regular
         return super(Ehentai, self).spy(regular(query), timeout)
+
+    def regular(self, query_text):
+        from .query import regular
+        return self.name, regular(query_text)

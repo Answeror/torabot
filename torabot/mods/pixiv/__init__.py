@@ -115,6 +115,10 @@ class Pixiv(
         result.query = query
         return result
 
+    def regular(self, query_text):
+        from .query import regular
+        return self.name, regular(query_text)
+
 
 def parse_result(d):
     if d and 'query' in d:

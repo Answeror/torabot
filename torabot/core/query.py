@@ -65,3 +65,12 @@ def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):
 def mark_need_sync(backend, kind, text):
     log.debug('mark query {} of {} need sync', text, kind)
     backend.set_next_sync_time_bi_kind_and_text(kind, text, datetime.utcnow())
+
+
+def regular(kind, text):
+    while True:
+        next_kind, next_text = mod(kind).regular(text)
+        if (next_kind, next_text) == (kind, text):
+            break
+        kind, text = next_kind, next_text
+    return kind, text

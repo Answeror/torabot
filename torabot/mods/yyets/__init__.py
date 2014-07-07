@@ -54,3 +54,7 @@ class Yyets(
         from .query import parse, regular
         query = parse(query)
         return super(Yyets, self).spy(regular(query), timeout)
+
+    def regular(self, query_text):
+        from .query import regular
+        return self.name, regular(query_text)

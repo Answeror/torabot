@@ -85,3 +85,7 @@ class Yandere(
     def sync_on_expire(self, query):
         from ..booru.query import parse
         return parse(query.text).method != 'tags'
+
+    def regular(self, query_text):
+        from ..booru.query import regular
+        return self.name, regular(query_text)

@@ -81,6 +81,9 @@ class Tora(
     def format_help_page(self):
         return self.view('web').format_help_page()
 
+    def regular(self, query_text):
+        return self.name, query_text
+
 
 def _translate(query):
     try:

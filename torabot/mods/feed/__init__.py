@@ -70,3 +70,7 @@ class Feed(
             from .types import Notice
             return super(Feed, self).notice_attachments(view, Notice(notice))
         return f(notice)
+
+    def regular(self, query_text):
+        from .query import regular
+        return self.name, regular(query_text)

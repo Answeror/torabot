@@ -54,6 +54,11 @@ class Core(object, metaclass=abc.ABCMeta):
     def sync_on_expire(self, query):
         return True
 
+    @abc.abstractmethod
+    def regular(self, query_text):
+        '''return most standard query kind and text'''
+        pass
+
 
 class Frontend(ScrapyMixin, Core):
     '''mod with frontend'''

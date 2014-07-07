@@ -1,7 +1,7 @@
 import abc
 
 
-class Backend(object):
+class Backend(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def has_query_bi_kind_and_text(self, kind, text):
@@ -37,4 +37,8 @@ class Backend(object):
 
     @abc.abstractmethod
     def set_next_sync_time(self, id, time):
+        pass
+
+    @abc.abstractmethod
+    def get_query_bi_id(self, id):
         pass

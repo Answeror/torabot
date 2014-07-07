@@ -96,6 +96,10 @@ class Bilibili(
         from .query import parse
         return parse(query.text).method != 'bangumi'
 
+    def regular(self, query_text):
+        from .query import regular
+        return self.name, regular(query_text)
+
 
 def query_method_from_result(result):
     if 'kind' in result:

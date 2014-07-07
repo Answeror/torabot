@@ -11,3 +11,6 @@ class Gist(
     Core
 ):
     name = 'gist'
+
+    def regular(self, query_text):
+        return self.name, query_text

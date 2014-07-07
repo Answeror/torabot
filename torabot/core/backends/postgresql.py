@@ -2,7 +2,7 @@ from ... import db
 from .base import Backend
 
 
-class PostgreSQL(Backend):
+class Impl(Backend):
 
     def __init__(self, conn):
         self.conn = conn
@@ -33,3 +33,11 @@ class PostgreSQL(Backend):
 
     def set_next_sync_time(self, id, time):
         return db.set_next_sync_time(self.conn, id, time)
+
+    def get_query_bi_id(self, id):
+        return db.get_query_bi_id(self.conn, id)
+
+
+def PostgreSQL(*args, **kargs):
+    from .regular import Regular
+    return Regular(Impl(*args, **kargs))

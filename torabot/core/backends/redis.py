@@ -6,7 +6,7 @@ from ..redis import redis
 from .base import Backend
 
 
-class Redis(Backend):
+class Impl(Backend):
 
     def has_query_bi_kind_and_text(self, kind, text):
         return redis.exists(encode(kind, text))
@@ -55,6 +55,7 @@ class Redis(Backend):
     def set_query_result(self, id, result):
         q = pickle.loads(redis.get(id))
         q['result'] = result
+        q['mtime'] = datetime.utcnow()
         redis.set(id, pickle.dumps(q))
 
     def is_query_active_bi_id(self, id):
@@ -67,6 +68,14 @@ class Redis(Backend):
         )
         if not ret:
             raise Exception('set next sync time of %s failed' % id)
+
+    def get_query_bi_id(self, id):
+        return bunchr(pickle.loads(redis.get(id)))
+
+
+def Redis(*args, **kargs):
+    from .regular import Regular
+    return Regular(Impl(*args, **kargs))
 
 
 def encode(kind, text):

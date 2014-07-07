@@ -18,3 +18,7 @@ class Onereq(
 
     def sync_on_expire(self, query):
         return parse(query).get('options', {}).get('sync_on_expire', True)
+
+    def regular(self, query_text):
+        from .query import regular
+        return self.name, regular(query_text)
