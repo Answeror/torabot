@@ -19,12 +19,14 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': None,
     'torabot.spy.middlewares.RotateUserAgentMiddleware': 400,
+    'torabot.spy.middlewares.ProxyMiddleware': 410,
     'tora.middlewares.Retry': 500,
 }
 
-#To make RotateUserAgentMiddleware enable.
+# To make RotateUserAgentMiddleware enable.
 USER_AGENT = ''
-HTTPCACHE_ENABLED = False
+HTTPCACHE_ENABLED = True
+HTTPCACHE_POLICY = 'scrapy.contrib.httpcache.RFC2616Policy'
 DNSCACHE_ENABLED = True
 DOWNLOAD_DELAY = 0.1
 AUTOTHROTTLE_ENABLED = False
