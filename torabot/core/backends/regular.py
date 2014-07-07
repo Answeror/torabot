@@ -53,9 +53,11 @@ class Regular(Backend):
         kind, text = self._get_root_kind_and_text(query.kind, query.text)
         if (kind, text) == (query.kind, query.text):
             return query
-        return self._fill_with_root(
-            query,
-            self.impl.get_query_bi_kind_and_text(kind, text)
+        root_query = self.impl.get_query_bi_kind_and_text(kind, text)
+        return (
+            self._fill_with_root(query, root_query)
+            if root_query is not None
+            else query
         )
 
     def _get_root_query(self, id):
