@@ -18,7 +18,7 @@ class Regular(Backend):
         root_query = self.impl.get_query_bi_kind_and_text(root_kind, root_text)
         return (
             self._fill_with_root(query, root_query)
-            if root_query is not None and query.mtime < root_query.mtime or not query.result
+            if root_query is not None and (query.mtime < root_query.mtime or not query.result)
             else query
         )
 
