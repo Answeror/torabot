@@ -37,12 +37,21 @@ def send_notice_email(conf, target, notice):
 
 
 def send_notices_email(conf, target, notices):
+    notices = list(notices)
+    limit = conf['TORABOT_NOTICE_ACCUMULATION_LIMIT']
+    if len(notices) > limit:
+        append_bodies = [
+            '您有%d条通知, 这里仅列出其中%d条. 更多通知请上torabot查看. '
+            '关于为什么只列出了部分通知: http://torabot.com/faq#faq-notice-accumulation-limit'
+            % (len(notices), limit)
+        ]
+        notices = notices[:limit]
     send_email(
         conf['TORABOT_EMAIL_USERNAME'],
         conf['TORABOT_EMAIL_PASSWORD'],
         [target],
         conf['TORABOT_EMAIL_HEAD'],
-        '\n\n---\n\n'.join(mod(no.kind).format_notice_body('email', no) for no in notices),
+        '\n\n---\n\n'.join([mod(no.kind).format_notice_body('email', no) for no in notices] + append_bodies),
         list(chain(*[mod(no.kind).notice_attachments('email', no) for no in notices])),
         host=conf['TORABOT_EMAIL_HOST'],
         port=conf['TORABOT_EMAIL_PORT'],
