@@ -33,7 +33,7 @@ class Target(Base):
             backend=Redis()
         )
         if query is None:
-            raise Exception('request %s failed' % self.name)
+            raise Exception('request {} failed, args: {}'.format(self.name, request))
         return query.result
 
 
