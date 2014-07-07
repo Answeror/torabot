@@ -22,8 +22,12 @@ class Regular(Backend):
             else query
         )
 
+    def _ensure_query_exists(self, kind, text):
+        self.get_or_add_query_bi_kind_and_text(kind, text)
+
     def set_next_sync_time_bi_kind_and_text(self, kind, text, time):
         kind, text = self._get_root_kind_and_text(kind, text)
+        self._ensure_query_exists(kind, text)
         return self.impl.set_next_sync_time_bi_kind_and_text(kind, text, time)
 
     def get_or_add_query_bi_kind_and_text(self, kind, text):
@@ -65,7 +69,7 @@ class Regular(Backend):
         kind, text = self._get_root_kind_and_text(query.kind, query.text)
         if (kind, text) == (query.kind, query.text):
             return query
-        return self.impl.get_query_bi_kind_and_text(kind, text)
+        return self.impl.get_or_add_query_bi_kind_and_text(kind, text)
 
     def _get_root_id(self, id):
         return self._get_root_query(id).id
