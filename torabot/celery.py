@@ -55,5 +55,17 @@ def make_source(files, conf):
     return Target.run(Env(bunchr(files)), conf)
 
 
+@app.torabot_task
+def del_inactive_queries():
+    from torabot import tasks
+    return tasks.del_inactive_queries()
+
+
+@app.torabot_task
+def del_old_changes():
+    from torabot import tasks
+    return tasks.del_old_changes()
+
+
 if __name__ == '__main__':
     app.start()

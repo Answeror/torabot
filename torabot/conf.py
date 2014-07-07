@@ -25,8 +25,16 @@ CELERYBEAT_SCHEDULE = {
     },
     'log_to_file': {
         'task': 'torabot.celery.log_to_file',
-        'schedule': crontab(minute='*/1'),  # log every 1 minutes
-    }
+        'schedule': crontab(minute='*/1'),  # log every 1 minute
+    },
+    'del_inactive_queries': {
+        'task': 'torabot.celery.del_inactive_queries',
+        'schedule': crontab(minute='*/30'),  # delete inactive queries every 30 minutes
+    },
+    'del_old_changes': {
+        'task': 'torabot.celery.del_old_changes',
+        'schedule': crontab(minute='*/15'),  # delete old changes every 15 minutes
+    },
 }
 
 TORABOT_DEBUG = True
@@ -53,6 +61,10 @@ TORABOT_DEFAULT_SYNC_INTERVAL = 15 * 60  # integer, seconds
 TORABOT_QUERY_EXPIRE = TORABOT_DEFAULT_SYNC_INTERVAL
 TORABOT_DESIRE_RECENT_NOTICE_COUNT = 24
 TORABOT_NOTICE_ACCUMULATION_LIMIT = 8
+TORABOT_DELETE_INACTIVE_QUERIES_BEFORE_DAYS = 7
+TORABOT_DELETE_INACTIVE_QUERIES_LIMIT = 128
+TORABOT_DELETE_OLD_CHANGES_BEFORE_DAYS = 7
+TORABOT_DELETE_OLD_CHANGES_LIMIT = 128
 
 # mod
 TORABOT_DEFAULT_MOD = 'tora'

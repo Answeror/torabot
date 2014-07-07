@@ -55,6 +55,8 @@ from .query import (
     set_next_sync_time_bi_kind_and_text,
     get_need_sync_queries,
     is_query_active_bi_id,
+    del_query_bi_id,
+    del_inactive_queries,
 )
 from .notice import (
     get_notices_bi_user_id,
@@ -65,7 +67,11 @@ from .notice import (
     mark_notice_sent,
     count_recent_notice_bi_user_id,
 )
-from .change import add_one_query_changes
+from .change import (
+    add_one_query_changes,
+    del_old_changes,
+    get_change_count,
+)
 from . import error
 
 
@@ -131,4 +137,8 @@ __all__ = [
     is_query_active_bi_id.__name__,
     has_user_bi_id.__name__,
     count_recent_notice_bi_user_id.__name__,
+    del_query_bi_id.__name__,
+    del_inactive_queries.__name__,
+    del_old_changes.__name__,
+    get_change_count.__name__,
 ]

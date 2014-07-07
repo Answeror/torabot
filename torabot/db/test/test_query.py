@@ -10,8 +10,11 @@ from ..query import (
     get_need_sync_queries,
     set_next_sync_time,
     is_query_active_bi_id,
+    del_query_bi_id,
+    get_query_count,
+    del_inactive_queries,
 )
-from ..change import add_one_query_changes
+from ..change import add_one_query_changes, del_old_changes
 
 
 def fake_add_users(conn):
@@ -160,4 +163,101 @@ def test_count_recent_notice():
             user_id,
             timedelta(days=0)
         ), 0)
+        trans.rollback()
+
+
+def test_query_delete_cascade():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        del_query_bi_id(g.connection, query_id)
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 0)
+        trans.rollback()
+
+
+def test_del_inactive_queries():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        del_inactive_queries(
+            g.connection,
+            before=datetime.utcnow(),
+            limit=42
+        )
+        assert_equal(get_query_count(g.connection), 1)
+        trans.rollback()
+
+
+def test_del_inactive_queries_before():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        del_inactive_queries(
+            g.connection,
+            before=datetime.utcnow() - timedelta(days=1),
+            limit=42
+        )
+        assert_equal(get_query_count(g.connection), 2)
+        trans.rollback()
+
+
+def test_del_inactive_queries_limit():
+    with g.connection.begin_nested() as trans:
+        fake_add_queries(g.connection)
+        del_inactive_queries(
+            g.connection,
+            before=datetime.utcnow(),
+            limit=1
+        )
+        assert_equal(get_query_count(g.connection), 1)
+        trans.rollback()
+
+
+def test_del_old_changes():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        del_old_changes(
+            g.connection,
+            before=datetime.utcnow(),
+            limit=42
+        )
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 0)
+        trans.rollback()
+
+
+def test_del_old_changes_before():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        del_old_changes(
+            g.connection,
+            before=datetime.utcnow() - timedelta(days=1),
+            limit=42
+        )
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
+        trans.rollback()
+
+
+def test_del_old_changes_limit():
+    with g.connection.begin_nested() as trans:
+        user_id = fake_add_users(g.connection)[0]
+        query_id = fake_add_queries(g.connection)[0]
+        watch(g.connection, user_id=user_id, query_id=query_id)
+        add_one_query_changes(g.connection, query_id, [{}])
+        add_one_query_changes(g.connection, query_id, [{}])
+        del_old_changes(
+            g.connection,
+            before=datetime.utcnow(),
+            limit=1
+        )
+        assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
         trans.rollback()

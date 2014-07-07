@@ -586,6 +586,13 @@ ALTER TABLE ONLY watch
 
 
 --
+-- Name: idx_change_ctime; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+--
+
+CREATE INDEX idx_change_ctime ON change USING btree (ctime);
+
+
+--
 -- Name: idx_email_id_activated; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
 --
 
@@ -723,7 +730,7 @@ CREATE TRIGGER update_user_email AFTER UPDATE OF email, activated ON "user" FOR 
 --
 
 ALTER TABLE ONLY change
-    ADD CONSTRAINT change_query_id_fkey FOREIGN KEY (query_id) REFERENCES query(id);
+    ADD CONSTRAINT change_query_id_fkey FOREIGN KEY (query_id) REFERENCES query(id) ON DELETE CASCADE;
 
 
 --
@@ -731,7 +738,7 @@ ALTER TABLE ONLY change
 --
 
 ALTER TABLE ONLY email
-    ADD CONSTRAINT email_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id);
+    ADD CONSTRAINT email_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
 
 
 --
@@ -739,7 +746,7 @@ ALTER TABLE ONLY email
 --
 
 ALTER TABLE ONLY notice
-    ADD CONSTRAINT notice_change_id_fkey FOREIGN KEY (change_id) REFERENCES change(id);
+    ADD CONSTRAINT notice_change_id_fkey FOREIGN KEY (change_id) REFERENCES change(id) ON DELETE CASCADE;
 
 
 --
@@ -747,7 +754,7 @@ ALTER TABLE ONLY notice
 --
 
 ALTER TABLE ONLY notice
-    ADD CONSTRAINT notice_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id);
+    ADD CONSTRAINT notice_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
 
 
 --
@@ -755,7 +762,7 @@ ALTER TABLE ONLY notice
 --
 
 ALTER TABLE ONLY watch
-    ADD CONSTRAINT watch_email_id_fkey FOREIGN KEY (email_id) REFERENCES email(id);
+    ADD CONSTRAINT watch_email_id_fkey FOREIGN KEY (email_id) REFERENCES email(id) ON DELETE CASCADE;
 
 
 --
@@ -763,7 +770,7 @@ ALTER TABLE ONLY watch
 --
 
 ALTER TABLE ONLY watch
-    ADD CONSTRAINT watch_query_id_fkey FOREIGN KEY (query_id) REFERENCES query(id);
+    ADD CONSTRAINT watch_query_id_fkey FOREIGN KEY (query_id) REFERENCES query(id) ON DELETE CASCADE;
 
 
 --
@@ -771,7 +778,7 @@ ALTER TABLE ONLY watch
 --
 
 ALTER TABLE ONLY watch
-    ADD CONSTRAINT watch_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id);
+    ADD CONSTRAINT watch_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
 
 
 --

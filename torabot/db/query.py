@@ -201,3 +201,27 @@ def set_query_field_bi_id(conn, id, field, value):
         id=id,
         value=value
     )
+
+
+def del_query_bi_id(conn, id):
+    conn.execute(
+        sql('delete from query where id = :id'),
+        id=id
+    )
+
+
+def del_inactive_queries(conn, before, limit):
+    conn.execute(sql(
+        '''
+        delete from query
+        where query.id in (
+            select q0.id
+            from query as q0
+            where q0.ctime < :before and not exists (
+                select 1 from watch as w0
+                where w0.query_id = q0.id
+            )
+            limit :limit
+        )
+        '''
+    ), id=id, before=before, limit=limit)

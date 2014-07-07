@@ -1,6 +1,6 @@
 from flask import jsonify, current_app
 from .... import db
-from ....celery import sync_all as task_sync_all
+from .... import celery
 from ....core.mod import mods as _mods
 from ....core.local import current_user, request_values
 from ....core.connection import autoccontext
@@ -14,7 +14,7 @@ from ..errors import InvalidTokenError
 @bp.route('/sync')
 @token_required
 def sync():
-    task_sync_all.delay()
+    celery.sync_all.delay()
     return 'done'
 
 
@@ -40,6 +40,26 @@ def user_notices(id, page):
     with autoccontext() as conn:
         notices = db.get_notices_bi_user_id(conn, user_id=id, page=page, room=room)
     return jsonify({'result': notices})
+
+
+@bp.route('/delete-old-changes')
+@token_required
+def delete_old_changes():
+    return jsonify({
+        'result': {
+            "deleted": celery.del_old_changes.apply_async().get()
+        }
+    })
+
+
+@bp.route('/delete-inactive-queries')
+@token_required
+def delete_inactive_queries():
+    return jsonify({
+        'result': {
+            "deleted": celery.del_inactive_queries.apply_async().get()
+        }
+    })
 
 
 @bp.errorhandler(InvalidTokenError)
