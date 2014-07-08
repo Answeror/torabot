@@ -1,3 +1,5 @@
+import os
+import shutil
 from logbook import Logger
 import json
 import requests
@@ -19,6 +21,13 @@ def lives(kind):
     if not r.ok or r.json()['status'] != 'ok':
         return 0
     return len(r.json()['running']) + len(r.json()['pending'])
+
+
+def liveids(kind):
+    r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
+    if not r.ok or r.json()['status'] != 'ok':
+        return 0
+    return [job['id'] for job in (r.json()['running'] + r.json()['pending'])]
 
 
 def prepare(kind, query, timeout, slaves, options):
@@ -54,6 +63,23 @@ def merge_options(kind, options):
     return d
 
 
+def get_liveids_and_copy_logs():
+    result = []
+    for id in liveids():
+        root = os.path.join(get_current_conf()['TORABOT_DATA_PATH'], 'scrapy')
+        if not os.path.exists(root):
+            os.makedirs(root)
+        filename = id + '.log'
+        source = os.path.join('logs', filename)
+        if os.path.exists(source):
+            shutil.copyfile(
+                source,
+                os.path.join(root, filename)
+            )
+            result.append(id)
+    return result
+
+
 def spy(kind, query, timeout, slaves, options={}):
     options = merge_options(kind, options)
     log.debug('spy {} for {} with options: {}', query, kind, options)
@@ -80,6 +106,15 @@ def spy(kind, query, timeout, slaves, options={}):
         message = r.get('message', 'no error message')
         if r.get('expected', False):
             raise ExpectedError(message)
-        raise Exception('spy %s for %s failed: %s' % (kind, query, message))
+        raise Exception('spy {} for {} failed: {}, log copied: {}'.format(
+            kind,
+            query,
+            message,
+            get_liveids_and_copy_logs()
+        ))
 
-    raise SpyTimeoutError('spy %s for %s timeout' % (kind, query))
+    raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
+        kind,
+        query,
+        get_liveids_and_copy_logs()
+    ))
