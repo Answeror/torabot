@@ -23,11 +23,11 @@ def lives(kind):
     return len(r.json()['running']) + len(r.json()['pending'])
 
 
-def liveids(kind):
+def jobids(kind):
     r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
     if not r.ok or r.json()['status'] != 'ok':
         return 0
-    return [job['id'] for job in (r.json()['running'] + r.json()['pending'])]
+    return [job['id'] for job in (r.json()['running'] + r.json()['pending'] + r.json()['finished'])]
 
 
 def prepare(kind, query, timeout, slaves, options):
@@ -63,9 +63,9 @@ def merge_options(kind, options):
     return d
 
 
-def get_liveids_and_copy_logs(kind):
+def get_jobids_and_copy_logs(kind):
     result = []
-    for id in liveids(kind):
+    for id in jobids(kind):
         root = os.path.join(get_current_conf()['TORABOT_DATA_PATH'], 'scrapy')
         if not os.path.exists(root):
             os.makedirs(root)
@@ -110,11 +110,11 @@ def spy(kind, query, timeout, slaves, options={}):
             kind,
             query,
             message,
-            get_liveids_and_copy_logs(kind)
+            get_jobids_and_copy_logs(kind)
         ))
 
     raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
         kind,
         query,
-        get_liveids_and_copy_logs(kind)
+        get_jobids_and_copy_logs(kind)
     ))
