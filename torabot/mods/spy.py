@@ -50,8 +50,8 @@ def prepare(kind, query, timeout, slaves, options):
             )
             if not r.ok or r.json()['status'] != 'ok':
                 log.info('start {} slave failed', kind)
-                return False
-    return True
+                return []
+    return jobids(kind)
 
 
 def merge_options(kind, options):
@@ -63,9 +63,9 @@ def merge_options(kind, options):
     return d
 
 
-def get_jobids_and_copy_logs(kind):
+def copy_logs(kind, jobids):
     result = []
-    for id in jobids(kind):
+    for id in jobids:
         root = os.path.join(get_current_conf()['TORABOT_DATA_PATH'], 'scrapy')
         if not os.path.exists(root):
             os.makedirs(root)
@@ -84,7 +84,8 @@ def spy(kind, query, timeout, slaves, options={}):
     options = merge_options(kind, options)
     log.debug('spy {} for {} with options: {}', query, kind, options)
 
-    if not prepare(kind, query, timeout, slaves, options):
+    jobids = prepare(kind, query, timeout, slaves, options)
+    if not jobids:
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))
@@ -106,15 +107,17 @@ def spy(kind, query, timeout, slaves, options={}):
         message = r.get('message', 'no error message')
         if r.get('expected', False):
             raise ExpectedError(message)
+        copy_logs(kind, jobids)
         raise Exception('spy {} for {} failed: {}, log copied: {}'.format(
             kind,
             query,
             message,
-            get_jobids_and_copy_logs(kind)
+            jobids,
         ))
 
+    copy_logs(kind, jobids)
     raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
         kind,
         query,
-        get_jobids_and_copy_logs(kind)
+        jobids,
     ))
