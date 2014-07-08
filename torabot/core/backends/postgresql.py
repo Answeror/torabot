@@ -2,7 +2,7 @@ from ... import db
 from .base import Backend
 
 
-class Impl(Backend):
+class PostgreSQL(Backend):
 
     def __init__(self, conn):
         self.conn = conn
@@ -36,8 +36,3 @@ class Impl(Backend):
 
     def get_query_bi_id(self, id):
         return db.get_query_bi_id(self.conn, id)
-
-
-def PostgreSQL(*args, **kargs):
-    from .regular import Regular
-    return Regular(Impl(*args, **kargs))

@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor as Ex
 from ..ut.guard import exguard, timeguard
 from ..core.connection import autoccontext
-from ..core.sync import sync
+from ..core.sync import sync, fast_sync
 from ..core.backends.postgresql import PostgreSQL
 from ..core.query import regular
 from ..db import get_need_sync_queries
@@ -12,9 +12,9 @@ from logbook import Logger
 log = Logger(__name__)
 
 
-def _sync(engine, kind, text, timeout):
+def _sync(engine, func, kind, text, timeout):
     with autoccontext(engine=engine, commit=True) as conn:
-        sync(
+        func(
             kind=kind,
             text=text,
             timeout=timeout,
@@ -29,15 +29,30 @@ def sync_all(conf):
     with autoccontext(engine=engine) as conn:
         queries = get_need_sync_queries(conn)
 
+    options = dict(
+        engine=engine,
+        timeout=conf['TORABOT_SPY_TIMEOUT'],
+    )
+
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
         for kind, text in unique(queries):
-            log.debug('sync {} of {}', text, kind)
+            # log.debug('sync {} of {}', text, kind)
             ex.submit(
                 exguard(_sync),
-                engine=engine,
+                func=sync,
                 kind=kind,
                 text=text,
-                timeout=conf['TORABOT_SPY_TIMEOUT'],
+                **options
+            )
+
+    with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
+        for query in queries:
+            ex.submit(
+                exguard(_sync),
+                func=fast_sync,
+                kind=query.kind,
+                text=query.text,
+                **options
             )
 
 

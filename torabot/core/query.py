@@ -1,7 +1,8 @@
 from functools import partial
 from datetime import datetime
 from logbook import Logger
-from .sync import sync
+from .sync import sync, fast_sync, regular
+assert regular
 from .mod import mod
 
 
@@ -22,14 +23,12 @@ def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):
         'good',
         'sync_interval'
     ]}
-    _sync = partial(
-        sync,
-        kind=kind,
-        text=text,
-        timeout=timeout,
-        backend=backend,
-        **sync_options
-    )
+
+    def _sync():
+        options = dict(kind=kind, text=text, timeout=timeout, backend=backend)
+        options.update(sync_options)
+        return fast_sync(**options) or sync(**options)
+
     get_query = partial(
         backend.get_query_bi_kind_and_text,
         kind=kind,
@@ -66,12 +65,3 @@ def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):
 def mark_need_sync(backend, kind, text):
     log.debug('mark query {} of {} need sync', text, kind)
     backend.set_next_sync_time_bi_kind_and_text(kind, text, datetime.utcnow())
-
-
-def regular(kind, text):
-    while True:
-        next_kind, next_text = mod(kind).regular(text)
-        if (next_kind, next_text) == (kind, text):
-            break
-        kind, text = next_kind, next_text
-    return kind, text

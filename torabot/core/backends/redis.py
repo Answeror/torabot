@@ -6,7 +6,7 @@ from ..redis import redis
 from .base import Backend
 
 
-class Impl(Backend):
+class Redis(Backend):
 
     def has_query_bi_kind_and_text(self, kind, text):
         return redis.exists(encode(kind, text))
@@ -71,11 +71,6 @@ class Impl(Backend):
 
     def get_query_bi_id(self, id):
         return bunchr(pickle.loads(redis.get(id)))
-
-
-def Redis(*args, **kargs):
-    from .regular import Regular
-    return Regular(Impl(*args, **kargs))
 
 
 def encode(kind, text):
