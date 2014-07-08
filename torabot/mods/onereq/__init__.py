@@ -22,3 +22,11 @@ class Onereq(
     def regular(self, query_text):
         from .query import regular
         return self.name, regular(query_text)
+
+    @property
+    def spy_slaves(self):
+        return 2
+
+    @property
+    def spy_life(self):
+        return 60 * 60

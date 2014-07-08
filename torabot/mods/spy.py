@@ -28,7 +28,7 @@ def jobids(kind):
     return [name[:-4] for name in list(os.listdir(root))]
 
 
-def prepare(kind, query, timeout, slaves, options):
+def prepare(kind, query, timeout, life, slaves, options):
     with Lock(redis, 'torabot:temp:spy_prepare'):
         while lives(kind) < slaves:
             log.info(
@@ -42,7 +42,7 @@ def prepare(kind, query, timeout, slaves, options):
                 data=dict(
                     project=kind,
                     spider=kind,
-                    life=2 * timeout,
+                    life=life,
                     **options
                 )
             )
@@ -84,11 +84,18 @@ def copy_logs(kind, jobids):
     return result
 
 
-def spy(kind, query, timeout, slaves, options={}):
+def spy(kind, query, timeout, slaves, options={}, life=None):
     options = merge_options(kind, options)
     log.debug('spy {} for {} with options: {}', query, kind, options)
 
-    if not prepare(kind, query, timeout, slaves, options):
+    if not prepare(
+        kind,
+        query,
+        timeout,
+        life if life is not None else 2 * timeout,
+        slaves,
+        options
+    ):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))

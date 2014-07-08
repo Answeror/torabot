@@ -5,6 +5,7 @@ import jsonpickle
 from nose.tools import assert_in
 from flask import current_app, abort, request, jsonify
 from logbook import Logger
+from celery.exceptions import SoftTimeLimitExceeded
 from ....core.backends.redis import Redis
 from ....core.mod import mod
 from .... import celery
@@ -40,7 +41,7 @@ def source(id, format):
         backend=Redis()
     )
     if not q:
-        abort(503)
+        abort(502)
 
     files = q.result.files
     for f in files:
@@ -56,10 +57,14 @@ def source(id, format):
         abort(404)
 
     assert_in(format, MIME)
-    return celery.make_source.apply_async(
-        args=[files, conf],
-        time_limit=30,
-        soft_time_limit=25
-    ).get(), 200, {
-        'content-type': MIME[format]
-    }
+    try:
+        return celery.make_source.apply_async(
+            args=[files, conf],
+            time_limit=current_app.config['TORABOT_MAKE_TIMEOUT'],
+            soft_time_limit=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT']
+        ).get(), 200, {
+            'content-type': MIME[format]
+        }
+    except SoftTimeLimitExceeded:
+        log.warning('source soft timeout, {} with args: {}', id, args)
+        abort(502)

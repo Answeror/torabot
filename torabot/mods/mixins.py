@@ -161,9 +161,18 @@ class ScrapyMixin(object):
             self.name,
             query,
             timeout=timeout,
-            slaves=self.conf.get('TORABOT_SPY_SLAVES', 1),
+            slaves=self.spy_slaves,
             options=options,
+            life=self.spy_life
         )
+
+    @property
+    def spy_slaves(self):
+        return self.conf.get('TORABOT_SPY_SLAVES', 1)
+
+    @property
+    def spy_life(self):
+        return self.conf.get('TORABOT_SPY_LIFE')
 
 
 class NoChangeMixin(object):
