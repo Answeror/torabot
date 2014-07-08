@@ -72,6 +72,7 @@ def spy(kind, query, timeout, slaves, options={}):
 
         r = json.loads(resp[1].decode('utf-8'))
         if datetime.strptime(r['ctime'], TIME_FORMAT) + timedelta(seconds=int(timeout)) < datetime.utcnow():
+            log.debug('got expired spy result of ({}, {})', kind, query)
             continue
         r = r['result']
         if r.get('ok', True):
