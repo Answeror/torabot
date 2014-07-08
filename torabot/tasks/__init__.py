@@ -3,6 +3,7 @@ from .notice import notice_all
 from .log import log_to_file
 from .admin import tell_admin_safe
 from .delete import del_old_changes, del_inactive_queries
+from .source import make_source
 
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     tell_admin_safe.__name__,
     del_old_changes.__name__,
     del_inactive_queries.__name__,
+    make_source.__name__,
 ]

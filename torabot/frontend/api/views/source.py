@@ -26,8 +26,9 @@ MIME = {
 
 @bp.route('/source/<id>', methods=['GET'], defaults={'format': 'txt'})
 @bp.route('/source/<id>.<format>', methods=['GET'])
-def gist(id, format):
-    log.debug('gist %s search start' % id)
+def source(id, format):
+    args = {key: request.args[key] for key in request.args}
+    log.info('source {} with args: {}', id, args)
 
     if format not in MIME:
         return jsonify({"message": "invalid format"}), 400
@@ -38,7 +39,6 @@ def gist(id, format):
         sync_on_expire=True,
         backend=Redis()
     )
-    log.debug('gist %s search done' % id)
     if not q:
         abort(503)
 
@@ -47,7 +47,7 @@ def gist(id, format):
         if f['name'] == 'torabot.json':
             conf = jsonpickle.decode(jinja2.Template(
                 base64.b64decode(f['content']).decode('utf-8')
-            ).render(**{key: request.args[key] for key in request.args}))
+            ).render(**args))
             break
     else:
         conf = None

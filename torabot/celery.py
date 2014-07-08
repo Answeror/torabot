@@ -49,10 +49,8 @@ def tell_admin_safe(*args, **kargs):
 
 @app.torabot_task
 def make_source(files, conf):
-    from .core.make.envs.dict import Env
-    from .core.make.targets import Target
-    from .ut.bunch import bunchr
-    return Target.run(Env(bunchr(files)), conf)
+    from torabot import tasks
+    return tasks.make_source(files, conf)
 
 
 @app.torabot_task
