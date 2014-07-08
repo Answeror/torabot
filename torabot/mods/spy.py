@@ -24,10 +24,8 @@ def lives(kind):
 
 
 def jobids(kind):
-    r = requests.get('http://localhost:6800/listjobs.json?project=%s' % kind)
-    if not r.ok or r.json()['status'] != 'ok':
-        return 0
-    return [job['id'] for job in (r.json()['running'] + r.json()['pending'] + r.json()['finished'])]
+    root = os.path.join('logs', kind, kind)
+    return [name[:-4] for name in list(os.listdir(root))]
 
 
 def prepare(kind, query, timeout, slaves, options):
@@ -50,8 +48,8 @@ def prepare(kind, query, timeout, slaves, options):
             )
             if not r.ok or r.json()['status'] != 'ok':
                 log.info('start {} slave failed', kind)
-                return []
-    return jobids(kind)
+                return False
+    return True
 
 
 def merge_options(kind, options):
@@ -61,6 +59,12 @@ def merge_options(kind, options):
     d = {key[len(prefix):].lower(): conf[key] for key in keys}
     d.update(options)
     return d
+
+
+def get_all_jobids_and_copy(kind):
+    ids = jobids(kind)
+    copy_logs(ids)
+    return ids
 
 
 def copy_logs(kind, jobids):
@@ -84,8 +88,7 @@ def spy(kind, query, timeout, slaves, options={}):
     options = merge_options(kind, options)
     log.debug('spy {} for {} with options: {}', query, kind, options)
 
-    jobids = prepare(kind, query, timeout, slaves, options)
-    if not jobids:
+    if not prepare(kind, query, timeout, slaves, options):
         raise Exception('spy %s for %s failed not prepared' % (kind, query))
 
     redis.rpush('torabot:spy:%s' % kind, query.encode('utf-8'))
@@ -107,17 +110,17 @@ def spy(kind, query, timeout, slaves, options={}):
         message = r.get('message', 'no error message')
         if r.get('expected', False):
             raise ExpectedError(message)
-        copy_logs(kind, jobids)
+        copy_logs(kind)
         raise Exception('spy {} for {} failed: {}, log copied: {}'.format(
             kind,
             query,
             message,
-            jobids,
+            get_all_jobids_and_copy(kind)
         ))
 
-    copy_logs(kind, jobids)
+    copy_logs(kind)
     raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
         kind,
         query,
-        jobids,
+        get_all_jobids_and_copy(kind)
     ))
