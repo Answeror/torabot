@@ -23,12 +23,17 @@ class Target(Base):
             'payload': request.get('payload'),
         }
 
-    def __call__(self, request, timeout=10, sync_on_expire=False):
+    @property
+    def default_timeout(self):
+        from ...local import get_current_conf
+        return get_current_conf()['TORABOT_SPY_TIMEOUT']
+
+    def __call__(self, request, timeout=None, sync_on_expire=False):
         if isuri(request):
             request = {'uri': request}
         query = mod('onereq').search(
             text=jsonpickle.encode(self.prepare(request)),
-            timeout=timeout,
+            timeout=self.default_timeout if timeout is None else timeout,
             sync_on_expire=sync_on_expire,
             backend=Redis()
         )

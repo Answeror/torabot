@@ -110,15 +110,13 @@ def spy(kind, query, timeout, slaves, options={}):
         message = r.get('message', 'no error message')
         if r.get('expected', False):
             raise ExpectedError(message)
-        raise Exception('spy {} for {} failed: {}, log copied: {}'.format(
+        raise Exception('spy {} for {} failed: {}'.format(
             kind,
             query,
             message,
-            get_all_jobids_and_copy(kind)
         ))
 
-    raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
+    raise SpyTimeoutError('spy {} for {} timeout'.format(
         kind,
         query,
-        get_all_jobids_and_copy(kind)
     ))
