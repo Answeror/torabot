@@ -67,13 +67,14 @@ def sync_all(conf):
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
         log.info('need sync {} normal queries', len(queries))
         for query in queries:
-            ex.submit(
-                exguard(_sync),
-                func=fast_sync,
-                kind=query.kind,
-                text=query.text,
-                **options
-            )
+            if (query.kind, query.text) not in query_pairs:
+                ex.submit(
+                    exguard(_sync),
+                    func=fast_sync,
+                    kind=query.kind,
+                    text=query.text,
+                    **options
+                )
 
 
 def unique(queries):
