@@ -11,9 +11,18 @@ log = Logger(__name__)
 def fast_sync(backend, kind, text, timeout, good=None, sync_interval=None):
     root_kind, root_text = regular(kind, text)
     if (kind, text) == (root_kind, root_text):
+        query = backend.get_query_bi_kind_and_text(kind, text)
+        return filled(query) and not expired(query)
+
+    root = backend.get_query_bi_kind_and_text(root_kind, root_text)
+    if not filled(root):
+        log.debug('root query of ({}, {}) not filled', kind, text)
         return False
-    root = backend.get_query_bi_kind_and_text(kind, text)
-    if not filled(root) or expired(root) or (good and not good(root.result)):
+    if expired(root):
+        log.debug('root query of ({}, {}) expired', kind, text)
+        return False
+    if good and not good(root.result):
+        log.debug('root query of ({}, {}) not good', kind, text)
         return False
     fill_result(backend, kind, text, root.result, sync_interval)
     return True

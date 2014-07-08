@@ -18,6 +18,13 @@ def sync():
     return 'done'
 
 
+@bp.route('/log-to-file')
+@token_required
+def log_to_file():
+    celery.log_to_file.delay()
+    return 'done'
+
+
 @bp.route('/mods', methods=['GET'])
 def mods():
     return jsonify(dict(result=[dict(

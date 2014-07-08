@@ -30,12 +30,14 @@ def _sync(engine, func, kind, text, timeout):
 
 
 def get_expired(engine, query_pairs):
+    result = []
     with autoccontext(engine=engine) as conn:
         backend = PostgreSQL(conn=conn)
-        return [
-            (kind, text) for kind, text in query_pairs
-            if expired(backend.get_query_bi_kind_and_text(kind, text))
-        ]
+        for kind, text in query_pairs:
+            query = backend.get_query_bi_kind_and_text(kind, text)
+            if query is None or expired(query):
+                result.append((kind, text))
+    return result
 
 
 @timeguard
@@ -51,7 +53,9 @@ def sync_all(conf):
     )
 
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
-        for kind, text in get_expired(unique(queries)):
+        query_pairs = get_expired(engine, unique(queries))
+        log.info('need sync {} root queries', len(query_pairs))
+        for kind, text in query_pairs:
             ex.submit(
                 exguard(_sync),
                 func=sync,
@@ -61,6 +65,7 @@ def sync_all(conf):
             )
 
     with Ex(max_workers=conf['TORABOT_SYNC_THREADS']) as ex:
+        log.info('need sync {} normal queries', len(queries))
         for query in queries:
             ex.submit(
                 exguard(_sync),
