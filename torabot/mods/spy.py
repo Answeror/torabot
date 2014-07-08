@@ -35,7 +35,7 @@ def prepare(kind, query, timeout, slaves, options):
                 data=dict(
                     project=kind,
                     spider=kind,
-                    life=timeout,
+                    life=2 * timeout,
                     **options
                 )
             )

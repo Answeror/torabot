@@ -11,13 +11,20 @@ class RedisMixin(object):
     life = None
 
     @property
-    def start_time(self):
-        name = '_start_time'
+    def last_idle_time(self):
+        name = '_last_idle_time'
         value = getattr(self, name, None)
         if value is None:
             value = time()
             setattr(self, name, value)
         return value
+
+    @last_idle_time.setter
+    def last_idle_time(self, value):
+        self._last_idle_time = value
+
+    def touch(self):
+        self.last_idle_time = time()
 
     @property
     def redis_key(self):
@@ -29,6 +36,7 @@ class RedisMixin(object):
         if query:
             query = decode(query)
             log.msg(u'got query %s' % query, level=log.INFO)
+            self.touch()
             for req in self.make_requests_from_query(query):
                 yield req
 
@@ -68,7 +76,7 @@ class RedisMixin(object):
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""
         self.schedule_rest_requests()
-        if self.life is None or (time() - self.start_time < self.life):
+        if self.life is None or (time() - self.last_idle_time < self.life):
             raise DontCloseSpider
 
     def item_scraped(self, *args, **kwargs):
