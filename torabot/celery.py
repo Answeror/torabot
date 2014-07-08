@@ -8,7 +8,7 @@ class App(RedisPubMixin, Celery):
     def torabot_task(self, f):
         @wraps(f)
         def inner(*args, **kargs):
-            with self.redispub.threadbound():
+            with self.redispub.applicationbound():
                 return f(*args, **kargs)
         return self.task(inner)
 

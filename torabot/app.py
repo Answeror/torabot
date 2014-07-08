@@ -37,5 +37,5 @@ class App(RedisPubMixin, Flask):
             part.make(self)
 
     def __call__(self, *args, **kargs):
-        with self.redispub.threadbound():
+        with self.redispub.applicationbound():
             return super(App, self).__call__(*args, **kargs)
