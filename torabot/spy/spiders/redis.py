@@ -62,16 +62,15 @@ class RedisMixin(object):
 
     def schedule_next_request(self):
         """Schedules a request if available"""
-        for req in self.next_requests():
-            self.crawler.engine.crawl(req, spider=self)
-
-    def schedule_rest_requests(self):
         while True:
             reqs = list(self.next_requests())
             if not reqs:
                 break
             for req in reqs:
                 self.crawler.engine.crawl(req, spider=self)
+
+    def schedule_rest_requests(self):
+        self.schedule_next_request()
 
     def spider_idle(self):
         """Schedules a request if available, otherwise waits."""

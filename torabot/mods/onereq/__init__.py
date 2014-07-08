@@ -25,7 +25,7 @@ class Onereq(
 
     @property
     def spy_slaves(self):
-        return 2
+        return 1
 
     @property
     def spy_life(self):
