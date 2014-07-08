@@ -70,7 +70,7 @@ def get_liveids_and_copy_logs(kind):
         if not os.path.exists(root):
             os.makedirs(root)
         filename = id + '.log'
-        source = os.path.join('logs', filename)
+        source = os.path.join('logs', kind, kind, filename)
         if os.path.exists(source):
             shutil.copyfile(
                 source,
