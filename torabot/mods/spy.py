@@ -63,7 +63,7 @@ def merge_options(kind, options):
 
 def get_all_jobids_and_copy(kind):
     ids = jobids(kind)
-    copy_logs(ids)
+    copy_logs(kind, ids)
     return ids
 
 
@@ -110,7 +110,6 @@ def spy(kind, query, timeout, slaves, options={}):
         message = r.get('message', 'no error message')
         if r.get('expected', False):
             raise ExpectedError(message)
-        copy_logs(kind)
         raise Exception('spy {} for {} failed: {}, log copied: {}'.format(
             kind,
             query,
@@ -118,7 +117,6 @@ def spy(kind, query, timeout, slaves, options={}):
             get_all_jobids_and_copy(kind)
         ))
 
-    copy_logs(kind)
     raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
         kind,
         query,
