@@ -63,9 +63,9 @@ def merge_options(kind, options):
     return d
 
 
-def get_liveids_and_copy_logs():
+def get_liveids_and_copy_logs(kind):
     result = []
-    for id in liveids():
+    for id in liveids(kind):
         root = os.path.join(get_current_conf()['TORABOT_DATA_PATH'], 'scrapy')
         if not os.path.exists(root):
             os.makedirs(root)
@@ -110,11 +110,11 @@ def spy(kind, query, timeout, slaves, options={}):
             kind,
             query,
             message,
-            get_liveids_and_copy_logs()
+            get_liveids_and_copy_logs(kind)
         ))
 
     raise SpyTimeoutError('spy {} for {} timeout, log copied: {}'.format(
         kind,
         query,
-        get_liveids_and_copy_logs()
+        get_liveids_and_copy_logs(kind)
     ))
