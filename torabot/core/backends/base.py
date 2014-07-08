@@ -7,6 +7,10 @@ class Backend(metaclass=abc.ABCMeta):
     def has_query_bi_kind_and_text(self, kind, text):
         pass
 
+    def has_filled_query_bi_kind_and_text(self, kind, text):
+        q = self.get_query_bi_kind_and_text(kind, text)
+        return bool(q and q.result)
+
     @abc.abstractmethod
     def get_query_bi_kind_and_text(self, kind, text):
         pass

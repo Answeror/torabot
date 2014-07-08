@@ -10,7 +10,7 @@ log = Logger(__name__)
 
 
 def has(backend, kind, text):
-    return backend.has_query_bi_kind_and_text(kind, text)
+    return backend.has_filled_query_bi_kind_and_text(kind, text)
 
 
 def query(backend, kind, text, timeout, **kargs):
@@ -58,7 +58,8 @@ def _search(backend, kind, text, timeout, sync_on_expire=None, **kargs):
                     )
             else:
                 mark_need_sync(backend, kind, text)
-    assert query is None or query.result
+
+    assert query is None or query.result, 'invalid query: {}'.format(query)
     return query
 
 
