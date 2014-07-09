@@ -93,7 +93,15 @@ def auth_error_guard(e):
 
 def general_error_guard(e):
     name = str(uuid4())
-    log.exception(name)
+    log.exception('general error: {}', {
+        'hash': name,
+        'request': {
+            'uri': request.url,
+            'method': request.method,
+            'headers': dict(request.headers),
+            'data': request.data
+        }
+    })
     template = '出错了. 错误编号 %s . 你可以提交该编号给 %s , 协助改进torabot.'
 
     def format_json():
