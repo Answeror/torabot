@@ -48,9 +48,9 @@ def tell_admin_safe(*args, **kargs):
 
 
 @app.torabot_task
-def make_source(files, conf):
+def make_source(gist, args):
     from torabot import tasks
-    return tasks.make_source(files, conf)
+    return tasks.make_source(gist=gist, args=args)
 
 
 @app.torabot_task

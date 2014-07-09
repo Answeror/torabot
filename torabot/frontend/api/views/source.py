@@ -1,14 +1,5 @@
-import json
-import base64
-import jinja2
-import jsonpickle
-from time import time
-from nose.tools import assert_in
-from flask import current_app, abort, request, jsonify
 from logbook import Logger
-from celery.exceptions import SoftTimeLimitExceeded
-from ....core.backends.redis import Redis
-from ....core.mod import mod
+from flask import current_app, abort, request, jsonify
 from .... import celery
 from .. import bp
 
@@ -26,57 +17,25 @@ MIME = {
 }
 
 
-@bp.route('/source/<id>', methods=['GET'], defaults={'format': 'txt'})
-@bp.route('/source/<id>.<format>', methods=['GET'])
-def source(id, format):
-    args = {key: request.args[key] for key in request.args}
-    log.info('source {} with args: {}', id, args)
-    start_time = time()
-
+@bp.route('/source/<gist>', methods=['GET'], defaults={'format': 'txt'})
+@bp.route('/source/<gist>.<format>', methods=['GET'])
+def source(gist, format):
     if format not in MIME:
         return jsonify({"message": "invalid format"}), 400
 
-    gist_start_time = time()
-    q = mod('gist').search(
-        text=json.dumps(dict(method='id', id=id)),
-        timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
-        sync_on_expire=True,
-        backend=Redis()
-    )
-    gist_elapsed = time() - gist_start_time
-    if not q:
-        abort(502)
+    args = {key: request.args[key] for key in request.args}
+    log.info('source {} with {}', gist, args)
 
-    files = q.result.files
-    for f in files:
-        if f['name'] == 'torabot.json':
-            conf = jsonpickle.decode(jinja2.Template(
-                base64.b64decode(f['content']).decode('utf-8')
-            ).render(**args))
-            break
-    else:
-        conf = None
+    result = celery.make_source.apply_async(
+        kwargs=dict(gist=gist, args=args),
+        expires=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT'],
+        time_limit=current_app.config['TORABOT_MAKE_TIMEOUT'],
+        soft_time_limit=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT']
+    ).get(interval=0.1)
 
-    if not conf:
-        abort(404)
+    if isinstance(result, int):
+        abort(result)
 
-    assert_in(format, MIME)
-    try:
-        result = celery.make_source.apply_async(
-            args=[files, conf],
-            time_limit=current_app.config['TORABOT_MAKE_TIMEOUT'],
-            soft_time_limit=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT']
-        ).get(), 200, {
-            'content-type': MIME[format]
-        }
-        log.debug(
-            'source takes {} seconds, gist takes {} seconds, {} with args: {}',
-            time() - start_time,
-            gist_elapsed,
-            id,
-            args
-        )
-        return result
-    except SoftTimeLimitExceeded:
-        log.warning('source soft timeout, {} with args: {}', id, args)
-        abort(502)
+    return result, 200, {
+        'content-type': MIME[format]
+    }

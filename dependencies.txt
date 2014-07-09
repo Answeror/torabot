@@ -2,7 +2,7 @@ Flask==0.10.1
 Flask-Cache-Latest==0.12
 Flask-OpenID==1.42.1
 Jinja2==2.7.1
-Logbook==0.6.0
+Logbook==0.7.0
 MarkupSafe==0.18
 SQLAlchemy==0.8.4
 Werkzeug==0.9.4

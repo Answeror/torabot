@@ -9,12 +9,13 @@ def path(name):
     return os.path.join(get_current_conf()['TORABOT_DATA_PATH'], name)
 
 
-def handle(level):
+def handle(level, bubble=True):
     return TimedRotatingFileHandler(
         path('torabot.%s.log' % level),
         date_format='%Y-%m-%d',
+        format_string='[{record.time:%Y-%m-%d %H:%M:%S}] {record.level_name}: {record.channel}: {record.message} {record.extra[context]}',
         level=getattr(logbook, level.upper()),
-        bubble=True,
+        bubble=bubble,
     )
 
 
