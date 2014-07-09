@@ -2,6 +2,7 @@ import json
 import base64
 import jinja2
 import jsonpickle
+from time import time
 from nose.tools import assert_in
 from flask import current_app, abort, request, jsonify
 from logbook import Logger
@@ -30,6 +31,7 @@ MIME = {
 def source(id, format):
     args = {key: request.args[key] for key in request.args}
     log.info('source {} with args: {}', id, args)
+    start_time = time()
 
     if format not in MIME:
         return jsonify({"message": "invalid format"}), 400
@@ -58,13 +60,20 @@ def source(id, format):
 
     assert_in(format, MIME)
     try:
-        return celery.make_source.apply_async(
+        result = celery.make_source.apply_async(
             args=[files, conf],
             time_limit=current_app.config['TORABOT_MAKE_TIMEOUT'],
             soft_time_limit=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT']
         ).get(), 200, {
             'content-type': MIME[format]
         }
+        log.debug(
+            'source takes {} seconds, {} with args: {}',
+            time() - start_time,
+            id,
+            args
+        )
+        return result
     except SoftTimeLimitExceeded:
         log.warning('source soft timeout, {} with args: {}', id, args)
         abort(502)
