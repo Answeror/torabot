@@ -43,4 +43,4 @@ def gunicorn():
                     run('python setup.py develop')
                     runbg('celery worker -A torabot -f data/celery-worker.log --autoscale=4,1')
                     runbg('celery beat -A torabot -f data/celery-beat.log')
-                    runbg('gunicorn --pythonpath . -t 600 -w 2 -k sync --threads 16 gunicorn_app:app')
+                    runbg('gunicorn --pythonpath . -t 600 -w 2 -k gthread.ThreadWorker --threads 16 gunicorn_app:app')
