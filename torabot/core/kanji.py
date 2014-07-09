@@ -17,5 +17,5 @@ def kanji():
 
 def translate(s):
     t = ''.join(kanji()[c][0] if c in kanji() else c for c in s)
-    log.debug('translate: {} -> {}', s, t)
+    # log.debug('translate: {} -> {}', s, t)
     return t
