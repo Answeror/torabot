@@ -36,12 +36,14 @@ def source(id, format):
     if format not in MIME:
         return jsonify({"message": "invalid format"}), 400
 
+    gist_start_time = time()
     q = mod('gist').search(
         text=json.dumps(dict(method='id', id=id)),
         timeout=current_app.config['TORABOT_SPY_TIMEOUT'],
         sync_on_expire=True,
         backend=Redis()
     )
+    gist_elapsed = time() - gist_start_time
     if not q:
         abort(502)
 
@@ -68,8 +70,9 @@ def source(id, format):
             'content-type': MIME[format]
         }
         log.debug(
-            'source takes {} seconds, {} with args: {}',
+            'source takes {} seconds, gist takes {} seconds, {} with args: {}',
             time() - start_time,
+            gist_elapsed,
             id,
             args
         )
