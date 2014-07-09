@@ -41,7 +41,7 @@ def gunicorn():
                 with prefix('workon torabot'):
                     run('pip install -r dependencies.txt')
                     run('python setup.py develop')
-                    for i in range(4):
-                        runbg('celery worker -A torabot -c 32 -P cthreads:TaskPool -f data/celery-worker.log')
+                    for i in range(2):
+                        runbg('celery worker -A torabot -c 16 -P cthreads:TaskPool -f data/celery-worker.log')
                     runbg('celery beat -A torabot -f data/celery-beat.log')
                     runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')
