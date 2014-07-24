@@ -92,7 +92,7 @@ def spy(kind, query, timeout, slaves, options={}, life=None):
         kind,
         query,
         timeout,
-        life if life is not None else 2 * timeout,
+        life if life is not None else timeout / 2,
         slaves,
         options
     ):
