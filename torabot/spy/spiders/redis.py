@@ -36,7 +36,6 @@ class RedisMixin(object):
         if query:
             query = decode(query)
             log.msg(u'got query %s' % query, level=log.INFO)
-            self.touch()
             for req in self.make_requests_from_query(query):
                 yield req
 
@@ -59,6 +58,7 @@ class RedisMixin(object):
         self.crawler.signals.connect(self.spider_idle, signal=signals.spider_idle)
         self.crawler.signals.connect(self.item_scraped, signal=signals.item_scraped)
         log.msg("Reading URLs from redis list '%s'" % self.redis_key, level=log.INFO)
+        self.touch()
 
     def schedule_next_request(self):
         """Schedules a request if available"""
