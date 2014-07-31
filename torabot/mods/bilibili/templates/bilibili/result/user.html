@@ -29,6 +29,8 @@
         {% endfor %}
     </tbody>
 </table>
-{% else %}
+{% elif 'username' in query.result.query %}
 <p>没有找到相关UP主. 你可以先去<a href='http://www.bilibili.tv/search?keyword={{ ("@author " + query.result.query.username)|urlencode }}'>这里</a>搜搜看.</p>
+{% else %}
+<p>没有找到相关UP主, 或该UP主尚未投稿.</p>
 {% endif %}
