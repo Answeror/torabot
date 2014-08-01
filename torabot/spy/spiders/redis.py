@@ -56,7 +56,11 @@ class RedisMixin(object):
         # idle signal is called when the spider has no requests left,
         # that's when we will schedule new requests from redis queue
         self.crawler.signals.connect(self.spider_idle, signal=signals.spider_idle)
-        self.crawler.signals.connect(self.item_scraped, signal=signals.item_scraped)
+        self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.item_scraped)
+        self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.item_dropped)
+        self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.request_scheduled)
+        self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.response_received)
+        self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.response_downloaded)
         log.msg("Reading URLs from redis list '%s'" % self.redis_key, level=log.INFO)
         self.touch()
 
@@ -69,7 +73,7 @@ class RedisMixin(object):
             for req in reqs:
                 self.crawler.engine.crawl(req, spider=self)
 
-    def schedule_rest_requests(self):
+    def schedule_rest_requests(self, *args, **kargs):
         self.schedule_next_request()
 
     def spider_idle(self):
@@ -77,10 +81,6 @@ class RedisMixin(object):
         self.schedule_rest_requests()
         if self.life is None or (time() - self.last_idle_time < self.life):
             raise DontCloseSpider
-
-    def item_scraped(self, *args, **kwargs):
-        """Avoids waiting for the spider to  idle before scheduling the next request"""
-        self.schedule_rest_requests()
 
 
 class RedisSpider(RedisMixin, Spider):
