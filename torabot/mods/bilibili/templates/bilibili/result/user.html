@@ -24,7 +24,7 @@
     <tbody>
         {% for r in query.result.recommendations %}
         <tr>
-            <td><a href='{{ url_for("main.search", method="username", kind="bilibili") }}'>{{ r.username }}</a></td>
+            <td><a href='{{ url_for("main.search", method="username", kind="bilibili", username=r.username) }}'>{{ r.username }}</a></td>
         </tr>
         {% endfor %}
     </tbody>
