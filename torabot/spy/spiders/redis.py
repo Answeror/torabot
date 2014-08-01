@@ -3,6 +3,7 @@ from scrapy import signals, log
 from scrapy.spider import Spider
 from scrapy.exceptions import DontCloseSpider
 from time import time
+from twisted.internet import task
 
 
 class RedisMixin(object):
@@ -61,8 +62,19 @@ class RedisMixin(object):
         self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.request_scheduled)
         self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.response_received)
         self.crawler.signals.connect(self.schedule_rest_requests, signal=signals.response_downloaded)
+
+        self.crawler.signals.connect(self.__start_loop, signal=signals.spider_opened)
+        self.crawler.signals.connect(self.__stop_loop, signal=signals.spider_closed)
+
         log.msg("Reading URLs from redis list '%s'" % self.redis_key, level=log.INFO)
         self.touch()
+
+    def __start_loop(self, spider):
+        self.loop = task.LoopingCall(self.schedule_rest_requests)
+        self.loop.start(1.0)
+
+    def __stop_loop(self, spider, reason):
+        self.loop.stop()
 
     def schedule_next_request(self):
         """Schedules a request if available"""
