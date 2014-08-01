@@ -7,10 +7,8 @@ define("torabot/main/0.1.0/intro-debug", [ "./init-debug", "seajs/seajs-style/1.
         init: function(options) {
             self.options = options;
             $("body").addClass("intro");
-            $(".navbar").removeClass("navbar-fixed-top");
             var restore = function() {
                 $("body").removeClass("intro");
-                $(".navbar").addClass("navbar-fixed-top");
             };
             var exit = function() {
                 restore();

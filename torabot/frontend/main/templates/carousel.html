@@ -10,6 +10,14 @@
     .carousel-caption h1:first-letter {
         text-transform: uppercase;
     }
+    .carousel-inner {
+        -webkit-box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
+        -moz-box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
+        box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
+        -moz-border-radius: 10px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+    }
     /* Declare heights because of positioning of img element */
     .carousel .item {
         height: 500px;
@@ -17,14 +25,7 @@
     .carousel .snapshot-wrap {
         position: relative;
         width: 100%;
-        height: 460px;
-        margin-top: 20px;
-        -webkit-box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
-        -moz-box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
-        box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
-        -moz-border-radius: 10px;
-        -webkit-border-radius: 10px;
-        border-radius: 10px;
+        height: 425px;
         overflow: hidden;
     }
     .carousel .snapshot {
@@ -67,25 +68,23 @@
     <div class=carousel-inner>
         {% for mod in mods %}
         <div class="item{% if loop.first %} active{% endif %}">
-            <div class=container>
-                <div class=snapshot-wrap>
-                    <div class=snapshot>
-                        {% if mod.carousel %}
-                        <img src='{{ url_for(".static", filename="images/%s.jpg" % mod.name) }}'>
-                        {% endif %}
-                    </div>
-                    <div class=carousel-caption>
-                        <h1>{{ mod.display_name }}</h1>
-                        <p class=lead>{{ mod.description }}</p>
-                        {% if not is_user %}
-                        <p>
-                            <form action='/login' method=post>
-                                <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
-                                <input type=submit class='btn btn-lg btn-primary' value="使用Google账户登录">
-                            </form>
-                        </p>
-                        {% endif %}
-                    </div>
+            <div class=snapshot-wrap>
+                <div class=snapshot>
+                    {% if mod.carousel %}
+                    <img src='{{ url_for(".static", filename="images/%s.jpg" % mod.name) }}'>
+                    {% endif %}
+                </div>
+                <div class=carousel-caption>
+                    <h1>{{ mod.display_name }}</h1>
+                    <p class=lead>{{ mod.description }}</p>
+                    {% if not is_user %}
+                    <p>
+                        <form action='/login' method=post>
+                            <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
+                            <input type=submit class='btn btn-lg btn-primary' value="使用Google账户登录">
+                        </form>
+                    </p>
+                    {% endif %}
                 </div>
             </div>
         </div>

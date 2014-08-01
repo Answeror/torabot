@@ -11,8 +11,8 @@
     {% else %}
         {% set query_kind = default_mod %}
     {% endif %}
-    <div class="navbar navbar-masthead navbar-default navbar-fixed-top" role="navigation">
-        <div class="container">
+    <div class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
@@ -23,14 +23,14 @@
                 <a class=navbar-brand href='/'><strong>torabot</strong></a>
             </div>
             <div class="collapse navbar-collapse">
-                <div class=navbar-left>
+                <div class='nav navbar-nav navbar-left'>
                     {% block search_box_left %}{% endblock %}
                     <div class='navbar-form navbar-left'>
                         {% include "search_box.html" %}
                     </div>
                     {% block search_box_right %}{% endblock %}
                 </div>
-                <div class=navbar-right>
+                <div class='nav navbar-nav navbar-right'>
                     {% block user_menu_left %}{% endblock %}
                     {% if not is_user %}
                     <form id=login-form class=navbar-left action='{{ url_for("main.login") }}' method=post>

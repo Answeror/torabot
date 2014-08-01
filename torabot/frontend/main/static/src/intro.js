@@ -8,10 +8,8 @@ define(function(require, exports, module){
             self.options = options;
 
             $('body').addClass('intro');
-            $('.navbar').removeClass('navbar-fixed-top');
             var restore = function() {
                 $('body').removeClass('intro');
-                $('.navbar').addClass('navbar-fixed-top');
             };
             var exit = function(){
                 restore();

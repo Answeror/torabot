@@ -1,8 +1,5 @@
 {% extends 'base.html' %}
 {% block body %}
-{% block navbar %}
-{% include 'nav.html' %}
-{% endblock %}
 {% block before_container %}
 {% if not snapshot and bulletin_text and bulletin_id != request.cookies['hide_bulletin_id'] %}
 <div class='bulletin alert alert-{{ bulletin_type if bulletin_type else "info" }} alert-dismissable'>
@@ -15,6 +12,9 @@
 {% endif %}
 {% endblock %}
 <div class='page container vspace-top-small'>
+    {% block navbar %}
+    {% include 'nav.html' %}
+    {% endblock %}
     {% block content %}{% endblock %}
     {% block footer %}
     {% if not snapshot %}

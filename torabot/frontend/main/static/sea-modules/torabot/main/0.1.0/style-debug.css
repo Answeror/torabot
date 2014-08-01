@@ -70,12 +70,8 @@
 
 /*! block torabot/main/0.1.0/mine-debug.css */
 body {
-    padding-top: 50px;
     /* from v2ex */
     font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", Tahoma, "Hiragino Sans GB", STHeiti !important;
-}
-body.intro {
-    padding-top: 0;
 }
 body.snapshot {
     overflow: hidden;
@@ -92,10 +88,6 @@ body.snapshot::after {
     position: absolute;
     top: -50%;
     left: -50%;
-}
-
-.intro .navbar {
-    margin-bottom: 0 !important;
 }
 
 .vspace-top-small {
