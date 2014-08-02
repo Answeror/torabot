@@ -39,7 +39,7 @@ class FeedSpider(RedisSpider):
     def parse_uri(self, response):
         query = response.meta['query']
         try:
-            feed = feedparser.parse(response.body_as_unicode())
+            feed = feedparser.parse(response.body)
             if feed.bozo:
                 return failed(query, 'ill formed xml on line {}: {}'.format(
                     feed.bozo_exception.getLineNumber(),
