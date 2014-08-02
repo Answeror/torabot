@@ -3,19 +3,21 @@
         <span class="intro-step input-group-btn">
             <button name=help type=button class='intro-help btn btn-default' title='帮助'><strong>?</strong></button>
         </span>
-        <span class='intro-select-mod input-group-btn'>
-            <select class="mod-select form-control" name=kind data-live-search=true data-container=body>
-                {% for m in mods %}
-                <option
-                    value='{{ m.name }}'
-                    data-has-normal-search={{ 1 if m.has_normal_search else 0 }}
-                    data-has-advanced-search={{ 1 if m.has_advanced_search else 0 }}
-                    data-allow-empty-query={{ 1 if m.allow_empty_query else 0 }}
-                    data-normal-search-prompt='{{ m.normal_search_prompt }}'
-                    {% if query_kind == m.name %} selected{% endif %}
-                >{{ m.display_name }}</option>
-                {% endfor %}
-            </select>
+        <span class='intro-select-mod input-group-btn' style='overflow:hidden'>
+            <div class=mod-select-wrap>
+                <select class="mod-select form-control" name=kind data-live-search=true data-container=body>
+                    {% for m in mods %}
+                    <option
+                        value='{{ m.name }}'
+                        data-has-normal-search={{ 1 if m.has_normal_search else 0 }}
+                        data-has-advanced-search={{ 1 if m.has_advanced_search else 0 }}
+                        data-allow-empty-query={{ 1 if m.allow_empty_query else 0 }}
+                        data-normal-search-prompt='{{ m.normal_search_prompt }}'
+                        {% if query_kind == m.name %} selected{% endif %}
+                    >{{ m.display_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </span>
         <span class='intro-query input-group-btn query-wrap'>
             <input disabled type="text" class='form-control query-text' name=q value='{{ query_text }}'>

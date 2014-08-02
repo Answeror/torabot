@@ -141,6 +141,11 @@ span.w {
     display: block;
 }
 
+.torabot .mod-select-wrap {
+    width: 120px;
+    margin-left: -120px;
+}
+
 .torabot .mod-select {
     border-right: none !important;
     margin-bottom: 0 !important;

@@ -8,12 +8,14 @@ define(function(require, exports, module){
             $('.mod-select').selectpicker({
                 noneResultsText: '无匹配项'
             });
+            self.$mod_select_wrap.animate({'margin-left': '0'});
         },
         init_main: function(){
             self.$form = $('form[name="search"]');
             self.$q = self.$form.find('input[name="q"]');
             self.$query_wrap = self.$form.find('.query-wrap');
             self.$mods = self.$form.find('select[name="kind"]');
+            self.$mod_select_wrap = self.$form.find('.mod-select-wrap');
 
             self.init_select();
 

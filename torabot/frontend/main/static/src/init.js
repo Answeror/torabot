@@ -1,5 +1,6 @@
 define(function(require, exports, module){
     require('seajs-style');
+    require('./bootstrap/js/bootstrap');
     require('./ut');
     require('./bulletin');
     require('./completion');
