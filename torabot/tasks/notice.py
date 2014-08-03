@@ -45,7 +45,7 @@ def notice_one_user(user_id, notices, engine, conf):
         return
 
     with ccontext(commit=True, engine=engine) as conn:
-        notices = sorted(notices, lambda n: n.email)
+        notices = sorted(notices, key=lambda n: n.email)
         for email, subset in groupby(notices, lambda n: n.email):
             send_notices(
                 conf=conf,
