@@ -4,8 +4,16 @@
         <li><a href='{{ url_for("main.about") }}'>关于本站</a></li>
         <li><a href='{{ config['TORABOT_ISSUE_LIST_URI'] | safe }}' target=_blank>问题反馈</a></li>
         <li><a id=start-intro class=text-success href='{{ url_for("main.intro") }}'>开始教程</a></li>
+        {% for link in config['TORABOT_FOOTER_LEFT_LINKS'] %}
+        <li>{{ link|safe }}</li>
+        {% endfor %}
     </ul>
     <div class=pull-right>
+        <ul class='pull-left list-inline' style='margin-right:2em'>
+            {% for link in config['TORABOT_FOOTER_RIGHT_LINKS'] %}
+            <li>{{ link|safe }}</li>
+            {% endfor %}
+        </ul>
         {% if not debug %}
         <ul class='pull-left list-inline'>
             <li><div class=g-plusone data-size=medium data-href='http://torabot.aip.io'></div></li>
