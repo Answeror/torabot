@@ -1,5 +1,6 @@
 from datetime import timedelta
 from logbook import Logger
+from itertools import groupby
 from .engine import make as make_engine
 from ..ut.connection import ccontext
 from ..ut.guard import timeguard
@@ -44,11 +45,13 @@ def notice_one_user(user_id, notices, engine, conf):
         return
 
     with ccontext(commit=True, engine=engine) as conn:
-        send_notices(
-            conf=conf,
-            notices=notices,
-            conn=conn,
-        )
+        notices = sorted(notices, lambda n: n.email)
+        for email, subset in groupby(notices, lambda n: n.email):
+            send_notices(
+                conf=conf,
+                notices=list(subset),
+                conn=conn,
+            )
 
 
 def need_accumulate(recent, conf):
