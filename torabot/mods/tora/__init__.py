@@ -44,7 +44,7 @@ class Tora(
             'email': email,
         }[name]
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         from .change import changes
         return changes(old, new)
 

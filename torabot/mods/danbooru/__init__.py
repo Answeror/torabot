@@ -84,7 +84,7 @@ class Danbooru(
             spy = super(Danbooru, self).spy
         return spy(regular(query), timeout)
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         if new.query.method == 'tags':
             return
         yield from super(Danbooru, self).changes(old, new)

@@ -40,7 +40,7 @@ class Yyets(
             'email': email
         }[name]
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         oldmap = {art.guid: art for art in getattr(old, 'arts', [])}
         for art in new.arts:
             try:

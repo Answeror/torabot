@@ -38,7 +38,7 @@ class Ehentai(
             'email': email
         }[name]
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         seen = {post.uri: post for post in old.get('posts', [])}
         for post in new.posts:
             if post.uri not in seen:

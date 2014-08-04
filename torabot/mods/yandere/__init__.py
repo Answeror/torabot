@@ -77,7 +77,7 @@ class Yandere(
             spy = super(Yandere, self).spy
         return spy(regular(query), timeout)
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         if new.query.method == 'tags':
             return
         yield from super(Yandere, self).changes(old, new)

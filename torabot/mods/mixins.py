@@ -177,5 +177,5 @@ class ScrapyMixin(object):
 
 class NoChangeMixin(object):
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         return []

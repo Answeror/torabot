@@ -68,8 +68,8 @@ class Mod(object):
             ]
         })
 
-    def changes(self, old, new):
-        return mod('tora').changes(old, new)
+    def changes(self, old, new, **kargs):
+        return mod('tora').changes(old, new, **kargs)
 
     def regular(self, text):
         return 'tora', text

@@ -57,7 +57,7 @@ class Pixiv(
             'email': email,
         }[name]
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         old = parse_result(old)
         new = parse_result(new)
         return {

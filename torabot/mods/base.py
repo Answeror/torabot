@@ -34,7 +34,7 @@ class Core(object, metaclass=abc.ABCMeta):
         )
 
     @abc.abstractmethod
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         pass
 
     @abc.abstractmethod

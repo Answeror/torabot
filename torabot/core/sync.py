@@ -63,7 +63,7 @@ def fill_result(backend, kind, text, result, sync_interval):
     else:
         backend.add_one_query_changes(
             query.id,
-            mod(kind).changes(query.result, result)
+            mod(kind).changes(query.result, result, query=query)
         )
         backend.set_query_result(query.id, result)
     if backend.is_query_active_bi_id(query.id):

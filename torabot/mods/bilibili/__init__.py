@@ -40,7 +40,7 @@ class Bilibili(
             'email': email,
         }[name]
 
-    def changes(self, old, new):
+    def changes(self, old, new, **kargs):
         if old:
             assert_equal(
                 query_method_from_result(old),
