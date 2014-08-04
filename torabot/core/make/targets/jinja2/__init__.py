@@ -1,6 +1,7 @@
 import jsonpickle
 from datetime import datetime
 from jinja2 import Environment, PackageLoader
+from hashlib import md5
 from ..base import Base
 
 
@@ -15,6 +16,7 @@ class Target(Base):
             'templates'
         ))
         self.jinja2_env.filters['tojson'] = jsonpickle.encode
+        self.jinja2_env.filters['md5'] = lambda s: md5(s).hexdigest()
         self.jinja2_env.globals['datetime'] = datetime
 
     def __call__(self, template, kargs):
