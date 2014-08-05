@@ -49,9 +49,12 @@ class Feed(
             # only emit changes newer than last update
             # to deal with bad rss with empty content accidentially
             if entry_id(entry) not in seen and (
-                query is None or
-                'updated_parsed' not in entry or
-                query.mtime <= Entry(entry).updated_parsed
+                query is None or (
+                    ('updated_parsed' not in entry and (
+                        'published_parsed' not in entry or
+                        query.mtime <= Entry(entry).published_parsed
+                    )) or query.mtime <= Entry(entry).updated_parsed
+                )
             ):
                 yield bunchr(kind='feed.new', query=new.query, entry=entry)
 
