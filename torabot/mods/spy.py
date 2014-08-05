@@ -1,7 +1,7 @@
 import os
 import shutil
 from logbook import Logger
-import json
+import jsonpickle
 import requests
 from datetime import datetime, timedelta
 from redis_lock import Lock
@@ -107,7 +107,7 @@ def spy(kind, query, timeout, slaves, options={}, life=None):
         if not resp:
             break
 
-        r = json.loads(resp[1].decode('utf-8'))
+        r = jsonpickle.decode(resp[1].decode('utf-8'))
         if datetime.strptime(r['ctime'], TIME_FORMAT) + timedelta(seconds=int(timeout)) < datetime.utcnow():
             log.debug('got expired spy result of ({}, {})', kind, query)
             continue
