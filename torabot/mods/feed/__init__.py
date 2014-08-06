@@ -48,15 +48,17 @@ class Feed(
         for i, entry in enumerate(new.get('data', {}).get('entries', [])):
             # only emit changes newer than last update
             # to deal with bad rss with empty content accidentially
-            if entry_id(entry) not in seen and (
-                query is None or (
-                    ('updated_parsed' not in entry and (
-                        'published_parsed' not in entry or
-                        query.mtime <= Entry(entry).published_parsed
-                    )) or query.mtime <= Entry(entry).updated_parsed
-                )
-            ):
-                yield bunchr(kind='feed.new', query=new.query, entry=entry)
+            if entry_id(entry) not in seen:
+                def need():
+                    if query is None:
+                        return True
+                    if 'updated_parsed' in entry:
+                        return query.time <= Entry(entry).updated_parsed
+                    if 'published_parsed' in entry:
+                        return query.mtime <= Entry(entry).published_parsed
+                    return True
+                if need():
+                    yield bunchr(kind='feed.new', query=new.query, entry=entry)
 
     def spy(self, query, timeout):
         from .query import parse, regular
