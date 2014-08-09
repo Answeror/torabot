@@ -53,7 +53,7 @@ class Feed(
                     if query is None:
                         return True
                     if 'updated_parsed' in entry:
-                        return query.time <= Entry(entry).updated_parsed
+                        return query.mtime <= Entry(entry).updated_parsed
                     if 'published_parsed' in entry:
                         return query.mtime <= Entry(entry).published_parsed
                     return True
