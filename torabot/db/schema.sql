@@ -302,7 +302,7 @@ CREATE VIEW activated_watch AS
     w0.email_id,
     e0.text AS email_text
    FROM (watch w0
-   JOIN email e0 ON ((w0.email_id = e0.id)))
+     JOIN email e0 ON ((w0.email_id = e0.id)))
   WHERE (e0.activated = true);
 
 
@@ -433,7 +433,7 @@ CREATE TABLE "user" (
     openid text NOT NULL,
     ctime timestamp without time zone DEFAULT timezone('utc'::text, now()),
     maxwatch integer DEFAULT 42 NOT NULL,
-    activated boolean DEFAULT true,
+    activated boolean DEFAULT false,
     maxemail integer DEFAULT 3,
     CONSTRAINT user_maxemail_check CHECK ((maxemail > 0))
 );
