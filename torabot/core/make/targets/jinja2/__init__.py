@@ -19,7 +19,7 @@ class Target(Base):
         self.jinja2_env.filters['md5'] = lambda s: md5(s).hexdigest()
         self.jinja2_env.globals['datetime'] = datetime
 
-    def __call__(self, template, kargs):
+    def __call__(self, template, kargs={}):
         return self.get_template_content(template).render(**kargs)
 
     def get_template_content(self, name_or_content):
