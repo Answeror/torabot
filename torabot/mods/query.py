@@ -15,7 +15,7 @@ def query(kind, text, timeout, make_backend=PostgreSQL, **kargs):
             backend=make_backend(conn=conn),
             **kargs
         )
-    return q.result if q else q.result
+    return q.result if q else None
 
 
 def parse_json(query):
