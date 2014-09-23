@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xsl:stylesheet
+    version='1.0'
+    xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
+    xmlns:re='http://exslt.org/regular-expressions'
+    extension-element-prefixes='re'
+>
+    <xsl:output method='xml' encoding='UTF-8'/>
+    <xsl:template match='/'>
+        <feed xml:lang='zh-CN' xmlns='http://www.w3.org/2005/Atom'>
+            <id>www.pixiv.net/bookmark_new_illust.php</id>
+            <link rel='alternate' type='text/html' href='http://www.pixiv.net/bookmark_new_illust.php'/>
+            <title>pixiv following new work</title>
+            <xsl:for-each select='//li[@class="image-item"]'>
+                <xsl:variable name='link' select='.//a[@class="work"]/@href'/>
+                <xsl:variable name='id' select='re:replace($link, ".*=(\d+)", "", "\1")'/>
+                <entry>
+                    <id><xsl:value-of select='$id'/></id>
+                    <link rel='alternate' type='text/html' href='http://www.pixiv.net{$link}'></link>
+                    <title><xsl:value-of select='.//h1[@class="title"]'/></title>
+                    <content type='html'>
+                        <img target='_blank' href='http://rss.moe/thumb?referer=http://www.pixiv.net/&amp;uri={.//img/@src}'/>
+                    </content>
+                    <author>
+                        <xsl:variable name='user' select='.//a[@class="user ui-profile-popup"]'/>
+                        <name><xsl:value-of select='$user'/></name>
+                        <url>http://www.pixiv.net<xsl:value-of select='$user/@href'/></url>
+                    </author>
+                </entry>
+            </xsl:for-each>
+        </feed>
+    </xsl:template>
+</xsl:stylesheet>

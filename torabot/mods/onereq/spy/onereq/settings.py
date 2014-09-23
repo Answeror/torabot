@@ -19,6 +19,8 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
     'torabot.spy.middlewares.RotateUserAgentMiddleware': 400,
     'torabot.spy.middlewares.ProxyMiddleware': 410,
+    # 'scrapy.contrib.downloadermiddleware.redirect.RedirectMiddleware': None,
+    # 'torabot.spy.middlewares.RedirectWithCookieMiddleware': 600,
 }
 
 USER_AGENT = ''
@@ -27,4 +29,4 @@ HTTPCACHE_POLICY = 'scrapy.contrib.httpcache.RFC2616Policy'
 DNSCACHE_ENABLED = True
 DOWNLOAD_DELAY = 0.1
 AUTOTHROTTLE_ENABLED = False
-COOKIES_ENABLED = False
+COOKIES_ENABLED = True

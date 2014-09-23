@@ -22,11 +22,12 @@ class OnereqSpider(RedisSpider):
             query.get('uri'),
             method=query.get('method', 'GET'),
             headers=query.get('headers', {}),
+            body=query.get('body', ''),
             callback=self.parse,
             meta=dict(
                 query=query,
                 payload=query.get('payload'),
-                dont_merge_cookies=True,
+                cookiejar=query.get('env')
             ),
             dont_filter=True,
         )

@@ -1,10 +1,6 @@
-from logbook import Logger
-from flask import current_app, abort, request, jsonify
-from .... import celery
+from flask import abort, request, jsonify
 from .. import bp
-
-
-log = Logger(__name__)
+from ..ut import make
 
 
 MIME = {
@@ -23,15 +19,10 @@ def source(gist, format):
     if format not in MIME:
         return jsonify({"message": "invalid format"}), 400
 
-    args = {key: request.args[key] for key in request.args}
-    log.info('source {} with {}', gist, args)
-
-    result = celery.make_source.apply_async(
-        kwargs=dict(gist=gist, args=args),
-        expires=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT'],
-        time_limit=current_app.config['TORABOT_MAKE_TIMEOUT'],
-        soft_time_limit=current_app.config['TORABOT_MAKE_SOFT_TIMEOUT']
-    ).get(interval=0.1)
+    result = make(
+        gist=gist,
+        args={key: request.args[key] for key in request.args}
+    )
 
     if isinstance(result, int):
         abort(result)

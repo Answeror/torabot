@@ -1,0 +1,17 @@
+{
+    "@js": {
+        "code": {"text<": "changes.js"},
+        "args": [
+            "changes",
+            {
+                "text": "foo",
+                "result": {
+                    "arts": ["a", "b"]
+                }
+            },
+            {
+                "arts": ["b", "c", "d"]
+            }
+        ]
+    }
+}

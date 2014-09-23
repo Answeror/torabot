@@ -1,0 +1,28 @@
+<div id='pics' class=row>
+    {% for pic in query.result.arts %}
+    <div class='col-xs-4 col-sm-2 pic'>
+        <div class='thumbnail'>
+            <a href='{{ pic.uri }}' target=_blank><img alt='{{ pic.title }}' src='{{ pic.thumbnail_uri }}'></a>
+            <div class=caption>
+                <strong>{{ art.title }}</strong>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script src='//cdnjs.cloudflare.com/ajax/libs/masonry/3.1.2/masonry.pkgd.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/3.0.4/jquery.imagesloaded.min.js'></script>
+<script>
+    $(function() {
+        var $container = $('#pics');
+        $container.masonry({
+            columnWidth: '.pic',
+            itemSelector: '.pic'
+        });
+        $container.find('.pic').each(function() {
+            $(this).imagesLoaded(function() {
+                $container.masonry();
+            });
+        });
+    });
+</script>

@@ -17,7 +17,7 @@ log = Logger(__name__)
 
 def get_conf(files, args):
     for f in files:
-        if f['name'] == 'torabot.json':
+        if f['name'] in ['main.json', 'torabot.json']:
             return json.loads(jinja2.Template(
                 base64.b64decode(f['content']).decode('utf-8')
             ).render(**args))

@@ -1,5 +1,6 @@
 import json
 from flask import Blueprint
+import importlib
 from ..ut.bunch import bunchr
 from ..core.kanji import translate
 
@@ -65,6 +66,19 @@ class ViewMixin(object):
         if f is None:
             return super(ViewMixin, self).notice_attachments(view, notice)
         return f(notice)
+
+
+class ModuleViewMixin(ViewMixin):
+
+    def __init__(self, import_name):
+        self.import_name = import_name
+
+    def view(self, name):
+        return importlib.import_module('..' + name, self.import_name)
+
+
+def make_module_view_mixin(import_name):
+    return ModuleViewMixin(import_name)
 
 
 class NoEmptyQueryMixin(object):

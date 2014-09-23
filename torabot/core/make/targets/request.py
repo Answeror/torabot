@@ -14,13 +14,16 @@ class Target(Base):
             url=request['uri'],
             method=request.get('method', 'GET'),
             headers=request.get('headers', {}),
-            cookies=request.get('cookies', requests.cookies.RequestsCookieJar())
+            cookies=request.get('cookies', requests.cookies.RequestsCookieJar()),
+            data=request.get('body', '')
         ).prepare()
         return {
             'uri': request['uri'],
             'headers': dict(prepared.headers),
             'method': prepared.method,
+            'body': prepared.body,
             'payload': request.get('payload'),
+            'env': self.env.name
         }
 
     @property

@@ -4,6 +4,11 @@
 import random
 from scrapy.contrib.downloadermiddleware.useragent import UserAgentMiddleware
 from scrapy.conf import settings
+from scrapy.http.cookies import CookieJar
+from scrapy.contrib.downloadermiddleware.redirect import RedirectMiddleware
+from scrapy.http import Response
+import six
+from six.moves.urllib.parse import urljoin
 
 
 class RotateUserAgentMiddleware(UserAgentMiddleware):
@@ -62,3 +67,67 @@ class ProxyMiddleware(object):
             proxy = getattr(spider, 'proxy', settings.get('PROXY'))
             if proxy:
                 request.meta['proxy'] = proxy
+
+
+class RedirectWithCookieMiddleware(RedirectMiddleware):
+
+    def process_response(self, request, response, spider):
+        if 'dont_redirect' in request.meta:
+            return response
+
+        if request.method == 'HEAD':
+            if response.status in [301, 302, 303, 307] and 'Location' in response.headers:
+                redirected_url = urljoin(request.url, response.headers['location'])
+                redirected = request.replace(url=redirected_url)
+                self._merge_cookies(redirected, response)
+                return self._redirect(redirected, request, spider, response.status)
+            else:
+                return response
+
+        if response.status in [302, 303] and 'Location' in response.headers:
+            redirected_url = urljoin(request.url, response.headers['location'])
+            redirected = self._redirect_request_using_get(request, redirected_url)
+            self._merge_cookies(redirected, response)
+            return self._redirect(redirected, request, spider, response.status)
+
+        if response.status in [301, 307] and 'Location' in response.headers:
+            redirected_url = urljoin(request.url, response.headers['location'])
+            redirected = request.replace(url=redirected_url)
+            self._merge_cookies(redirected, response)
+            return self._redirect(redirected, request, spider, response.status)
+
+        return response
+
+    def _merge_cookies(self, request, response):
+        jar = CookieJar()
+        jar.extract_cookies(response, request)
+        cookies = self._get_request_cookies(jar, request)
+        for cookie in cookies:
+            jar.set_cookie_if_ok(cookie, request)
+
+        # set Cookie header
+        request.headers.pop('Cookie', None)
+        jar.add_cookie_header(request)
+
+    def _format_cookie(self, cookie):
+        # build cookie string
+        cookie_str = '%s=%s' % (cookie['name'], cookie['value'])
+
+        if cookie.get('path', None):
+            cookie_str += '; Path=%s' % cookie['path']
+        if cookie.get('domain', None):
+            cookie_str += '; Domain=%s' % cookie['domain']
+
+        return cookie_str
+
+    def _get_request_cookies(self, jar, request):
+        if isinstance(request.cookies, dict):
+            cookie_list = [{'name': k, 'value': v} for k, v in six.iteritems(request.cookies)]
+        else:
+            cookie_list = request.cookies
+
+        cookies = [self._format_cookie(x) for x in cookie_list]
+        headers = {'Set-Cookie': cookies}
+        response = Response(request.url, headers=headers)
+
+        return jar.make_cookies(response, request)

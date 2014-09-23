@@ -12,7 +12,9 @@ class Base(object):
 
     @classmethod
     def run(cls, env, conf):
-        if isinstance(conf, dict):
+        if isinstance(conf, list):
+            return [cls.run(env, item) for item in conf]
+        elif isinstance(conf, dict):
             conf = {key: cls.run(env, conf[key]) for key in conf}
 
             for symbol, kind in [
@@ -38,8 +40,6 @@ class Base(object):
                 result = target(*args, **kargs)
                 env.result[target.name] = result
                 return result
-        elif isinstance(conf, list):
-            return [cls.run(env, item) for item in conf]
         return conf
 
     def __init__(self, env, name=None):
