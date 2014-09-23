@@ -2,7 +2,12 @@ from nose.tools import assert_equal, assert_is_not_none, assert_greater
 from datetime import datetime, timedelta
 from . import g
 from ..notice import get_notices_bi_user_id, count_recent_notice_bi_user_id
-from ..user import add_user, add_email_bi_user_id, activate_email_bi_id
+from ..user import (
+    add_user,
+    add_email_bi_user_id,
+    activate_email_bi_id,
+    activate_user_bi_id
+)
 from ..watch import watch
 from ..query import (
     add_query,
@@ -14,16 +19,24 @@ from ..query import (
     get_query_count,
     del_inactive_queries,
 )
-from ..change import add_one_query_changes, del_old_changes
+from ..change import (
+    add_one_query_changes,
+    del_old_changes,
+    add_one_query_changes_unique,
+    get_change_count
+)
 
 
 def fake_add_users(conn):
-    return [add_user(
+    user_ids = [add_user(
         conn,
         name=name,
         email='%s@gmail.com' % name,
         openid=name,
     ) for name in ['foo', 'bar']]
+    for user_id in user_ids:
+        activate_user_bi_id(conn, user_id)
+    return user_ids
 
 
 def fake_add_queries(conn):
@@ -260,4 +273,31 @@ def test_del_old_changes_limit():
             limit=1
         )
         assert_equal(len(get_notices_bi_user_id(g.connection, user_id)), 1)
+        trans.rollback()
+
+
+def test_add_changes_unique():
+    with g.connection.begin_nested() as trans:
+        query_id = fake_add_queries(g.connection)[0]
+        assert_equal(get_change_count(g.connection), 0)
+        add_one_query_changes(
+            g.connection,
+            query_id,
+            [{}]
+        )
+        assert_equal(get_change_count(g.connection), 1)
+        add_one_query_changes_unique(
+            g.connection,
+            query_id,
+            [{}],
+            timedelta(days=1)
+        )
+        assert_equal(get_change_count(g.connection), 1)
+        add_one_query_changes_unique(
+            g.connection,
+            query_id,
+            [{}],
+            timedelta(days=-1)
+        )
+        assert_equal(get_change_count(g.connection), 2)
         trans.rollback()

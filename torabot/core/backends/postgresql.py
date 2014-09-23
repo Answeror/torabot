@@ -1,3 +1,4 @@
+from datetime import timedelta
 from ... import db
 from .base import Backend
 
@@ -23,7 +24,12 @@ class PostgreSQL(Backend):
         return db.touch_query_bi_id(self.conn, id)
 
     def add_one_query_changes(self, id, changes):
-        return db.add_one_query_changes(self.conn, id, changes)
+        return db.add_one_query_changes_unique(
+            self.conn,
+            id,
+            changes,
+            timedelta(days=1)
+        )
 
     def set_query_result(self, id, result):
         return db.set_query_result(self.conn, id, result)

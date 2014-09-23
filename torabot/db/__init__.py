@@ -69,6 +69,7 @@ from .notice import (
 )
 from .change import (
     add_one_query_changes,
+    add_one_query_changes_unique,
     del_old_changes,
     get_change_count,
 )
@@ -141,4 +142,5 @@ __all__ = [
     del_inactive_queries.__name__,
     del_old_changes.__name__,
     get_change_count.__name__,
+    add_one_query_changes_unique.__name__,
 ]

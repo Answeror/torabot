@@ -42,23 +42,10 @@ class Feed(
 
     def changes(self, old, new, **kargs):
         from .ut import entry_id
-        from .types import Entry
-        query = kargs.get('query')
         seen = {entry_id(entry) for entry in old.get('data', {}).get('entries', [])}
         for i, entry in enumerate(new.get('data', {}).get('entries', [])):
-            # only emit changes newer than last update
-            # to deal with bad rss with empty content accidentially
             if entry_id(entry) not in seen:
-                def need():
-                    if query is None:
-                        return True
-                    if 'updated_parsed' in entry:
-                        return query.mtime <= Entry(entry).updated_parsed
-                    if 'published_parsed' in entry:
-                        return query.mtime <= Entry(entry).published_parsed
-                    return True
-                if need():
-                    yield bunchr(kind='feed.new', query=new.query, entry=entry)
+                yield bunchr(kind='feed.new', query=new.query, entry=entry)
 
     def spy(self, query, timeout):
         from .query import parse, regular
