@@ -316,7 +316,8 @@ CREATE TABLE change (
     id integer NOT NULL,
     query_id integer,
     data json DEFAULT '{}'::json NOT NULL,
-    ctime timestamp without time zone DEFAULT timezone('utc'::text, now())
+    ctime timestamp without time zone DEFAULT timezone('utc'::text, now()),
+    hash text
 );
 
 
@@ -593,6 +594,13 @@ CREATE INDEX idx_change_ctime ON change USING btree (ctime);
 
 
 --
+-- Name: idx_change_hash; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+--
+
+CREATE INDEX idx_change_hash ON change USING btree (hash);
+
+
+--
 -- Name: idx_email_id_activated; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
 --
 
@@ -715,7 +723,7 @@ CREATE TRIGGER update_main_email AFTER UPDATE OF text, activated ON email FOR EA
 -- Name: update_query_mtime; Type: TRIGGER; Schema: public; Owner: answeror
 --
 
-CREATE TRIGGER update_query_mtime BEFORE UPDATE ON query FOR EACH ROW EXECUTE PROCEDURE update_query_mtime();
+CREATE TRIGGER update_query_mtime BEFORE UPDATE OF result ON query FOR EACH ROW EXECUTE PROCEDURE update_query_mtime();
 
 
 --
