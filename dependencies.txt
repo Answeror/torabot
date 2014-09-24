@@ -1,6 +1,6 @@
 Flask==0.10.1
 Flask-Cache-Latest==0.12
-Flask-OpenID==1.42.1
+git+https://github.com/mitsuhiko/flask-openid.git
 Jinja2==2.7.1
 Logbook==0.7.0
 MarkupSafe==0.18
