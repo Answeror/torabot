@@ -9,7 +9,6 @@ CURRENT_PATH = os.path.dirname(__file__)
 
 def test_parse_user_arts():
     for name in [
-        '32165.html',
         'tid.html',
     ]:
         yield check_parse_user_arts, name
