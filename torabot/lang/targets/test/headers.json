@@ -7,5 +7,5 @@
     "Cookie": "chii_auth={{ chii_auth }}; chii_cookietime=2592000",
     "Host": "bgm.tv",
     "Referer": "http://bgm.tv/",
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.114 Safari/537.36"
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0"
 }

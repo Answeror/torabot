@@ -32,8 +32,12 @@ BUSY_BODY_MD5_LIST = {
 
 
 def checkbusy(f):
-    check = lambda response: md5(response.body).hexdigest() in BUSY_BODY_MD5_LIST
-    make = lambda response: failed(response.meta['query'], 'pixiv busy', expected=True)
+    def check(response):
+        return md5(response.body).hexdigest() in BUSY_BODY_MD5_LIST
+
+    def make(response):
+        failed(response.meta['query'], 'pixiv busy', expected=True)
+
     if inspect.isgeneratorfunction(f):
         def inner(self, response):
             if check(response):
@@ -276,10 +280,10 @@ def make_ranking_uri(query):
 def parse_user_arts(sel):
     author = sel.xpath('//h1[@class="user"]/text()').extract()[0]
     # http://stackoverflow.com/a/9133579
-    for a in sel.xpath('//a[contains(concat(" ", normalize-space(@class), " "), " work ")]'):
+    for li in sel.xpath('//li[contains(concat(" ", normalize-space(@class), " "), " image-item ")]'):
         yield Art(
-            title=a.xpath('.//h1/@title').extract()[0],
+            title=li.xpath('.//h1/@title').extract()[0],
             author=author,
-            uri=urljoin(BASE_URL, a.xpath('@href').extract()[0]),
-            thumbnail_uri=a.xpath('.//img/@src').extract()[0],
+            uri=urljoin(BASE_URL, li.xpath('.//a/@href').extract()[0]),
+            thumbnail_uri=li.xpath('.//img/@src').extract()[0],
         )

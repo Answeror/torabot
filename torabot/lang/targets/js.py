@@ -1,12 +1,47 @@
+from asyncio import coroutine
 import execjs
+from ..errors import LangError
 from .base import Base
 
 
 class Target(Base):
+    '''Execute Javascript using node.js
+
+    TODO: async execute
+    '''
 
     unary = False
 
-    def __call__(self, code, args):
+    @coroutine
+    def __call__(self, *args, **kargs):
+        if args and kargs:
+            raise LangError('Either args or kargs must be empty')
+        if args:
+            if len(args) == 1:
+                return self._do(args[0], 'main', [])
+            if len(args) == 2:
+                if isinstance(args[1], str):
+                    return self._do(args[0], args[1], [])
+                return self._do(args[0], 'main', args[1])
+            if len(args) == 3:
+                return self._do(*args)
+            raise LangError('Too many args')
+        if kargs:
+            return self._do(
+                kargs.get('code'),
+                kargs.get('func', 'main'),
+                kargs.get('args', [])
+            )
+        assert False, 'Cannot reach here'
+
+    def _do(self, code, func, args):
+        if not isinstance(code, str):
+            raise LangError('Argument 1 (code) must be str')
+        if not isinstance(func, str):
+            raise LangError('Argument 2 (func) must be str')
+        if not isinstance(args, list):
+            raise LangError('Argument 3 (args) must be list')
+
         node = execjs.get('Node')
         context = node.compile(code)
-        return context.call(*args)
+        return context.call(func, *args)

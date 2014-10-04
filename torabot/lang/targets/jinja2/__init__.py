@@ -1,7 +1,9 @@
-import jsonpickle
+import json
+from asyncio import coroutine
 from datetime import datetime
 from jinja2 import Environment, PackageLoader
 from hashlib import md5
+from ...errors import LangError
 from ..base import Base
 
 
@@ -9,22 +11,28 @@ class Target(Base):
 
     unary = False
 
-    def __init__(self, *args, **kargs):
-        super(Target, self).__init__(*args, **kargs)
+    def _init_jinja2_env(self):
         self.jinja2_env = Environment(loader=PackageLoader(
-            'torabot.core.make.targets.jinja2',
+            self.__module__,
             'templates'
         ))
-        self.jinja2_env.filters['tojson'] = jsonpickle.encode
-        self.jinja2_env.filters['md5'] = lambda s: md5(s).hexdigest()
-        self.jinja2_env.globals['datetime'] = datetime
+        self.jinja2_env.filters.update(
+            tojson=json.dumps,
+            md5=lambda s: md5(s).hexdigest()
+        )
+        self.jinja2_env.globals.update(
+            datetime=datetime
+        )
 
+    @coroutine
     def __call__(self, template, kargs={}):
+        self._init_jinja2_env()
         return self.get_template_content(template).render(**kargs)
 
     def get_template_content(self, name_or_content):
         if isinstance(name_or_content, str):
             return self.jinja2_env.from_string(name_or_content)
-        assert isinstance(name_or_content, dict), 'unknown type: {}'.format(type(name_or_content))
+        if not isinstance(name_or_content, dict):
+            raise LangError('Unknown type: {}'.format(type(name_or_content)))
         name = name_or_content['name']
         return self.jinja2_env.get_template(name)

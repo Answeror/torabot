@@ -1,77 +1,39 @@
 {
-    "@": "all",
-    "args": [
+    "@all": [
         {
             "@": "json_decode",
             "name": "headers",
             "args": [
                 {
-                    "@": "jinja2",
-                    "kargs": {
-                        "template": {
-                            "@": "read",
-                            "kargs": {
-                                "name": "headers.json",
-                                "type": "text"
-                            }
-                        },
-                        "kargs": {
-                            "chii_auth": "{{ chii_auth }}"
-                        }
+                    "@jinja2": {
+                        "template": { "text<": "headers.json" },
+                        "kargs": { "chii_auth": "{{ chii_auth }}" }
                     }
                 }
             ]
         },
         {
-            "@": "request",
-            "name": "update_cookie",
-            "args": [
-                {
-                    "uri": "http://bgm.tv",
-                    "headers": {"&": "headers"}
-                }
-            ]
+            "@request": [{
+                "uri": "http://bgm.tv",
+                "headers": { "&": "headers" }
+            }]
         },
         {
-            "@": "set_cookie",
-            "name": "set_cookie",
-            "kargs": {
-                "request": {
-                    "uri": "http://bgm.tv/pm",
-                    "headers": {"&": "headers"}
+            "@xslt": {
+                "html": {
+                    "@base64_decode": {
+                        "[]": [
+                            {
+                                "@request": [{
+                                    "uri": "http://bgm.tv/pm",
+                                    "headers": { "&": "headers" }
+                                }]
+                            },
+                            "body"
+                        ]
+                    }
                 },
-                "set_cookie": {
-                    "[]": [
-                        {"&": "update_cookie"},
-                        "headers",
-                        "Set-Cookie"
-                    ]
-                }
-            }
-        },
-        {
-            "@": "request",
-            "name": "get_html",
-            "args": [{"&": "set_cookie"}]
-        },
-        {
-            "@": "base64_decode",
-            "name": "decode",
-            "args": [
-                {"[]": [{"&": "get_html"}, "body"]}
-            ]
-        },
-        {
-            "@": "xslt",
-            "kargs": {
-                "html": {"&": "decode"},
-                "xslt": {
-                    "@": "read",
-                    "kargs": {
-                        "name": "bgm_pm.xslt",
-                        "type": "text"
-                    }
-                }
+                "xslt": { "text<": "bgm_pm.xslt" }
             }
         }
     ]

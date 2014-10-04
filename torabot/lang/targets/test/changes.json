@@ -1,8 +1,8 @@
 {
     "@js": {
         "code": {"text<": "changes.js"},
+        "func": "changes",
         "args": [
-            "changes",
             {
                 "text": "foo",
                 "result": {

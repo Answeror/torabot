@@ -11,7 +11,7 @@
         "uri": "http://www.pixiv.net/bookmark_new_illust.php",
         "arts": [
         <xsl:for-each select='//li[@class="image-item"]'>
-            <xsl:variable name='link' select='.//a[@class="work"]/@href'/>
+            <xsl:variable name='link' select='.//a/@href'/>
             <xsl:variable name='id' select='re:replace($link, ".*=(\d+)", "", "\1")'/>
             <xsl:variable name='user' select='.//a[@class="user ui-profile-popup"]'/>
             {

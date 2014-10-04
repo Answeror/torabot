@@ -74,6 +74,7 @@ from .change import (
     get_change_count,
 )
 from . import error
+from .fixtures import DatabaseFixture
 
 
 __all__ = [
@@ -143,4 +144,5 @@ __all__ = [
     del_old_changes.__name__,
     get_change_count.__name__,
     add_one_query_changes_unique.__name__,
+    DatabaseFixture.__name__
 ]

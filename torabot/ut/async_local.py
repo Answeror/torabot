@@ -1,9 +1,12 @@
 import aioredis
-from flask import current_app
 from asyncio import coroutine
+from .local import Local as SyncLocal
 
 
-class Local(object):
+class AsyncLocal(object):
+
+    def __init__(self, conf='toraconf'):
+        self.sync_local = SyncLocal(conf)
 
     @property
     @coroutine
@@ -17,7 +20,7 @@ class Local(object):
 
     @property
     def conf(self):
-        return current_app.config
+        return self.sync_local.conf
 
 
-local = Local()
+local = AsyncLocal()

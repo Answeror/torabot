@@ -1,8 +1,10 @@
 import os
 import pkgutil
 import importlib
+from asyncio import coroutine
 from uuid import uuid4
 from nose.tools import assert_is_instance
+from ..errors import LangError
 
 
 none = object()
@@ -11,11 +13,23 @@ none = object()
 class Base(object):
 
     @classmethod
+    @coroutine
     def run(cls, env, conf):
         if isinstance(conf, list):
-            return [cls.run(env, item) for item in conf]
+            #return list((yield from cls.run(env, item)) for item in conf)
+            d = []
+            for item in conf:
+                d.append((yield from cls.run(env, item)))
+            return d
         elif isinstance(conf, dict):
-            conf = {key: cls.run(env, conf[key]) for key in conf}
+            #conf = dict(
+                #(key, (yield from cls.run(env, conf[key])))
+                #for key in conf
+            #)
+            d = {}
+            for key in conf:
+                d[key] = yield from cls.run(env, conf[key])
+            conf = d
 
             for symbol, kind in [
                 ('&', 'use'),
@@ -23,12 +37,12 @@ class Base(object):
                 ('<', 'read'),
                 ('text<', 'read_text'),
             ] + [('@' + kind, kind) for kind in target_types()]:
-                parse_shortcut(conf, symbol, kind)
+                expand_shortcut(conf, symbol, kind)
 
             kind = conf.get('@', none)
             if kind is not none:
                 if '.' in kind:
-                    raise Exception('unknown target type: %s' % kind)
+                    raise LangError('Unknown target type: %s' % kind)
                 target = targetcls(kind)(env=env, name=conf.get('name'))
                 args = conf.get('args', [])
                 assert_is_instance(args, list)
@@ -37,17 +51,26 @@ class Base(object):
                     args = [arg] + args
                 kargs = conf.get('kargs', {})
                 assert_is_instance(kargs, dict)
-                result = target(*args, **kargs)
+                result = yield from target(*args, **kargs)
                 env.result[target.name] = result
                 return result
         return conf
 
     def __init__(self, env, name=None):
         self.env = env
-        self.name = str(uuid4()) if name is None else name
+        self.name = random_name() if name is None else name
+
+    def regular_context(self, name):
+        if name is None:
+            name = 'default'
+        return self.__module__.split('.')[-1] + '.' + name
 
 
-def parse_shortcut(conf, symbol, kind):
+def random_name():
+    return str(uuid4())
+
+
+def expand_shortcut(conf, symbol, kind):
     item = conf.get(symbol, none)
     if item is not none:
         del conf[symbol]

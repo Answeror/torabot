@@ -1,5 +1,6 @@
 from flask import Flask
 from .app_mixins import RedisPubMixin
+from .ut.conf import init_conf
 
 
 class App(RedisPubMixin, Flask):
@@ -19,13 +20,7 @@ class App(RedisPubMixin, Flask):
         cache.init_app(self)
 
     def _init_conf(self, config):
-        try:
-            import toraconf
-            self.config.from_object(toraconf)
-        except:
-            from . import conf
-            self.config_from_object(conf)
-
+        init_conf(self.config, 'toraconf')
         if config is not None:
             self.config.update(config)
 
