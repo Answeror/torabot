@@ -3,6 +3,7 @@ import jinja2
 import feedparser
 import jsonpickle
 from nose.tools import assert_equal, assert_greater
+from .....ut.local import local
 from ..... import make
 from ...envs.fs import Env
 from .. import Target
@@ -29,7 +30,7 @@ def test_bgm_pm_task():
         result = Target.run(
             Env(CURRENT_PATH),
             jsonpickle.decode(jinja2.Template(read('bgm_pm.json')).render(
-                chii_auth=read('chii_auth').strip()
+                chii_auth=local.conf['TORABOT_TEST_CHII_AUTH']
             ))
         )
         feed = feedparser.parse(result)
