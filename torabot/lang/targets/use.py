@@ -5,6 +5,7 @@ from .base import Base
 class Target(Base):
 
     unary = True
+    shortcut_prefix = '&'
 
     @coroutine
     def __call__(self, name):

@@ -2,8 +2,7 @@ function main(username, password){
     return {
         "@all": [
             {
-                "@request[login]": {
-                    "context": "pixiv",
+                "@request": {
                     "uri": "http://www.pixiv.net/login.php",
                     "method": "POST",
                     "headers": {
@@ -19,8 +18,7 @@ function main(username, password){
                     "@xslt": {
                         "html_encoded": {
                             "[body]": {
-                                "@request/login": {
-                                    "context": "pixiv",
+                                "@request": {
                                     "uri": "http://www.pixiv.net/bookmark_new_illust.php"
                                 }
                             }

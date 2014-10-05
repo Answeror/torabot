@@ -6,6 +6,7 @@ from .base import Base
 class Target(Base):
 
     unary = False
+    shortcut_prefix = '<'
 
     @coroutine
     def __call__(self, name, type):
