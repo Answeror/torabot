@@ -5,7 +5,7 @@ import pkgutil
 import importlib
 from functools import partial
 from logbook import Logger
-from asyncio import coroutine
+from asyncio import coroutine, gather
 from uuid import uuid4
 from nose.tools import assert_is_instance
 from ...ut.async_local import local
@@ -82,7 +82,7 @@ class Base(metaclass=Meta):
     @coroutine
     def _parse(cls, env, conf):
         conf = yield from cls._expand(conf)
-        print(json.dumps(conf, indent=4))
+        # print(json.dumps(conf, indent=4))
         conf = yield from bind(env, conf)
         return conf
 
@@ -95,21 +95,33 @@ class Base(metaclass=Meta):
             args = [arg] + args
         kargs = conf.get('kargs', {})
         assert_is_instance(kargs, dict)
-        self.__args = yield from trans_list(args, partial(bind, env))
-        self.__kargs = yield from trans_dict(kargs, partial(bind, env))
-        self._depend_subs = {}
-        for dep in self.depends:
-            self._depend_subs[dep] = yield from self.sub(dep)
+        self.__args, self.__kargs, self._depend_subs = yield from gather(
+            trans_list(args, partial(bind, env)),
+            trans_dict(kargs, partial(bind, env)),
+            trans_dict(dict(zip(self.depends, self.depends)), self.sub)
+        )
         return self
 
     @coroutine
     def _eval(self):
-        self.__args = yield from trans_list(self.__args, eval)
-        self.__kargs = yield from trans_dict(self.__kargs, eval)
-        self.depend_result = {}
-        for dep, sub in self._depend_subs.items():
-            self.depend_result[dep] = json.loads(
-                (yield from sub.next_published()).value
+        self.__args, self.__kargs, self.depend_result = yield from gather(
+            trans_list(self.__args, eval),
+            trans_dict(self.__kargs, eval),
+            trans_dict(self._depend_subs, next_result)
+            #Can't use lambda here, don't know why
+            #trans_dict(
+                #self._depend_subs,
+                #coroutine(lambda sub: json.loads(
+                    #(yield from sub.next_published()).value
+                #))
+            #)
+        )
+        if '@' in self.__kargs:
+            raise LangError(
+                'Wrong arg of @{}[{}]. Maybe missing a [ ] outside?'.format(
+                    self.kind,
+                    self.name
+                )
             )
         result = yield from self(*self.__args, **self.__kargs)
         yield from self.pub(result)
@@ -189,18 +201,15 @@ def eval(conf):
 
 @coroutine
 def trans_list(conf, func):
-    expanded = []
-    for item in conf:
-        expanded.append((yield from func(item)))
-    return expanded
+    return (yield from gather(*[func(item) for item in conf]))
 
 
 @coroutine
 def trans_dict(conf, func):
-    expanded = {}
-    for key in conf:
-        expanded[key] = yield from func(conf[key])
-    return expanded
+    return dict(zip(
+        conf,
+        (yield from gather(*[func(conf[key]) for key in conf]))
+    ))
 
 
 def try_expand_shortcut(conf):
@@ -232,3 +241,8 @@ def try_expand_conf(conf):
     if kind is not none:
         conf = targetcls(kind)._postprocess_conf(conf)
     return conf
+
+
+@coroutine
+def next_result(sub):
+    return json.loads((yield from sub.next_published()).value)

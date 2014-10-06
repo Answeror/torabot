@@ -1,8 +1,8 @@
 import json
+from nose.tools import assert_equal
 from ....ut.async_local import local
 from ....ut.async_test_tools import with_event_loop
 from .. import Target
-from nose.tools import assert_equal
 from .ut import make_fs_env
 
 
