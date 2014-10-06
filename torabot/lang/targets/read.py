@@ -10,17 +10,20 @@ class Target(Base):
 
     @coroutine
     def __call__(self, name, type):
-        return {
+        return (yield from {
             'blob': self.read,
             'text': self.read_text,
             'json': self.read_json,
-        }[type](name)
+        }[type](name))
 
+    @coroutine
     def read(self, name):
-        return self.env.read(name)
+        return (yield from self.env.read(name))
 
+    @coroutine
     def read_text(self, name):
-        return self.read(name).decode('utf-8')
+        return (yield from self.read(name)).decode('utf-8')
 
+    @coroutine
     def read_json(self, name):
-        return json.loads(self.read_text(name))
+        return json.loads((yield from self.read_text(name)))

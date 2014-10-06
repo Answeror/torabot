@@ -1,5 +1,6 @@
 import os
 import base64
+from asyncio import coroutine
 from .base import Base
 
 
@@ -10,6 +11,7 @@ class Env(Base):
         self.d = d
         self.root = root
 
+    @coroutine
     def read(self, name):
         for f in self.d['files']:
             if f['name'] == name:

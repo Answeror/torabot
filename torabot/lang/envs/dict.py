@@ -1,4 +1,5 @@
 import base64
+from asyncio import coroutine
 from .base import Base
 
 
@@ -8,6 +9,7 @@ class Env(Base):
         super(Env, self).__init__()
         self.d = d
 
+    @coroutine
     def read(self, name):
         for f in self.d:
             if f['name'] == name:

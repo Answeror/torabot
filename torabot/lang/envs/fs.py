@@ -1,4 +1,5 @@
 import os
+from asyncio import coroutine
 from .base import Base
 
 
@@ -8,6 +9,7 @@ class Env(Base):
         super(Env, self).__init__()
         self.root = root
 
+    @coroutine
     def read(self, name):
         with open(os.path.join(self.root, name), 'rb') as f:
             return f.read()
