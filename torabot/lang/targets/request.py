@@ -3,6 +3,7 @@ import aiohttp
 from logbook import Logger
 from asyncio import coroutine, wait_for
 from ...ut.async_local import local
+from ...ut.async_request import request
 from .base import Base
 
 
@@ -25,16 +26,15 @@ class Target(Base):
             cookies=kargs.get('cookies', {}),
             data=base64.b64decode(kargs.get('body', ''))
         )
-        options['connector'] = self._conn(self.regular_context(context))
+        if context is not None:
+            options['connector'] = self._conn(self.regular_context(context))
         return options
 
     def _conn(self, name):
         '''TCP connection for Cookies sharing'''
         c = self.env.context.get(name)
         if c is None:
-            c = aiohttp.TCPConnector(
-                share_cookies=name != self.regular_context(None)
-            )
+            c = aiohttp.TCPConnector(share_cookies=True)
             self.env.context[name] = c
         return c
 
@@ -46,9 +46,10 @@ class Target(Base):
     def __call__(self, uri, **kargs):
         options = self._prepare(uri=uri, **kargs)
         log.debug('Request headers: {}', options['headers'])
-        log.debug('Connection cookies: {}', options['connector'].cookies)
+        if 'context' in kargs:
+            log.debug('Connection cookies: {}', options['connector'].cookies)
         resp = yield from wait_for(
-            aiohttp.request(**options),
+            request(**options),
             timeout=kargs.get('timeout', self.default_timeout)
         )
         log.debug('Response headers: {}', resp.headers)
