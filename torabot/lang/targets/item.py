@@ -30,6 +30,10 @@ class Target(Base):
 
     @classmethod
     def _try_expand_shortcut(cls, key, value):
+        expanded = Base._try_expand_shortcut(key, value)
+        if expanded is not None:
+            return expanded
+
         ma = RE.search(key)
         if not ma:
             return None

@@ -10,7 +10,8 @@ function main(chii_auth) {
                 }
             },
             {
-                "@request": {
+                "@request[login]": {
+                    "context": "bangumi",
                     "uri": "http://bgm.tv",
                     "headers": { "&": "headers" }
                 }
@@ -19,7 +20,8 @@ function main(chii_auth) {
                 "@xslt": {
                     "html_encoded": {
                         "[body]": {
-                            "@request": {
+                            "@request/login": {
+                                "context": "bangumi",
                                 "uri": "http://bgm.tv/pm",
                                 "headers": { "&": "headers" }
                             }

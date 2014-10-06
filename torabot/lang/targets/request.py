@@ -56,7 +56,7 @@ class Target(Base):
             'status': resp.status,
             'headers': dict(resp.headers),
             'cookies': dict(resp.cookies),
-            'body': base64.b64encode((yield from resp.read()))
+            'body': base64.b64encode((yield from resp.read())).decode('ascii')
         }
         if 'context' in kargs:
             result['context'] = {
