@@ -1,4 +1,5 @@
 import sh
+import sys
 from functools import wraps
 from nose.tools import assert_is_not_none
 from .. import make
@@ -6,6 +7,8 @@ from ..core.mod import mod
 
 
 def check_scrapyd():
+    if sys.platform == 'darwin':
+        return True
     if 'scrapyd' not in sh.ps('cax'):
         raise RuntimeError('scrapyd not running')
 

@@ -1,8 +1,7 @@
-from flask import Flask
+from ..async_web import App
 
 
-app = Flask(__name__)
-app.config.from_object('toraconf')
+app = App(__name__)
 
 
 from . import views

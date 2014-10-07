@@ -33,7 +33,7 @@ def request(cache_life=None, **kargs):
     if cache is not None:
         if (
             resp.headers.get('etag', lhs) == cache['data'].headers.get('etag', rhs) or
-            resp.headers.get('last-modified', lhs) == cache['last-modified'].headers.get('etag', rhs)
+            resp.headers.get('last-modified', lhs) == cache['data'].headers.get('last-modified', rhs)
         ):
             return cache['data']
 
@@ -81,5 +81,4 @@ class Response(object):
 
     @coroutine
     def read(self):
-        print(self.body)
         return self.body
