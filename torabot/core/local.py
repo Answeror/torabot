@@ -1,18 +1,11 @@
 from werkzeug.local import LocalProxy
 from flask import g, session, request
 from .. import db
+from ..ut.local import local
 
 
 def get_current_conf():
-    try:
-        from flask import current_app
-        return current_app.config
-    except:
-        try:
-            from celery import current_app
-            return current_app.conf
-        except:
-            return {}
+    return local.conf
 
 
 def get_is_user():

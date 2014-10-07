@@ -38,10 +38,7 @@ CELERYBEAT_SCHEDULE = {
 }
 
 TORABOT_DEBUG = False
-TORABOT_CONNECTION_STRING = (
-    'postgresql+psycopg2://{0}:{0}@localhost/{0}'
-    .format('torabot-dev')
-)
+TORABOT_CONNECTION_STRING = 'postgresql+psycopg2://localhost/torabot-test'
 TORABOT_SYNC_THREADS = 32
 TORABOT_EMAIL_HEAD = 'torabot notice'
 TORABOT_SPY_TIMEOUT = 30
