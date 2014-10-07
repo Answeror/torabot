@@ -220,7 +220,7 @@ def try_expand_shortcut(conf):
 
     for cls in map(targetcls, sorted(target_types(), reverse=True)):
         basic_prefix = '@' + cls.kind
-        if key.startswith(basic_prefix):
+        if re.search('^' + basic_prefix + '[^_\w\d]', key + '$'):
             expanded = cls._expand_prefix_shortcut(key, conf[key], basic_prefix)
         else:
             expanded = cls.try_expand_shortcut(key, conf[key])
