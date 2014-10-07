@@ -45,14 +45,14 @@ class Target(Base):
     @coroutine
     def __call__(self, uri, **kargs):
         options = self._prepare(uri=uri, **kargs)
-        log.debug('Request headers: {}', options['headers'])
-        if 'context' in kargs:
-            log.debug('Connection cookies: {}', options['connector'].cookies)
+        # log.debug('Request headers: {}', options['headers'])
+        # if 'context' in kargs:
+            # log.debug('Connection cookies: {}', options['connector'].cookies)
         resp = yield from wait_for(
             request(**options),
             timeout=kargs.get('timeout', self.default_timeout)
         )
-        log.debug('Response headers: {}', resp.headers)
+        # log.debug('Response headers: {}', resp.headers)
         result = {
             'status': resp.status,
             'headers': dict(resp.headers),

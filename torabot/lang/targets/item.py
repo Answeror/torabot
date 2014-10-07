@@ -29,8 +29,8 @@ class Target(Base):
         return key
 
     @classmethod
-    def _try_expand_shortcut(cls, key, value):
-        expanded = Base._try_expand_shortcut(key, value)
+    def try_expand_shortcut(cls, key, value):
+        expanded = Base.try_expand_shortcut(key, value)
         if expanded is not None:
             return expanded
 

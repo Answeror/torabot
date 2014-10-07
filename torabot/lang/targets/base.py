@@ -14,8 +14,8 @@ from ..errors import LangError
 
 log = Logger(__name__)
 none = object()
-name_re = re.compile(r'\S\[([_\w][_\w\d]*)\]')
-pubsub_channel_template = 'torabot:lang:env:{}:{}'
+NAME_RE = re.compile(r'\S\[([_\w][_\w\d]*)\]')
+PUBSUB_CHANNEL_TEMPLATE = 'torabot:lang:env:{}:{}'
 
 
 class Meta(type):
@@ -45,7 +45,7 @@ class Base(metaclass=Meta):
         redis = yield from local.redis
         sub = yield from redis.start_subscribe()
         yield from sub.subscribe([
-            pubsub_channel_template.format(self.env.name, channel)
+            PUBSUB_CHANNEL_TEMPLATE.format(self.env.name, channel)
         ])
         return sub
 
@@ -54,7 +54,7 @@ class Base(metaclass=Meta):
         channel = self.name
         redis = yield from local.redis
         return (yield from redis.publish(
-            pubsub_channel_template.format(self.env.name, channel),
+            PUBSUB_CHANNEL_TEMPLATE.format(self.env.name, channel),
             json.dumps(message)
         ))
 
@@ -108,13 +108,13 @@ class Base(metaclass=Meta):
             trans_list(self.__args, eval),
             trans_dict(self.__kargs, eval),
             trans_dict(self._depend_subs, next_result)
-            #Can't use lambda here, don't know why
-            #trans_dict(
-                #self._depend_subs,
-                #coroutine(lambda sub: json.loads(
-                    #(yield from sub.next_published()).value
-                #))
-            #)
+            # Can't use lambda here, don't know why
+            # trans_dict(
+                # self._depend_subs,
+                # coroutine(lambda sub: json.loads(
+                    # (yield from sub.next_published()).value
+                # ))
+            # )
         )
         if '@' in self.__kargs:
             raise LangError(
@@ -128,7 +128,7 @@ class Base(metaclass=Meta):
         return result
 
     @classmethod
-    def _try_expand_shortcut(cls, key, value):
+    def try_expand_shortcut(cls, key, value):
         if cls.shortcut_prefix and key.startswith(cls.shortcut_prefix):
             return cls._expand_prefix_shortcut(key, value, cls.shortcut_prefix)
 
@@ -223,10 +223,10 @@ def try_expand_shortcut(conf):
         if key.startswith(basic_prefix):
             expanded = cls._expand_prefix_shortcut(key, conf[key], basic_prefix)
         else:
-            expanded = cls._try_expand_shortcut(key, conf[key])
+            expanded = cls.try_expand_shortcut(key, conf[key])
         if expanded is not None:
             expanded['@'] = cls.kind
-            name_match = name_re.search(key)
+            name_match = NAME_RE.search(key)
             if name_match:
                 expanded['name'] = name_match.group(1)
             expanded['depends'] = key.split('/')[1:]

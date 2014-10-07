@@ -1,6 +1,10 @@
-from asyncio import coroutine
+import re
 import json
+from asyncio import coroutine
 from .base import Base
+
+
+RE = re.compile(r'^([_\w\d]*)<')
 
 
 class Target(Base):
@@ -27,3 +31,16 @@ class Target(Base):
     @coroutine
     def read_json(self, name):
         return json.loads((yield from self.read_text(name)))
+
+    @classmethod
+    def try_expand_shortcut(cls, key, value):
+        expanded = Base.try_expand_shortcut(key, value)
+        if expanded is not None:
+            return expanded
+
+        match = RE.search(key)
+        if not match:
+            return None
+        if match.group(1):
+            return {'args': [value, match.group(1)]}
+        return {'arg': value}
