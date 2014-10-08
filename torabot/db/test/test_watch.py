@@ -1,8 +1,11 @@
 from nose.tools import assert_raises, assert_is_not_none
-from ..user import add_user
-from ..watch import watch, get_watches_bi_user_id
-from ..query import add_query
-from ..error import WatchCountLimitError
+from .. import (
+    add_user,
+    watch,
+    get_watches_bi_user_id,
+    add_query,
+    WatchCountLimitError
+)
 from . import g
 
 
@@ -12,7 +15,7 @@ def test_maxwatch():
             g.connection,
             name='answeror',
             email='answeror+torabot@gmail.com',
-            openid='whatever',
+            password_hash='whatever',
         )
 
         query_ids = []
@@ -42,7 +45,7 @@ def test_default_watch_email():
             g.connection,
             name='answeror',
             email='answeror+torabot@gmail.com',
-            openid='whatever',
+            password_hash='whatever',
         )
         query_id = add_query(
             g.connection,

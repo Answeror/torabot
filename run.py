@@ -16,4 +16,4 @@ if __name__ == '__main__':
             instance_path=os.path.join(CURRENT_PATH, 'data'),
             instance_relative_config=True,
         )
-        app.run(threaded=True)
+        app.run(threaded=True, debug=True)

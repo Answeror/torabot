@@ -51,7 +51,7 @@ def error_guard(f):
             raise InvalidArgumentError from e
         except sqlalchemy.exc.IntegrityError as e:
             if 'duplicate' in str(e):
-                raise UniqueConstraintError from e
+                raise UniqueConstraintError(str(e)) from e
             if 'update or delete on table "email" violates foreign key constraint "watch_email_id_fkey" on table "watch"' in str(e):
                 raise DeleteEmailInUseError from e
             raise

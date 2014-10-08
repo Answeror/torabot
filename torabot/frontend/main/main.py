@@ -10,6 +10,7 @@ from flask import (
     render_template,
     redirect,
     url_for,
+    session,
     make_response as flask_make_response
 )
 from flask.views import MethodView
@@ -29,6 +30,14 @@ from ...core.user import (
     update_email as core_update_email,
     add_email as core_add_email,
     activate_email as core_activate_email,
+    send_password_reset_email,
+    get_password_reset_email,
+    set_password_bi_email,
+    verity_password_bi_email,
+    get_user_id_bi_email,
+    has_email,
+    add_user,
+    activate_user_and_get_next_uri
 )
 from ..errors import AuthError, BusyError
 from . import bp
@@ -36,6 +45,7 @@ from .. import auth
 from ..response import make_ok_response, make_response
 from ..bulletin import get_bulletin_text, get_bulletin_type
 from ...core.redis import redis
+from ...core.errors import DuplicateUsernameError, DuplicateEmailError
 
 
 log = Logger(__name__)
@@ -426,6 +436,140 @@ def call(kind):
             json.loads(request.args['arg'])
         )))
     raise Exception('only support get now')
+
+
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        if verity_password_bi_email(
+            request.form.get('email'),
+            request.form.get('password')
+        ):
+            session['user_id'] = get_user_id_bi_email(request.form['email'])
+            return redirect(url_for('.index'))
+        else:
+            return render_template(
+                'login.html',
+                ok=False,
+                message='该邮箱尚未注册或密码错误'
+            )
+
+
+@bp.route('/reset', methods=['GET', 'POST'], defaults={'payload': None})
+@bp.route('/reset/<payload>', methods=['GET', 'POST'])
+def reset_password(payload):
+    if payload is None:
+        if request.method == 'GET':
+            return render_template('reset_password.html')
+        else:
+            if not has_email(request.form.get('email')):
+                return render_template(
+                    'reset_password.html',
+                    ok=False,
+                    message='该邮箱尚未注册'
+                )
+            send_password_reset_email(request.form['email'])
+            return render_template(
+                'message.html',
+                ok=True,
+                message='密码重置邮件已发送至 %s , 请根据邮件中的提示完成重置.' % request.form['email']
+            )
+    else:
+        email = get_password_reset_email(payload)
+        if not email:
+            return render_template(
+                'message.html',
+                ok=False,
+                message='密码重置链接已失效.'
+            )
+
+        if request.method == 'GET':
+            return render_template('set_password.html', email=email)
+        else:
+            if request.form.get('email') != email:
+                return redirect(url_for('.index'))
+            if (
+                not request.form.get('password') or
+                request.form.get('password') != request.form.get('confirm')
+            ):
+                return render_template(
+                    'set_password.html',
+                    email=email,
+                    ok=False,
+                    message='请正确输入两遍密码'
+                )
+            set_password_bi_email(email, request.form['password'])
+            return redirect(url_for('.login'))
+
+
+@bp.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('.index'))
+
+
+@bp.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+    else:
+        if not request.form.get('name', '').strip():
+            return render_template(
+                'signup.html',
+                ok=False,
+                message='昵称不能为空'
+            )
+        if not request.form.get('email', '').strip():
+            return render_template(
+                'signup.html',
+                ok=False,
+                message='邮箱不能为空'
+            )
+        if (
+            not request.form.get('password') or
+            request.form.get('password') != request.form.get('confirm')
+        ):
+            return render_template(
+                'signup.html',
+                ok=False,
+                message='请正确输入两遍密码'
+            )
+        try:
+            user = add_user(
+                request.form['name'].strip(),
+                request.form['email'].strip(),
+                request.form['password'],
+                next_uri=url_for('.index')
+            )
+        except DuplicateUsernameError:
+            return render_template(
+                'signup.html',
+                ok=False,
+                message='该昵称已被使用'
+            )
+        except DuplicateEmailError:
+            return render_template(
+                'signup.html',
+                ok=False,
+                message='该邮箱已被使用'
+            )
+        session['user_id'] = user.id
+        return redirect(url_for('.index'))
+
+
+@bp.route('/activate/<payload>')
+def activate_user(payload):
+    next_uri = activate_user_and_get_next_uri(payload)
+    if not next_uri:
+        return render_template(
+            'message.html',
+            ok=False,
+            message='激活链接已失效.'
+        )
+
+    return redirect(next_uri)
 
 
 @bp.context_processor

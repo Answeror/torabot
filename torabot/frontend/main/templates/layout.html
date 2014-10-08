@@ -5,11 +5,15 @@
 <div class='bulletin alert alert-{{ bulletin_type if bulletin_type else "info" }} alert-dismissable'>
     <input type=hidden name=id value='{{ bulletin_id }}'>
     <button type=button class=close data-dismiss=alert aria-hidden=true>&times;</button>
-    <div class=container>
-        {{ bulletin_text|safe }}
-    </div>
+    <div class=container>{{ bulletin_text|safe }}</div>
 </div>
 {% endif %}
+{% if message -%}
+<div class='bulletin alert alert-dismissable alert-{{ "info" if ok else "warning" }}'>
+    <button type=button class=close data-dismiss=alert aria-hidden=true>&times;</button>
+    <div class=container>{{ message|safe }}</div>
+</div>
+{%- endif %}
 {% endblock %}
 <div class='page container vspace-top-small'>
     {% block navbar %}

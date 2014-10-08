@@ -12,8 +12,7 @@ def get_is_user():
     name = '_is_user'
     value = getattr(g, name, None)
     if value is None:
-        from .user import check_openid
-        value = 'openid' in session and check_openid(session['openid'])
+        value = 'user_id' in session
         setattr(g, name, value)
     return value
 
@@ -42,14 +41,13 @@ def get_is_admin():
     name = '_is_admin'
     value = getattr(g, name, None)
     if value is None:
-        value = 'openid' in session and check_admin_openid(session['openid'])
+        value = 'user_id' in session and check_admin_id(session['user_id'])
         setattr(g, name, value)
     return value
 
 
-def check_admin_openid(openid):
-    from flask import current_app
-    return current_user_id._get_current_object() in current_app.config['TORABOT_ADMIN_IDS']
+def check_admin_id(id):
+    return id in local.conf['TORABOT_ADMIN_IDS']
 
 
 is_admin = LocalProxy(get_is_admin)
@@ -59,8 +57,8 @@ def get_current_user():
     name = '_current_user'
     value = getattr(g, name, None)
     if value is None:
-        from .user import get_user_detail_bi_openid
-        value = get_user_detail_bi_openid(session['openid'])
+        from .user import get_user_detail_bi_id
+        value = get_user_detail_bi_id(session['user_id'])
         setattr(g, name, value)
         if value:
             g.current_user_loaded = True
@@ -71,19 +69,10 @@ current_user = LocalProxy(get_current_user)
 
 
 def get_current_user_id():
-    name = '_current_user_id'
-    if hasattr(g, name):
-        value = getattr(g, name)
-    else:
-        if 'openid' not in session:
-            value = None
-        else:
-            if g.get('current_user_loaded', False):
-                value = current_user.id
-            else:
-                from .user import get_user_id_bi_openid
-                value = get_user_id_bi_openid(session['openid'])
-        setattr(g, name, value)
+    none = object()
+    value = getattr(g, '_current_user_id', none)
+    if value is none:
+        g._current_user_id = value = session.get('user_id')
     return value
 
 
@@ -91,19 +80,18 @@ current_user_id = LocalProxy(get_current_user_id)
 
 
 def get_current_username():
-    name = '_current_username'
-    if hasattr(g, name):
-        value = getattr(g, name)
-    else:
-        if 'openid' not in session:
+    none = object()
+    value = getattr(g, '_current_username', none)
+    if value is none:
+        if 'user_id' not in session:
             value = None
         else:
             if g.get('current_user_loaded', False):
                 value = current_user.name
             else:
-                from .user import get_user_name_bi_openid
-                value = get_user_name_bi_openid(session['openid'])
-        setattr(g, name, value)
+                from .user import get_user_name_bi_id
+                value = get_user_name_bi_id(session['user_id'])
+        g._current_username = value
     return value
 
 

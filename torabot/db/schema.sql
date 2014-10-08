@@ -10,14 +10,14 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
@@ -26,7 +26,7 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 SET search_path = public, pg_catalog;
 
 --
--- Name: notice_status; Type: TYPE; Schema: public; Owner: answeror
+-- Name: notice_status; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE notice_status AS ENUM (
@@ -35,10 +35,8 @@ CREATE TYPE notice_status AS ENUM (
 );
 
 
-ALTER TYPE public.notice_status OWNER TO answeror;
-
 --
--- Name: add_main_email_on_create_user(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: add_main_email_on_create_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION add_main_email_on_create_user() RETURNS trigger
@@ -52,10 +50,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.add_main_email_on_create_user() OWNER TO answeror;
-
 --
--- Name: broadcast(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: broadcast(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION broadcast() RETURNS trigger
@@ -71,10 +67,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.broadcast() OWNER TO answeror;
-
 --
--- Name: check_main_email(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: check_main_email(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION check_main_email() RETURNS trigger
@@ -92,10 +86,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.check_main_email() OWNER TO answeror;
-
 --
--- Name: check_maxemail(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: check_maxemail(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION check_maxemail() RETURNS trigger
@@ -115,10 +107,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.check_maxemail() OWNER TO answeror;
-
 --
--- Name: check_maxwatch(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: check_maxwatch(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION check_maxwatch() RETURNS trigger
@@ -138,10 +128,8 @@ CREATE FUNCTION check_maxwatch() RETURNS trigger
 $$;
 
 
-ALTER FUNCTION public.check_maxwatch() OWNER TO answeror;
-
 --
--- Name: fill_watch_email(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: fill_watch_email(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION fill_watch_email() RETURNS trigger
@@ -159,14 +147,12 @@ end;
 $$;
 
 
-ALTER FUNCTION public.fill_watch_email() OWNER TO answeror;
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- Name: query; Type: TABLE; Schema: public; Owner: answeror; Tablespace: 
+-- Name: query; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE query (
@@ -180,10 +166,8 @@ CREATE TABLE query (
 );
 
 
-ALTER TABLE public.query OWNER TO answeror;
-
 --
--- Name: get_or_add_query_bi_kind_and_text(text, text); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: get_or_add_query_bi_kind_and_text(text, text); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION get_or_add_query_bi_kind_and_text(kind text, text text) RETURNS SETOF query
@@ -201,10 +185,8 @@ CREATE FUNCTION get_or_add_query_bi_kind_and_text(kind text, text text) RETURNS 
 $_$;
 
 
-ALTER FUNCTION public.get_or_add_query_bi_kind_and_text(kind text, text text) OWNER TO answeror;
-
 --
--- Name: update_main_email(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: update_main_email(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION update_main_email() RETURNS trigger
@@ -221,10 +203,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.update_main_email() OWNER TO answeror;
-
 --
--- Name: update_query_mtime(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: update_query_mtime(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION update_query_mtime() RETURNS trigger
@@ -237,10 +217,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.update_query_mtime() OWNER TO answeror;
-
 --
--- Name: update_user_email(); Type: FUNCTION; Schema: public; Owner: answeror
+-- Name: update_user_email(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION update_user_email() RETURNS trigger
@@ -257,10 +235,8 @@ end;
 $$;
 
 
-ALTER FUNCTION public.update_user_email() OWNER TO answeror;
-
 --
--- Name: email; Type: TABLE; Schema: public; Owner: answeror; Tablespace: 
+-- Name: email; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE email (
@@ -273,10 +249,8 @@ CREATE TABLE email (
 );
 
 
-ALTER TABLE public.email OWNER TO answeror;
-
 --
--- Name: watch; Type: TABLE; Schema: public; Owner: answeror; Tablespace: 
+-- Name: watch; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE watch (
@@ -288,10 +262,8 @@ CREATE TABLE watch (
 );
 
 
-ALTER TABLE public.watch OWNER TO answeror;
-
 --
--- Name: activated_watch; Type: VIEW; Schema: public; Owner: answeror
+-- Name: activated_watch; Type: VIEW; Schema: public; Owner: -
 --
 
 CREATE VIEW activated_watch AS
@@ -306,10 +278,8 @@ CREATE VIEW activated_watch AS
   WHERE (e0.activated = true);
 
 
-ALTER TABLE public.activated_watch OWNER TO answeror;
-
 --
--- Name: change; Type: TABLE; Schema: public; Owner: answeror; Tablespace: 
+-- Name: change; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE change (
@@ -321,10 +291,8 @@ CREATE TABLE change (
 );
 
 
-ALTER TABLE public.change OWNER TO answeror;
-
 --
--- Name: change_id_seq; Type: SEQUENCE; Schema: public; Owner: answeror
+-- Name: change_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE change_id_seq
@@ -335,17 +303,15 @@ CREATE SEQUENCE change_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.change_id_seq OWNER TO answeror;
-
 --
--- Name: change_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: answeror
+-- Name: change_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE change_id_seq OWNED BY change.id;
 
 
 --
--- Name: email_id_seq; Type: SEQUENCE; Schema: public; Owner: answeror
+-- Name: email_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE email_id_seq
@@ -356,17 +322,15 @@ CREATE SEQUENCE email_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.email_id_seq OWNER TO answeror;
-
 --
--- Name: email_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: answeror
+-- Name: email_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE email_id_seq OWNED BY email.id;
 
 
 --
--- Name: notice; Type: TABLE; Schema: public; Owner: answeror; Tablespace: 
+-- Name: notice; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE notice (
@@ -379,10 +343,8 @@ CREATE TABLE notice (
 );
 
 
-ALTER TABLE public.notice OWNER TO answeror;
-
 --
--- Name: notice_id_seq; Type: SEQUENCE; Schema: public; Owner: answeror
+-- Name: notice_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE notice_id_seq
@@ -393,17 +355,15 @@ CREATE SEQUENCE notice_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.notice_id_seq OWNER TO answeror;
-
 --
--- Name: notice_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: answeror
+-- Name: notice_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE notice_id_seq OWNED BY notice.id;
 
 
 --
--- Name: query_id_seq; Type: SEQUENCE; Schema: public; Owner: answeror
+-- Name: query_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE query_id_seq
@@ -414,36 +374,33 @@ CREATE SEQUENCE query_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.query_id_seq OWNER TO answeror;
-
 --
--- Name: query_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: answeror
+-- Name: query_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE query_id_seq OWNED BY query.id;
 
 
 --
--- Name: user; Type: TABLE; Schema: public; Owner: answeror; Tablespace: 
+-- Name: user; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE "user" (
     id integer NOT NULL,
     name text NOT NULL,
     email text NOT NULL,
-    openid text NOT NULL,
+    openid text,
     ctime timestamp without time zone DEFAULT timezone('utc'::text, now()),
     maxwatch integer DEFAULT 42 NOT NULL,
     activated boolean DEFAULT false,
     maxemail integer DEFAULT 3,
+    password_hash text,
     CONSTRAINT user_maxemail_check CHECK ((maxemail > 0))
 );
 
 
-ALTER TABLE public."user" OWNER TO answeror;
-
 --
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: answeror
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE user_id_seq
@@ -454,52 +411,50 @@ CREATE SEQUENCE user_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.user_id_seq OWNER TO answeror;
-
 --
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: answeror
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE user_id_seq OWNED BY "user".id;
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: answeror
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY change ALTER COLUMN id SET DEFAULT nextval('change_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: answeror
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY email ALTER COLUMN id SET DEFAULT nextval('email_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: answeror
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY notice ALTER COLUMN id SET DEFAULT nextval('notice_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: answeror
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY query ALTER COLUMN id SET DEFAULT nextval('query_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: answeror
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY "user" ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);
 
 
 --
--- Name: change_pkey; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: change_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY change
@@ -507,7 +462,7 @@ ALTER TABLE ONLY change
 
 
 --
--- Name: email_pkey; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: email_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY email
@@ -515,7 +470,7 @@ ALTER TABLE ONLY email
 
 
 --
--- Name: email_text_key; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: email_text_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY email
@@ -523,7 +478,7 @@ ALTER TABLE ONLY email
 
 
 --
--- Name: notice_pkey; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: notice_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY notice
@@ -531,7 +486,7 @@ ALTER TABLE ONLY notice
 
 
 --
--- Name: query_kind_text_key; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: query_kind_text_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY query
@@ -539,7 +494,7 @@ ALTER TABLE ONLY query
 
 
 --
--- Name: query_pkey; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: query_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY query
@@ -547,7 +502,7 @@ ALTER TABLE ONLY query
 
 
 --
--- Name: user_email_key; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: user_email_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY "user"
@@ -555,7 +510,7 @@ ALTER TABLE ONLY "user"
 
 
 --
--- Name: user_name_key; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: user_name_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY "user"
@@ -563,7 +518,7 @@ ALTER TABLE ONLY "user"
 
 
 --
--- Name: user_openid_key; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: user_openid_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY "user"
@@ -571,7 +526,7 @@ ALTER TABLE ONLY "user"
 
 
 --
--- Name: user_pkey; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: user_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY "user"
@@ -579,7 +534,7 @@ ALTER TABLE ONLY "user"
 
 
 --
--- Name: watch_pkey; Type: CONSTRAINT; Schema: public; Owner: answeror; Tablespace: 
+-- Name: watch_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY watch
@@ -587,154 +542,154 @@ ALTER TABLE ONLY watch
 
 
 --
--- Name: idx_change_ctime; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_change_ctime; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_change_ctime ON change USING btree (ctime);
 
 
 --
--- Name: idx_change_hash; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_change_hash; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_change_hash ON change USING btree (hash);
 
 
 --
--- Name: idx_email_id_activated; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_email_id_activated; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_email_id_activated ON email USING btree (id, activated);
 
 
 --
--- Name: idx_email_text; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_email_text; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_email_text ON email USING btree (text);
 
 
 --
--- Name: idx_email_user_id; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_email_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_email_user_id ON email USING btree (user_id);
 
 
 --
--- Name: idx_notice_mix; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_notice_mix; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_notice_mix ON notice USING btree (user_id, status, change_id, ctime);
 
 
 --
--- Name: idx_query_ctime; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_query_ctime; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_query_ctime ON query USING btree (ctime);
 
 
 --
--- Name: idx_query_kind_text; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_query_kind_text; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_query_kind_text ON query USING btree (kind, text);
 
 
 --
--- Name: idx_query_next_sync_time; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_query_next_sync_time; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_query_next_sync_time ON query USING btree (next_sync_time);
 
 
 --
--- Name: idx_user_openid; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_user_openid; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_user_openid ON "user" USING btree (openid);
 
 
 --
--- Name: idx_watch_user_id_ctime; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_watch_user_id_ctime; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_watch_user_id_ctime ON watch USING btree (user_id, ctime);
 
 
 --
--- Name: idx_watch_user_id_query_id; Type: INDEX; Schema: public; Owner: answeror; Tablespace: 
+-- Name: idx_watch_user_id_query_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX idx_watch_user_id_query_id ON watch USING btree (user_id, query_id);
 
 
 --
--- Name: add_main_email_on_create_user; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: add_main_email_on_create_user; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER add_main_email_on_create_user AFTER INSERT ON "user" FOR EACH ROW EXECUTE PROCEDURE add_main_email_on_create_user();
 
 
 --
--- Name: check_main_email; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: check_main_email; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER check_main_email BEFORE DELETE ON email FOR EACH ROW EXECUTE PROCEDURE check_main_email();
 
 
 --
--- Name: check_maxemail; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: check_maxemail; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER check_maxemail BEFORE INSERT ON email FOR EACH ROW EXECUTE PROCEDURE check_maxemail();
 
 
 --
--- Name: check_maxwatch; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: check_maxwatch; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER check_maxwatch BEFORE INSERT ON watch FOR EACH ROW EXECUTE PROCEDURE check_maxwatch();
 
 
 --
--- Name: fill_watch_email; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: fill_watch_email; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER fill_watch_email BEFORE INSERT ON watch FOR EACH ROW EXECUTE PROCEDURE fill_watch_email();
 
 
 --
--- Name: insert_broadcast; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: insert_broadcast; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER insert_broadcast AFTER INSERT ON change FOR EACH ROW EXECUTE PROCEDURE broadcast();
 
 
 --
--- Name: update_main_email; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: update_main_email; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_main_email AFTER UPDATE OF text, activated ON email FOR EACH ROW EXECUTE PROCEDURE update_main_email();
 
 
 --
--- Name: update_query_mtime; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: update_query_mtime; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_query_mtime BEFORE UPDATE OF result ON query FOR EACH ROW EXECUTE PROCEDURE update_query_mtime();
 
 
 --
--- Name: update_user_email; Type: TRIGGER; Schema: public; Owner: answeror
+-- Name: update_user_email; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_user_email AFTER UPDATE OF email, activated ON "user" FOR EACH ROW EXECUTE PROCEDURE update_user_email();
 
 
 --
--- Name: change_query_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: change_query_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY change
@@ -742,7 +697,7 @@ ALTER TABLE ONLY change
 
 
 --
--- Name: email_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: email_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY email
@@ -750,7 +705,7 @@ ALTER TABLE ONLY email
 
 
 --
--- Name: notice_change_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: notice_change_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY notice
@@ -758,7 +713,7 @@ ALTER TABLE ONLY notice
 
 
 --
--- Name: notice_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: notice_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY notice
@@ -766,7 +721,7 @@ ALTER TABLE ONLY notice
 
 
 --
--- Name: watch_email_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: watch_email_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY watch
@@ -774,7 +729,7 @@ ALTER TABLE ONLY watch
 
 
 --
--- Name: watch_query_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: watch_query_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY watch
@@ -782,8 +737,24 @@ ALTER TABLE ONLY watch
 
 
 --
--- Name: watch_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: answeror
+-- Name: watch_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY watch
     ADD CONSTRAINT watch_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: -
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM answeror;
+GRANT ALL ON SCHEMA public TO answeror;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

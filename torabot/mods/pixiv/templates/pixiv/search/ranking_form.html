@@ -39,7 +39,7 @@ $(function(){
     var $normal = $('.pixiv-normal');
     var $r18 = $('.pixiv-r18');
     var $modes = $('.pixiv-modes');
-    $('.pixiv-content').click(function(){
+    $('.pixiv-content').click(function(event){
         if ($(event.target).find('input').attr('value') == 'r18') {
             $normal.remove();
             $r18.appendTo($modes);

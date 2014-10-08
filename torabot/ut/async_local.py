@@ -24,5 +24,9 @@ class AsyncLocal(object):
     def conf(self):
         return self.sync_local.conf
 
+    @property
+    def secret_key(self):
+        return self.sync_local.secret_key
+
 
 local = AsyncLocal()

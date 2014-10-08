@@ -123,8 +123,6 @@ class Pixiv(RedisSpider):
 
     def parse_ranking_uri(self, response):
         query = response.meta['query']
-        if response.status == 404:
-            return failed(query, '404')
         try:
             pages = response.meta['pages']
             try:

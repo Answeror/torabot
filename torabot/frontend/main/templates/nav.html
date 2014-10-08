@@ -33,10 +33,7 @@
                 <div class='nav navbar-nav navbar-right'>
                     {% block user_menu_left %}{% endblock %}
                     {% if not is_user %}
-                    <form id=login-form class=navbar-left action='{{ url_for("main.login") }}' method=post>
-                        <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
-                    </form>
-                    <input type=submit class='btn btn-success navbar-btn navbar-left' onclick='$("#login-form").submit()' value='登录/注册'>
+                    <a class='btn btn-success navbar-btn navbar-left' href='{{ url_for("main.login") }}'>登录</a>
                     {% else %}
                     <ul class='nav navbar-nav navbar-left'>
                         <li>
@@ -59,7 +56,7 @@
                                 {% endif %}
 
                                 <li class="divider"></li>
-                                <li><form id=logout-form method=post action='{{ url_for("main.logout") }}'></form><a href=# onclick='$("#logout-form").submit()'>登出</a></li>
+                                <li><a href='{{ url_for("main.logout") }}'>登出</a></li>
                             </ul>
                         </li>
                     </ul>

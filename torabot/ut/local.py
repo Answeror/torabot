@@ -20,5 +20,13 @@ class Local(object):
                 self._conf = conf
             return self._conf
 
+    @property
+    def secret_key(self):
+        try:
+            from flask import current_app
+            return current_app.secret_key
+        except:
+            return self.conf['SECRET_KEY']
+
 
 local = Local()

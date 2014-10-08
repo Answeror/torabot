@@ -1,15 +1,13 @@
 from nose.tools import assert_equal, assert_is_not_none, assert_greater
 from datetime import datetime, timedelta
-from . import g
-from ..notice import get_notices_bi_user_id, count_recent_notice_bi_user_id
-from ..user import (
+from .. import (
+    get_notices_bi_user_id,
+    count_recent_notice_bi_user_id,
     add_user,
     add_email_bi_user_id,
     activate_email_bi_id,
-    activate_user_bi_id
-)
-from ..watch import watch
-from ..query import (
+    activate_user_bi_id,
+    watch,
     add_query,
     get_sorted_active_queries,
     get_need_sync_queries,
@@ -18,13 +16,12 @@ from ..query import (
     del_query_bi_id,
     get_query_count,
     del_inactive_queries,
-)
-from ..change import (
     add_one_query_changes,
     del_old_changes,
     add_one_query_changes_unique,
     get_change_count
 )
+from . import g
 
 
 def fake_add_users(conn):
@@ -32,7 +29,7 @@ def fake_add_users(conn):
         conn,
         name=name,
         email='%s@gmail.com' % name,
-        openid=name,
+        password_hash=name,
     ) for name in ['foo', 'bar']]
     for user_id in user_ids:
         activate_user_bi_id(conn, user_id)

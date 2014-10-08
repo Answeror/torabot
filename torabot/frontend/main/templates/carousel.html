@@ -79,10 +79,7 @@
                     <p class=lead>{{ mod.description }}</p>
                     {% if not is_user %}
                     <p>
-                        <form action='/login' method=post>
-                            <input type=hidden name=openid value='https://www.google.com/accounts/o8/id'>
-                            <input type=submit class='btn btn-lg btn-primary' value="使用Google账户登录">
-                        </form>
+                        <a class='btn btn-lg btn-primary' href='{{ url_for("main.signup") }}'>现在注册</a>
                     </p>
                     {% endif %}
                 </div>

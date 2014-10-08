@@ -1,6 +1,11 @@
-from nose.tools import assert_is_not_none, assert_equal, assert_raises
-from . import g
-from ..user import (
+from nose.tools import (
+    assert_is_not_none,
+    assert_equal,
+    assert_raises,
+    assert_is_none
+)
+from .. import operations as op
+from .. import (
     add_user,
     get_user_detail_bi_id,
     get_emails_bi_user_id,
@@ -13,11 +18,10 @@ from ..user import (
     inactivate_email_bi_id,
     email_activated_bi_id,
     update_email_bi_id,
-)
-from ..error import (
     DeleteMainEmainError,
-    EmailCountLimitError,
+    EmailCountLimitError
 )
+from . import g
 
 
 def prepare_user(conn):
@@ -25,7 +29,7 @@ def prepare_user(conn):
         conn,
         name='answeror',
         email='answeror+torabot@gmail.com',
-        openid='whatever',
+        password_hash='whatever',
     )
     assert_is_not_none(user_id)
     return user_id
@@ -204,4 +208,37 @@ def test_email_count_limit():
             email='answeror+fail@gmail.com',
             label=''
         )
+        trans.rollback()
+
+
+def test_set_password_hash_bi_email():
+    with g.connection.begin_nested() as trans:
+        prepare_user(g.connection)
+        email = 'answeror+torabot@gmail.com'
+        op.set_password_hash_bi_email(g.connection, email, 'new hash')
+        assert_equal(
+            op.get_password_hash_bi_email(g.connection, email),
+            'new hash'
+        )
+        trans.rollback()
+
+
+def test_get_user_id_bi_email():
+    with g.connection.begin_nested() as trans:
+        user_id = prepare_user(g.connection)
+        assert_equal(
+            op.get_user_id_bi_email(g.connection, 'answeror+torabot@gmail.com'),
+            user_id
+        )
+        assert_is_none(
+            op.get_user_id_bi_email(g.connection, 'noanswer@gmail.com')
+        )
+        trans.rollback()
+
+
+def test_has_email():
+    with g.connection.begin_nested() as trans:
+        prepare_user(g.connection)
+        assert op.has_email(g.connection, 'answeror+torabot@gmail.com')
+        assert not op.has_email(g.connection, 'noanswer@gmail.com')
         trans.rollback()

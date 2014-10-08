@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}登录{% endblock %}
+{% block content %}
+    <div class='page-header col-sm-12'>
+        <div class=row>
+            <div class='col-sm-offset-2 col-sm-8'>
+                <h1>登录</h1>
+            </div>
+        </div>
+    </div>
+    <form method=post class="form-horizontal" role="form">
+        <div class="form-group">
+            <label for="email" class="col-sm-2 control-label">邮箱</label>
+            <div class="col-sm-4">
+                <input id=email name=email type=email class=form-control value='{{ request.form.email }}'>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password" class="col-sm-2 control-label">密码</label>
+            <div class="col-sm-4">
+                <input id=password name=password type=password class=form-control value='{{ request.form.password }}'>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-success">登录</button>
+                <a class='btn btn-default' style='margin-left:.5em' href="{{ url_for('main.signup') }}">创建账户</a>
+                <a class='btn btn-default' style='margin-left:.5em' href="{{ url_for('main.reset_password') }}">忘记密码</a>
+            </div>
+        </div>
+    </form>
+{% endblock %}

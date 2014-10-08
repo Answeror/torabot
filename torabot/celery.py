@@ -2,7 +2,6 @@ from celery import Celery
 from functools import wraps
 from .app_mixins import RedisPubMixin
 
-
 class App(RedisPubMixin, Celery):
 
     def torabot_task(self, f):
@@ -15,12 +14,14 @@ class App(RedisPubMixin, Celery):
 
 app = Celery('torabot')
 
+
+from .conf import *
 try:
-    import toraconf
-    assert toraconf
-    app.config_from_object('toraconf')
+    from toraconf import *
 except:
-    app.config_from_object('torabot.conf')
+    pass
+
+app.config_from_object(__name__)
 
 
 @app.task
@@ -45,12 +46,6 @@ def log_to_file():
 def tell_admin_safe(*args, **kargs):
     from torabot import tasks
     return tasks.tell_admin_safe(*args, **kargs)
-
-
-@app.task
-def make_source(gist, args):
-    from torabot import tasks
-    return tasks.make_source(gist=gist, args=args)
 
 
 @app.task

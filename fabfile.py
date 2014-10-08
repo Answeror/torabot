@@ -36,12 +36,11 @@ def gunicorn():
                     run('pip install -r dependencies-27.txt')
                     runbg('scrapyd')
                     run('./deployspy')
-        with prefix('pyenv shell 3.3.4'):
+        with prefix('pyenv shell 3.4.1'):
             with prefix('pyenv virtualenvwrapper'):
-                with prefix('workon torabot'):
+                with prefix('workon torabot34'):
                     run('pip install -r dependencies.txt')
                     run('python setup.py develop')
-                    for i in range(2):
-                        runbg('celery worker -A torabot -c 16 -P cthreads:TaskPool -f data/celery-worker.log')
+                    runbg('celery worker -A torabot -f data/celery-worker.log --autoscale=4,1')
                     runbg('celery beat -A torabot -f data/celery-beat.log')
                     runbg('gunicorn --pythonpath . -t 600 -w 2 -k gunicorn_worker.Worker gunicorn_app:app')

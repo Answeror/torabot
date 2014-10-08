@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}创建账户{% endblock %}
+{% block content %}
+    <div class=row>
+        <div class='page-header col-sm-12'>
+            <div class=row>
+                <div class='col-sm-offset-2 col-sm-8'>
+                    <h1>创建账户</h1>
+                </div>
+            </div>
+        </div>
+        <form method=post class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">昵称</label>
+                <div class="col-sm-4">
+                    <input id=name name=name type=text class=form-control value='{{ request.form.name }}'>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email" class="col-sm-2 control-label">邮箱</label>
+                <div class="col-sm-4">
+                    <input id=email name=email type=email class=form-control value='{{ request.form.email }}'>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password" class="col-sm-2 control-label">密码</label>
+                <div class="col-sm-4">
+                    <input name=password type=password class=form-control value='{{ request.form.password }}'>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="confirm" class="col-sm-2 control-label">确认密码</label>
+                <div class="col-sm-4">
+                    <input name=confirm type=password class=form-control placeholder='请再输入一遍' value='{{ request.form.confirm }}'>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-success">创建</button>
+                    <a class='btn btn-default' style='margin-left:.5em' href="{{ url_for('main.index') }}">取消</a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
