@@ -10,7 +10,7 @@ from ..ut.bunch import Bunch
 from .. import db
 from .. import celery
 from .connection import autoccontext
-from .email import send as send_email
+from ..ut.email import send as send_email
 from ..ut.local import local
 from .errors import DuplicateUsernameError, DuplicateEmailError
 
@@ -89,39 +89,29 @@ def add_email(user_id, email, label):
 
 
 def send_activation_email(email_id, email_text, username, next_uri):
-    send_email(
-        local.conf['TORABOT_EMAIL_USERNAME'],
-        local.conf['TORABOT_EMAIL_PASSWORD'],
-        [email_text],
-        'Torabot用户邮件验证',
-        render_template(
+    return send_email(
+        recipient_addrs=[email_text],
+        subject='Torabot用户邮件验证',
+        text=render_template(
             'activation_email.txt',
             name=username,
             email=email_text,
             site=url_for('main.index', _external=True),
             activation_uri=get_activation_link(email_id, next_uri),
-        ),
-        [],
-        host=local.conf['TORABOT_EMAIL_HOST'],
-        port=local.conf['TORABOT_EMAIL_PORT'],
+        )
     )
 
 
 def send_password_reset_email(email):
-    send_email(
-        local.conf['TORABOT_EMAIL_USERNAME'],
-        local.conf['TORABOT_EMAIL_PASSWORD'],
-        [email],
-        'Torabot密码重置',
-        render_template(
+    return send_email(
+        recipient_addrs=[email],
+        subject='Torabot密码重置',
+        text=render_template(
             'password_reset_email.txt',
             email=email,
             site=url_for('main.index', _external=True),
             activation_uri=get_password_reset_link(email),
-        ),
-        [],
-        host=local.conf['TORABOT_EMAIL_HOST'],
-        port=local.conf['TORABOT_EMAIL_PORT'],
+        )
     )
 
 

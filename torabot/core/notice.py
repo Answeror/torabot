@@ -1,9 +1,9 @@
 from logbook import Logger
 from itertools import chain
 from .. import db
-from .email import send as send_email
-from ..core.mod import mod
+from ..ut.email import send as send_email
 from ..ut.bunch import Bunch
+from .mod import mod
 
 
 log = Logger(__name__)
@@ -24,15 +24,11 @@ def web_transform(notice):
 
 
 def send_notice_email(conf, target, notice):
-    send_email(
-        conf['TORABOT_EMAIL_USERNAME'],
-        conf['TORABOT_EMAIL_PASSWORD'],
-        [target],
-        conf['TORABOT_EMAIL_HEAD'],
-        mod(notice.kind).format_notice_body('email', notice),
-        mod(notice.kind).notice_attachments('email', notice),
-        host=conf['TORABOT_EMAIL_HOST'],
-        port=conf['TORABOT_EMAIL_PORT'],
+    return send_email(
+        recipient_addrs=[target],
+        subject=conf['TORABOT_EMAIL_HEAD'],
+        text=mod(notice.kind).format_notice_body('email', notice),
+        attachments=mod(notice.kind).notice_attachments('email', notice)
     )
 
 
@@ -48,15 +44,11 @@ def send_notices_email(conf, target, notices):
         notices = notices[:limit]
     else:
         append_bodies = []
-    send_email(
-        conf['TORABOT_EMAIL_USERNAME'],
-        conf['TORABOT_EMAIL_PASSWORD'],
-        [target],
-        conf['TORABOT_EMAIL_HEAD'],
-        '\n\n---\n\n'.join([mod(no.kind).format_notice_body('email', no) for no in notices] + append_bodies),
-        list(chain(*[mod(no.kind).notice_attachments('email', no) for no in notices])),
-        host=conf['TORABOT_EMAIL_HOST'],
-        port=conf['TORABOT_EMAIL_PORT'],
+    return send_email(
+        recipient_addrs=[target],
+        subject=conf['TORABOT_EMAIL_HEAD'],
+        text='\n\n---\n\n'.join([mod(no.kind).format_notice_body('email', no) for no in notices] + append_bodies),
+        attachments=list(chain(*[mod(no.kind).notice_attachments('email', no) for no in notices]))
     )
 
 

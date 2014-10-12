@@ -28,5 +28,16 @@ class Local(object):
         except:
             return self.conf['SECRET_KEY']
 
+    @property
+    def redis(self):
+        value = getattr(self, '_redis', None)
+        if value is None:
+            from redis import StrictRedis
+            self._redis = value = StrictRedis(
+                host=self.conf.get('TORABOT_REDIS_HOST', 'localhost'),
+                port=self.conf.get('TORABOT_REDIS_PORT', 6379)
+            )
+        return value
+
 
 local = Local()

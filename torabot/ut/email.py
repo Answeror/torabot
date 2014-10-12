@@ -13,11 +13,22 @@ import mimetypes
 
 
 ENCODING = 'utf-8'
-
 log = Logger(__name__)
 
 
-def pack(sender_addr, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None):
+class EmailLoginError(Exception):
+    pass
+
+
+def pack(
+    sender_addr,
+    recipient_addrs,
+    subject,
+    text=None,
+    attachments=[],
+    sender_name=None,
+    html=None
+):
     if sender_name is None:
         sender_name = sender_addr
     sender_name = Header(sender_name, ENCODING).encode()
@@ -49,7 +60,19 @@ def pack(sender_addr, recipient_addrs, subject, text=None, attachments=[], sende
     return msg_root
 
 
-def send(sender_addr, password, recipient_addrs, subject, text=None, attachments=[], sender_name=None, html=None, save=False, host='smtp.gmail.com', port=587):
+def _send(
+    sender_addr,
+    password,
+    recipient_addrs,
+    subject,
+    text=None,
+    attachments=[],
+    sender_name=None,
+    html=None,
+    save=False,
+    host='smtp.gmail.com',
+    port=587
+):
     msg_root = pack(
         sender_addr=sender_addr,
         recipient_addrs=recipient_addrs,
@@ -76,8 +99,7 @@ def send(sender_addr, password, recipient_addrs, subject, text=None, attachments
             # not auth required
             pass
         else:
-            log.exception('email login failed')
-            raise
+            raise EmailLoginError('email login failed') from e
 
     smtp.send_message(msg_root)
     smtp.quit()
@@ -142,23 +164,92 @@ def format_attachments(attachments):
         yield msg
 
 
-if __name__ == '__main__':
-    import os
-    from ..ut.bunch import Bunch
-    from .. import make
-    app = make()
-    conf = app.config
-    send(
-        conf['TORABOT_EMAIL_USERNAME'],
-        conf['TORABOT_EMAIL_PASSWORD'],
-        ['answeror@gmail.com'],
-        conf['TORABOT_EMAIL_HEAD'],
-        '测试中文',
-        [Bunch(
-            path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'nerv.png'),
-            mime='image/png',
-            name='例大祭11カット'
-        )],
+def _send_conf(
+    conf,
+    recipient_addrs,
+    subject,
+    text=None,
+    attachments=[],
+    sender_name=None,
+    html=None,
+    save=False
+):
+    if conf['TORABOT_DEBUG']:
+        log.debug('send email {} to {}', subject, recipient_addrs)
+        return
+    return _send(
+        sender_addr=conf['TORABOT_EMAIL_USERNAME'],
+        password=conf['TORABOT_EMAIL_PASSWORD'],
+        recipient_addrs=recipient_addrs,
+        subject=subject,
+        text=text,
+        attachments=attachments,
+        sender_name=sender_name,
+        html=html,
+        save=save,
         host=conf['TORABOT_EMAIL_HOST'],
         port=conf['TORABOT_EMAIL_PORT'],
+    )
+
+
+def send(
+    recipient_addrs,
+    subject,
+    text=None,
+    attachments=[],
+    sender_name=None,
+    html=None,
+    save=False
+):
+    from .local import local
+    return _send_conf(
+        local.conf,
+        recipient_addrs=recipient_addrs,
+        subject=subject,
+        text=text,
+        attachments=attachments,
+        sender_name=sender_name,
+        html=html,
+        save=save
+    )
+
+
+def async_send(
+    recipient_addrs,
+    subject,
+    text=None,
+    attachments=[],
+    sender_name=None,
+    html=None,
+    save=False
+):
+    from .async_local import local
+    return _send_conf(
+        local.conf,
+        recipient_addrs=recipient_addrs,
+        subject=subject,
+        text=text,
+        attachments=attachments,
+        sender_name=sender_name,
+        html=html,
+        save=save
+    )
+
+
+if __name__ == '__main__':
+    import os
+    from .bunch import Bunch
+    from .local import local
+    _send(
+        recipient_addrs=['answeror@gmail.com'],
+        subject=local.conf['TORABOT_EMAIL_HEAD'],
+        text='测试中文',
+        attachments=[Bunch(
+            path=os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                'nerv.png'
+            ),
+            mime='image/png',
+            name='例大祭11カット'
+        )]
     )
