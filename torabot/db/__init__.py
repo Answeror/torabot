@@ -1,3 +1,4 @@
-from .errors import *
-from .fixtures import *
-from .operations import *
+from .facade import Facade
+
+
+db = Facade()
