@@ -13,9 +13,7 @@ bp = Blueprint(
 from . import main, thumbnail
 assert main
 assert thumbnail
-# from .openid import *
 
 
 def make(app):
     app.register_blueprint(bp)
-    # oid.init_app(app)

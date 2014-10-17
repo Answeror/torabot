@@ -25,6 +25,7 @@ def gunicorn():
         kill('celery')
         kill('scrapyd')
     # run('redis-cli flushall')
+    run('redis-cli keys "lock-signal:torabot:temp:spy_prepare" | xargs redis-cli del')
     run('redis-cli keys "torabot:temp:*" | xargs redis-cli del')
     run('redis-cli keys "torabot:spy:*" | xargs redis-cli del')
     run('redis-cli keys "celery-task-meta-*" | xargs redis-cli del')
@@ -33,13 +34,13 @@ def gunicorn():
         with prefix('pyenv shell 2.7.6'):
             with prefix('pyenv virtualenvwrapper'):
                 with prefix('workon www27'):
-                    run('pip install -r dependencies-27.txt')
+                    # run('pip install -r dependencies-27.txt')
                     runbg('scrapyd')
                     run('./deployspy')
         with prefix('pyenv shell 3.4.1'):
             with prefix('pyenv virtualenvwrapper'):
                 with prefix('workon torabot34'):
-                    run('pip install -r dependencies.txt')
+                    # run('pip install -r dependencies.txt')
                     run('python setup.py develop')
                     runbg('celery worker -A torabot -f data/celery-worker.log --autoscale=4,1')
                     runbg('celery beat -A torabot -f data/celery-beat.log')

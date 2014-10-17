@@ -7,10 +7,9 @@ from flask import Blueprint
 bp = Blueprint('api', __name__)
 
 
-for _, name, _ in pkgutil.iter_modules([os.path.join(
-    os.path.dirname(__file__),
-    'views'
-)]):
+for _, name, _ in pkgutil.iter_modules(
+    [os.path.join(os.path.dirname(__file__), 'views')]
+):
     importlib.import_module('.views.' + name, __name__)
 
 

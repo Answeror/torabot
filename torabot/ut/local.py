@@ -1,8 +1,9 @@
 import os
+import threading
 from .conf import init_conf
 
 
-class Local(object):
+class Local(threading.local):
 
     def __init__(self, conf='toraconf'):
         self._conf = conf

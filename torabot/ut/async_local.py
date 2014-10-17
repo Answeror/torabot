@@ -1,9 +1,10 @@
+import threading
 import asyncio_redis
 from asyncio import coroutine
 from .local import Local as SyncLocal
 
 
-class AsyncLocal(object):
+class AsyncLocal(threading.local):
 
     def __init__(self, conf='toraconf'):
         self.sync_local = SyncLocal(conf)
