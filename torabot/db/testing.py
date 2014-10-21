@@ -1,7 +1,7 @@
-from flask import current_app
 from functools import wraps
 from contextlib import contextmanager
 import logbook
+from asyncio import coroutine
 from ..app import App
 from .schema import create_all
 from . import db
@@ -47,4 +47,21 @@ def with_sandbox(f):
     def g(*args, **kargs):
         with sandbox() as conn:
             return f(conn, *args, **kargs)
+    return g
+
+
+def with_async_sandbox(f):
+    @coroutine
+    @wraps(f)
+    def g(*args, **kargs):
+        app = App(__name__)
+        app.config.from_object(__name__)
+        db.init_app(app)
+        with app.app_context():
+            fixture = SandboxFixture()
+            fixture.setup()
+            try:
+                return (yield from f(fixture.connection, *args, **kargs))
+            finally:
+                fixture.teardown()
     return g

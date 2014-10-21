@@ -135,3 +135,9 @@ def general_error_guard(e):
         'text/html': format_html,
     }
     return formats[mimeparse.best_match(formats, request.headers['accept'])](), 400
+
+
+from .facade import Facade
+
+
+frontend = Facade()

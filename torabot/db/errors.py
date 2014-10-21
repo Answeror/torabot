@@ -44,9 +44,9 @@ class WatchCountLimitError(DBError):
 
 def error_guard(f):
     @wraps(f)
-    def inner(*args, **kargs):
+    def inner(conn, *args, **kargs):
         try:
-            return f(*args, **kargs)
+            return f(conn, *args, **kargs)
         except sqlalchemy.exc.DataError as e:
             raise InvalidArgumentError from e
         except sqlalchemy.exc.IntegrityError as e:
