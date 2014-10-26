@@ -2,7 +2,7 @@ import json
 from flask import Blueprint
 import importlib
 from ..ut.bunch import bunchr
-from ..core.kanji import translate
+from ..ut.kanji import translate
 
 
 class BlueprintField(object):

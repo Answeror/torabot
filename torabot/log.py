@@ -1,7 +1,7 @@
 import logbook.queues
 import logbook
 import json
-import sys
+from flask import current_app
 from .redis import redis
 
 
@@ -34,12 +34,12 @@ class RedisSub(logbook.queues.SubscriberBase):
 
     def recv(self, timeout=None):
         if timeout is None:
-            rv = redis.blpop(self.key)
+            rv = current_app.loop.run_until_complete(redis.blpop(self.key))
             value = rv[1]
         elif timeout == 0:
-            value = redis.lpop(self.key)
+            value = current_app.loop.run_until_complete(redis.lpop(self.key))
         else:
-            rv = redis.blpop(self.key)
+            rv = current_app.loop.run_until_complete(redis.blpop(self.key))
             value = None if rv is None else rv[1]
 
         if value is None:
@@ -47,23 +47,3 @@ class RedisSub(logbook.queues.SubscriberBase):
 
         d = json.loads(value.decode('utf-8'))
         return logbook.LogRecord.from_dict(d)
-
-
-class Tee(object):
-
-    def __init__(self, name, mode):
-        self.file = open(name, mode)
-        self.stdout = sys.stdout
-        sys.stdout = self
-
-    def close(self):
-        sys.stdout = self.stdout
-        self.file.flush()
-        self.file.close()
-
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-
-    def flush(self):
-        self.file.flush()

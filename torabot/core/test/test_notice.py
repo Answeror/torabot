@@ -1,52 +1,44 @@
-from nose.tools import assert_equal, assert_greater
+from nose.tools import assert_equal
 from unittest.mock import patch
-from ... import db
-from ..sync import sync
-from ..notice import send_notice
-from ..backends.postgresql import PostgreSQL
-from . import g
+from ...ut.async_test_tools import with_event_loop
+from ...db import db
+from .. import core
+from . import TestSuite, with_fake_tora_mod
 
 
-def send_notice_email(conf, target, notice):
-    assert_equal(target, 'answeror+foo@gmail.com')
+class TestNotice(db.SandboxTestSuiteMixin, TestSuite):
 
-
-@patch('torabot.core.notice.send_notice_email', send_notice_email)
-def test_send_notice():
-    with g.connection.begin_nested() as trans:
-        query_id = db.add_query(g.connection, kind='tora', text='东方')
-        user_id = db.add_user(
-            g.connection,
-            name='answeror',
-            email='answerro@gmail.com',
-            openid='foo'
-        )
-        email_id = db.add_email_bi_user_id(
-            g.connection,
-            id=user_id,
-            email='answeror+foo@gmail.com',
-            label=''
-        )
-        db.activate_email_bi_id(g.connection, email_id)
-        db.watch(
-            g.connection,
-            user_id=user_id,
-            query_id=query_id,
-            email_id=email_id
-        )
-        sync(
+    @with_event_loop
+    @with_fake_tora_mod
+    def test_notice_all(self):
+        query_id = yield from db.add_query(
+            db.connection,
             kind='tora',
-            text='东方',
-            timeout=60,
-            sync_interval=300,
-            backend=PostgreSQL(conn=g.connection)
+            text='大嘘'
         )
-        notices = db.get_pending_notices(g.connection)
-        assert_greater(len(notices), 0)
-        for notice in notices:
-            assert send_notice(
-                conf={},
-                notice=notice,
-                conn=g.connection,
-            )
-        trans.rollback()
+        user = yield from core.add_user(
+            name='foo',
+            email='foo@bar.com',
+            password='foo',
+            conn=db.connection
+        )
+        yield from db.activate_email_bi_id(
+            db.connection,
+            user.emails[0].id,
+        )
+        yield from db.watch(
+            db.connection,
+            user_id=user.id,
+            query_id=query_id,
+            email_id=user.emails[0].id
+        )
+        yield from core.sync(
+            kind='tora',
+            text='大嘘',
+            bind=db.bind
+        )
+        with patch('torabot.core.notice.send_notices_email') as send:
+            yield from core.notice_all(bind=db.bind)
+            assert send.called
+            assert send.call_args[0]
+            assert_equal(send.call_args[0][0], 'foo@bar.com')

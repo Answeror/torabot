@@ -1,26 +1,14 @@
 from nose.tools import assert_equal
-from unittest.mock import patch
-from ...db import get_query_count
-from ..sync import sync
-from ..backends.postgresql import PostgreSQL
-from .mod import Mod
-from . import g
+from ...ut.async_test_tools import with_event_loop
+from ...db import db
+from .. import core
+from . import TestSuite, with_fake_tora_mod
 
 
-def mod(kind):
-    assert_equal(kind, 'tora')
-    return Mod()
+class TestSync(db.SandboxTestSuiteMixin, TestSuite):
 
-
-@patch('torabot.core.sync.mod', mod)
-def test_sync():
-    with g.connection.begin_nested() as trans:
-        sync(
-            kind='tora',
-            text='大嘘',
-            timeout=0,
-            sync_interval=300,
-            backend=PostgreSQL(conn=g.connection)
-        )
-        assert_equal(get_query_count(g.connection), 1)
-        trans.rollback()
+    @with_event_loop
+    @with_fake_tora_mod
+    def test_sync(self):
+        yield from core.sync(kind='tora', text='大嘘')
+        assert_equal((yield from db.get_query_count(db.connection)), 1)

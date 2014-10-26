@@ -73,7 +73,7 @@ class App(RedisPubMixin, Celery):
         return (lambda f: yawrap(self.task(bind=True, **kargs)(wrap(f))))
 
 
-app = App('torabot', include=['torabot.lang.tasks'])
+celery = app = App('torabot', include=['torabot.lang.tasks'])
 app.config_from_object('torabot.celery_conf')
 
 

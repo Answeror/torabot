@@ -1,11 +1,18 @@
+from asyncio import coroutine
 from nose.tools import assert_equal
 from ...ut.bunch import bunchr
-from ..mod import mod
+from .. import core
 
 
-class Mod(object):
+class Mod(core.Mod):
 
-    def spy(self, query, timeout):
+    name = 'tora'
+
+    def __init__(self, orig):
+        self.orig = orig
+
+    @coroutine
+    def source(self, query, timeout):
         assert_equal(query, '大嘘')
         return bunchr({
             'arts': [
@@ -68,8 +75,9 @@ class Mod(object):
             ]
         })
 
+    @coroutine
     def changes(self, old, new, **kargs):
-        return mod('tora').changes(old, new, **kargs)
+        return (yield from self.orig.changes(old, new, **kargs))
 
     def regular(self, text):
         return 'tora', text

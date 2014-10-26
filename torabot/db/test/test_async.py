@@ -1,8 +1,8 @@
 from asyncio import coroutine, gather
 from nose.tools import assert_equal
 from ...ut.async_test_tools import with_event_loop
-from ..testing import with_async_sandbox
 from .. import db
+from . import TestSuite
 
 
 @coroutine
@@ -28,14 +28,15 @@ def fake_add_queries(conn):
     ]))
 
 
-@with_event_loop
-@with_async_sandbox
-def test_broadcast_one(conn):
-    user_id = (yield from fake_add_users(conn))[0]
-    query_id = (yield from fake_add_queries(conn))[0]
-    yield from db.watch(conn, user_id=user_id, query_id=query_id)
-    yield from db.add_one_query_changes(conn, query_id, [{}])
-    assert_equal(
-        len((yield from db.get_notices_bi_user_id(conn, user_id))),
-        1
-    )
+class TestAsync(db.SandboxTestSuiteMixin, TestSuite):
+
+    @with_event_loop
+    def test_broadcast_one(self):
+        user_id = (yield from fake_add_users(db.connection))[0]
+        query_id = (yield from fake_add_queries(db.connection))[0]
+        yield from db.watch(db.connection, user_id=user_id, query_id=query_id)
+        yield from db.add_one_query_changes(db.connection, query_id, [{}])
+        assert_equal(
+            len((yield from db.get_notices_bi_user_id(db.connection, user_id))),
+            1
+        )

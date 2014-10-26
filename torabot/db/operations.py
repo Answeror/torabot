@@ -1,4 +1,6 @@
 from nose.tools import assert_in
+from functools import wraps
+import sqlalchemy.exc
 from sqlalchemy.sql import text as sql
 from psycopg2.extras import Json
 from datetime import datetime
@@ -8,19 +10,41 @@ from fn.iters import chain
 import hashlib
 from email.utils import parseaddr
 from ..ut.bunch import bunchr
-from .errors import (
-    error_guard,
-    InvalidEmailError,
-    UserNotExistError,
-    EmailNotExistError
-)
 from .ut import ignore_none
 
 
 NOTICE_PAGE_SIZE = 2147483647
 
 
+def guard(f):
+    @wraps(f)
+    def inner(conn, *args, **kargs):
+        from . import db
+
+        try:
+            return f(conn, *args, **kargs)
+        except sqlalchemy.exc.DataError as e:
+            raise db.InvalidArgumentError from e
+        except sqlalchemy.exc.IntegrityError as e:
+            if 'duplicate' in str(e):
+                raise db.UniqueConstraintError(str(e)) from e
+            if 'update or delete on table "email" violates foreign key constraint "watch_email_id_fkey" on table "watch"' in str(e):
+                raise db.DeleteEmailInUseError from e
+            raise
+        except sqlalchemy.exc.InternalError as e:
+            if 'cannot delete main email of' in str(e):
+                raise db.DeleteMainEmainError from e
+            if 'email count reach limit' in str(e):
+                raise db.EmailCountLimitError from e
+            if 'watch count reach limit' in str(e):
+                raise db.WatchCountLimitError from e
+            raise
+    return inner
+
+
 def fill_id(conn, user_id, email_id):
+    from . import db
+
     assert user_id is not None or email_id is not None
 
     if email_id is None:
@@ -40,14 +64,14 @@ def fill_id(conn, user_id, email_id):
             user_id = user_id[0]
 
     if user_id is None:
-        raise UserNotExistError()
+        raise db.UserNotExistError()
     if email_id is None:
-        raise EmailNotExistError()
+        raise db.EmailNotExistError()
 
     return user_id, email_id
 
 
-@error_guard
+@guard
 def watch(conn, query_id, user_id=None, email_id=None, name=None):
     user_id, email_id = fill_id(conn, user_id, email_id)
     if user_id is None or email_id is None:
@@ -147,7 +171,7 @@ def get_email_watch_states(conn, user_id, query_id):
     ), user_id=user_id, query_id=query_id).fetchall()]
 
 
-@error_guard
+@guard
 def add_user(conn, name, email, password_hash):
     return conn.execute(sql(
         '''
@@ -158,37 +182,37 @@ def add_user(conn, name, email, password_hash):
     ), name=name, email=email, password_hash=password_hash).fetchone()[0]
 
 
-@error_guard
+@guard
 def get_user_id_bi_openid(conn, openid):
     ret = conn.execute('select id from "user" where openid = %s', (openid,)).fetchone()
     return None if ret is None else ret[0]
 
 
-@error_guard
+@guard
 def get_user_name_bi_openid(conn, openid):
     ret = conn.execute('select name from "user" where openid = %s', (openid,)).fetchone()
     return None if ret is None else ret[0]
 
 
-@error_guard
+@guard
 def get_user_name_bi_id(conn, id):
     ret = conn.execute(sql('select name from "user" where id = :id'), id=id).fetchone()
     return None if ret is None else ret[0]
 
 
-@error_guard
+@guard
 def get_user_email_bi_id(conn, id):
     ret = conn.execute('select email from "user" where id = %s', (id,)).fetchone()
     return None if ret is None else ret[0]
 
 
-@error_guard
+@guard
 def get_user_bi_id(conn, id):
     ret = conn.execute('select * from "user" where id = %s', (id,)).fetchone()
     return None if ret is None else bunchr(**ret)
 
 
-@error_guard
+@guard
 def set_email(conn, id, email):
     conn.execute(
         'update "user" set email = %s where id = %s',
@@ -196,7 +220,7 @@ def set_email(conn, id, email):
     )
 
 
-@error_guard
+@guard
 def get_users(conn, offset=None, limit=None):
     result = conn.execute(sql('\n'.join([
         'select * from "user" order by id',
@@ -215,7 +239,7 @@ def check_user_order_field(name):
     ])
 
 
-@error_guard
+@guard
 def get_users_detail(conn, offset=None, limit=None, order_by=None, desc=False):
     ignore_none(check_user_order_field)(order_by)
     result = conn.execute(sql('\n'.join([
@@ -231,7 +255,7 @@ def get_users_detail(conn, offset=None, limit=None, order_by=None, desc=False):
     return [bunchr(**row) for row in result.fetchall()]
 
 
-@error_guard
+@guard
 def get_user_detail_bi_id(conn, id):
     return enrich(conn, conn.execute(sql(
         '''
@@ -242,7 +266,7 @@ def get_user_detail_bi_id(conn, id):
     ), id=id).fetchone())
 
 
-@error_guard
+@guard
 def get_user_detail_bi_openid(conn, openid):
     return enrich(conn, conn.execute(sql(
         '''
@@ -261,7 +285,7 @@ def enrich(conn, ret):
     return user
 
 
-@error_guard
+@guard
 def get_user_detail_bi_email_id(conn, id):
     return enrich(conn, conn.execute(sql(
         '''
@@ -272,7 +296,7 @@ def get_user_detail_bi_email_id(conn, id):
     ), id=id).fetchone())
 
 
-@error_guard
+@guard
 def get_emails_bi_user_id(conn, id):
     return [bunchr(**row) for row in conn.execute(
         sql('select * from email where user_id = :id order by ctime'),
@@ -280,7 +304,7 @@ def get_emails_bi_user_id(conn, id):
     ).fetchall()]
 
 
-@error_guard
+@guard
 def get_email_bi_id(conn, id):
     ret = conn.execute(
         sql('select * from email where id = :id'),
@@ -289,11 +313,13 @@ def get_email_bi_id(conn, id):
     return None if ret is None else bunchr(**ret)
 
 
-@error_guard
+@guard
 def add_email_bi_user_id(conn, id, email, label):
+    from . import db
+
     # http://stackoverflow.com/a/14485817/238472
     if not email or parseaddr(email) == ('', ''):
-        raise InvalidEmailError(email)
+        raise db.InvalidEmailError(email)
     return conn.execute(sql(
         '''
         insert into email (text, label, user_id)
@@ -303,7 +329,7 @@ def add_email_bi_user_id(conn, id, email, label):
     ), text=email, label=label, user_id=id).fetchone()[0]
 
 
-@error_guard
+@guard
 def del_email_bi_id(conn, id):
     conn.execute(
         sql('delete from email where id = :id'),
@@ -311,12 +337,12 @@ def del_email_bi_id(conn, id):
     )
 
 
-@error_guard
+@guard
 def get_user_count(conn):
     return conn.execute('select count(1) from "user"').fetchone()[0]
 
 
-@error_guard
+@guard
 def set_user_field_bi_id(conn, id, field, value):
     assert_in(field, ('name', 'email', 'openid', 'maxwatch'))
     conn.execute(
@@ -326,7 +352,7 @@ def set_user_field_bi_id(conn, id, field, value):
     )
 
 
-@error_guard
+@guard
 def has_user_bi_openid(conn, openid):
     return conn.execute(
         sql('select 1 from "user" where openid = :openid'),
@@ -334,7 +360,7 @@ def has_user_bi_openid(conn, openid):
     ).fetchone() is not None
 
 
-@error_guard
+@guard
 def has_user_bi_id(conn, id):
     return conn.execute(
         sql('select 1 from "user" where id = :id'),
@@ -342,27 +368,27 @@ def has_user_bi_id(conn, id):
     ).fetchone() is not None
 
 
-@error_guard
+@guard
 def activate_user_bi_id(conn, id):
     conn.execute(sql('update "user" set activated = TRUE where id = :id'), id=id)
 
 
-@error_guard
+@guard
 def activate_email_bi_id(conn, id):
     conn.execute(sql('update email set activated = TRUE where id = :id'), id=id)
 
 
-@error_guard
+@guard
 def inactivate_user_bi_id(conn, id):
     conn.execute(sql('update "user" set activated = FALSE where id = :id'), id=id)
 
 
-@error_guard
+@guard
 def inactivate_email_bi_id(conn, id):
     conn.execute(sql('update email set activated = FALSE where id = :id'), id=id)
 
 
-@error_guard
+@guard
 def user_activated_bi_id(conn, id):
     return conn.execute(
         sql('select activated from "user" where id = :id'),
@@ -370,7 +396,7 @@ def user_activated_bi_id(conn, id):
     ).fetchone()[0]
 
 
-@error_guard
+@guard
 def email_activated_bi_id(conn, id):
     return conn.execute(
         sql('select activated from email where id = :id'),
@@ -378,7 +404,7 @@ def email_activated_bi_id(conn, id):
     ).fetchone()[0]
 
 
-@error_guard
+@guard
 def update_email_bi_id(conn, id, email, label):
     conn.execute(
         sql('update email set text = :text, label = :label where id = :id'),
@@ -756,7 +782,7 @@ def is_query_active_bi_id(conn, id):
     ), id=id).fetchone() is not None
 
 
-@error_guard
+@guard
 def set_query_field_bi_id(conn, id, field, value):
     conn.execute(
         sql('update query set %s = :value where id = :id' % field),

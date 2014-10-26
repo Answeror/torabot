@@ -1,6 +1,7 @@
 import json
+from asyncio import coroutine
 from ...ut.bunch import Bunch
-from ...core.kanji import translate
+from ...ut.kanji import translate
 from ..base import Mod
 from flask import Blueprint
 from ..mixins import (
@@ -73,6 +74,10 @@ class Tora(
             )
         return Mod.spy(self, self.translate(query), timeout)
 
+    @coroutine
+    def source(self, query, timeout):
+        return self.spy(query, timeout)
+
     def translate(self, text):
         if self.conf.get('TORABOT_MOD_TORA_TRANSLATE', True):
             return _translate(text)
@@ -83,6 +88,12 @@ class Tora(
 
     def regular(self, query_text):
         return self.name, query_text
+
+    def init_app(self, app):
+        pass
+
+
+tora = Tora()
 
 
 def _translate(query):

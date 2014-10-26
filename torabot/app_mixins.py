@@ -1,4 +1,4 @@
-from .core.log import RedisPub
+from .log import RedisPub
 
 
 class RedisPubMixin(object):

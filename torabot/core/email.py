@@ -1,3 +1,4 @@
+import os
 import smtplib
 from uuid import uuid4
 from email import encoders
@@ -10,6 +11,8 @@ from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate, COMMASPACE
 from logbook import Logger
 import mimetypes
+from flask import current_app
+from . import core
 
 
 ENCODING = 'utf-8'
@@ -18,6 +21,14 @@ log = Logger(__name__)
 
 class EmailLoginError(Exception):
     pass
+
+
+@core.initializer
+def init_app(app):
+    app.config.setdefault('TORABOT_EMAIL_USERNAME', None)
+    app.config.setdefault('TORABOT_EMAIL_PASSWORD', None)
+    app.config.setdefault('TORABOT_EMAIL_HOST', 'localhost')
+    app.config.setdefault('TORABOT_EMAIL_PORT', None)
 
 
 def pack(
@@ -164,8 +175,7 @@ def format_attachments(attachments):
         yield msg
 
 
-def _send_conf(
-    conf,
+def mock_point(
     recipient_addrs,
     subject,
     text=None,
@@ -174,7 +184,8 @@ def _send_conf(
     html=None,
     save=False
 ):
-    if conf['TORABOT_DEBUG']:
+    conf = current_app.config
+    if conf['DEBUG']:
         log.debug('send email {} to {}', subject, recipient_addrs)
         return
     return _send(
@@ -192,64 +203,24 @@ def _send_conf(
     )
 
 
-def send(
-    recipient_addrs,
-    subject,
-    text=None,
-    attachments=[],
-    sender_name=None,
-    html=None,
-    save=False
-):
-    from .local import local
-    return _send_conf(
-        local.conf,
-        recipient_addrs=recipient_addrs,
-        subject=subject,
-        text=text,
-        attachments=attachments,
-        sender_name=sender_name,
-        html=html,
-        save=save
-    )
+def send(*args, **kargs):
+    return mock_point(*args, **kargs)
 
 
-def async_send(
-    recipient_addrs,
-    subject,
-    text=None,
-    attachments=[],
-    sender_name=None,
-    html=None,
-    save=False
-):
-    from .async_local import local
-    return _send_conf(
-        local.conf,
-        recipient_addrs=recipient_addrs,
-        subject=subject,
-        text=text,
-        attachments=attachments,
-        sender_name=sender_name,
-        html=html,
-        save=save
-    )
-
-
-if __name__ == '__main__':
-    import os
-    from .bunch import Bunch
-    from .local import local
-    _send(
-        recipient_addrs=['answeror@gmail.com'],
-        subject=local.conf['TORABOT_EMAIL_HEAD'],
-        text='测试中文',
-        attachments=[Bunch(
-            path=os.path.join(
-                os.path.abspath(os.path.dirname(__file__)),
-                'nerv.png'
-            ),
-            mime='image/png',
-            name='例大祭11カット'
-        )]
-    )
+# if __name__ == '__main__':
+    # import os
+    # from .bunch import Bunch
+    # from .local import local
+    # _send(
+        # recipient_addrs=['answeror@gmail.com'],
+        # subject=local.conf['TORABOT_EMAIL_HEAD'],
+        # text='测试中文',
+        # attachments=[Bunch(
+            # path=os.path.join(
+                # os.path.abspath(os.path.dirname(__file__)),
+                # 'nerv.png'
+            # ),
+            # mime='image/png',
+            # name='例大祭11カット'
+        # )]
+    # )

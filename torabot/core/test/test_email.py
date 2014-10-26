@@ -11,7 +11,10 @@ def test_pack():
         'head',
         'body',
         [Bunch(
-            path=os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'nerv.png'),
+            path=os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                'nerv.png'
+            ),
             mime='image/png',
             name='例大祭11カット'
         )],

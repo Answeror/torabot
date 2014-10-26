@@ -7,12 +7,11 @@ log = Logger(__name__)
 
 def exception_guard(f):
     @wraps(f)
-    def inner(*args, **kargs):
+    def g(*args, **kargs):
         try:
             return f(*args, **kargs)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
-            log.exception('caught by exception guard')
-
-    return inner
+            log.exception('{} failure caught by exception guard', f.__name__)
+    return g
