@@ -1,44 +1,24 @@
 from nose.tools import assert_equal
 from ...ut.bunch import bunchr
-from ..base import Mod
-from ..mixins import (
+from ...core.mod import (
+    Mod,
     ViewMixin,
-    NoEmptyQueryMixin,
-    make_blueprint_mixin,
-    IdentityGuessNameMixin,
-    make_field_guess_name_mixin
+    field_guess_name_mixin
 )
-
-
-name = 'bilibili'
 
 
 class Bilibili(
     ViewMixin,
-    NoEmptyQueryMixin,
-    make_blueprint_mixin(__name__),
-    make_field_guess_name_mixin('title', 'user_id', 'username', 'query'),
-    IdentityGuessNameMixin,
+    field_guess_name_mixin('title', 'user_id', 'username', 'query'),
     Mod
 ):
 
-    name = name
-    display_name = name
+    name = 'bilibili'
+    display_name = 'bilibili'
+    description = '订阅新番和up主, 更新时会收到邮件通知.'
     has_advanced_search = True
     has_normal_search = False
-    description = '订阅新番和up主, 更新时会收到邮件通知.'
-
-    @property
-    def carousel(self):
-        from flask import url_for
-        return url_for("main.example_advanced_search", kind=name)
-
-    def view(self, name):
-        from .views import web, email
-        return {
-            'web': web,
-            'email': email,
-        }[name]
+    no_empty_query = True
 
     def changes(self, old, new, **kargs):
         if old:
@@ -111,7 +91,7 @@ def query_method_from_result(result):
     return result.query.method
 
 
-bp = Bilibili.blueprint
+bilibili = Bilibili()
 
-from .views import web
-assert web
+
+__all__ = ['bilibili']

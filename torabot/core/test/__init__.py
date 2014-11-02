@@ -3,16 +3,14 @@ from asyncio import coroutine
 from functools import wraps, partial
 from unittest.mock import patch
 from ...ut.testing import app_test_suite
+from ...ut.redis import redis
 from ...app import App
 from ...db import db
-from ...redis import redis
 from .. import core
 
 
 app = App(__name__)
 app.config.from_object('torabot.ut.test_config')
-db.init_app(app)
-redis.init_app(app)
 core.init_app(app)
 
 

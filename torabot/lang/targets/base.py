@@ -8,8 +8,8 @@ from logbook import Logger
 from asyncio import coroutine, gather
 from uuid import uuid4
 from nose.tools import assert_is_instance
-from ...ut.async_local import local
-from ..errors import LangError
+from ...ut.redis import redis
+from .. import lang
 
 
 log = Logger(__name__)
@@ -42,7 +42,6 @@ class Base(metaclass=Meta):
 
     @coroutine
     def sub(self, channel):
-        redis = yield from local.redis
         sub = yield from redis.start_subscribe()
         yield from sub.subscribe([
             PUBSUB_CHANNEL_TEMPLATE.format(self.env.name, channel)
@@ -52,7 +51,6 @@ class Base(metaclass=Meta):
     @coroutine
     def pub(self, message):
         channel = self.name
-        redis = yield from local.redis
         return (yield from redis.publish(
             PUBSUB_CHANNEL_TEMPLATE.format(self.env.name, channel),
             json.dumps(message)
@@ -117,7 +115,7 @@ class Base(metaclass=Meta):
             # )
         )
         if '@' in self.__kargs:
-            raise LangError(
+            raise lang.LangError(
                 'Wrong arg of @{}[{}]. Maybe missing a [ ] outside?'.format(
                     self.kind,
                     self.name
@@ -155,11 +153,11 @@ def random_name():
 def targetcls(name):
     try:
         if '.' in name:
-            raise LangError('Unknown target type: %s' % name)
+            raise lang.LangError('Unknown target type: %s' % name)
         lib = importlib.import_module('..' + name, __name__)
         return lib.Target
     except Exception as e:
-        raise LangError('Unknown target: ' + name) from e
+        raise lang.LangError('Unknown target: ' + name) from e
 
 
 def target_types():

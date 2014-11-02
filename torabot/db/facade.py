@@ -36,17 +36,24 @@ class Meta(type):
 
 class Facade(Base, metaclass=Meta):
 
+    name = 'db'
+
     def __init__(self):
         super().__init__()
         self._engine_lock = Lock()
 
     def init_app(self, app):
         super().init_app(app)
+
+        if self.get_inited(app):
+            return
+
         app.config.setdefault(
             'TORABOT_TEST_CONNECTION_STRING',
             'postgresql+psycopg2://localhost/torabot-test'
         )
         app.teardown_appcontext(self.teardown)
+        self.set_inited(app)
 
     def teardown(self, exception):
         ctx = stack.top

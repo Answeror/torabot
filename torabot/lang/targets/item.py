@@ -1,7 +1,7 @@
 import re
 from asyncio import coroutine
+from .. import lang
 from .base import Base
-from ..errors import LangError
 
 
 RE = re.compile(r'^\[([_\w\d]*)\]')
@@ -17,7 +17,7 @@ class Target(Base):
         for k in [key] + list(args):
             k = self._conv_key(cont, key)
             if k not in cont:
-                raise LangError('{} not in {}'.format(k, cont))
+                raise lang.LangError('{} not in {}'.format(k, cont))
             cont = cont[k]
         return cont
 

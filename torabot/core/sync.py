@@ -23,7 +23,7 @@ def init_app(app):
 @db.with_optional_connection(commit=True)
 @coroutine
 def fast_sync(kind, text, conn, timeout=None, good=None, sync_interval=None):
-    root_kind, root_text = core.regular_query(kind, text)
+    root_kind, root_text = core.regular(kind, text)
     if (kind, text) == (root_kind, root_text):
         query = yield from db.get_query_bi_kind_and_text(conn, kind, text)
         return filled(query) and not expired(query)
@@ -81,7 +81,7 @@ def expired(query):
 
 @coroutine
 def fill_root_result(kind, text, result, sync_interval, conn):
-    root_kind, root_text = core.regular_query(kind, text)
+    root_kind, root_text = core.regular(kind, text)
     if (kind, text) != (root_kind, root_text):
         yield from fill_result(
             root_kind,

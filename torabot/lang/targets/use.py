@@ -1,5 +1,5 @@
 from asyncio import coroutine
-from ..errors import LangError
+from .. import lang
 from .base import Base
 
 
@@ -13,7 +13,7 @@ class Target(Base):
         none = object()
         value = self.depend_result.get(name, none)
         if value is none:
-            raise LangError("Result of %s haven't been computed" % name)
+            raise lang.LangError("Result of %s haven't been computed" % name)
         return value
 
     @classmethod

@@ -1,6 +1,6 @@
 from asyncio import coroutine
 import execjs
-from ..errors import LangError
+from .. import lang
 from .base import Base
 
 
@@ -15,7 +15,7 @@ class Target(Base):
     @coroutine
     def __call__(self, *args, **kargs):
         if args and kargs:
-            raise LangError('Either args or kargs must be empty')
+            raise lang.LangError('Either args or kargs must be empty')
         if args:
             if len(args) == 1:
                 return self._do(args[0], 'main', [])
@@ -25,7 +25,7 @@ class Target(Base):
                 return self._do(args[0], 'main', args[1])
             if len(args) == 3:
                 return self._do(*args)
-            raise LangError('Too many args')
+            raise lang.LangError('Too many args')
         if kargs:
             return self._do(
                 kargs.get('code'),
@@ -36,11 +36,11 @@ class Target(Base):
 
     def _do(self, code, func, args):
         if not isinstance(code, str):
-            raise LangError('Argument 1 (code) must be str')
+            raise lang.LangError('Argument 1 (code) must be str')
         if not isinstance(func, str):
-            raise LangError('Argument 2 (func) must be str')
+            raise lang.LangError('Argument 2 (func) must be str')
         if not isinstance(args, list):
-            raise LangError('Argument 3 (args) must be list')
+            raise lang.LangError('Argument 3 (args) must be list')
 
         node = execjs.get('Node')
         context = node.compile(code)

@@ -3,7 +3,7 @@ from asyncio import coroutine
 from datetime import datetime
 from jinja2 import Environment, PackageLoader
 from hashlib import md5
-from ...errors import LangError
+from ... import lang
 from ..base import Base
 
 
@@ -33,6 +33,6 @@ class Target(Base):
         if isinstance(name_or_content, str):
             return self.jinja2_env.from_string(name_or_content)
         if not isinstance(name_or_content, dict):
-            raise LangError('Unknown type: {}'.format(type(name_or_content)))
+            raise lang.LangError('Unknown type: {}'.format(type(name_or_content)))
         name = name_or_content['name']
         return self.jinja2_env.get_template(name)

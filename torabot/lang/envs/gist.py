@@ -1,7 +1,6 @@
 import json
-import aiohttp
 from asyncio import coroutine
-from ...ut.async_request import request
+from ...ut.request import request
 from .base import Base
 
 
@@ -20,7 +19,7 @@ class Env(Base):
     def meta(self):
         value = getattr(self, '_meta', None)
         if value is None:
-            resp = yield from request(method='GET', url=self.uri)
+            resp = yield from request.get(self.uri)
             self._meta = value = json.loads(
                 (yield from resp.read()).decode('utf-8')
             )

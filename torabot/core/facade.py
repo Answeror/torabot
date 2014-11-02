@@ -1,5 +1,7 @@
 from flask import url_for, current_app
 from asyncio import coroutine
+from ..db import db
+from ..ut.redis import redis
 from ..ut.facade import Facade as Base, blueprint_mixin
 
 
@@ -18,6 +20,9 @@ class Core(blueprint_mixin(__name__), Base):
     def init_app(self, app):
         super().init_app(app)
 
+        db.init_app(app)
+        redis.init_app(app)
+
         if not app.config.get('SERVER_NAME'):
             app.config['SERVER_NAME'] = 'rss.moe'
 
@@ -31,7 +36,7 @@ class Core(blueprint_mixin(__name__), Base):
         except:
             return 'http://' + current_app.config['SERVER_NAME']
 
-    def regular_query(self, kind, text):
+    def regular(self, kind, text):
         while True:
             next_kind, next_text = self.mod(kind).regular(text)
             if (next_kind, next_text) == (kind, text):
