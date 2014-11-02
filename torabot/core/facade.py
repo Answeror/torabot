@@ -2,6 +2,7 @@ from flask import url_for, current_app
 from asyncio import coroutine
 from ..db import db
 from ..ut.redis import redis
+from ..ut.request import request
 from ..ut.facade import Facade as Base, blueprint_mixin
 
 
@@ -22,6 +23,7 @@ class Core(blueprint_mixin(__name__), Base):
 
         db.init_app(app)
         redis.init_app(app)
+        request.init_app(app)
 
         if not app.config.get('SERVER_NAME'):
             app.config['SERVER_NAME'] = 'rss.moe'

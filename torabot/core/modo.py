@@ -38,7 +38,7 @@ class Modo(Base):
         ))
         return [
             self.get(name) for _, name, _ in pkgutil.iter_modules([root])
-            if name in ['tora']
+            if name in ['bilibili']
         ]
 
 

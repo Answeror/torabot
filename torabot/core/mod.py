@@ -59,8 +59,9 @@ class Mod(Facade, metaclass=abc.ABCMeta):
     def description(self):
         pass
 
-    def get_state(self, app):
-        return app.parts['mod_' + self.name]
+    @property
+    def state_id(self):
+        return 'mod_' + self.name
 
     def guess_name(self, query):
         return query.text
@@ -70,7 +71,7 @@ class Mod(Facade, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def source(self, query, options={}):
+    def source(self, query):
         pass
 
     @abc.abstractmethod
@@ -80,7 +81,7 @@ class Mod(Facade, metaclass=abc.ABCMeta):
 
     @db.with_optional_bind
     @coroutine
-    def search(self, text, bind, sync_on_expire=None):
+    def search(self, text, *, bind, sync_on_expire=None):
         '''return None means first sync failed'''
 
         if self.no_empty_query and not text:
@@ -180,9 +181,12 @@ class ViewMixin(object):
 
     @property
     def views(self):
-        value = self.state.get('views')
+        return self.get_views(current_app)
+
+    def get_views(self, app):
+        value = self.get_state(app).get('views')
         if value is None:
-            self.state['views'] = value = {}
+            self.get_state(app)['views'] = value = {}
         return value
 
     def init_app(self, app):
@@ -196,11 +200,10 @@ class ViewMixin(object):
             'views'
         ))
         for _, name, _ in pkgutil.iter_modules([root]):
-            lib = importlib.import_module(
+            self.get_views(app)[name] = importlib.import_module(
                 '...mods.%s.views.%s' % (self.name, name),
                 __name__
             )
-            self.views[name] = getattr(lib, name)
 
     def format_notice_status(self, view, notice):
         return self.views[view].format_notice_status(notice)

@@ -40,3 +40,9 @@ def _parse_args(kargs):
             return data, xslt, parser_makers[name]()
 
     raise RuntimeError('unknown input type of xslt')
+
+
+@celery.async_task(name='parse_html')
+def parse_html(data, done):
+    import lxml.etree as ET
+    return done(ET.XML(data, ET.HTMLParser()))

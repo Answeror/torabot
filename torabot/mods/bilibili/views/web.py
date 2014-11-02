@@ -1,17 +1,14 @@
+from asyncio import coroutine
 from urllib.parse import quote
 from flask import render_template
 from logbook import Logger
 from copy import deepcopy
-from ..query import get_bangumi, parse
-from .. import name, bp
+from ..source import get_bangumi
+from ..query import parse
+from .. import bilibili
 
 
 log = Logger(__name__)
-
-
-@bp.route('/bilibili_<hash>.html')
-def bilibili_site_verification(hash):
-    return bp.send_static_file('bilibili_%s.html' % hash)
 
 
 def format_query_result(query):
@@ -45,24 +42,25 @@ def format_sp_notice_body(notice):
     )
 
 
+@coroutine
 def format_bangumi_search():
     return render_template(
         'bilibili/search/bangumi.html',
-        bangumi=get_bangumi(),
-        kind=name,
+        bangumi=(yield from get_bangumi()),
+        kind=bilibili.name,
     )
 
 
 def format_user_search():
-    return render_template('bilibili/search/user.html', kind=name)
+    return render_template('bilibili/search/user.html', kind=bilibili.name)
 
 
 def format_username_search():
-    return render_template('bilibili/search/username.html', kind=name)
+    return render_template('bilibili/search/username.html', kind=bilibili.name)
 
 
 def format_query_search():
-    return render_template('bilibili/search/query.html', kind=name)
+    return render_template('bilibili/search/query.html', kind=bilibili.name)
 
 
 def format_advanced_search(**kargs):

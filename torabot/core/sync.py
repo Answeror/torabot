@@ -47,7 +47,7 @@ def fast_sync(kind, text, conn, timeout=None, good=None, sync_interval=None):
 @coroutine
 def deep_sync(kind, text, bind, timeout=None, good=None, sync_interval=None):
     try:
-        result = yield from core.mod(kind).source(text, timeout)
+        result = yield from core.mod(kind).source(text, timeout=timeout)
         if good and not good(result):
             return False
     except (core.ExpectedError, core.SpyTimeoutError) as e:

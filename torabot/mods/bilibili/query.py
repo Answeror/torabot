@@ -1,16 +1,5 @@
-import json
 from ...ut.bunch import bunchr
-from ...core.local import get_current_conf
-from ..query import query, parse_json, parse_dict, make_parse_and_regular
-from . import name
-
-
-def get_bangumi():
-    return query(
-        kind=name,
-        text=json.dumps(dict(method='bangumi')),
-        timeout=get_current_conf()['TORABOT_SPY_TIMEOUT'],
-    ).content
+from ..query import parse_json, parse_dict, make_parse_and_regular
 
 
 def parse_title(query):

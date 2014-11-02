@@ -1,4 +1,5 @@
 from nose.tools import assert_equal
+from asyncio import coroutine
 from ...ut.bunch import bunchr
 from ...core.mod import (
     Mod,
@@ -50,19 +51,10 @@ class Bilibili(
         ):
             yield bunchr(kind='sp_update', sp=new.sp)
 
-    def spy(self, query, timeout):
-        from .query import parse, regular
-        query = parse(query)
-        if query.get('method') == 'sp':
-            return self._spy_sp(query['title'])
-        return super(Bilibili, self).spy(regular(query), timeout)
-
-    def _spy_sp(self, title):
-        from .query import get_bangumi
-        for sp in get_bangumi():
-            if sp.title == title:
-                return bunchr(kind='sp', sp=sp)
-        return bunchr(kind='sp', sp=None)
+    @coroutine
+    def source(self, *args, **kargs):
+        from .source import source
+        return (yield from source(*args, **kargs))
 
     def _user_changes(self, old, new):
         return self._post_changes('user_new_post', old, new)
@@ -84,11 +76,15 @@ class Bilibili(
         from .query import regular
         return self.name, regular(query_text)
 
+    def parse(self, query):
+        from .query import parse
+        return parse(query)
+
 
 def query_method_from_result(result):
     if 'kind' in result:
-        return result.kind
-    return result.query.method
+        return result['kind']
+    return result['query']['method']
 
 
 bilibili = Bilibili()

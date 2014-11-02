@@ -21,11 +21,15 @@ class Facade(object):
         return value
 
     @property
+    def state_id(self):
+        return self.name
+
+    @property
     def state(self):
         return self.get_state(current_app)
 
     def init_app(self, app, loop=None):
-        app.parts[self.name] = Bunch()
+        app.parts[self.state_id] = Bunch()
 
         if loop is None:
             loop = get_event_loop()
@@ -39,7 +43,7 @@ class Facade(object):
         app.config.setdefault('TORABOT_CONCURRENCY', 2 * cpu_count())
 
     def get_state(self, app):
-        return app.parts[self.name]
+        return app.parts[self.state_id]
 
     def get_inited(self, app):
         return self.get_state(app).get('inited', False)
