@@ -10,7 +10,7 @@ from . import bilibili
 
 @coroutine
 def source(query, timeout=None):
-    query = bilibili.parse(query)
+    query = yield from bilibili.parse(query)
 
     return (yield from {
         'sp': source_sp,

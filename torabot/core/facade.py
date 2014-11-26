@@ -38,9 +38,10 @@ class Core(blueprint_mixin(__name__), Base):
         except:
             return 'http://' + current_app.config['SERVER_NAME']
 
+    @coroutine
     def regular(self, kind, text):
         while True:
-            next_kind, next_text = self.mod(kind).regular(text)
+            next_kind, next_text = yield from self.mod(kind).regular(text)
             if (next_kind, next_text) == (kind, text):
                 break
             kind, text = next_kind, next_text

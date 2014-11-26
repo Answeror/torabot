@@ -1,8 +1,8 @@
 from nose.tools import assert_equal
-from ....ut.bunch import bunchr
-from ....core.mod import mod
-from .. import name
 from .const import USERNAME_QUERY_RESULT, QUERY_RESULT
+from ....ut.async_test_tools import with_event_loop
+from .. import bilibili
+from . import TestSuite
 
 
 BASE = {
@@ -23,52 +23,83 @@ BASE = {
 }
 
 
-def test_no_change():
-    changes = list(mod(name).changes(
-        bunchr(kind='sp', sp=dict(lastupdate=1397091797, lastupdate_at='2014-04-10 09:03', **BASE)),
-        bunchr(kind='sp', sp=dict(lastupdate=1397091797, lastupdate_at='2014-04-10 09:03', **BASE)),
-    ))
-    assert_equal(len(changes), 0)
+class TestChanges(TestSuite):
 
+    @with_event_loop
+    def test_no_change(self):
+        changes = yield from bilibili.changes(
+            dict(
+                kind='sp',
+                sp=dict(
+                    lastupdate=1397091797,
+                    lastupdate_at='2014-04-10 09:03',
+                    **BASE
+                )
+            ),
+            dict(
+                kind='sp',
+                sp=dict(
+                    lastupdate=1397091797,
+                    lastupdate_at='2014-04-10 09:03',
+                    **BASE
+                )
+            ),
+        )
+        assert_equal(len(changes), 0)
 
-def test_one_change():
-    changes = list(mod(name).changes(
-        bunchr(kind='sp', sp=dict(lastupdate=1397091797, lastupdate_at='2014-04-10 09:03', **BASE)),
-        bunchr(kind='sp', sp=dict(lastupdate=1397091798, lastupdate_at='2014-04-10 09:04', **BASE)),
-    ))
-    assert_equal(len(changes), 1)
-    assert_equal(changes[0].kind, 'sp_update')
+    @with_event_loop
+    def test_one_change(self):
+        changes = yield from bilibili.changes(
+            dict(
+                kind='sp',
+                sp=dict(
+                    lastupdate=1397091797,
+                    lastupdate_at='2014-04-10 09:03',
+                    **BASE
+                )
+            ),
+            dict(
+                kind='sp',
+                sp=dict(
+                    lastupdate=1397091798,
+                    lastupdate_at='2014-04-10 09:04',
+                    **BASE
+                )
+            ),
+        )
+        assert_equal(len(changes), 1)
+        assert_equal(changes[0].kind, 'sp_update')
 
+    @with_event_loop
+    def test_username_query_no_change(self):
+        changes = yield from bilibili.changes(
+            USERNAME_QUERY_RESULT,
+            USERNAME_QUERY_RESULT
+        )
+        assert_equal(len(changes), 0)
 
-def test_username_query_no_change():
-    changes = list(mod(name).changes(
-        bunchr(USERNAME_QUERY_RESULT),
-        bunchr(USERNAME_QUERY_RESULT)
-    ))
-    assert_equal(len(changes), 0)
+    @with_event_loop
+    def test_username_query_change(self):
+        r = USERNAME_QUERY_RESULT
+        changes = yield from bilibili.changes(
+            dict(query=r['query'], posts=r['posts'][1:]),
+            dict(query=r['query'], posts=r['posts'])
+        )
+        assert_equal(len(changes), 1)
 
+    @with_event_loop
+    def test_query_no_change(self):
+        changes = yield from bilibili.changes(
+            QUERY_RESULT,
+            QUERY_RESULT
+        )
+        assert_equal(len(changes), 0)
 
-def test_username_query_change():
-    r = USERNAME_QUERY_RESULT
-    changes = list(mod(name).changes(
-        bunchr(query=r['query'], posts=r['posts'][1:]),
-        bunchr(query=r['query'], posts=r['posts'])
-    ))
-    assert_equal(len(changes), 1)
-
-
-def test_query_no_change():
-    changes = list(mod(name).changes(
-        bunchr(QUERY_RESULT),
-        bunchr(QUERY_RESULT)
-    ))
-    assert_equal(len(changes), 0)
-
-
-def test_query_change():
-    r = QUERY_RESULT
-    changes = list(mod(name).changes(
-        bunchr(query=r['query'], posts=r['posts'][1:]),
-        bunchr(query=r['query'], posts=r['posts'])
-    ))
-    assert_equal(len(changes), 1)
+    @with_event_loop
+    def test_query_change(self):
+        r = QUERY_RESULT
+        changes = yield from bilibili.changes(
+            dict(query=r['query'], posts=r['posts'][1:]),
+            dict(query=r['query'], posts=r['posts'])
+        )
+        assert_equal(len(changes), 1)

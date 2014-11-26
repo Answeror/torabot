@@ -1,6 +1,4 @@
-from nose.tools import assert_equal
 from asyncio import coroutine
-from ...ut.bunch import bunchr
 from ...core.mod import (
     Mod,
     ViewMixin,
@@ -21,70 +19,35 @@ class Bilibili(
     has_normal_search = False
     no_empty_query = True
 
-    def changes(self, old, new, **kargs):
-        if old:
-            assert_equal(
-                query_method_from_result(old),
-                query_method_from_result(new)
-            )
-        yield from {
-            'bangumi': self._bangumi_changes,
-            'sp': self._sp_changes,
-            'user': self._user_changes,
-            'username': self._user_changes,
-            'query': self._query_changes,
-        }[query_method_from_result(new)](old, new)
-
-    def _bangumi_changes(self, old, new):
-        return []
-
-    def _sp_changes(self, old, new):
-        if not old:
-            yield bunchr(kind='sp_new', sp=new.sp)
-            return
-        if not new or not new.sp:
-            return
-        if (
-            not old.sp or
-            new.sp.bgmcount != old.sp.bgmcount or
-            new.sp.lastupdate != old.sp.lastupdate
-        ):
-            yield bunchr(kind='sp_update', sp=new.sp)
+    @coroutine
+    def changes(self, old, new):
+        from .changes import changes
+        return (yield from changes(old, new))
 
     @coroutine
     def source(self, *args, **kargs):
         from .source import source
         return (yield from source(*args, **kargs))
 
-    def _user_changes(self, old, new):
-        return self._post_changes('user_new_post', old, new)
-
-    def _query_changes(self, old, new):
-        return self._post_changes('query_new_post', old, new)
-
-    def _post_changes(self, kind_prefix, old, new):
-        oldmap = {post.uri: post for post in getattr(old, 'posts', [])}
-        for post in new.posts:
-            if post.uri not in oldmap:
-                yield bunchr(kind='user_new_post', post=post)
-
+    @coroutine
     def sync_on_expire(self, query):
         from .query import parse
         return parse(query.text).method != 'bangumi'
 
+    @coroutine
     def regular(self, query_text):
         from .query import regular
         return self.name, regular(query_text)
 
+    @coroutine
     def parse(self, query):
         from .query import parse
         return parse(query)
 
-
-def query_method_from_result(result):
-    if 'kind' in result:
-        return result['kind']
-    return result['query']['method']
+    def _query_method_from_result(self, result):
+        if 'kind' in result:
+            return result['kind']
+        return result['query']['method']
 
 
 bilibili = Bilibili()

@@ -8,7 +8,8 @@ class TestRegular(TestSuite):
 
     def test_regular(self):
         def gen(query, d_true):
-            (kind, query), d = bilibili.regular(query), bilibili.parse(query)
+            kind, query = yield from bilibili.regular(query)
+            d = yield from bilibili.parse(query)
             assert_equal(kind, bilibili.name)
             assert_equal(json.loads(query), d)
             assert_equal(d, d_true)
