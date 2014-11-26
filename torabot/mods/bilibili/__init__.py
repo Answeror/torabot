@@ -35,9 +35,9 @@ class Bilibili(
         return parse(query.text).method != 'bangumi'
 
     @coroutine
-    def regular(self, query_text):
+    def regular(self, query):
         from .query import regular
-        return self.name, regular(query_text)
+        return self.name, regular(query)
 
     @coroutine
     def parse(self, query):

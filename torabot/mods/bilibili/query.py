@@ -1,5 +1,5 @@
 from ...ut.bunch import bunchr
-from ..query import parse_json, parse_dict, make_parse_and_regular
+from ...core.query import parse_json, parse_dict, make_parse_and_regular
 
 
 def parse_title(query):
