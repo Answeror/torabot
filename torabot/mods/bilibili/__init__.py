@@ -25,9 +25,9 @@ class Bilibili(
         return (yield from changes(old, new))
 
     @coroutine
-    def source(self, *args, **kargs):
+    def source(self, query, timeout):
         from .source import source
-        return (yield from source(*args, **kargs))
+        return (yield from source(query, timeout))
 
     @coroutine
     def sync_on_expire(self, query):
@@ -44,7 +44,8 @@ class Bilibili(
         from .query import parse
         return parse(query)
 
-    def _query_method_from_result(self, result):
+    @staticmethod
+    def _query_method_from_result(result):
         if 'kind' in result:
             return result['kind']
         return result['query']['method']

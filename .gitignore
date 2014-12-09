@@ -22,3 +22,4 @@ build/
 /logs/
 /twistd.pid
 .scrapy/
+.idea/
