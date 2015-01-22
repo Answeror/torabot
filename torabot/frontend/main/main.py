@@ -15,37 +15,12 @@ from flask import (
 )
 from flask.views import MethodView
 from logbook import Logger
-from ... import db
-from ...core.backends.postgresql import PostgreSQL
-from ...core.query import query
-from ...core.notice import (
-    get_notices_bi_user_id,
-    get_pending_notices_bi_user_id,
-)
-from ...core.watch import get_watches_bi_user_id
-from ...core.connection import appccontext, autoccontext
-from ...core.mod import mod
-from ...core.local import is_user, current_user_id, request_values, current_user
-from ...core.user import (
-    update_email as core_update_email,
-    add_email as core_add_email,
-    activate_email as core_activate_email,
-    send_password_reset_email,
-    get_password_reset_email,
-    set_password_bi_email,
-    verity_password_bi_email,
-    get_user_id_bi_email,
-    has_email,
-    add_user,
-    activate_user_and_get_next_uri
-)
+from ...core import core
 from ..errors import AuthError, BusyError
-from . import bp
-from .. import auth
 from ..response import make_ok_response, make_response
 from ..bulletin import get_bulletin_text, get_bulletin_type
-from ...core.redis import redis
-from ...core.errors import DuplicateUsernameError, DuplicateEmailError
+from .. import auth
+from . import bp
 
 
 log = Logger(__name__)

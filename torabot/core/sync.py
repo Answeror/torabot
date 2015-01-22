@@ -101,7 +101,7 @@ def fill_result(kind, text, result, sync_interval, conn):
         yield from db.add_one_query_changes(
             conn,
             query.id,
-            core.mod(kind).changes(query.result, result)
+            (yield from core.mod(kind).changes(query.result, result))
         )
         yield from db.set_query_result(conn, query.id, result)
     if (yield from db.is_query_active_bi_id(conn, query.id)):

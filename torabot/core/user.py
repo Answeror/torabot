@@ -257,3 +257,10 @@ def get_user_id_bi_email(email, conn):
 @coroutine
 def has_email(email, conn):
     return (yield from db.has_email(conn, email))
+
+
+@property
+@core.interface
+@coroutine
+def is_user():
+    pass

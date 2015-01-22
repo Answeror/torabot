@@ -1,15 +1,12 @@
 from asyncio import coroutine
 from nose.tools import assert_equal
 from ...ut.bunch import bunchr
-from .. import core
+from ...mods.tora import Tora as Base
 
 
-class Mod(core.Mod):
+class Mod(Base):
 
     name = 'tora'
-
-    def __init__(self, orig):
-        self.orig = orig
 
     @coroutine
     def source(self, query, timeout):
@@ -74,10 +71,3 @@ class Mod(core.Mod):
                 }
             ]
         })
-
-    @coroutine
-    def changes(self, old, new, **kargs):
-        return (yield from self.orig.changes(old, new, **kargs))
-
-    def regular(self, text):
-        return 'tora', text

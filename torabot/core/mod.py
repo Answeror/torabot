@@ -2,6 +2,7 @@ import os
 import json
 import pkgutil
 import importlib
+from functools import partial
 from asyncio import coroutine
 from logbook import Logger
 from datetime import datetime, timedelta
@@ -140,6 +141,7 @@ class Mod(Facade, metaclass=abc.ABCMeta):
 
         return query
 
+    @coroutine
     def expired(self, query):
         return query.mtime + timedelta(seconds=self.life(query)) < datetime.utcnow()
 
@@ -148,6 +150,7 @@ class Mod(Facade, metaclass=abc.ABCMeta):
         assert_is_instance(t, int)
         return t
 
+    @coroutine
     def sync_on_expire(self, query):
         return current_app.config['TORABOT_SYNC_ON_EXPIRE']
 
@@ -171,7 +174,7 @@ class Mod(Facade, metaclass=abc.ABCMeta):
         pass
 
     def format_help_page(self):
-        return []
+        return ''
 
     def notice_attachments(self, view, notice):
         return []
@@ -187,49 +190,67 @@ class ViewMixin(object):
         value = self.get_state(app).get('views')
         if value is None:
             self.get_state(app)['views'] = value = {}
+            root = os.path.abspath(os.path.join(
+                os.path.dirname(__file__),
+                '..',
+                'mods',
+                self.name,
+                'views'
+            ))
+            try:
+                for _, name, _ in pkgutil.iter_modules([root]):
+                    value[name] = importlib.import_module(
+                        '...mods.%s.views.%s' % (self.name, name),
+                        __name__
+                    )
+            except:
+                log.info('Load views package of {} failed', self.name)
         return value
 
-    def init_app(self, app):
-        super().init_app(app)
-
-        root = os.path.abspath(os.path.join(
-            os.path.dirname(__file__),
-            '..',
-            'mods',
-            self.name,
-            'views'
-        ))
-        for _, name, _ in pkgutil.iter_modules([root]):
-            self.get_views(app)[name] = importlib.import_module(
-                '...mods.%s.views.%s' % (self.name, name),
-                __name__
-            )
-
     def format_notice_status(self, view, notice):
-        return self.views[view].format_notice_status(notice)
+        func = getattr(self, '%s_format_notice_status' % view, None)
+        if func is None:
+            func = self.views[view].format_notice_status
+        return func(notice)
 
     def format_notice_body(self, view, notice):
-        return self.views[view].format_notice_body(notice)
+        func = getattr(self, '%s_format_notice_body' % view, None)
+        if func is None:
+            func = self.views[view].format_notice_body
+        return func(notice)
 
     def format_query_text(self, view, text):
-        func = getattr(self.views[view], 'format_query_text', None)
+        func = getattr(self, '%s_format_query_text' % view, None)
         if func is None:
-            return super(ViewMixin, self).format_query_text(view, text)
+            func = getattr(self.views[view], 'format_query_text', None)
+        if func is None:
+            func = partial(super().format_query_text, view)
         return func(text)
 
     def format_query_result(self, view, query):
-        return self.views[view].format_query_result(query)
+        func = getattr(self, '%s_format_query_result' % view, None)
+        if func is None:
+            func = self.views[view].format_query_result
+        return func(query)
 
     def format_advanced_search(self, view, **kargs):
-        return self.views[view].format_advanced_search(**kargs)
+        func = getattr(self, '%s_format_advanced_search' % view, None)
+        if func is None:
+            func = self.views[view].format_advanced_search,
+        return func(**kargs)
 
     def format_help_page(self, view):
-        return self.views[view].format_help_page()
+        func = getattr(self, '%s_format_help_page' % view, None)
+        if func is None:
+            func = self.views[view].format_help_page
+        return func(view)
 
     def notice_attachments(self, view, notice):
-        func = getattr(self.views[view], 'notice_attachments', None)
+        func = getattr(self, '%s_notice_attachments' % view, None)
         if func is None:
-            return super(ViewMixin, self).notice_attachments(view, notice)
+            func = getattr(self.views[view], 'notice_attachments', None)
+        if func is None:
+            func = partial(super().notice_attachments, view)
         return func(notice)
 
 
@@ -255,6 +276,12 @@ def field_guess_name_mixin(field, *args):
             return super(FieldGuessNameMixin, self).guess_name(query)
 
     return FieldGuessNameMixin
+
+
+class GuessNameFromQueryText(object):
+
+    def guess_name(self, query):
+        return query.text
 
 
 __all__ = ['Mod', 'ViewMixin']

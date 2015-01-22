@@ -17,10 +17,10 @@ core.init_app(app)
 TestSuite = app_test_suite(app)
 
 
-def get(orig, name):
+def get(name):
     from .mod import Mod
     assert_equal(name, 'tora')
-    return Mod(orig)
+    return Mod()
 
 
 def with_fake_tora_mod(func):
@@ -29,7 +29,7 @@ def with_fake_tora_mod(func):
     def wrapped(*args, **kargs):
         from ..modo import modo
         from .mod import Mod
-        with patch.object(modo, 'get', partial(get, modo.get('tora'))):
+        with patch.object(modo, 'get', get):
             assert_is_instance(modo.get('tora'), Mod)
             return (yield from func(*args, **kargs))
     return wrapped

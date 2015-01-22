@@ -6,14 +6,17 @@ from logbook import Logger
 from collections import OrderedDict
 from urllib.parse import urljoin, urlencode
 from functools import partial
+from flask import render_template
+from ...ut.bunch import bunchr
 from ...ut.kanji import translate_recursive
 from ...ut.xml import parse_html
 from ...ut.request import request
+from ...ut.return_list import return_list
 from ...core.mod import (
     Mod,
     ViewMixin,
     field_guess_name_mixin,
-    IdentityGuessNameMixin
+    GuessNameFromQueryText
 )
 
 
@@ -29,7 +32,7 @@ log = Logger(__name__)
 class Tora(
     ViewMixin,
     field_guess_name_mixin('nam', 'act', 'com', 'itc'),
-    IdentityGuessNameMixin,
+    GuessNameFromQueryText,
     Mod
 ):
 
@@ -41,22 +44,75 @@ class Tora(
     has_advanced_search = True
     no_empty_query = False
 
-    def init_app(app):
+    def init_app(self, app):
         super().init_app(app)
 
         app.config.setdefault('TORABOT_MOD_TORA_TRANSLATE', True)
         app.config.setdefault('TORABOT_MOD_TORA_RETRIES', 3)
 
     @coroutine
+    @return_list
     def changes(self, old, new):
-        from .changes import changes
-        return (yield from changes(old, new))
+        oldmap = {art.uri: art for art in getattr(old, 'arts', [])}
+        for art in new.arts:
+            if art.uri not in oldmap:
+                yield bunchr(kind='new', art=art)
+            elif (oldmap[art.uri].status, art.status) in self.noticeable():
+                yield bunchr(kind='notice', art=art)
+
+    def noticeable(self):
+        return [
+            (None, 'reserve'),
+            ('other', 'reserve'),
+        ]
 
     @coroutine
     def source(self, query, timeout):
         if query.startswith(BASE_URL):
             return (yield from source_art(query, timeout))
         return (yield from source_list(query, timeout))
+
+    @coroutine
+    def regular(self, query):
+        return self.name, query
+
+    def format_change_kind(self, kind):
+        return {
+            'new': '已上架',
+            'notice': '可预定',
+        }[kind]
+
+    def web_format_notice_body(self, notice):
+        return "<a href='%s'>%s</a> %s" % (
+            notice.change.art.uri,
+            notice.change.art.title,
+            self.format_change_kind(notice.change.kind),
+        )
+
+    def web_format_notice_status(self, notice):
+        return {
+            'pending': '未发送',
+            'sent': '已发送',
+        }[notice.status]
+
+    def web_format_query_text(self, text):
+        return text
+
+    def web_format_query_result(self, query):
+        return render_template('tora/list.html', query=query)
+
+    def web_format_advanced_search(self, **kargs):
+        return render_template('tora/advanced_search.html', kind=self.name)
+
+    def web_format_help_page(self):
+        return render_template('tora/help.html')
+
+    def format_notice_body(self, notice):
+        return '%(title)s %(change)s: %(uri)s' % dict(
+            title=notice.change.art.title,
+            change=self.format_change_kind(notice.change.kind),
+            uri=notice.change.art.uri,
+        )
 
 
 def translate(query):
@@ -78,7 +134,7 @@ def source_art(uri, timeout):
     )
     art = yield from parse_html(data, partial(parse_art, uri))
     if art:
-        return dict(
+        return bunchr(
             query=uri,
             uri=uri,
             total=1,
@@ -88,7 +144,7 @@ def source_art(uri, timeout):
 
 @coroutine
 def get(*args, **kargs):
-    for epoch in current_app.config['TORABOT_MOD_TORA_RETRIES']:
+    for epoch in range(current_app.config['TORABOT_MOD_TORA_RETRIES']):
         resp = yield from request.get(*args, **kargs)
         data = yield from resp.read()
         content = data.decode(CODING)
@@ -100,7 +156,7 @@ def get(*args, **kargs):
 
 def parse_art(uri, root):
     try:
-        return dict(
+        return bunchr(
             title=str(root.xpath('string(//td[@class="td_title_bar_r1c2"])')),
             author=str(root.xpath('string(//td[@class="DetailData_L"]/a[contains(@href, "author")])')),
             company=str(root.xpath('string(//td[@class="CircleName"]/a[1])')),
@@ -166,7 +222,7 @@ def source_simple_list(query, uri, timeout):
         timeout=timeout
     )
     if empty(content):
-        return dict(
+        return bunchr(
             query=query,
             uri=uri,
             total=0,
@@ -178,7 +234,7 @@ def source_simple_list(query, uri, timeout):
 def parse_simple_list(query, uri, root):
     try:
         trs = list(root.xpath('//table[@class="FixFrame"]//tr'))
-        return dict(
+        return bunchr(
             query=query,
             uri=uri,
             total=int(re.search(r'\d+', root.xpath(
@@ -186,7 +242,7 @@ def parse_simple_list(query, uri, root):
                 '//td[@class="DTW_td_l"]/span[2])'
             )).group(0)),
             arts=[
-                dict(
+                bunchr(
                     title=str(tr.xpath('stirng(td[@class="c1"]/a)')),
                     author=str(tr.xpath('string(td[@class="c2"]/a)')),
                     company=str(tr.xpath('string(td[@class="c3"]/a)')),
@@ -208,7 +264,7 @@ def source_complex_list(query, uri, timeout):
         timeout=timeout
     )
     if empty(content):
-        return dict(
+        return bunchr(
             query=query,
             uri=uri,
             total=0,
@@ -231,7 +287,7 @@ def parse_complex_list(query, uri, timeout, root):
             ],
             loop=current_app.loop
         )))
-        return dict(
+        return bunchr(
             query=query,
             uri=uri,
             total=int(re.search(r'\d+', root.xpath(
@@ -262,4 +318,4 @@ def busy(content):
 tora = Tora()
 
 
-__all__ = ['tora']
+__all__ = ['Tora', 'tora']
